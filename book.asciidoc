@@ -32,7 +32,7 @@ pf: Payment Font
 ////
 	ePUB variables
 ////
-:front-cover-image: images/cover.png
+:front-cover-image: images/cover_oe.png
 :epub3-stylesdir: .
 ////
 	User variables
@@ -49,7 +49,7 @@ pf: Payment Font
 
 = Mastering Bitcoin
 
-include::preface.asciidoc[]
+include::preface_open_edition.asciidoc[]
 
 include::glossary.asciidoc[]
 
