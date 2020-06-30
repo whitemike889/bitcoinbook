@@ -1,10 +1,15 @@
 ////
 	General Settings
 ////
+:openedition:
+
 :doctype: book
 :toc:
 :toclevels: 6
 :imagesdir: .
+
+:stem: latexmath
+:latex:
 
 ////
 Available icon font sets

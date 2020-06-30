@@ -88,12 +88,12 @@ compress_images: create_folder
 #  Generate PDF
 create_pdf: create_folder copy_fonts
 	cd ${DIR}; \
-	asciidoctor-pdf -a pdfbuild ${BOOK}.asciidoc; \
+	asciidoctor-pdf -a pdfbuild -r asciidoctor-mathematical ${BOOK}.asciidoc; \
 
 #  Generate EPUB
 create_epub: create_folder copy_fonts
 	cd ${DIR}; \
-	asciidoctor-epub3 -a ebookbuild  ${BOOK}.asciidoc; \
+	asciidoctor-epub3 -a ebookbuild -r asciidoctor-mathematical  ${BOOK}.asciidoc; \
 
 #  Create Kindle version (ignoring the error that it outputs)
 create_kindle: create_epub
