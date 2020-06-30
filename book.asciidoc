@@ -27,7 +27,7 @@ pf: Payment Font
 ////
 	ePUB variables
 ////
-:front-cover-image: ebook-cover.jpg
+:front-cover-image: images/cover.png
 :epub3-stylesdir: .
 ////
 	User variables

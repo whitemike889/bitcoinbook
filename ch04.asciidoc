@@ -437,7 +437,7 @@ Here's the same public key shown as a 520-bit number (130 hex digits) with the p
 
 ++++
 <pre data-type="programlisting">
-K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A&#x21b5;
+K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A↵
 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
 </pre>
 ++++
@@ -568,7 +568,7 @@ Public Key (x,y) coordinates is:
  (41637322786646325214887832269588396900663353932545912953362782457239403430124L,
  16388935128781238405526710466724741593761085120864331449066658622400339362166L)
 Public Key (hex) is:
- 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec&#x21b5;
+ 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec↵
 243bcefdd4347074d44bd7356d6a53c495737dd96295e2a9374bf5f02ebfc176
 Compressed Public Key (hex) is:
  025c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec
@@ -798,7 +798,7 @@ image::images/mbc2_0409.png[]
 Although you can deposit funds into a paper wallet several times, you should withdraw all funds only once, spending everything. This is because in the process of unlocking and spending funds some wallets might generate a change address if you spend less than the whole amount. If the computer you use to sign the transaction is then compromised, you risk exposing the private key, giving access to the funds in the change address. By spending the entire balance of a paper wallet only once, you reduce the risk of key compromise. If you need only a small amount, send any remaining funds to a new paper wallet in the same transaction.
 ====
 
-Paper wallets come in many designs and sizes, with many different features. Some are intended to be given as gifts and have seasonal themes, such as Christmas and New Year's themes. Others are designed for storage in a bank vault or safe with the private key hidden in some way, either with opaque scratch-off stickers, or folded and sealed with tamper-proof adhesive foil. Figures pass:[<a data-type="xref" href="#paper_wallet_bpw" data-xrefstyle="select: labelnumber">#paper_wallet_bpw</a>] through pass:[<a data-type="xref" href="#paper_wallet_spw" data-xrefstyle="select: labelnumber">#paper_wallet_spw</a>] show various examples of paper wallets with security and backup features.
+Paper wallets come in many designs and sizes, with many different features. Some are intended to be given as gifts and have seasonal themes, such as Christmas and New Year's themes. Others are designed for storage in a bank vault or safe with the private key hidden in some way, either with opaque scratch-off stickers, or folded and sealed with tamper-proof adhesive foil. Figures <<paper_wallet_bpw>> through <<paper_wallet_spw>> show various examples of paper wallets with security and backup features.
 
 [[paper_wallet_bpw]]
 .An example of a paper wallet from bitcoinpaperwallet.com with the private key on a folding flap
