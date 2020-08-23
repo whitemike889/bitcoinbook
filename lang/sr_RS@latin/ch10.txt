@@ -1,0 +1,1122 @@
+[[mining]]
+== Rudarenje i konsenzus
+
+
+=== Uvod
+
+((("mining and consensus", "purpose of")))Reč "rudarenje" donekle navodi na pogrešan trag. Podsećajući na vađenje plemenitih metala, usmerava nam pažnju na nagradu za rudarenje, novi bitkoin stvoren u svakom bloku. Iako se rudarenje podstiče ovom nagradom, osnovna svrha rudarenja nije nagrada ili stvaranje novih kovanica. Ako rudarenje posmatrate samo kao proces kojim se stvaraju kovanice, zamenili ste sredstvo (podsticaje) za cilj procesa. Rudarenje je mehanizam koji stoji u osnovi decentralizovane klirinške kuće, pomoću kojeg se transakcije validiraju i odobravaju. Rudarenje je izum koji bitkoin čini posebnim, decentralizovanim mehanizmom zaštite koji je osnova P2P digitalne gotovine.
+
+((("mining and consensus", "decentralized consensus")))((("central trusted authority")))Mining _secures the bitcoin system_ and enables the emergence of network-wide _consensus without a central authority_. ((("fees", "transaction fees")))Nagrada za novoiskovane kovanice i naknada za transakcije je podsticajna šema koja usklađuje akcije rudara sa sigurnošću mreže, uz istovremeno sprovođenje monetarnog snabdevanja.
+
+[TIP]
+====
+((("decentralized systems", "bitcoin mining and")))Svrha rudarenja nije stvaranje novog bitkoina. To je sistem davanja podsticaja. Rudarenje je mehanizam pomoću kojeg je bitkoinova _sigurnost_ _decentralizovana_.
+====
+
+Rudari potvrđuju nove transakcije i beleže ih u globalnoj knjizi. Novi blok, u kom su sadržane transakcije koje su se desile posle poslednjeg bloka, "rudari" se u proseku na svakih 10 minuta, čime se te transakcije dodaju u blokčejn. Transakcije koje postanu deo bloka i dodaju se u blokčejn smatraju se "potvrđenim", što omogućava novim vlasnicima bitkoina da troše bitkoin koji su primili u tim transakcijama.
+
+((("fees", "mining rewards")))((("mining and consensus", "mining rewards and fees")))((("Proof-of-Work algorithm")))((("mining and consensus", "Proof-of-Work algorithm")))Rudari dobijaju dve vrste nagrada u zamenu za sigurnost koju pružaju rudarenjem: nove kovanice stvorene sa svakim novim blokom i transakcijske naknade iz svih transakcija uključenih u blok. Da bi zaradili ovu nagradu, rudari se takmiče u rešavanju teškog matematičkog problema zasnovanog na kriptografskom heš algoritmu. Rešenje problema, nazvano Proof-of-Work, uključuje se u novi blok i služi da dokaže da je rudar uložio značajne napore pri računanju. Takmičenje u rešavanju algoritma Proof-of-Work radi dobijanja nagrade i prava na snimanje transakcija na blokčejnu osnova je sigurnosnog modela bitkoina.
+
+Proces se naziva rudarenjem jer je nagrada (generisanje novih bitkoin kovanica) dizajnirana da simulira opadanje prinosa, baš kao i rudarenje plemenitih metala. Novčana masa bitkoina stvara se rudarenjem, slično kao što Centralna banka izdaje novi novac štampajući novčanice. Maksimalni iznos novostvorenog bitkoina koji rudar može dodati bloku smanjuje se približno svake četiri godine (ili tačnije na svakih 210.000 blokova). Počelo je sa 50 bitkoina po bloku u januaru 2009. i prepolovljeno je na 25 bitkoina po bloku u novembru 2012. Ponovo se prepolovilo na 12,5 bitkoina u julu 2016. Na osnovu te formule, nagrade za rudarenje bitkoina smanjuju se eksponencijalno sve do približno 2140. godine, kada će sav bitkoin (20,99999998 miliona) biti emitovan. Nakon 2140, nijedan novi bitkoin neće biti emitovan.
+
+Bitkoin rudari takođe zarađuju od transakcija. Svaka transakcija može da uključi naknadu za transakciju, u obliku viška bitkoina između ulaza i izlaza transakcije. Pobednički rudar bitkoina može "zadržati kusur" transakcija koje su uključene u pobednički blok. Danas naknade predstavljaju 0,5% ili manje prihoda rudara bitkoina, a velika većina dolazi od novoiskovanog bitkoina. Međutim, kako se nagrada smanjuje vremenom, a broj transakcija po bloku povećava, veći deo zarade od rudarenja bitkoina dolazi od naknada. Postepeno, naknade za transakcije prevagnuće kao nagrade za rudarenje, i postaće glavni podsticaj za rudare. Nakon 2140. godine, količina novog bitkoina u svakom bloku opada na nulu, a rudarenje bitkoina biće podsticano samo naknadama za transakcije.
+
+U ovom poglavlju prvo ćemo istražiti rudarenje kao mehanizam za monetarnu ponudu, a zatim ćemo razmotriti najvažniju funkciju rudarenja: decentralizovani mehanizam konsenzusa na kojem se zasniva sigurnost bitkoina.
+
+Da bismo razumeli rudarenje i konsenzus, ispratićemo Alisinu transakciju dok se prima i dodaje u blok pomoću Đingove opreme za rudarenje. Zatim ćemo pratiti blok dok se rudari, dodaje u blokčejn i prihvata od strane bitkoin mreže kroz proces konsenzusa.
+
+==== Bitkoin ekonomija i stvaranje valuta
+
+((("mining and consensus", "bitcoin economics and currency creation")))((("currency creation")))((("money supply")))((("issuance rate")))Bitkoini se "kuju" pri stvaranju svakog bloka fiksnom i opadajućom brzinom. Svaki blok, generisan u proseku na svakih 10 minuta, sadrži potpuno novi bitkoin, stvoren ni iz čega. Svakih 210.000 blokova, odnosno otprilike svake četiri godine, stopa izdavanja valute smanjuje se za 50%. Za prve četiri godine rada mreže, svaki blok je sadržavao 50 novih bitkoina.
+
+U novembru 2012. godine, nova stopa izdavanja bitkoina smanjena je na 25 bitkoina po bloku. U julu 2016. godine ponovo je smanjena na 12,5 bitkoina po bloku. Ponovo će se prepoloviti na 6,25 bitkoina posle bloka 630,000, koji će biti rudaren negde 2020. Stopa novih kovanica se smanjuje ovako eksponencijalno u toku 32 "prepolovljavanja" sve do bloka 6,720,000 (rudarenog otprilike 2137. godine), kada dostigne minimalnu valutnu jedinicu od 1 satošija. Konačno, nakon 6,93 miliona blokova, otprilike 2140, biće izdato skoro 2,099,999,997,690,000 satošija, odnosno skoro 21 milion bitkoina. Nakon toga, blokovi neće sadržavati novi bitkoin, a rudari će biti nagrađivani isključivo naknadama za transakcije. <<bitcoin_money_supply>> prikazuje ukupni bitkoin u opticaju tokom vremena, jer se izdavanje valute smanjuje.
+
+[[bitcoin_money_supply]]
+.Snabdevanje bitkoin valutom tokom vremena na osnovu geometrijski opadajuće stope izdavanja
+image::images/mbc2_1001.png["BitcoinMoneySupply"]
+
+[NOTE]
+====
+Maksimalni broj rudarenih kovanica je _gornji limit_ mogućih nagrada za rudarenje bitkoina. U praksi, rudar može namerno da rudari blok uzimajući manje od cele nagrade. Takvi blokovi su već bili rudareni, i još više takvih može biti rudareno u budućnosti, što rezultira nižim ukupnim izdavanjem valute.
+====
+
+U primeru koda u <<max_money>>, izračunavamo ukupni iznos bitkoina koji će biti izdat.
+
+[[max_money]]
+.Skripta za izračunavanje ukupnog broja bitkoina koji će biti izdat
+====
+[source, python]
+----
+include::code/max_money.py[]
+----
+====
+
+<<max_money_run>> prikazuje izlaz proizveden pokretanjem ove skripte.
+
+[[max_money_run]]
+.Pokretanje max_money.py skripte
+====
+[source,bash]
+----
+$ python max_money.py
+Ukupni BTC koji će ikada biti stvoren: 2099999997690000 satošija
+----
+====
+
+Konačno i opadajuće izdavanje stvara fiksnu monetarnu ponudu koja odoleva inflaciji. Za razliku od dekretne valute (fiat currency), koju centralna banka može štampati u beskonačnom broju, bitkoin se nikada ne može povećati štampanjem.
+
+.Deflacioni novac
+****
+((("deflationary money")))Najvažnija posledica fiksnog i opadajućeg monetarnog izdavanja o kojoj se mnogo raspravlja je ta da valuta ima inherentnu _deflacionu_ tendenciju. Deflacija je fenomen povećavanja vrednosti zbog neusklađenosti ponude i potražnje, koja povećava vrednost (i kurs) valute. Suprotno od inflacije, deflacija cena znači da novac vremenom ima veću kupovnu moć.
+
+Mnogi ekonomisti tvrde da je deflaciona ekonomija katastrofa koju bi trebalo izbeći po svaku cenu. To je zato što u periodu brze deflacije ljudi imaju tendenciju da čuvaju novac umesto da ga troše, nadajući se da će cene pasti. Takav fenomen se odvijao tokom japanske "izgubljene decenije", kada je potpuni kolaps potražnje gurnuo valutu u deflacionu spiralu.
+
+Stručnjaci za bitkoin tvrde da deflacija sama po sebi nije loša. Umesto toga, deflacija je povezana sa kolapsom potražnje, jer je to jedini primer deflacije koji moramo proučavati. U dekretnoj valuti (nacionalnih banaka) sa mogućnošću neograničenog štampanja, vrlo je teško ući u deflacionu spiralu, ukoliko ne dođe do potpunog kolapsa potražnje i nespremnosti na štampanje novca. Deflacija u bitkoinu nije prouzrokovana padom potražnje, već predvidljivo ograničenom ponudom.
+
+Pozitivan aspekt deflacije je, naravno, taj što je suprotna od inflacije. Inflacija uzrokuje sporo, ali neizbežno poništavanje valute, što rezultira oblikom skrivenog oporezivanja kojim se štediše kažnjavaju kako bi se spasili dužnici (uključujući najveće dužnike, same vlade). Valute pod državnom kontrolom trpe moralni rizik lakog izdavanja duga koji se kasnije može izbrisati degradacijom na štetu štediša.
+
+Ostaje da se vidi da li je deflacioni aspekt valute problem ako nije vođen brzim ekonomskim povlačenjem, ili prednost, jer zaštita od inflacije i degradacije daleko prevazilazi rizike deflacije.
+****
+
+=== Decentralizovani konsenzus
+
+((("mining and consensus", "decentralized consensus")))((("decentralized systems", "consensus in")))U prethodnom poglavlju smo pogledali blokčejn, globalnu javnu knjigu (spisak) svih transakcija koje svi u bitkoin mreži prihvataju kao autoritativni zapis o vlasništvu.
+
+Ali kako se svi u mreži mogu složiti oko jedne univerzalne "istine" o tome ko šta poseduje, a da ne moraju nikome da veruju? Svi tradicionalni platni sistemi zavise od modela poverenja, sa centralnim organom koji pruža usluge klirinške kuće, u suštini vršeći proveru i kliring (odobravanje i obračunavanje) svih transakcija. Bitkoin nema centralni autoritet, ali nekako svaki puni čvor ima potpunu kopiju javne knjige kojoj može verovati kao autoritativnom zapisu. Blokčejn nije kreirao jedan centralni autoritet, već ga samostalno sastavlja svaki čvor u mreži. Nekako svaki čvor u mreži, delujući na osnovu informacija koje se prenose preko nesigurnih mrežnih veza, može doći do istog zaključka i sastaviti kopiju iste javne knjige kao i svi ostali. Ovo poglavlje ispituje postupak kojim bitkoin mreža postiže globalni konsenzus bez centralnog autoriteta.
+
+((("emergent consensus")))((("mining and consensus", "emergent consensus")))Glavni izum Satošija Nakamota je decentralizovani mehanizam za _konsenzus koji iskrsne_. Konsenzus iskrsne jer nije postignut eksplicitno - nema izbora ili fiksnog trenutka kada se konsenzus dogodi. Umesto toga, konsenzus je novi predmet asinhrone interakcije hiljada nezavisnih čvorova, a svi slede jednostavna pravila. Sva svojstva bitkoina, uključujući valutu, transakcije, plaćanja i sigurnosni model koji ne zavisi od centralnog autoriteta ili poverenja, proističu iz ovog pronalaska.
+
+Bitkoinov decentralizovani konsenzus potiče iz interakcije četiri procesa koji se odvijaju nezavisno na čvorovima širom mreže:
+
+[role="pagebreak-before"]
+* Nezavisne verifikacije svake transakcije, od strane svakog punog čvora, zasnovane na sveobuhvatnoj listi kriterijuma
+* Nezavisnog agregiranja tih transakcija u nove blokove zahvaljujući rudarskim čvorovima, zajedno sa prikazanim izračunavanjem pomoću algoritma Proof-of-Work
+* Nezavisne verifikacije novih blokova u svakom čvoru i sastavljanja u lanac
+* Nezavisnog izbora, od strane svakog čvora, lanca sa najkumulativnijim izračunavanjem demonstriranim pomoću Proof-of-Work-a
+
+U narednih nekoliko odeljka analiziraćemo ove procese i kako oni međusobno deluju kako bi stvorili novo svojstvo konsenzusa na celoj mreži koje omogućava bilo kojem bitkoin čvoru da sastavi svoju kopiju autoritativne, pouzdane, javne, globalne knjige.
+
+[[tx_verification]]
+=== Nezavisna verifikacija transakcija
+
+((("mining and consensus", "independent transaction verification")))((("transactions", "independent verification of")))U <<transactions>>, videli smo kako softver u novčaniku stvara transakcije prikupljanjem UTXO-a, obezbeđivanjem odgovarajućih skripti za otključavanje i konstruisanjem novih izlaza dodeljenih novom vlasniku. Nastala transakcija tada se šalje na susedne čvorove u bitkoin mreži kako bi mogla da se širi po celoj bitkoin mreži.
+
+Međutim, pre prosleđivanja transakcija svojim susedima, svaki bitkoin čvor koji primi transakciju prvo će verifikovati transakciju. Ovo osigurava širenje samo validnih transakcija širom mreže, dok se transakcije koje nisu validne odbacuju na prvom čvoru koji na njih naiđe.
+
+Svaki čvor proverava svaku transakciju u odnosu na dugu listu kriterijuma:
+
+* Sintaksa i struktura podataka transakcije moraju biti tačni.
+* Ni liste ulaza, ni liste izlaza, nisu prazne.
+* Veličina transakcije u bajtovima je manja od +MAX_BLOCK_SIZE+.
+* Svaka izlazna vrednost, kao i ukupna vrednost, moraju biti unutar dozvoljenog prostora vrednosti (manje od 21 miliona kovanica, više od praga _prašine (dust)_).
+* Nijedan od ulaza nema heš=0, N=-1 (transakcije coinbase-a ne treba da se prenose).
+* +nLocktime+ je jednako +INT_MAX+, ili +nLocktime+ i +nSequence+ vrednosti su zadovoljene u skladu sa +MedianTimePast+.
+* Veličina transakcije u bajtovima je veća ili jednaka 100.
+* Broj operacija potpisa (SIGOPS) sadržana u transakciji je manji od ograničenja operacije potpisa.
+* Skripta za otključavanje (+scriptSig+) može staviti brojeve samo na stek, a skripta za zaključavanje (+scriptPubkey+) mora odgovarati +IsStandard+ šemi (to odbacuje "nestandardne" transakcije).
+* Transakcija u memorijskom pulu ili u bloku mora da ima odgovarajuću ulaznu transakciju u glavnom stablu.
+* Za svaki ulaz, ako referentni izlaz postoji u bilo kojoj drugoj transakciji u pulu, transakcija mora biti odbijena.
+* Za svaki ulaz potražite u glavnoj grani i transakcijskom pulu da biste pronašli referenciranu izlaznu transakciju. Ako izlazna transakcija nedostaje za bilo koji ulaz, to će biti orphan transakcija. Dodajte u orphan transakcijski pul ako odgovarajuća transakcija već nije u pulu.
+* Za svaki ulaz, ako je referencirana izlazna transakcija izlaz coinbase-a, mora imati najmanje +COINBASE_MATURITY+ (100) potvrda.
+* Za svaki ulaz referencirani izlaz mora postojati i ne sme već biti potrošen.
+* Koristeći referencirane izlazne transakcije za dobijanje ulaznih vrednosti, proverite da li je svaka ulazna vrednost, kao i zbir, u dozvoljenom rasponu vrednosti (manje od 21M kovanica, više od 0).
+* Odbacite ako je zbir ulaznih vrednosti manji od zbira izlaznih vrednosti.
+* Odbacite ako je naknada za transakciju preniska (+minRelayTxFee+) da biste ušli u prazan blok.
+* Skripte za otključavanje za svaki ulaz se moraju validirati u odnosu na odgovarajuće skripte za zaključavanje izlaza.
+
+Ovi uslovi se mogu detaljno videti u funkcijama +AcceptToMemoryPool+, +CheckTransaction+, i +CheckInputs+ u Bitcoin Core-u. Imajte na umu da se uslovi sa vremenom menjaju, a da biste rešili nove vrste DoS napada ili da biste ponekad popustili pravila tako da uključite više vrsta transakcija.
+
+Nezavisno potvrđujući svaku transakciju kako je primljena i pre nego što je raširena, svaki čvor gradi bazu važećih (ali nepotvrđenih) transakcija poznatih kao _transakcijski pul (transaction pool)_, _memorijski pul (memory pool)_ ili _mempool_.
+
+=== Rudarski čvorovi
+
+((("mining and consensus", "mining nodes")))((("bitcoin nodes", "mining nodes")))Neki čvorovi u bitkoin mreži su specijalizovani čvorovi zvani _rudari_ ili _miners_. U <<ch01_intro_what_is_bitcoin>> predstavili smo ((("use cases", "mining for bitcoin", id="jingten")))Đinga, studenta računarskog inženjerstva u Šangaju, u Kini, koji je rudar bitkoina. Đing zarađuje bitkoin vođenjem rudarske opreme, koja je specijalizovani računarski i hardverski sistem dizajniran za rudarenje bitkoina. Đingov specijalizovani rudarski hardver povezan je sa serverom koji pokreće pun bitkoin čvor. Za razliku od Đinga, neki rudari rudare bez punog čvora, kao što ćemo videti u <<mining_pools>>. Kao i svaki drugi puni čvor, Đingov čvor prima i širi nepotvrđene transakcije na bitkoin mreži. Đingov čvor, međutim, takođe objedinjuje ove transakcije u nove blokove.
+
+Đingov čvor, kao i svi čvorovi, sluša nove blokove koji se šire na bitkoin mreži. Međutim, dolazak novog bloka ima poseban značaj za rudarski čvor. Takmičenje među rudarima efektivno se završava širenjem novog bloka koji služi kao proglašavanje pobednika. Za rudare, dobijanje validnog novog bloka znači da je neko drugi pobedio u takmičenju i da su oni izgubili. Međutim, kraj jednog kruga takmičenja je i početak sledećeg kruga. Novi blok nije samo karirana zastava koja označava kraj trke; to je ujedno i startni pucanj pištolja u trci za sledeći blok.
+
+=== Agregiranje (objedinjavanje) transakcija u blokove
+
+((("mining and consensus", "aggregating transactions into blocks", id="MACaggreg10")))((("transactions", "aggregating into blocks", id="Taggreg10")))((("blocks", "aggregating transactions into", id="Baggreg10")))((("blocks", "candidate blocks")))((("candidate blocks")))((("transaction pools")))((("memory pools (mempools)")))Nakon provere transakcija, bitkoin čvor će ih dodati u _memorijski pul (memory pool)_, ili _transakcijski pul (transaction pool)_, gde transakcije čekaju dok ne bude bilo moguće da se uključe (rudare) u blok. Đingov čvor skuplja, potvrđuje i prenosi nove transakcije, kao i bilo koji drugi čvor. Za razliku od drugih čvorova, Đingov čvor će zatim ove transakcije objediniti u _kandidatski blok_.
+
+Pratimo blokove koji su nastali u vreme kada je Alisa kupila šolju kafe u Bobovom kafiću (vidi <<cup_of_coffee>>). Alisina transakcija je uključena u blok 277.316. Radi prikazivanja koncepata u ovom poglavlju, pretpostavimo da je blok rudario Đingov rudarski sistem i da prati Alisinu transakciju dok postaje deo ovog novog bloka.
+
+Đingov rudarski čvor održava lokalnu kopiju blokčejna. Do trenutka ((("use cases", "buying coffee"))) kada Alisa kupuje šolju kafe, Đingov čvor je sastavio lanac do bloka 277.314. Đingov čvor sluša transakcije, pokušava da rudari novi blok i takođe sluša blokove koje su otkrili drugi čvorovi. Kako Đingov čvor rudari, on prima blok 277.315 preko bitkoin mreže. Dolazak ovog bloka označava kraj takmičenja za blok 277.315 i početak takmičenja za stvaranje bloka 277.316.
+
+Tokom prethodnih 10 minuta, dok je Đingov čvor tražio rešenje za blok 277.315, on je takođe prikupljao transakcije u pripremi za sledeći blok. Do sada je prikupio nekoliko stotina transakcija u memorijskom pulu. Nakon što primi blok 277.315 i potvrdi ga, Đingov čvor će ga uporediti sa svim transakcijama u memorijskom pulu i ukloniti sve koje su bile uključene u blok 277.315. Sve transakcije koje ostanu u memorijskom pulu nisu potvrđene i čekaju da budu uknjižene u jednom novom bloku.
+
+((("Proof-of-Work algorithm")))((("mining and consensus", "Proof-of-Work algorithm")))Đingov čvor odmah gradi novi prazan blok, kandidata za blok 277.316. Taj blok se naziva _kandidatski blok_ ili _candidate block_ jer još uvek nije važeći blok, pošto sadrži validan Proof-of-Work. Blok postaje validan samo ako rudar uspe da pronađe rešenje algoritma Proof-of-Work.
+
+Kada Đingov čvor agregira sve transakcije iz memorijskog pula, novi kandidatski blok ima 418 transakcija sa ukupnim naknadama za transakcije u iznosu od 0,09094928 bitkoina. Ovaj blok možete videti u blokčejnu pomoću korisničkog interfejsa komandne linije Bitcoin Core-a, kao što je prikazano u <<block277316>>.
+
+[[block277316]]
+.Koristeći komandnu liniju za skidanje bloka 277.316
+====
+[source,bash]
+----
+$ bitcoin-cli getblockhash 277316
+
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+
+$ bitcoin-cli getblock 0000000000000001b6b9a13b095e96db41c4a928b97ef2d9\
+44a9b31b2cc7bdc4
+----
+
+
+[source,json]
+----
+{
+    "hash" : "0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4",
+    "confirmations" : 35561,
+    "size" : 218629,
+    "height" : 277316,
+    "version" : 2,
+    "merkleroot" : "c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e",
+    "tx" : [
+        "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+        "b268b45c59b39d759614757718b9918caf0ba9d97c56f3b91956ff877c503fbe",
+
+        ... još 417 transakcija ...
+
+       ],
+    "time" : 1388185914,
+    "nonce" : 924591752,
+    "bits" : "1903a30c",
+    "difficulty" : 1180923195.25802612,
+    "chainwork" : "000000000000000000000000000000000000000000000934695e92aaf53afa1a",
+    "previousblockhash" : "0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569"
+}
+----
+====
+
+==== Transakcija coinbase-a
+
+((("coinbase transactions", id="coinbtrans10")))((("transactions", "coinbase transactions", id="Tcoinb10")))Prva transakcija u bilo kom bloku je posebna transakcija, koja se naziva _transakcija coinbase-a_. Ovu transakciju konstruiše Đingov čvor i sadrži njegovu _nagradu (reward)_ za rudarski napor.
+
+[NOTE]
+====
+Kada je blok 277.316 bio rudaren, nagrada je bila 25 bitkoina po bloku. Od tada je protekao jedan period "prepolovljavanja". Nagrada za blok promenjena je na 12,5 bitkoina u julu 2016. Ponovo će se prepoloviti za 210.000 blokova, 2020. godine.
+====
+
+Đingov čvor stvara transakciju coinbase-a kao plaćanje sopstvenom novčaniku: "Platite na Đingovu adresu 25,09094928 bitkoina." Ukupan iznos nagrade koju Đing skuplja za rudarenje bloka je zbir nagrada coinabase-a (25 novih bitkoina) i naknada za transakcije (0,09094928) za sve transakcije uključene u blok kao što je prikazano u <<generation_tx_example>>.
+
+
+[[generation_tx_example]]
+.Transakcija coinbase-a
+====
+----
+$ bitcoin-cli getrawtransaction d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f 1
+----
+
+[source,json]
+[role="c_less_space"]
+----
+{
+    "hex" : "01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f03443b0403858402062f503253482fffffffff0110c08d9500000000232102aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21ac00000000",
+    "txid" : "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+    "version" : 1,
+    "locktime" : 0,
+    "vin" : [
+        {
+            "coinbase" : "03443b0403858402062f503253482f",
+            "sequence" : 4294967295
+        }
+    ],
+    "vout" : [
+        {
+            "value" : 25.09094928,
+            "n" : 0,
+            "scriptPubKey" : {
+                "asm" : "02aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21OP_CHECKSIG",
+                "hex" : "2102aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21ac",
+                "reqSigs" : 1,
+                "type" : "pubkey",
+                "addresses" : [
+                    "1MxTkeEP2PmHSMze5tUZ1hAV3YTKu2Gh1N"
+                ]
+            }
+        }
+    ]
+}
+----
+====
+
+Za razliku od običnih transakcija, transakcija coinbase-a ne konzumira (troši) UTXO kao ulaze. Umesto toga, ima samo jedan ulaz, koji se zove _coinbase_, i koji stvara bitkoin ni iz čega. Transakcija coinbase-a ima jedan izlaz, koji se plaća rudaru na njegovu sopstvenu bitkoin adresu. Izlaz transakcije coinbase-a šalje vrednost od 25,09094928 bitkoina na bitkoin adresu rudara; u ovom slučaju je to +1MxTkeEP2PmHSMze5tUZ1hAV3YTKu2Gh1N+.
+
+==== Nagrade i naknade coinbase-a
+
+((("coinbase transactions", "rewards and fees")))((("fees", "transaction fees")))((("mining and consensus", "rewards and fees")))Za izgradnju transakcije coinbase-a, Đingov čvor prvo izračunava ukupan iznos naknada za transakcije dodavanjem svih ulaza i izlaza 418 transakcija dodatih u blok. Naknade se računaju ovako:
+
+----
+Ukupna naknada = zbir(ulaza) - zbir(izlaza)
+----
+
+U bloku 277.316, ukupne cene transakcija su 0,09094928 bitkoina.
+
+Zatim, Đingov čvor izračunava tačnu nagradu za novi blok. Nagrada se izračunava na osnovu visine bloka, počevši sa 50 bitkoina po bloku i smanjujući se za polovinu na svakih 210.000 blokova. S obzirom na to da je ovaj blok na visini od 277.316, tačna nagrada je 25 bitkoina.
+
+Računica se može videti u funkciji +GetBlockSubsidy+ u Bitcoin Core klijentu, kao što je prikazano u <<getblocksubsidy_source>>.
+
+[[getblocksubsidy_source]]
+.Računanje nagrade bloka&#x2014;Funkcija GetBlockSubsidi, GetBlockSubsidy, Bitcoin Core Client, main.cpp
+====
+[role="c_less_space"]
+[source, cpp]
+----
+CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
+{
+    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
+    // Staviti nagradu za blok na nulu ako nije definisan pomak na desno.
+    if (halvings >= 64)
+        return 0;
+
+    CAmount nSubsidy = 50 * COIN;
+    // Subvencija se prepolovi na svakih 210.000 blokova, što se dešava na otprilike svake 4 godine.
+    nSubsidy >>= halvings;
+    return nSubsidy;
+}
+----
+====
+
+Početna subvencija izračunava se u satošijima množenjem 50 sa konstantom +COIN+ (100.000.000 satošija). Ovo postavlja početnu nagradu (+nSubsidy+) na 5 milijardi satošija.
+
+((("halvings")))Dalje, funkcija izračunava broj prepolovljavanja +(halvings)+ koja su se desila deljenjem trenutne visine bloka na interval prepolovljavanja (+SubsidyHalvingInterval+). U slučaju bloka 277.316, sa intervalom prepolovljavanja na svakih 210.000 blokova, rezultat je 1 (jedno) prepolovljavanje.
+
+Maksimalni broj dozvoljenih prepolovljavanja je 64, tako da kod stavlja nagradu na nulu (vraća samo naknade) ako su prekoračena 64 prepolovljavanja.
+
+Zatim, funkcija koristi operator binarnog-pomeranja-na-desno kako bi nagradu (+nSubsidy+) podelila sa dva za svaki krug prepolovljavanja. U slučaju bloka 277.316, ovo bi napravilo binarno-pomeranje-na-desno jednom, tako da nagradu od 5 milijardi satošija prepolovi jednom i da rezultat od 2,5 milijardi satošija, ili 25 bitkoina. Operator binarnog-pomeranja-na-desno koristi se zato što je efikasniji od višestrukog ponovljanja deljenja. Da bi se izbegla potencijalna greška, binarno-pomeranje se preskače nakon 63 operacija, a subvencija je tada postavljena na 0.
+
+Na kraju, naknadi za transakciju (+nFees+) dodaje se nagrada coinbase-a (+nSubsidy+), i iznos se vraća.
+
+[TIP]
+====
+Ako Đingov rudarski čvor piše transakciju coinbase-a, šta sprečava Đinga da sam sebe "nagradi" sa 100 ili 1000 bitkoina? Odgovor je da bi pogrešna nagrada dovela do toga da svi ostali blok smatraju nevažećim, zbog čega bi struja koju je Đing iskoristio za Proof-of-Work bila uzalud potrošena. Đing može da troši nagradu samo ako svi prihvate blok.
+====
+
+==== Struktura transakcije coinbase-a
+
+((("coinbase transactions", "structure of")))Uz ova računanja, Đingov čvor zatim konstruiše transakciju coinbase-a kako bi sebi isplatio 25,09094928 bitkoina.
+
+Kao što vidite u<<generation_tx_example>>, transakcija coinbase-a ima poseban format. Umesto ulaza transakcije koji tačno određuje prethodni UTXO koji treba potrošiti, on ima ulaz "coinbase-a". Proučili smo ulaze transakcija u <<tx_in_structure>>. Uporedimo obični ulaz transakcije sa ulazom coinbase-a. <<table_8-1>> prikazuje strukturu obične transakcije, dok <<table_8-2>> prikazuje strukturu ulaza transakcije coinbase-a.
+
+[[table_8-1]]
+.Struktura "normalnog" ulaza transakcije
+[options="header"]
+|=======
+| Veličina | Polje | Opis
+| 32 bajta | Heš transakcije | Referenca na transakciju koja sadrži UTXO za potrošnju
+| 4 bajta | Izlazni indeks | Broj indeksa UTXO-a za potrošnju, prvi je 0
+| 1&#x2013;9 bajta (VarInt) | Veličina skripte za otključavanje | Dužina skripte u bajtovima
+| Promenljiva | Skripta za otključavanje | Skripta koja ispunjava uslove UTXO skripte za zaključavanje
+| 4 bajta | Redni broj | Obično postavljeno na 0xFFFFFFFF da bi se isključili BIP 125 i BIP 68
+|=======
+
+[[table_8-2]]
+.Struktura ulaza transakcije coinbase-a
+[options="header"]
+|=======
+| Veličina | Polje | Opis
+| 32 bajta | Heš transakcije | Svi bitovi su nula: nije referenca na heš transakcije
+| 4 bajta | Izlazni indeks | Svi bitovi su: 0xFFFFFFFF
+| 1&#x2013;9 bajta (VarInt) | Veličina coinbase podataka | Dužina coinbase podataka, od 2 do 100 bajtova
+| Promenljiva | Coinbase podaci | Proizvoljni podaci koji se koriste za dodatni nonce i rudarske oznake. U v2 blokova; mora da počne visinom bloka
+| 4 bajta | Redni broj | Stavite ga na 0xFFFFFFFF
+|=======
+
+U transakciji coinbase-a, prva dva polja su postavljena na vrednostima koje ne predstavljaju UTXO referencu. Umesto "heša transakcije", prvo polje se puni sa 32 bajta, a sve je postavljeno na nulu. "Izlazni indeks" je ispunjen sa 4 bajta koji su postavljeni na 0xFF (255 decimalnih mesta). "Skripta za otključavanje" (+scriptSig+) zamenjena je coinbase podacima, poljem podatka koje koriste rudari, što ćemo videti kasnije.
+
+==== Coinbase podaci
+
+((("coinbase transactions", "coinbase data")))Transakcije coinbase-a nemaju polje za skriptu za otključavanje (odnosno +scriptSig+). Umesto toga, ovo polje se zamenjuje coinbase podacima koji moraju biti između 2 i 100 bajtova. Osim prvih nekoliko bajtova, preostale coinabase podatke rudari mogu da koriste na bilo koji način koji žele; to su proizvoljni podaci.
+
+((("nonce values")))((("blocks", "genesis block")))((("blockchain (the)", "genesis block")))((("genesis block")))Satoši Nakamoto je, na primer, u genezni blok dodao tekst "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks" (The Times, 3. januar 2009. Kancelarka na ivici drugog spasavanja banaka) u coinbase podatke, iskoristivši ga da bi dokazao datum i preneo poruku. Trenutno rudari koriste coinbase podatke kako bi uključili dodatne nonce vrednosti i stringove koji identifikuju rudarski pui.
+
+Prvih nekoliko bajtova coinbase-a nekada je bilo proizvoljno, ali to više nije slučaj. Prema BIP-34, blokovi verzije-2 (blokovi sa verzijskim poljem postavljenim na 2) moraju da sadrže indeks visine bloka kao "push" operaciju skripte na početku polja coinbase-a.
+
+U bloku 277.316 vidimo da coinbase (vidi <<generation_tx_example>>), koji se nalazi u skripti za otključavanje ili +scriptSig+ polju ulaza transakcije, sadrži heksadecimalnu vrednost +03443b0403858402062f503253482f+. Dekodirajmo ovu vrednost.
+
+Prvi bajt, +03+, naređuje mehanizmu za izvršenje skripte da gurne sledeća tri bajta na stek skripte (pogledajte <<tx_script_ops_table_pushdata>>). Sledeća tri bajta, +0x443b04+, visina su bloka kodirana u little-endian formatu (unazad, najmanje značajan bajt ide prvi). Obrnuti redosled bajtova i rezultat je +0x043b44+, što je 277.316 u decimalnom obliku.
+
+Sledećih nekoliko heksadecimalnih cifara (+0385840206+) koristi se za kodiranje dodatnog _nonca_ (vidi <<extra_nonce>>), ili nasumične vrednosti, koja se koristi za pronalaženje odgovarajućeg rešenja Proof-of-Work.
+
+((("bitcoin improvement proposals", "Pay to Script Hash (BIP-16)")))((("bitcoin improvement proposals", "CHECKHASHVERIFY (BIP-17)")))((("CHECKHASHVERIFY (CHV)")))((("Pay-to-Script-Hash (P2SH)", "coinbase data")))Završni deo coinbase podataka (+2f503253482f+) je ASCII string  pass:[<span class="keep-together"><code>/P2SH/</code></span>], koji označava da rudarski čvor koji je rudario ovaj blok podržava P2SH poboljšanje definisano u BIP-16. Uvođenje P2SH mogućnosti zahteva od rudara da naznače da li podržavaju BIP-16 ili BIP-17. Oni koji podržavaju implementaciju BIP-16 treba da stave +/P2SH/+ u svoje coinbase podatke. Oni koji podržavaju BIP-17 implementaciju P2SH treba da stave string +p2sh/CHV+ u svoje coinbase podatke. Za pobednika je izabran BIP-16, a mnogi rudari su nastavili da uključuju string +/P2SH/+ u svoje coinbase podatke kako bi pokazali da podržavaju ovu funkciju.
+
+<<satoshi_words>> koristi biblioteku libbitcoin koju smo predstavili u <<alt_libraries>> za izdvajanje coinbase podatka iz geneznog bloka, prikazujući Satošijevu poruku. Imajte na umu da biblioteka libbitcoin sadrži statičku kopiju geneznog bloka, pa primer koda može da izvuče genezni blok direktno iz biblioteke.
+
+[[satoshi_words]]
+.Izvaditi coinbase podatke iz geneznog bloka
+====
+[source, cpp]
+----
+include::code/satoshi-words.cpp[]
+----
+====
+
+Kompajliramo kod sa GNU C++ kompajlerom i pokrenimo rezultirajući izvršni fajl, kao što je prikazano u <<satoshi_words_run>>.((("", startref="MACaggreg10")))((("", startref="Baggreg10")))((("", startref="Taggreg10")))((("", startref="Tcoinb10")))((("", startref="coinbtrans10")))
+
+[[satoshi_words_run]]
+.Kompajliranje i pokretanje primera koda satošija
+====
+[source,bash]
+----
+$ # Compile the code
+$  g++ -o satoshi-words satoshi-words.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # Run the executable
+$ ./satoshi-words
+^D��<GS>^A^DEThe Times 03/Jan/2009 Chancellor on brink of second bailout for banks
+----
+====
+
+=== Konstrukcija zaglavlja bloka
+
+((("mining and consensus", "constructing block headers")))((("blocks", "headers")))((("headers")))((("blockchain (the)", "block headers")))Da biste konstruisali zaglavlje bloka, rudarski čvor mora popuniti šest polja, kako je navedeno u <<block_header_structure_ch10>>.
+
+[[block_header_structure_ch10]]
+.Struktura zaglavlja bloka
+[options="header"]
+|=======
+| Veličina | Polje | Opis
+| 4 bajta | Verzija | Broj verzije za praćenje nadogradnje softvera/protokola
+| 32 bajta | Heš prethodnog bloka | Referenciranje na heš prethodnog (roditeljskog) bloka u lancu
+| 32 bajta | Merkleov koren | Heš korena Merkleovog stabla transakcija ovog bloka
+| 4 bajta | Vremenski pečat | Približno vreme kreiranja ovog bloka (sekunde od Unix Epoch-a)
+| 4 bajta | Cilj | Cilj algoritma Proof-of-Work za ovaj blok
+| 4 bajta | Nonce | Brojač korišćen za algoritam Proof-of-Work
+|=======
+
+U vreme kada je blok 277.316 rudaren, broj verzije koji opisuje strukturu bloka je verzija 2, koja je u little-endian formatu kodirana u 4 bajta kao +0x02000000+.
+
+((("blocks", "parent blocks")))((("parent blocks")))Zatim, rudarskom čvoru treba dodati "Prethodni Heš Bloka" ili "Previous Block Hash" (takođe poznat kao +prevhash+). To je heš zaglavlja bloka od bloka 277.315, prethodnog bloka primljenog od mreže, koji je Đingov čvor prihvatio i izabrao kao _roditelj (parent)_ kandidatskog bloka 277.316. Heš zaglavlja bloka za blok 277.315 je:
+
+----
+0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569
+----
+
+[TIP]
+====
+Birajući određeni _roditeljski_ blok, označen poljem "Prethodni Blok Heš" u zaglavlju kandidatskog bloka, Đing angažuje svoju rudarsku snagu da bi širio lanac koji se završava u tom određenom bloku. U suštini, ovako Đing "glasa" svojom rudarskom snagom za važeći lanac sa najdužom težinom.
+====
+
+((("merkle trees")))((("blockchain (the)", "merkle trees")))Sledeći korak je da rezimirate sve transakcije sa Merkleovim stablom, kako biste dodali Merkleov koren zaglavlja bloka. Transakcija coinbase-a navedena je kao prva transakcija u bloku. Zatim se dodaje 418 dodatnih transakcija nakon nje, za ukupno 419 transakcija u bloku. Kao što smo videli u <<merkle_trees>>, mora postojati paran broj "listova" na drvetu, tako da se poslednja transakcija duplira, stvarajući 420 čvorova, od kojih svaki sadrži heš jedne transakcije. Hešovi transakcija se zatim kombinuju u parove, stvarajući svaki nivo stabla sve dok se sve transakcije ne rezimiraju u jedan čvor u "korenu" stabla. Koren Merkleovog stabla rezimira sve transakcije u jednu 32-bajtnu vrednost, koju možete videti kao "Merkleov koren" u <<block277316>>:
+
+----
+c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e
+----
+
+Đingov rudarski čvor dodaće 4-bajtni vremenski pečat, kodiran kao vremenski pečat Unix "epohe", koji se zasniva na broju sekundi koje su protekle od ponoći UTC, u četvrtak, 1. januara 1970. Vreme +1388185914+ je jednako petku, 27. decembra 2013, u 23:11:54 UTC.
+
+Tada Đingov čvor ispunjava cilj, koji definiše potreban Proof-of-Work kako bi ovo postao validan blok. Cilj se stavlja u blok kao metrika "ciljnih bitova" (target bits), što je kodiranje mantisa-eksponenta (npr mantisa 3,141592 je 0,141592). Kodiranje ima 1-bajtni eksponent, a zatim 3-bajtnu mantisu (koeficijent). Na primer, u bloku 277.316, ciljna vrednost bitova je +0x1903a30c+. Prvi deo +0x19+ je heksadecimalni eksponent, dok je sledeći deo, +0x03a30c+, koeficijent. Koncept cilja objašnjen je u <<target>>, a prikaz "ciljnih bitova" je objašnjen u <<target_bits>>.
+
+Zadnje polje je nonce koje je inicijalizirano sa nulom.
+
+Sada kada su sva ostala polja popunjena, zaglavlje bloka je završeno i proces rudarenja može početi. Sada je cilj pronaći vrednost za nonce koji rezultira hešom zaglavlja bloka manjim od cilja. Rudarski čvor moraće da testira milijarde ili trilijarde nonce vrednosti pre nego što se nađe nonce koji ispunjava zahtev.
+
+=== Rudarenje bloka
+
+((("mining and consensus", "mining the block", id="MACmining10")))Sada kada je Đingov čvor konstruisao kandidatski blok, vreme je da Đingov hardverski rudarski uređaj "rudari" blok, da bi našao rešenje algoritma Proof-of-Work koji čini blok validnim. Kroz ovu knjigu proučavali smo kriptografske heš funkcije koje se koriste u različitim aspektima bitkoin sistema. Heš funkcija SHA256 je funkcija koja se koristi u procesu rudarenja bitkoina.((("", startref="jingten")))
+
+((("mining and consensus", "defined")))Najjednostavnije rečeno, rudarenje je proces višestrukog hešovanja zaglavlja bloka, menjanja jednog parametra, sve dok rezultirajući heš ne odgovara određenom cilju. Rezultat heš funkcije ne može se unapred odrediti, niti se može kreirati šema koja će proizvesti određenu heš vrednost. Ova karakteristika heš funkcija znači da je jedini način da se dobije heš rezultat koji odgovara određenom cilju je pokušavati ponovo i ponovo, nasumično menjanjući ulaz sve dok se željeni rezultat heša ne pojavi slučajno.
+
+==== Algoritam Proof-of-Work (dokaz o radu)
+
+((("Proof-of-Work algorithm", id="proof10")))((("mining and consensus", "Proof-of-Work algorithm", id="Cproof10")))Algoritam heša uzima podatke proizvoljne dužine i stvara determinisani rezultat fiksne dužine, digitalni otisak prsta. Za bilo koji specifični unos, rezultirajući heš će uvek biti isti i lako ga može izračunati i verifikovati svako ko implementira isti algoritam heša. ((("collisions")))Ključna karakteristika kriptografskog heš algoritma je ta što je računski neizvodljivo pronaći dva različita ulaza koji proizvode isti otisak prsta (poznat kao _kolizija_). Kao rezultat toga, praktično je nemoguće da se odabere ulaz na takav način da se proizvede željeni otisak prsta, osim da se  isprobavaju nasumični ulazi.
+
+Kod SHA256, izlaz je uvek 256 bita, bez obzira na veličinu ulaza. U <<sha256_example1>>, koristićemo Python interpreter za izračunavanje SHA256 heš fraze, "I am Satoshi Nakamoto."
+
+[[sha256_example1]]
+.SHA256 primer
+====
+[source,bash]
+----
+$ python
+----
+[source,pycon]
+----
+Python 2.7.1
+>>> import hashlib
+>>> print hashlib.sha256("I am Satoshi Nakamoto").hexdigest()
+5d7c7ba21cbbcd75d14800b100252d5b428e5b1213d27c385bc141ca6b47989e
+----
+====
+
+<<sha256_example1>> prikazuje rezultat izračunavanja heša + +"I am Satoshi Nakamoto"+: +5d7c7ba21cbbcd75d14800b100252d5b428e5b1213d27c385bc141ca6b47989e+. Ovaj 256-bitni broj je _heš_ ili _digest_ fraze i zavisi od svakog dela fraze. Dodavanjem jednog slova, interpunkcijskog znaka ili bilo kog drugog znaka napraviće se drugačiji heš.
+
+Sada, ako promenimo frazu, trebalo bi očekivati da ćemo videti potpuno različite hešove. Pokušajmo to dodavanjem broja na kraju naše fraze, koristeći jednostavni Python skript u <<sha256_example_generator>>.
+
+[[sha256_example_generator]]
+.SHA256 skripta za generisanje mnogo hešova iteracijom nonce-a
+====
+[role="c_less_space"]
+[source, python]
+----
+include::code/hash_example.py[]
+----
+====
+
+Ako se ovo pokrene, dobićete hešove nekoliko fraza, koji će biti različiti zbog dodavanja broja na kraju teksta. Povećavanjem broja možemo dobiti različite hešove, kao što je prikazano u <<sha256_example_generator_output>>.
+
+[[sha256_example_generator_output]]
+.SHA256 izlaz skripte za generisanje mnogo hešova iteriranjem nonce-a
+====
+[source,bash]
+----
+$ python hash_example.py
+----
+
+----
+I am Satoshi Nakamoto0 => a80a81401765c8eddee25df36728d732...
+I am Satoshi Nakamoto1 => f7bc9a6304a4647bb41241a677b5345f...
+I am Satoshi Nakamoto2 => ea758a8134b115298a1583ffb80ae629...
+I am Satoshi Nakamoto3 => bfa9779618ff072c903d773de30c99bd...
+I am Satoshi Nakamoto4 => bce8564de9a83c18c31944a66bde992f...
+I am Satoshi Nakamoto5 => eb362c3cf3479be0a97a20163589038e...
+I am Satoshi Nakamoto6 => 4a2fd48e3be420d0d28e202360cfbaba...
+I am Satoshi Nakamoto7 => 790b5a1349a5f2b909bf74d0d166b17a...
+I am Satoshi Nakamoto8 => 702c45e5b15aa54b625d68dd947f1597...
+I am Satoshi Nakamoto9 => 7007cf7dd40f5e933cd89fff5b791ff0...
+I am Satoshi Nakamoto10 => c2f38c81992f4614206a21537bd634a...
+I am Satoshi Nakamoto11 => 7045da6ed8a914690f087690e1e8d66...
+I am Satoshi Nakamoto12 => 60f01db30c1a0d4cbce2b4b22e88b9b...
+I am Satoshi Nakamoto13 => 0ebc56d59a34f5082aaef3d66b37a66...
+I am Satoshi Nakamoto14 => 27ead1ca85da66981fd9da01a8c6816...
+I am Satoshi Nakamoto15 => 394809fb809c5f83ce97ab554a2812c...
+I am Satoshi Nakamoto16 => 8fa4992219df33f50834465d3047429...
+I am Satoshi Nakamoto17 => dca9b8b4f8d8e1521fa4eaa46f4f0cd...
+I am Satoshi Nakamoto18 => 9989a401b2a3a318b01e9ca9a22b0f3...
+I am Satoshi Nakamoto19 => cda56022ecb5b67b2bc93a2d764e75f...
+----
+====
+
+Svaka fraza daje potpuno različite rezultate heša. Izgledaju kao da su nasumični, ali tačne rezultate možete reprodukovati u ovom primeru na bilo kom računaru sa Python-om i videti tačno iste hešove.
+
+Broj koji se koristi kao promenljiva u takvom scenariju naziva se _nonce_. Nonce se koristi za promenu izlaza kriptografske funkcije, u ovom slučaju za promenu SHA256 otiska prsta date fraze.
+
+Da bismo napravili izazov od ovog algoritma, postavićemo cilj: nađite frazu koja proizvodi heksadecimalni heš koji počinje sa nulom. Srećom, ovo nije teško! <<sha256_example_generator_output>> pokazuje da fraza "I am Satoshi Nakamoto13" proizvodi heš +0ebc56d59a34f5082aaef3d66b37a661696c2b618e62432727216ba9531041a5+, što odgovara našim kriterijumima. Bilo je potrebno 13 pokušaja da se pronađe. U pogledu verovatnoće, ako je izlaz heš funkcije ravnomerno raspoređen, očekivali bismo da ćemo dobiti rezultat sa 0 kao heksadecimalni prefiks jednom u 16 hešova (jedna od 16 heksadecimalnih cifara 0 do F). U numeričkom smislu, to znači pronalazak heš vrednosti koja je manja od +0x1000000000000000000000000000000000000000000000000000000000000000+. Ovaj prag nazivamo _ciljem (target)_, a cilj je pronaći heš koji je brojčano manji od cilja. Ako smanjimo cilj, zadatak nalaženja heša koji je manji od cilja postaje sve teži.
+
+Napravimo jednu prostu analogiju: zamislite igru u kojoj igrači nekoliko puta bacaju dve kockice, pokušavajući da bace manje od određenog cilja. U prvom krugu cilj je 12. Osim ako ne bacite dve šestice, pobedićete. U sledećem krugu cilj je 11. Igrači moraju baciti 10 ili manje da bi pobedili, opet lak zadatak. Recimo da je nekoliko krugova kasnije cilj smanjen na 5. Sada će više od polovine bacanja kocki premašiti cilj i prema tome biti nevažeći. Što je cilj manji, za pobedu je potrebno eksponencijalno više bacanja kocki. Na kraju, kada je cilj 2 (najmanji moguć), samo jedno bacanje od 36, ili 2% njih, proizvešće pobednički rezultat.
+
+Iz perspektive posmatrača koji zna da je cilj igre kockicama 2, ako je neko uspeo da baci pobedničko bacanje, može da pretpostavi da je u proseku pokušao 36 bacanja. Drugim rečima, može se proceniti količina rada koja je potrebna da bi se uspelo na osnovu težine nametnute ciljem. Kada se algoritam zasniva na determinističkoj funkciji kao što je SHA256, sam unos čini _dokaz (proof)_ da je određena količina _rada (work)_ urađena da bi se dobio rezultat manji od cilja. Otuda, _Proof-of-Work_.
+
+[TIP]
+====
+Iako svaki pokušaj daje nasumični rezultat, verovatnoća eventualnog rezultata može se unapred izračunati. Zato rezultat određene težine predstavlja dokaz (proof) o određenoj količini rada (work).
+====
+
+U  <<sha256_example_generator_output>>, pobednički "nonce" je 13 i ovaj rezultat može svako nezavisno da potvrdi. Svako može da doda broj 13 kao sufiks na frazu "I am Satoshi Nakamoto" i da izračuna heš, potvrđujući da je manji od cilja. Uspešan rezultat je takođe "Proof-of-Work", jer dokazuje da smo radili kako bismo pronašli taj nonce. Iako je za verifikaciju potrebno samo jedno izračunavanje heša, trebalo nam je 13 računanja heša da pronađemo nonce koji je uspeo. Da smo imali niži cilj (veću težinu), bilo bi potrebno mnogo više računanja heša da bi se pronašao odgovarajući nonce, ali samo jedno heširanje da bi ga bilo ko verifikovao. Osim toga, znajući cilj, svako može proceniti težinu koristeći statistiku i samim tim znati koliko je rada potrebno da bi se pronašao takav nonce.
+
+[TIP]
+====
+Proof-of.Work mora da proizvede heš koji je _manji_ od cilja. Viši cilj znači da je manje teško pronaći heš koji je ispod cilja. Niži cilj znači da je teže naći heš ispod cilja. Cilj i težina su obrnuto proporcionalni.
+====
+
+
+((("targets")))Bitkoinov Proof-of-Work vrlo je sličan izazovu prikazanom u <<sha256_example_generator_output>>. Rudar gradi kandidatski blok ispunjen transakcijama. Zatim rudar izračunava heš zaglavlja ovog bloka i gleda da li je manji od trenutnog _cilja (target-a)_. Ako heš nije manji od cilja, rudar će izmeniti nonce (obično ga samo povećava za jedan) i pokušaće ponovo. U trenutnoj težini bitkoin mreže, rudari moraju da probaju kvadrilion puta pre nego što pronađu nonce koja rezultira dovoljno niskim hešom zaglavlja bloka.
+
+Vrlo pojednostavljeni algoritam Proof-of-Work-a implementiran je u Python-u u <<pow_example1>>.
+
+[[pow_example1]]
+.Pojednostavljena implementacija Proof-of-Work-a
+====
+[source, python]
+----
+include::code/proof-of-work-example.py[]
+----
+====
+
+Pokretanjem ovog koda možete postaviti željenu težinu (u bitovima, koliko vodećih bitova mora biti nula) i videti koliko vremena treba vašem računaru da nađe rešenje. U <<pow_example_outputs>>, možete videti kako to funkcioniše na prosečnom laptopu.
+
+[[pow_example_outputs]]
+.Pokretanje primera Proof-of-Work-a za razne težine
+====
+[source, bash]
+----
+$ python proof-of-work-example.py*
+----
+
+----
+Difficulty: 1 (0 bits)
+
+[...]
+
+Difficulty: 8 (3 bits)
+Starting search...
+Success with nonce 9
+Hash is 1c1c105e65b47142f028a8f93ddf3dabb9260491bc64474738133ce5256cb3c1
+Elapsed Time: 0.0004 seconds
+Hashing Power: 25065 hashes per second
+Difficulty: 16 (4 bits)
+Starting search...
+Success with nonce 25
+Hash is 0f7becfd3bcd1a82e06663c97176add89e7cae0268de46f94e7e11bc3863e148
+Elapsed Time: 0.0005 seconds
+Hashing Power: 52507 hashes per second
+Difficulty: 32 (5 bits)
+Starting search...
+Success with nonce 36
+Hash is 029ae6e5004302a120630adcbb808452346ab1cf0b94c5189ba8bac1d47e7903
+Elapsed Time: 0.0006 seconds
+Hashing Power: 58164 hashes per second
+
+[...]
+
+Difficulty: 4194304 (22 bits)
+Starting search...
+Success with nonce 1759164
+Hash is 0000008bb8f0e731f0496b8e530da984e85fb3cd2bd81882fe8ba3610b6cefc3
+Elapsed Time: 13.3201 seconds
+Hashing Power: 132068 hashes per second
+Difficulty: 8388608 (23 bits)
+Starting search...
+Success with nonce 14214729
+Hash is 000001408cf12dbd20fcba6372a223e098d58786c6ff93488a9f74f5df4df0a3
+Elapsed Time: 110.1507 seconds
+Hashing Power: 129048 hashes per second
+Difficulty: 16777216 (24 bits)
+Starting search...
+Success with nonce 24586379
+Hash is 0000002c3d6b370fccd699708d1b7cb4a94388595171366b944d68b2acce8b95
+Elapsed Time: 195.2991 seconds
+Hashing Power: 125890 hashes per second
+
+[...]
+
+Difficulty: 67108864 (26 bits)
+Starting search...
+Success with nonce 84561291
+Hash is 0000001f0ea21e676b6dde5ad429b9d131a9f2b000802ab2f169cbca22b1e21a
+Elapsed Time: 665.0949 seconds
+Hashing Power: 127141 hashes per second
+----
+====
+
+Kao što vidite, povećavanje težine za 1 bit uzrokuje udvostručavanje vremena koje je potrebno da se nađe rešenje. Ako zamislite celokupni 256-bitni prostor brojeva, svaki put kada ograničite još jedan bit na nulu, smanjujete prostor za pretragu na pola. U <<pow_example_outputs>>, potrebno je 84 miliona heš pokušaja da se pronađe nonce koji stvara heš sa 26 vodećih bitova kao nula. Čak i sa brzinom većom od 120.000 hešova u sekundi, još uvek je potrebno 10 minuta da laptop nađe ovo rešenje.
+
+U trenutku pisanja ove knjige, mreža pokušava da pronađe blok čiji je heš zaglavlja manji od:
+
+----
+0000000000000000029AB9000000000000000000000000000000000000000000
+----
+
+Kao što vidite, na početku tog cilja postoji puno nula, što znači da je prihvatljivi raspon hešova mnogo manji, pa je zato teže naći validan heš. U proseku će trebati više od 1,8 zeta hešova (hiljadu milijardi milijardi hešova) u sekundi da bi mreža otkrila sledeći blok. To izgleda kao nemogući zadatak, ali srećom, mreža donosi 3 exa-heša u sekundi (EH/sec) procesorske snage koja može da pronađe blok u proseku za oko 10 minuta. ((("", startref="Cproof10")))((("", startref="proof10")))
+
+[[target_bits]]
+==== Reprezentacija cilja
+
+((("mining and consensus", "mining the block", "target representation")))((("targets", id="targets10")))U <<block277316>>, videli smo da blok sadrži cilj, u belešci koja se zove "ciljni bitovi (target bits)" ili samo "bitovi", što u bloku 277.316 ima vrednost +0x1903a30c+. Ova beleška izražava cilj Proof-of-Work-a kao format koeficijenta/eksponenta, sa prve dve heksadecimalne cifre za eksponent i narednih šest heksadecimalnih cifara kao koeficijent. Zato je u ovom bloku eksponent +0x19+, a koeficijent +0x03a30c+.
+
+Formula za izračunavanje ciljne težine iz ovog prikaza je:
+
+++++
+<ul class="simplelist">
+  <li>target=koeficijent*2<sup>(8*(eksponenta–3))</sup></li>
+</ul>
+++++
+
+Pomoću te formule i vrednosti bitova težine 0x1903a30c dobijamo:
+
+++++
+<ul class="simplelist">
+  <li>target = 0x03a30c * 2 <sup>0x08*(0x19-0x03)</sup></li>
+  <li>=> target = 0x03a30c * 2<sup>(0x08*0x16)</sup></li>
+  <li>=> target = 0x03a30c * 2<sup>0xB0</sup></li>
+</ul>
+++++
+
+koja je u decimalnom obliku:
+
+++++
+<ul class="simplelist">
+  <li>=> target = 238.348 * 2<sup>176</sup></li>
+  <li>=> target = <br/>22.829.202.948.393.929.850.749.706.076.701.368.331.072.452.018.388.575.715.328</li>
+</ul>
+++++
+
+prebacimo se nazad u heksadecimalni oblik:
+
+++++
+<ul class="simplelist">
+  <li> => target = <br/>0x0000000000000003A30C0000000000000000000000000000000000000000000000000000</li>
+</ul>
+++++
+
+To znači da je validan blok za visinu 277.316 onaj koji ima heš zaglavlja bloka koji je manji od traženog. U binarnom formatu taj broj mora imati više od 60 vodećih bita postavljenih na nulu. Sa ovim nivoom težine, samo jedan rudar koji obrađuje 1 bilion heša u sekundi (1 terahaš u sekundi ili 1 TH/sec) bi rešenje pronašao u proseku jednom u 8,496 blokova ili jednom u 59 dana.
+
+[[target]]
+==== Iznova postavljanje cilja za prilagođavanje težine 
+
+((("mining and consensus", "mining the block", "retargeting to adjust difficulty")))Kao što smo videli, cilj određuje težinu i samim tim utiče na to koliko vremena je potrebno da bi se našlo rešenje dokaza o radu. To dovodi do očiglednih pitanja: Zašto je težina podesiva, ko je podešava i kako?
+
+Blokovi bitkoina generišu se u proseku na svakih 10 minuta. To je bitkoinov puls koji daje ritam izdavanju valuta i brzinu namirenja transakcije. On mora da ostane konstantan ne samo tokom kratkog roka, već tokom više decenija. Tokom ovog vremena, očekuje se da će snaga računara i dalje rasti brzo. Pored toga, broj učesnika u rudarenju i računari koje se koriste će se takođe stalno menjati. Da bi vreme generisanja bloka bilo 10 minuta, težina rudarenja se mora prilagoditi tim promenama. U stvari, cilj Proof-of-Work je dinamični parametar koji se periodično prilagođava kako bi se ispunio cilj od 10 minuta intervala po bloku. Jednostavno rečeno, cilj je postavljen tako da će trenutna snaga rudarenja rezultirati u blok intervalu od 10 minuta.
+
+Dakle, kako je takvo prilagođavanje izvršeno u potpuno decentralizovanoj mreži? Iznova postavljanje cilja se vrši automatski i na svakom čvoru nezavisno. Na svakih 2.016 blokova, svi čvorovi iznova postavljaju cilj Proof-of-Work-a. Jednačina za iznova postavljanje cilja meri vreme potrebno za nalaženje zadnjih 2.016 blokova i upoređuje to sa očekivanim vremenom od 20.160 minuta (2.016 blokova puta 10 minuta željene dužine intervala bloka). Izračunava se odnos između stvarnog i željenog vremenskog raspona i vrši se proporcionalno prilagođavanje cilja (na gore ili na dole). Jednostavno: ako mreža pronalazi blokove brže od na svakih 10 minuta, težina se povećava (cilj se smanjuje). Ako je otkrivanje bloka sporije od očekivanog, težina se smanjuje (cilj se povećava).
+
+Jednačina se može napisati ovako:
+
+----
+Novi cilj = Stari cilj * (Stvarno vreme poslednjih 2016 blokova / 20160 minuta)
+----
+
+<<retarget_code>> prikazuje kod koji se koristi u Bitcoin Core klijentu.
+
+[[retarget_code]]
+.Iznova postavljanje cilja za Proof-of-Work&#x2014;CalculateNextWorkRequired() u pow.cpp
+====
+[source,cpp]
+----
+
+   // Korak podešavanja granice
+    int64_t nActualTimespan = pindexLast->GetBlockTime() - nFirstBlockTime;
+    LogPrintf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
+    if (nActualTimespan < params.nPowTargetTimespan/4)
+        nActualTimespan = params.nPowTargetTimespan/4;
+    if (nActualTimespan > params.nPowTargetTimespan*4)
+        nActualTimespan = params.nPowTargetTimespan*4;
+
+    // Iznova postavljanje cilja
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    arith_uint256 bnNew;
+    arith_uint256 bnOld;
+    bnNew.SetCompact(pindexLast->nBits);
+    bnOld = bnNew;
+    bnNew *= nActualTimespan;
+    bnNew /= params.nPowTargetTimespan;
+
+    if (bnNew > bnPowLimit)
+        bnNew = bnPowLimit;
+
+----
+====
+
+[NOTE]
+====
+Iako se kalibracija cilja dešava na svakih 2.016 blokova, zbog off-by-one greške kod originalnog klijenta Bitcoin Core-a, ona se zasniva na ukupnom vremenu prethodnih 2.015 blokova (ne 2.016 kako bi trebalo da bude), što dovodi do toga da su iznova postavljeni ciljevi skloni većim težinama za 0,05%.
+====
+
+
+Parametri +Interval+ (2.016 blokova) i +TargetTimespan+ (dve nedelje kao 1.209.600 sekunde) su definisani u _chainparams.cpp_.
+
+Da bi se izbegla ekstremna nestabilnost u težini, iznova prilagođavanje cilja mora biti manje od faktora četiri (4) po ciklusu. Ako je potrebno podešavanje cilja većeg od faktora četiri, podešava se sa faktorom 4, a ne više. Svako dalje prilagođavanje biće izvršeno u narednom periodu kod novog postavljanja cilja, jer će neravnoteža ostati u narednih 2.016 blokova. Zbog toga bi velike razlike između snage hešovanja i težina mogle da potraju nekoliko ciklusa od 2.016 blokova da se uravnoteže.
+
+[TIP]
+====
+Težina rudarenja bitkoin bloka iznosi otprilike '10 minuta obrade' za celu mrežu, na osnovu vremena koje je bilo potrebno da se rudari prethodnih 2.016 blokova, prilagođenih na svakih 2.016 blokova. To se postiže spuštanjem ili podizanjem cilja.
+====
+
+Imajte na umu da je cilj nezavisan u broju transakcija ili vrednosti transakcija. To znači da je količina snage hešovanja i samim tim električna energija potrošena za osiguranje bitkoina takođe u potpunosti nezavisna od broja transakcija. Bitkoin se može povećati, postići šire usvajanje i ostati siguran bez ikakvog povećanja snage hešovanja sa današnjeg nivoa. Povećanje snage hešovanja predstavlja tržišne snage kako novi rudari ulaze na tržište da bi se takmičili za nagradu. Sve dok je dovoljno snage hešovanja pod kontrolom rudara koji se pošteno ponašaju u potrazi za nagradom, dovoljno je da spreče napade "preuzimanja", a samim tim je i dovoljno da osiguraju bitkoin.
+
+Težina rudarenja usko je povezana sa troškovima električne energije i vrednošću bitkoina u odnosu na valutu koja se koristi za plaćanje električne energije. Rudarski sistemi visokih performansi su efikasni koliko je to moguće pri trenutnoj proizvodnji silicijuma, pretvarajući električnu energiju u računanje hešovanja po najvećoj mogućoj brzini. Cena jednog kilovat-sata električne energije u bitkoinu ima primarni uticaj na rudarskom tržištu, jer ona određuje isplativost rudarenja, a samim tim i podsticaje za ulazak ili izlazak sa tržišta rudarenja.((("", startref="targets10"))
+
+=== Uspešno rudarenje bloka
+
+((("mining and consensus", "mining the block", "successful completion")))((("use cases", "mining for bitcoin", id="jingtentwo")))Kao što smo videli ranije, Đingov čvor je konstruisao kandidatski blok i pripremio ga za rudarenje. Đing ima nekoliko hardverskih rudarskih uređaja sa integrisanim kolima specifičnim za aplikacije, gde stotine hiljada integrisanih kola paralelno pokreću algoritam SHA256 neverovatnomm brzinom. Mnoge od ovih specijalizovanih mašina povezane su sa njegovim rudarskim čvorom preko USB-a ili lokalne mreže. Dalje, rudarski čvor koji radi na Đingovom desktopu računara prenosi zaglavlje bloka svom rudarskom hardveru, koji počinje testirati tri biliona nonce-a u sekundi. Pošto je nonce samo 32 bita, nakon što iscrpi sve mogućnosti (oko 4 milijarde), rudarski hardver menja zaglavlje bloka (podešavajući dodatni prostor ili vremenski pečat coinbase-a) i resetuje brojač bez razmišljanja, testirajući nove kombinacije.
+
+Skoro 11 minuta nakon što je započeo sa rudarskim blokom 277.316, jedna od hardverskih rudarskih mašina pronalazi rešenje i šalje ga nazad u rudarski čvor.
+
+Kada se ubaci u zaglavlje bloka, nonce 924.591.752 stvara blok heš:
+
+----
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+----
+
+što je manje od cilja:
+
+----
+0000000000000003A30C00000000000000000000000000000000000000000000
+----
+
+Đingov rudarski čvor odmah šalje blok svim svojim vršnjacima. Oni primaju, potvrđuju i zatim šire novi blok. Dok se blok širi po mreži, svaki čvor ga dodaje svojoj kopiji blokčejna, proširujući ga na novu visinu od 277.316 blokova. Dok rudarski čvorovi primaju i potvrđuju blok, oni odustaju od napora da pronađu blok na istoj visini i odmah počinju da računaju sledeći blok u lancu, koristeći Đingov blok kao "roditelja". Izgrađujući na vrhu novootkrivenog bloka Đinga, ostali rudari u osnovi "glasaju" svojom rudarskom snagom i podržavaju Đingov blok i lanac koji on širi.
+
+U sledećem odeljku ćemo videti postupak koji svaki čvor koristi za potvrđivanje bloka i biranje najdužeg lanca, stvarajući konsenzus koji formira decentralizovani blokčejn.((("", startref="MACmining10")))((("", startref="jingtentwo")))
+
+=== Validiranje novog bloka
+
+((("mining and consensus", "new block validation")))((("blocks", "new block validation")))((("validation")))Treći korak u mehanizmu konsenzusa bitkoina je nezavisna potvrda svakog novog bloka od strane svakog čvora na mreži. Kako se novorešeni blok kreće kroz mrežu, svaki čvor sprovodi niz testova kako bi ga potvrdio pre nego što ga proširi svojim vršnjacima. Ovo osigurava da se na mreži šire samo važeći blokovi. Nezavisna validacija takođe osigurava da se rudarima koji postupaju pošteno blokovi ubace u blokčejn, čime dobijaju nagradu. Rudarima koji se ponašaju nepošteno, blokovi se odbacuju i ne samo da gube nagradu, već i uzalud troše napor uložen u nalaženje rešenja za Proof-of.Work, čime nastaju troškovi električne energije bez naknade.
+
+Kada čvor primi novi blok, on će ga potvrditi tako što će ga proveriti u odnosu na dugu listu kriterijuma koje svi moraju ispuniti; u suprotnom, blok se odbacuje. Ovi kriterijumi se mogu videti u Bitcoin Core klijentu u funkcijama +CheckBlock+ i +CheckBlockHeader+ i uključuju:
+
+* Struktura blok podatka je sintaktički validna
+* Heš zaglavlja bloka je manji od cilja (sprovesti Proof-of-Work)
+* Vremenska oznaka bloka je manja od dva sata u budućnosti (dozvoljava vremenske greške)
+* Veličina bloka je u prihvatljivim granicama
+* Prva transakcija (i samo prva) je transakcija coinbase-a
+* Sve transakcije unutar bloka su validne pomoću kontrolne liste transakcija o kojoj je bilo reči u <<tx_verification>>
+
+Nezavisna provera svakog novog bloka od strane svakog čvora na mreži osigurava da rudari ne mogu da varaju. U prethodnim odeljcima videli smo kako rudari dobijaju da napišu transakciju koja im dodeljuje novi bitkoin stvoren u bloku i zatraže naknadu za transakcije. Zašto rudari sami sebi ne napišu transakciju za hiljadu bitkoina umesto ispravne nagrade? Zato što svaki čvor potvrđuje blokove prema istim pravilima. Nevažeća transakcija coinbase-a učinila bi ceo blok nevažećim, što bi rezultiralo odbacivanjem bloka, i samim tim ta transakcija nikada ne bi postala deo knjige. Rudari moraju da naprave savršeni blok, zasnovan na zajedničkim pravilima koje prate svi čvorovi, i  da ga rudare sa ispravnim rešenjem Proof-of-Work-a. Da bi to postigli, troše mnogo električne energije pri rudarenju, a ako varaju, gube svu struju i trud. To je razlog zašto je nezavisna validacija ključna komponenta decentralizovanog konsenzusa.
+
+=== Sastavljanje i biranje lanaca blokova
+
+((("mining and consensus", "assembling and selecting chains of blocks", id="MACassembling10")))((("blocks", "assembling and selecting chains of", id="Bassemble10")))Poslednji korak u mehanizmu decentralizovanog konsenzusa bitkoina je sastavljanje blokova u lance i biranje lanca sa najviše Proof-of.Work-a. Jednom kada čvor potvrdi novi blok, pokušaće da sastavi lanac povezivanjem bloka sa postojećim blokčejnom/lancem blokova.
+
+Čvorovi održavaju tri skupa blokova: one koji su povezani sa glavnim blokčejnom, one koji formiraju grane od glavnog blokčejna (sekundarni lanci), i na kraju, blokove koji nemaju poznatog roditelja u poznatim lancima (orphan). Nevažeći blokovi se odbacuju čim propadne neki od kriterijuma za potvrdu, i zbog toga nisu uključeni ni u jedan lanac.
+
+"Glavni lanac" u svakom trenutku, je bilo koji _validni_ lanac blokova koji ima kumulativni najveći Proof-of.Work povezan sa njim. U većini slučajeva to je i lanac sa najviše blokova u njemu, osim ako postoje dva lanca jednake dužine i jedan ima više Proof-of.Work-a. Glavni lanac će takođe imati grane sa blokovima koji su "braća i sestre" blokova na glavnom lancu. Ovi blokovi su validni, ali nisu deo glavnog lanca. Oni se čuvaju za buduću upotrebu, u slučaju da jedan od tih lanaca nadmaši glavni lanac u radu. U sledećem odeljku (<<forks>>), videćemo kako nastaju sekundarni lanci kao rezultat gotovo istovremenog rudarenja blokova na istoj visini.
+
+Kad se primi novi blok, čvor će pokušati da ga ubaci u postojeći blok. Čvor će tražiti polje "prethodnog heša bloka", što je referenca na roditeljski blok. Zatim će čvor pokušati da pronađe tog roditelja u postojećem blokčejnu. Većinu vremena roditelj će biti "vrh" glavnog lanca, što znači da ovaj novi blok proširuje glavni lanac. Na primer, novi blok 277.316 ima referencu na heš svog roditeljskog bloka 277.315. Većina čvorova koji prime 277.316 već će imati blok 277.315 kao vrh svog glavnog lanca i zato će povezati novi blok i proširiti taj lanac.
+
+Ponekad, kao što ćemo videti u <<forks>>, novi blok proširuje lanac koji nije glavni lanac. U tom slučaju, čvor će prikačiti novi blok na sekundarni lanac kog proširuje, a zatim uporediti rad sekundarnog lanca sa glavnim lancem. Ako sekundarni lanac ima više kumulativnog rada od glavnog lanca, čvor će _iznova konvergirati_ na sekundarni lanac, što znači da će odabrati sekundarni lanac kao svoj novi glavni lanac, čineći stari glavni lanac sekundarnim lancem. Ako je čvor rudar, sada će konstruisati blok koji proširuje ovaj novi, duži, lanac.
+
+Ako je primljen validni blok i roditelj nije pronađen u postojećim lancima, taj se blok smatra za "orphan" (siroče). Oni (orphans) se smeštaju u orphan block pool-ove gde će ostati sve dok se roditelj ne primi. Jednom kada roditelj bude primljen i povezan u postojeće lance, orphan se može izvući iz orphan pool-a i povezati sa roditeljem, čineći ga delom lanca. Orphan-i se obično pojavljaju kada su dva bloka koja su rudarena u kratkom razmaku jedan od drugog primljena obrnutim redosledom (dete pre roditelja).
+
+Biranjem važećeg lanca najvećeg kumulativnog rada, svi čvorovi na kraju postižu konsenzus na celoj mreži. Privremene razlike između lanaca konačno se rešavaju kako se dodaje više rada, proširujući jedan od mogućih lanaca. Rudarski čvorovi "glasaju" svojom rudarskom snagom birajući koji će lanac produžiti rudareći sledeći blok. Kada rudare novi blok i produže lanac, novi blok predstavlja njihov glas.
+
+U sledećem odeljku ćemo pogledati kako se razlike između lanaca koji se takmiče (forks) rešavaju nezavisnim izborom lanca najvećeg kumulativnog rada.
+
+[[forks]]
+==== Blokčejn fork-ovi
+
+((("mining and consensus", "assembling and selecting chains of blocks", "blockchain forks")))((("blockchain (the)", "blockchain forks", id="BCTfork10")))((("forks", "blockchain fork events", id="forks10")))Pošto je blokčejn decentralizovana struktura podataka, različite kopije nisu uvek dosledne. Blokovi mogu stići u različite čvorove u različito vreme, uzrokujući da čvorovi imaju različitu perspektivu blokčejna. Da bi se to rešilo, svaki čvor uvek bira i pokušava da proširi lanac blokova koji predstavlja najviše Proof-of.Work-a, takođe poznat kao najduži lanac ili lanac najvećeg kumulativnog rada. Sabiranjem rada zableženog u svakom bloku u lancu, čvor može izračunati ukupnu količinu rada koja je utrošena za stvaranje tog lanca. Sve dok svi čvorovi biraju lanac najvećeg kumulativnog rada, globalna bitkoin mreža na kraju teži stabilnom stanju. Fork-ovi se pojavljuju kao privremene nedoslednosti između verzija blokčejna, koje se konačno rešavaju ponovnom konvergencijom (približavanjem), jer se više blokova dodaje u jedan od fork-ova.
+
+[TIP]
+====
+Fork-ovi blokčejna opisani u ovom odeljku javljaju se prirodno kao posledica kašnjenja prenosa u globalnoj mreži. Razmotrićemo kasnije u ovom poglavlju i namerno izazvane fork-ove.
+====
+
+U narednih nekoliko dijagrama pratimo napredak događaja "fork" širom mreže. Dijagram predstavlja pojednostavljeno predstavljanje bitkoin mreže. Za ilustraciju, različiti blokovi su prikazani u različitim oblicima (zvezda, trougao, obrnuti trougao, romb), koji se šire mrežom. Svaki čvor u mreži predstavljen je u obliku kruga.
+
+Svaki čvor ima svoju perspektivu globalnog blokčejna. Kako svaki čvor prima blokove od svojih suseda, on ažurira sopstvenu kopiju blokčejna birajući lanac najvećeg kumulativnog rada. Radi ilustracije, svaki čvor sadrži oblik koji predstavlja blok za koji veruje da je trenutno vrh glavnog lanca. Dakle, ako vidite oblik zvezde u čvoru, to znači da je blok zvezda vrh glavnog lanca, što se tiče tog čvora.
+
+U prvom dijagramu (<<fork1>>), mreža ima objedinjenu perspektivu blokčejna, sa blokom zvezde kao vrhom glavnog lanca.
+
+[[fork1]]
+[role="smallereighty"]
+.Pre fork-a&#x2014;svi čvorovi imaju istu perspektivu
+image::images/mbc2_1002.png["Pre fork-a - svi čvorovi imaju istu perspektivu"]
+
+"Fork" se javlja kad god se dva kandidatska bloka takmiče da formiraju najduži blokčejn. To se događa u normalnim uslovima kada dva rudara reše algoritam Proof-of-Work u kratkom vremenskom periodu jedan od drugog. Kako oba rudara otkriju rešenje za svoj kandidatski blok, oni odmah emituju sopstveni "pobednički" blok neposrednim komšijama koji započinju širenje bloka širom mreže. Svaki čvor koji primi važeći blok ugradiće ga u svoj blokčejn, proširujući blokčejn za jedan blok. Ako taj čvor kasnije vidi drugi kandidatski blok koji proširuje istog roditelja, on povezuje drugog kandidata u sekundarnom lancu. Kao rezultat toga, neki čvorovi će prvo "videti" jedan kandidatski blok, dok će drugi čvorovi videti drugi kandidatski blok i pojaviće se dve konkurentske verzije blokčejna.
+
+U <<fork2>>, vidimo dva rudara (čvor X i čvor Y) koji gotovo istovremeno rudare dva različita bloka. Oba ova bloka su deca bloka zvezde i produžuju lanac gradeći povrh bloka zvezde. Da bismo ga lakše pratili, jedan je prikazan kao blok trougla koji potiče iz čvora X, a drugi je prikazan kao blok obrnutog trougla koji potiče iz čvora Y.
+
+[[fork2]]
+[role="smallersixty"]
+.Vizualizacija događaja blokčejn fork-a: dva bloka pronađena istovremeno
+image::images/mbc2_1003.png["Vizualizacija događaja fork-a blokčejna: dva bloka pronađena istovremeno"]
+
+Pretpostavimo, na primer, da rudarski čvor X pronalazi rešenje Proof-of-Work-a za blok "trougao" koji proširuje blokčejn, građeći na vrhu roditeljskog bloka "zvezda". Skoro istovremeno, rudarski čvor Y koji je takođe produžavao lanac od bloka "zvezda", pronalazi rešenje za blok "obrnuti trougao", njegov kandidatski blok. Postoje dva moguća bloka; jedan nazivamo "trougao", koji potiče iz čvora X-a; a drugi zovemo "obrnuti trougao", koji potiče iz čvora Y-a. Oba bloka su validna, oba bloka sadrže validno rešenje Proof-of-Work-a, i oba bloka proširuju istog roditelja (blok "zvezdu"). Oba bloka verovatno sadrže većinu istih transakcija, sa samo možda nekoliko razlika u redosledu transakcija.
+
+Kako se dva bloka šire, neki čvorovi prvo primaju blok "trougao", a neki prvi primaju blok "obrnuti trougao". Kao što je prikazano u <<fork3>>, mreža se deli na dve različite perspektive blokčejna; na jednoj strani blok trougla je na vrhu, a na drugoj je obrnuti trougao.
+
+[[fork3]]
+[role="smallersixty"]
+.Vizualizacija događaja blokčejn fork-a: dva bloka se šire i razdvajaju mrežu
+image::images/mbc2_1004.png["Vizualizacija događaja fork-a blokčejna: dva bloka se šire, razdvajajući mrežu"]
+
+U dijagramu je nasumično izabrani "čvor X" prvi primio blok trougla i produžio lanac zvezde sa njim. Čvor X je izabrao lanac sa blokom "trougla" kao glavni lanac. Kasnije je čvor X takođe dobio blok "obrnuti trougao". Pošto je stigao drugi, pretpostavlja se da je "izgubio" trku. Ipak, blok sa "obrnutim trouglom" se ne odbacuje. Povezan je sa roditeljskim blokom "zvezda" i formira sekundarni lanac. Iako čvor X pretpostavlja da je pravilno odabrao pobednički lanac, on zadržava "gubitnički" lanac da bi imao potrebne informacije za ponovno uspostavljanje ako "gubitnički" lanac završi kao "pobednički".
+
+S druge strane mreže, čvor Y stvara blokčejn na osnovu sopstvenog viđenja sleda događaja. Prvo je dobio "obrnuti trougao" i izabrao taj lanac kao "pobednika". Kad je kasnije primio blok "trougao", povezao ga je sa roditeljskim blokom "zvezda" kao sekundarni lanac.
+
+Nijedna strana nije "tačna" ili "pogrešna". Obe su validne perspektive blokčejna. Jedino će kasnije prevladati jedan, zasnovan na tome kako se ova dva konkurentska lanca proširuju dodatnim radom.
+
+Rudarski čvorovi čija perspektiva podseća na čvor X odmah će početi sa rudarenjem novog kandidatskog bloka koji proširuje lanac sa "trouglom" na vrhu. Povezujući "trougao" kao roditelja svog kandidatskog bloka, oni glasaju svojom snagom hešovanja. Njihovo glasanje podržava lanac koji su izabrali za glavni lanac.
+
+Bilo koji rudarski čvor čija perspektiva liči na čvor Y počeće da gradi kandidatski čvor sa "obrnutim trouglom" kao roditeljem, proširujući lanac za koji smatraju da je glavni lanac. I tako, trka počinje ponovo.
+
+Fork-ovi se gotovo uvek rešavaju unutar jednog bloka. Dok je deo snage hešovanja mreže usmeren na građenje na vrhu "trougla" kao roditelja, drugi deo snage hešovanja je usmeren na izgradnju na "obrnutom trouglu". Čak i ako se snaga hešovanja gotovo ravnomerno raspodeli, verovatno će jedan skup rudara pronaći rešenje i proširiti ga pre nego što to uradi drugi skup rudara. Recimo, na primer, da rudari koji grade na vrhu "trougla" pronađu novi blok "romb" koji produžava lanac (npr. zvezda-trougao-romb). Oni odmah stvaraju taj novi blok i cela mreža ga vidi kao validno rešenje kao što je prikazano u <<fork4>>.
+
+
+Svi čvorovi koji su izabrali "trougao" kao pobednika u prethodnom krugu jednostavno će produžiti lanac za još jedan blok. Čvorovi koji su za pobednika izabrali "obrnuti trougao", sada će videti dva lanca: trougao zvezda-trougao-romb i zvezda-obrnuti-trougao. Lanac zvezda-trougao-romb sada je duži (više kumulativnog rada) od drugog lanca. Kao rezultat toga, ti čvorovi će postaviti lanac zvezda-trougao-romb kao glavni lanac i promeniti zvezda-obrnuti-trougao lanac u sekundarni lanac, kao što je prikazano u <<fork5>>. Ovo je ponovljena konvergencija lanca, jer su ti čvorovi primorani da revidiraju svoj pogled na blokčejn kako bi uključili nove dokaze o dužem lancu. Svi rudari koji rade na produženju lanca zvezda-obrnuti-trougao prestaće to da rade, jer je njihov kandidatski blok "orphan", a njegov nadređeni "obrnuti trougao" više nije na najdužem lancu. Transakcije unutar "obrnutog trougla" koje nisu unutar "trougla" ponovo se ubacuju u mempool radi uključivanja u sledeći blok i postaju deo glavnog lanca. Čitava mreža se ponovo konvergira na blokčejn zvezda-trougao-romb, sa "rombom" kao poslednjim blokom u lancu. Svi rudari odmah počinju sa radom na kandidatskim blokovima koji referenciraju na "romb" kao na svog roditelja kako bi proširili lanac zvezda-trougao-romb.
+
+[[fork4]]
+[role="smallereighty"]
+.Vizualizacija blokčejn fork-a: novi blok proširuje jedan fork, rekonvergirajući mrežu
+image::images/mbc2_1005.png["Vizualizacija blokčejn fork-a: novi blok proširuje jedan fork"]
+
+[[fork5]]
+[role="smallereighty"]
+.Vizualizacija blokčejn fork-a: mreža ponovo konvergira na novom najdužem lancu
+image::images/mbc2_1006.png["Vizualizacija blokčejn fork-a: mreža ponovo konvergira na novom najdužem lancu"]
+
+Teoretski je moguće da se fork proširi na dva bloka, ako rudari gotovo istovremeno pronađu dva bloka na suprotnim "stranama" prethodnog fork-a. Međutim, vrlo mala je šansa da se to dogodi. Dok se jednosmerni fork može pojaviti svakog dana, fork sa dva bloka javlja se najviše jednom u nekoliko nedelja.
+
+Bitkoinov interval blokova od 10 minuta predstavlja kompromis u dizajnu između brzog vremena potvrde (izmirenja transakcija) i verovatnoće pojave fork-a. Brže vreme blokova učiniće transakcije bržim, što češće dovodi do blokčejn fork-ova, dok sporije vreme bloka smanjuje broj fork-ova, ali usporava izmirivanje transakcija.((("", startref="Bassemble10")))((("", startref="MACassembling10")))((("", startref="forks10")))((("", startref="BCTfork10")))
+
+=== Rudarenje i trka hešovanja
+
+((("mining and consensus", "hashing power race", id="MAChash10")))Bitkoin rudarenje je izuzetno kompetitivna industrija. Snaga hešovanja povećavala se eksponencijalno svake godine postojanja bitkoina. Nekoliko godina rast je bio vidljiv u potpuno promenjenoj tehnologiji, kao što su bile 2010. i 2011. godine kada su mnogi rudari prešli sa korišćenja CPU rudarenja u rudarenje GPU-a i rudarenje FPGA (Field Programmable Gate Array). 2013. godine uvođenje ASIC rudarenja je dovelo do još jednog ogromnog skoka u rudarskoj snazi postavljanjem funkcije SHA256 direktno na silikonske čipove specijalizovane za potrebe rudarenja. Prvi takvi čipovi mogli su da isporuče više rudarske snage u jednoj kutiji, nego celokupna bitkoin mreža u 2010. godini.
+
+Sledeća lista prikazuje ukupnu snagu hešovanja bitkoin mreže tokom prvih osam godina rada:
+
+2009:: 0.5 MH/sec–8 MH/sec (16× growth)
+2010:: 8 MH/sec–116 GH/sec (14,500× growth)
+2011:: 116 GH/sec–9 TH/sec (78× growth)
+2012:: 9 TH/sec–23 TH/sec (2.5× growth)
+2013:: 23 TH/sec–10 PH/sec (450× growth)
+2014:: 10 PH/sec–300 PH/sec (30× growth)
+2015:: 300 PH/sec-800 PH/sec (2.66× growth)
+2016:: 800 PH/sec-2.5 EH/sec (3.12× growth)
+
+U tabeli u <<network_hashing_power>>, možemo videti da se snaga hešovanja bitkoin mreže povećala u poslednje dve godine. Kao što vidite, takmičenje između rudara i rast bitkoina doveli su do eksponencijalnog povećanja snage hešovanja (ukupnih hešova u sekundi širom mreže).
+
+[[network_hashing_power]]
+.Ukupna snaga hešovanja, terahešovi u sekundi (TH/sec)
+image::images/mbc2_1007.png["NetworkHashingRate"]
+
+Kako je količina snage hešovanja primenjena za rudarenje bitkoina eksplodirala, težina se povećala kako bi je dostigla. Metrika težine u grafikonu prikazanom u <<bitcoin_difficulty>> meri se kao odnos trenutne težine u odnosu na minimalnu težinu (težinu prvog bloka).
+
+[[bitcoin_difficulty]]
+.Metrika težine rudarenja
+image::images/mbc2_1008.png["BitcoinDifficulty"]
+
+U poslednje dve godine, ASIC rudarski čipovi postaju sve gušći, približavajući se najrazvijenijem delu izrade silicijuma sa karakterističnom veličinom (rezolucijom) od 16 nanometara (nm). Trenutno, proizvođači ASIC-a imaju za cilj da prestignu proizvođače čipova opšte namene, dizajnirajući čipove veličine 14 nm, jer profitabilnost rudarenja pokreće ovu industriju brže od opštih računara. U procesu rudarenja bitkoina nije ostalo mnogo velikih skokova, jer je industrija došla do ivice Murovog zakona, koji predviđa da se gustina računanja udvostručuje otprilike svakih 18 meseci. Ipak, rudarska snaga mreže i dalje napreduje eksponencijalnim tempom jer se trka za čipove veće gustine podudara sa trkom za centre podataka sa većom gustinom u kojima se mogu rasporediti hiljade tih čipova. Ne radi se više o tome koliko rudarenja može da se urađi jednim čipom, već koliko čipova može da se uglavi u zgradu, a da i dalje ispušta toplotu i pruža odgovarajuću snagu.
+
+[[extra_nonce]]
+==== Rešenje dodatnog nonce-a
+
+((("nonce values")))Od 2012. godine, eksplozija bitkoina je evoluirala da bi se rešilo fundamentalno ograničenje u strukturi zaglavlja bloka. U prvim danima bitkoina, rudar je mogao da nađe blok ponavljanjem kroz nonce, sve dok rezultirajući heš nije ispod cilja. Kako se težina povećavala, rudari su često prelazili kroz sve četiri milijarde vrednosti nonce-a ne pronalazeći blok. Međutim, ovo je lako rešeno ažuriranjem vremenskog pečata bloka da bi se uračunalo proteklo vreme. Zato što je vremenski pečat deo zaglavlja, promena bi omogućila rudarima da ponavljaju vrednosti nonce-a sa različitim rezultatima. Jednom kada je rudarski hardver premašio 4 GH/sec, ovaj pristup je postao sve teži jer bi se nonce vrednosti iscrpile za manje od sekunde. Kako je ASIC rudarska oprema počela da pristiže a potom i nadmašuje brzinu jednog TH/sec, rudarskom softveru je trebalo više prostora za nonce vrednosti da bi se pronašli validni blokovi. Vremenski pečat bi se mogao malo produžiti, ali njegovo pomeranje previše u budućnost uzrokovalo bi da blok postane nevažeći. Potreban je novi izvor "promene" u zaglavlju bloka. Rešenje je bilo koristiti transakciju coinbase-a kao izvor dodatnih nonce-a. Pošto skripta coinbase-a može da čuva između 2 i 100 bajta podataka, rudari su počeli da koriste taj prostor kao dodatni prostor, omogućavajući im da istražuju mnogo veći opseg vrednosti zaglavlja bloka kako bi pronašli važeće blokove. Transakcija coinbase-a uključena je u Merkleovom stablu, što znači da će svaka promena skripte coinbase-a imati promenu Merkleovog korena. Osam bajtova dodatnog nonce-a, plus 4 bajta "standardnog" nonce-a, omogućavaju rudarima da istraže ukupno 2^96^ (8 praćeno sa 28 nula) mogućnosti _u sekundi_ bez potrebe za izmenom vremenskog pečata. Ako bi rudari u budućnosti mogli da prođu kroz sve ove mogućnosti, mogli bi da izmene vremenski pečat. Takođe postoji više prostora u skripti coinbase-a za buduće širenje dodatnog nonce prostora.
+
+[[mining_pools]]
+==== Rudarski pulovi
+
+((("mining pools", id="MACoverpool10")))((("mining pools", "benefits of")))U ovom izuzetno kompetitivnom okruženju, pojedini rudari koji rade sami (poznati i kao solo rudari) nemaju šansu. Verovatnoća da će naći blok da nadoknade troškove električne energije i hardvera je tako mala da predstavlja kockanje, poput igranja na lutriji. Ni najbrži potrošački sistem za rudarenje, ASIC, ne može da prati komercijalne sisteme koji slažu desetine hiljada čipova u džinovske magacine u blizini hidroelektrana. Rudari sada sarađuju kako bi formirali rudarske pulove, udružujući svoju snagu hešovanja i deleći nagradu među hiljadama učesnika. Učešćem u pulu, rudari dobijaju manji deo ukupne nagrade, ali obično ih nagrađuju svaki dan, smanjujući neizvesnost.
+
+Pogledajte konkretan primer. Pretpostavimo da je rudar kupio rudarski hardver sa kombinovanom brzinom hešovanja od 14.000 gigaheša u sekundi (GH/s) ili 14 TH/s. U 2017. godini ova oprema košta oko 2.500 USD. Hardver troši 1.375 vata (1,3 kV) električne energije tokom rada, 33 kV-sata dnevno, po ceni od 1 do 2 dolara dnevno po veoma niskim cenama električne energije. Na osnovu trenutne bitkon težine, rudar će samostalno moći da izrudari blok otprilike jednom u 4 godine. Kako smo došli do te verovatnoće? To je zasnovano na brzini hešovanja na nivou mreže od 3 EH/sec (u 2017. godini) i stopi rudara od 14 TH/sec:
+
+++++
+<ul class="simplelist">
+  <li>P = (14 * 10<sup>12</sup> / 3 * 10<sup>18</sup>) * 210.240 = 0.98</li>
+</ul>
+++++
+
+... gde je 210.240 broj blokova za četiri godine. Rudar ima 98% verovatnoće da nađe blok u periodu od četiri godine, na osnovu globalne stope heša na početku perioda.
+
+Ako rudar nađe jedan blok u tom vremenskom okviru, isplata od 12,5 bitkoina, otprilike 1000 dolara po bitkoinu, rezultiraće jednom isplatom od 12.500 USD, što će doneti neto dobitak od oko 7.000 USD. Međutim, šansa za pronalazak bloka u četvorogodišnjem periodu zavisi od sreće rudara. Za četiri godine mogao bi da nađe dva bloka i napravi veoma veliku zaradu. A može da ne nađe blok ni za pet godina i da pretrpi veći finansijski gubitak. Što je još gore, težina algoritma za bitkoinov Proof-of-Work verovatno će znatno porasti tokom tog perioda, uz trenutnu stopu rasta moći heširanja, što znači da rudar ima najviše godinu dana da izvuče svoju investiciju hardvera pre nego što zastari, a koja mora da se zameni moćnijim hardverom za rudarenje. Ako ovaj rudar učestvuje u rudarskom pulu, umesto da čeka događaj koji se ponavlja svake četiri godine i dobije 12.500 dolara/umesto da čeka na božji dar koji mu donosi 12.500 dolara jednom u četiri godine, moći će da zarađuje otprilike od 50 do 60 dolara nedeljno. Redovne isplate iz rudarskog pula pomoći će mu da vremenom amortizuje troškove hardvera i struje, a da ne preuzme ogroman rizik. Hardver će zastareti za jednu ili dve godine i rizik je i dalje visok, ali je bar prihod u tom periodu redovan i pouzdan. To finansijski ima smisla samo pri veoma niskim troškovima električne energije (manjim od jednog centa po kV-satu) i samo u veoma velikoj razmeri.
+
+Rudarski pulovi koordinišu stotine ili hiljade rudara, preko specijalizovanih protokola za rudarske pulove. Pojedini rudari konfigurišu svoju rudarsku opremu za povezivanje sa serverom pula, nakon kreiranja računa sa pulom. Njihov rudarski hardver ostaje povezan sa serverom pula dok rudare, sinhronizujući njihove napore sa ostalim rudarima. Tako, rudari pula dele napor da izrudare blok, a zatim dele nagradu.
+
+Uspešni blokovi će nagradu pre platiti bitkoin adresi pula nego pojedinačnim rudarima. Server pula periodično će vršiti isplate na bitkoin adrese rudara, nakon što njihov udeo u nagradama dostigne određeni prag. Obično server pula naplaćuje procenat naknade od nagrade za pružanje usluge rudarskog pula.
+
+((("mining pools", "operation of")))Rudari koji učestvuju u pulu podelili su posao traženja rešenja za kandidatski blok i zaradili "udeo" za svoj doprinos u rudarenju. Rudarski pul postavlja veći cilj (manju težinu) za podelu zarade, obično više od 1.000 puta lakše od cilja bitkoin mreže. Kada neko iz pula uspešno izrudari blok, nagradu zarađuje pul, koju deli sa svim rudarima srazmerno udelu koji su imali u poslu.
+
+Pulovi su otvoreni za sve rudare, velike ili male, profesionalne ili amatere. Dakle, pul će imati neke učesnike sa jednom jedinom malom rudarskom mašinom, a druge sa garažama punim vrhunskog rudarskog hardvera. Neki će rudariti sa nekoliko desetina kilovata električne energije, drugi će upravljati centrom podataka koji troši megavat električne energije. Kako rudarski pul meri pojedinačne doprinose tako da se pravdeno raspodeljuju nagrade, bez mogućnosti varanja? Odgovor je da se koristi bitkoinov algoritam Proof-of-Work za merenje doprinosa svakog rudara pula, ali postavljen na manju težinu tako da čak i najmanji rudari pula osvoje udeo dovoljno često da bi im se isplatilo da doprinose pulu. Postavljanjem nižih težina za zaradu udela, pul meri količinu rada koji obavlja svaki rudar. Svaki put kada rudar pula nađe blok heš zaglavlja bloka koji je manji od cilja pula, on dokazuje da je uradio posao hešovanja da bi pronašao taj rezultat. Još važnije, rad na pronalaženju udela doprinosi, statistički merljivim načinom, ukupnim naporima da se pronađe heš niži od cilja bitkoin mreže. Hiljade rudara koji pokušavaju da pronađu hešove niske vrednosti na kraju će pronaći dovoljno nisku da zadovolje cilj bitkoin mreže.
+
+Vratimo se analogiji igre sa kockicama. Ako igrači kockica bacaju kockice sa ciljem da bace manje od četiri (ukupna težina u mreži), pul postavi lakši cilj, računajući koliko puta igrači pula uspeju da bace manje od osam. Kada igrači u pulu bace manje od osam (cilj pula), oni zarađuju akcije, ali ne pobeđuju u igri jer nisu postigli cilj igre (manje od četiri). Igrači u pulu mnogo će češće postizati lakši cilj pula, zarađujući redovne udele, čak i kada ne postignu teži cilj za pobedu u igri. Tu i tamo, jedan od igrača u pulu baciće kombinovani iznos kockica manji od četiri i pul će pobediti. Zatim, zarada može biti raspodeljena igračima iz pula na osnovu udela koji su zaradili. Iako cilj od osam ili manje nije bio dovoljan da bi se pobedilo, za igrače je bio pravedan način da se mere bacanja kockica, a može povremeno da baci iznos manji od četiri.
+
+Slično tome, rudarski pul će postaviti (veći i lakši) cilj pula koji će osigurati da pojedinačni rudar pula može često naći hešove blokova zaglavlja koji su manji od cilja pula, zarađujući udele nagrade. S vremena na vreme, jedan od ovih pokušaja će proizvesti heš bloka zaglavlja bloka koji je manji od cilja bitkoin mreže, što ga čini važećim blokom i čitav pul pobeđuje.
+
+===== Pulovi kojima se upravlja
+
+((("mining pools", "managed pools")))((("pool operators", seealso="mining pools")))Većinom rudarskih pulova se "upravlja", što znači da postoji kompanija ili pojedinac koji upravlja serverom pula. Vlasnik servera pula zove se _ operater pula (pool operator)_ i on naplaćuje rudarima pula procentualnu naknadu od zarade.
+
+Server pula pokreće specijalizovani softver i protokol pula za rudarenje koji koordinišu aktivnosti rudara pula. Server pula je takođe povezan sa jednim ili više punih bitkoin čvorova i ima direktan pristup celoj kopiji baze podataka blokčejna. To omogućava serveru pula da validira blokove i transakcije u ime rudara pula, oslobađajući ih tereta pokretanja punog čvora. Za rudare iz pula je važno da ovo razmotre, jer je za pun čvor potreban namenski računar sa najmanje 100 do 150 GB trajne memorije (disk) i najmanje 2 do 4 GB memorije (RAM). Pored toga, bitkoin softver koji radi na punom čvoru mora da se prati, održava i nadograđuje. Bilo koji prekid koji izazove nedostatak održavanja ili nedostatak resursa ići će na štetu isplativosti rudara. Za mnoge rudare, mogućnost da rudare bez pokretanja punog čvora je još jedna velika prednost pridruživanja pulu kojim se upravlja.
+
+Rudari pula povezuju se sa serverom pula koristeći protokol rudarenja poput Stratuma (STM) ili GetBlockTemplate (GBT). Stariji standard, koji se zove GetWork (GWK), uglavnom je zastareo od kraja 2012. godine, jer ne može da podrži rudarenje brzinom heša iznad 4 GH/s. I STM i GBT protokoli stvaraju _šablone (templates)_  blokova koji sadrže šablon zaglavlja kandidatskog bloka. Server pula konstruiše kandidatski blok agregiranjem transakcija, dodavanjem transakcije coinbase-a (sa dodatnim nonce prostorom), izračunavanjem Merkleovog korena i povezivanjem sa prethodnim hešom bloka. Zaglavlje kandidatskog bloka se onda šalje svakom rudaru pula kao šablon. Svaki rudar pula zatim rudari pomoću šablona bloka, na višem (lakšem) cilju od cilja bitkoin mreže i šalje sve uspešne rezultate nazad na server pula da bi zaradili svoje udele.
+
+===== Peer-to-Peer rudarski pul (P2Pool)
+
+((("mining pools", "peer-to-peer pools (P2Pool)")))((("peer-to-peer pools (P2Pool)")))Upravljani pulovi stvaraju mogućnost varanja od strane operatera pulova, koji mogu usmeriti napor pula ka duploj potrošnji transakcija ili poništavanju blokova (vidi <<consensus_attacks>>). Pored toga, centralizovani serveri pulova predstavljaju jedinstvenu tačku greške (single point of failure). Ako se server pula pokvari ili uspori DoS napadom, rudari pula ne mogu da rudare.  Da bi se rešili ovi problemi centralizacije, 2011. goine, predložena je i primenjena nova metoda rudarenja pula: P2Pool, vršnjački rudarski pul bez centralnog operatera.
+
+P2Pool funkcioniše decentralizujući funkcije servera pula, implementirajući paralelni sistem sličan blokčejnu koji se zove _lanac udela (share chain)_. Lanac udela je blokčejn koji radi na nižim težinama od bitkoin blokčejna. Lanac udela omogućava rudarima pula da sarađuju u decentralizovanom rudarskom pulu na lancu udela brzinom od jednog bloka udela na svakih 30 sekundi. Svaki od blokova u lancu udela beleži proporcionalnu nagradu za zarade rudara iz pula koji doprinose radu, noseći udele napred iz prethodnog bloka udela. Kada jedan od blokova udela takođe postigne cilj bitkoin mreže, on je širi i uključuje u bitkoin blokčejn nagrađujući sve rudare koji su radili sa udelima koje su prethodile pobedničkom bloku udela. U osnovi, umesto servera pula koji prati udele rudara i nagrada rudara pula, lanac udela omogućava svim rudarima pula da prate sve udele koristeći decentralizovani mehanizam konsenzusa poput mehanizma konsenzusa bitkoin blokčejna.
+
+Rudarenje P2Pool složenije je od rudarenja pula jer zahteva da rudari pula pokreću namenski računar sa dovoljno prostora na disku, memorije i internetske propusnosti da bi podržali puni bitkoin čvor i softver čvora P2Pool. P2Pool rudari povezuju rudarski hardver sa svojim lokalnim čvorom P2Pool koji simulira funkcije servera pula slanjem šablona blokova na rudarski hardver. Na P2Pool-u, pojedini rudari pula konstruišu sopstvene kandidatske blokove, objedinjujući transakcije slično kao i solo rudari, ali zatim sarađuju na lancu udela. P2Pool je hibridni pristup koji ima prednost mnogo detaljnijih isplata nego solo rudarenje, ali bez davanja prevelike kontrole operateru pula kao kod pulova kojima se upravlja.
+
+
+Iako P2Pool smanjuje koncentraciju snage operatera rudarskog pula, moguće je da je ranjiv na 51% napada na sam lanac udela. Mnogo šire prihvatanje P2Pool-a ne rešava problem napada sa 51% za sam bitkoin. Umesto toga, P2Pool čini bitkoin otpornijim, kao deo raznolikog rudarskog ekosistema.((("", startref="MAChash10")))((("", startref="MACoverpool10")))
+
+[[consensus_attacks]]
+=== Konsenzusni napadi
+
+((("mining and consensus", "consensus attacks", id="Cattack10")))((("security", "consensus attacks", id="Sconsens10")))Mehanizam konsenzusa bitkoina je, barem teoretski ranjiv na napad rudara (ili pulova) koji pokušavaju da iskoriste svoju snagu hešovanja za nepoštene ili destruktivne ciljeve. Kao što smo videli, mehanizam konsenzusa zavisi od većine rudara koji se pošteno ponašaju iz ličnog interesa. Međutim, ako rudar ili grupa rudara mogu da ostvare značajan udeo rudarske snage, oni mogu da napadnu mehanizam konsenzusa kako bi narušili bezbednost i dostupnost bitkoin mreže.
+
+Važno je napomenuti da napadi konsenzusa mogu uticati samo na budući konsenzus ili u najboljem slučaju na skoriju prošlost (desetine blokova). Knjiga bitkoina postaje sve nepromenljivija kako prolazi vreme. Dok se u teoriji fork (račvanje) može postići na bilo kojoj dubini, u praksi je potrebna velika računarska snaga za forsiranje vrlo dubokog fork-a, čineći stare blokove praktično nepromenljivim. Konsenzusni napadi takođe ne utiču na bezbednost privatnih ključeva i algoritma za potpisivanje (ECDSA). Napad konsenzusa ne može ukrasti bitkoin, trošiti bitkoin bez potpisa, preusmeriti bitkoin ili na drugi način promeniti prethodne transakcije ili vlasničke zapise. ((("denial-of-service attacks")))((("security", "denial-of-service attacks")))Konsenzusni napadi mogu da utiču samo na poslednje blokove i izazovu prekide u servisu za stvaranje budućih blokova.
+
+Jedan scenario napada protiv mehanizma konsenzusa naziva se "napad od 51%". U ovom scenariju, grupa rudara koja kontroliše većinu (51%) ukupne snage hešovanja, sprema se da napadne bitkoin. Sa sposobnošću da rudare većinu blokova, rudari koji napadaju mogu izazvati namerne "fork-ove" u blokčejnu i dvostruko potrošiti transakcije ili izvršiti DoS napade na određene transakcije ili adrese. Napadom fork-a/dvostruke potrošnje napadač uzrokuje da prethodno potvrđeni blokovi budu proglašeni nevažečim tako što pravi fork-ove ispod njih i ponovo ih konvergira u alternativnom lanacu. Sa dovoljno snage, napadač može da poništi šest ili više blokova u nizu, čineći da transakcije koje su bile smatrane nepromenljivim (šest potvrđivanja) postanu nevažeće. Imajte na umu da se dvostruka potrošnja može izvršiti samo na vlastitim transakcijama, za koje napadač može dati validan potpis. Dvostruko trošenje sopstvenih transakcija je profitabilno ako poništavajući transakciju napadač može da dobije nepovratnu razmenu plaćanja ili proizvod, a da ih ne plati.
+
+Ispitajmo praktični primer napada od 51%. U prvom poglavlju pogledali smo transakciju između ((("use cases", "buying coffee")))Alise i Boba za šolju kafe. Bob, vlasnik kafića, spreman je da prihvati plaćanje za šolju kafe bez čekanja na potvrdu (rudarenje u bloku), jer je rizik od dvostrukog trošenja za šolju kafe nizak u odnosu na pogodnost brzog servisa za kupce. To je slično praksi kafića koji prihvataju plaćanje kreditnom karticom bez potpisa za iznose ispod 25 dolara, jer je rizik povraćaja kreditne kartice nizak, dok su troškovi odlaganja transakcije radi dobijanja potpisa srazmerno veći. Za razliku od toga, prodaja skuplje stvari za bitkoin rizikuje napad dvostrukog trošenja, gde kupac emituje konkurentsku transakciju koja troši iste ulaze (UTXO) i otkazuje plaćanje trgovcu. Napad dvostruke potrošnje može se dogoditi na dva načina: pre nego što se transakcija potvrdi, ili ako napadač iskoristi blokčejn fork da poništi nekoliko blokova. Napad od 51% omogućava napadačima da dvostruko troše svoje transakcije u novom lancu, na taj način poništavajući odgovarajuću transakciju u starom lancu.
+
+U našem primeru, zlonamerni napadač Malori odlazi u ((("use cases", "retail sales", id="carolten")))Karolinu galeriju i kupuje prelepu triptih sliku koja prikazuje Satoši Nakamota kao Prometeja. Karol prodaje Maloriju slike "Velika Vatra" za 250.000 dolara u bitkoinu. Umesto da čeka šest ili više potvrda transakcije, Karol umotava i predaje Maloriju slike posle samo jedne potvrde. Malori radi sa saučesnikom Polom, koji upravlja velikim rudarskim pulom, on pokreće 51% napad čim se Malorijeva transakcija uključi u blok. Pol usmerava rudarski pul da iznova rudari istu visinu bloka kao i blok koji sadrži Malorijevu transakciju, zamenjujući Malorijevo plaćanje Karoli transakcijom koja dvostruko troši isti unos kao i Malorijeva uplata. Transakcija sa dvostrukom potrošnjom troši isti UTXO i vraća ga u Malorijov novčanik, umesto da ga uplati Karoli, u suštini omogućavajući Maloriju da zadrži bitkoin. Pol tada usmerava rudarski pul da rudari dodatni blok, kako bi lanac koji sadrži transakciju dvostruke potrošnje bio duži od prvobitnog lanca (izazivajući fork ispod bloka koji sadrži Malorijevu transakciju). Kada se blokčejn fork reši u korist novog (dužeg) lanca, dvostruko potrošena transakcija zamenjuje Karolinu prvobitnu uplatu. Karol sada nedostaju tri slike, a nema ni isplatu u bitkoinu. Kroz sve ove aktivnosti, učesnici u Polovom rudarskom pulu mogu da ostanu blago nesvesni pokušaja dvostruke potrošnje, jer oni rudare automatizovanim rudarima i ne mogu da nadgledaju svaku transakciju ni blok. ((("", startref="carolten")))
+
+((("confirmations", "of large-value transactions", secondary-sortas="large-value transactions")))Da bi se zaštitio od ove vrste napada, trgovac koji prodaje stvari velike vrednosti mora da sačeka najmanje šest potvrda pre davanja proizvoda kupcu. Alternativno, trgovac treba da koristi escrow račun za višestruki potpis, ponovo čekajući nekoliko potvrda nakon što je escrow račun finansiran. Što više potvrda prođe, teže je transakciju napraviti nevažećom sa napadom od 51%. Za stvari visoke vrednosti, plaćanje putem bitkoina i dalje će biti prikladno i efikasno, čak i ako kupac mora da čeka 24 sata na isporuku, što bi otprilike odgovaralo čekanju na 144 potvrde.
+
+Pored napada dvostruke potrošnje, drugi scenario napada konsenzusom je uskraćivanje usluge određenim učesnicima bitkoina (određenim bitkoin adresama). Napadač koji ima većinu rudarske snage može jednostavno ignorisati određene transakcije. Ako su uključene u blok koji je rudario drugi rudar, napadač može namerno napraviti fork i ponoviti rudarenje tog bloka, opet isključujući određene transakcije. Ova vrsta napada može rezultirati stalnim uskraćivanjem usluge protiv određene adrese ili skupa adresa sve dok napadač kontroliše većinu rudarske snage.
+
+Uprkos svom imenu, 51% scenario napada zapravo ne zahteva 51% snage hešovanja. U stvari, takav napad se može pokušati sa manjim procentom snage hešovanja. Prag od 51% je jednostavno nivo na kojem je takav napad gotovo garantovano uspešan. Napad konsenzusa u suštini je nadvlačenje konopca za sledeći blok i veća je verovatnoća da će "jača" grupa pobediti. Uz manje snage hešovanja, verovatnoća uspeha se smanjuje, jer drugi rudari kontrolišu stvaranje nekih blokova svojom "poštenom" rudarskom snagom. Jedan od načina za posmatranje je da što je veća moć napadača, to je duži fork koji može namerno da stvori, to je više blokova u bliskoj prošlosti koje može da učini nevažećim ili je to više blokova u budućnosti koje može da kontroliše. Grupe koje su istraživale sigurnost koristile su statističko modeliranje kako bi potvrdile da su moguće različite vrste konsenzusnih napada sa samo 30% snage hešovanja.
+
+Masivno povećanje ukupne snage hešovanja, navodno je učinilo bitkoin neosetljivim na napade jednog rudara. Ne postoji način da solo rudar kontroliše više od malog procenta ukupne rudarske snage. Međutim, centralizacija kontrole koju uzrokuju rudarski pulovi uvela je rizik napada zbog profita od strane operatera rudarskog pula. Operater pula u pulu kojim se upravlja kontroliše izgradnju kandidatskih blokova i takođe kontroliše koje su transakcije uključene. To daje operateru pula moć da isključi transakcije ili uvede transakcije dvostrukog trošenja. Ako se takva zloupotreba vlasti vrši ograničeno i suptilno, operater pula mogao bi ostvariti profit od napada konsenzusa, a da ne bude primećen.
+
+Međutim, nisu svi napadači motivisani profitom. Jedan od potencijalnih scenarija napada je gde napadač namerava da poremeti bitkoin mrežu bez mogućnosti profitiranja zbog takvih poremećaja. Zlonameran napad usmeren na sakaćenje bitkoina, zahteva ogromna ulaganja i prikriveno planiranje, ali mogao bi ga pokrenuti dobro finansirani napadač, kojeg najverovatnije sponzoriše država. Alternativno, dobro finansirani napadač može napasti konsenzus bitkoina istovremeno nabavljajući rudarski hardver, kompromitujući operatere pulova i napadajući ostale pulove uskraćivanjem usluge. Svi ovi scenariji su teoretski mogući, ali sve više nepraktični, jer ukupna snaga hešovanja bitkoin mreže i dalje eksponencijalno raste.
+
+Nesumnjivo, ozbiljan napad konsenzusa bi u kratkom roku narušio poverenje u bitkoin, što bi moglo izazvati značajan pad cena. Međutim, bitkoin mreža i softver se neprestano razvijaju, pa bi se napadi konsenzusa suočili sa trenutnim protivmerama od strane bitkoin zajednice, čineći bitkoin otpornijim.((("", startref="Cattack10")))((("", startref="MACattack10")))((("", startref="Sconsens10")))
+
+[[consensus_changes]]
+=== Promena pravila konsenzusa
+
+((("mining and consensus", "consensus rules", "changing", id="Crule10")))Pravila konsenzusa određuju validnost transakcija i blokova. Ova pravila su osnova za saradnju između svih bitkoin čvorova i odgovorna su za konvergenciju svih lokalnih perspektiva u jedinstveni blokčejn u celoj mreži.
+
+Iako su pravila konsenzusa kratkoročno nepromenljiva i moraju biti u skladu sa svim čvorovima, ona nisu dugoročno nepromenljiva. Da bi se razvio bitkoin sistem, pravila se moraju povremeno menjati kako bi se prilagodila novim funkcijama, poboljšanjima ili ispravkama greški. Za razliku od tradicionalnog razvoja softvera, međutim, nadogradnje na sistem konsenzusa su mnogo teže i zahtevaju koordinaciju između svih učesnika.
+
+
+[[hard_forks]]
+==== Hard fork-ovi (tvrde račve)
+((("forks", "changing consensus rules", id="forks10a")))((("forks", "changing consensus rules", "hard forks")))U <<forks>> smo videli kako se bitkoin mreža može nakratko odvojiti na dva dela mreže koji kratko vreme prate dve različite grane blokčejna. Videli smo kako se ovaj proces odvija prirodno, kao deo normalnog rada mreže i kako se mreža ponovo uspostavlja na zajedničkom blokčejnu nakon što se izrudari jedan ili više blokova.
+
+Postoji još jedan scenario u kojem mreža može da se odvoji u sledeća dva lanca: promena pravila konsenzusa. Ova vrsta fork-a naziva se _hard fork_, jer se nakon fork-a mreža ne preusmerava na jedan lanac. Umesto toga, dva lanca se razvijaju nezavisno. Hard fork-ovi se dešavaju kada deo mreže deluje u skladu sa drugačijim skupom konsenzusnih pravila od ostatka mreže. To se može dogoditi zbog greške ili zbog namerne promene u primeni pravila konsenzusa.
+
+Hard fork-ovi se mogu koristiti za promenu pravila konsenzusa, ali za njih je potrebna koordinacija između svih učesnika u sistemu. Čvorovi koji se ne nadograde na nova pravila konsenzusa ne mogu da učestvuju u mehanizmu konsenzusa i prisiljeni su na poseban lanac u trenutku hard fork-a. Dakle, promena koju je uveo hard fork može se smatrati "unapred nekompatibilnom" po tome što nenadograđeni sistemi više ne mogu obrađivati nova pravila konsenzusa.
+
+Ispitajmo mehaniku hard fork-a na konkretnom primeru.
+
+<<blockchainwithforks>> prikazuje blokčejn sa dva fork-a. Na visini bloka 4, javlja se fork sa jednim blokom. Ovo je vrsta spontanog fork-a koji smo videli u <<forks>>. Sa rudarenjem bloka 5, mreža se ponovo uspostavlja na jednom lancu i fork se rešava.
+
+[[blockchainwithforks]]
+.Blokčejn sa fork-ovima
+image::images/mbc2_1009.png[Blokčejn sa fork-ovima]
+
+Kasnije, međutim, na visini bloka 6, javlja se hard fork. Pretpostavimo da se nova implementacija klijenta pušta sa promenom pravila konsenzusa. Počevši od visine bloka 7, rudari koji pokreću ovu novu implementaciju prihvatiće novu vrstu digitalnog potpisa, nazovimo to "Smores" potpisom, koji nije zasnovan na ECDSA. Odmah nakon toga, čvor koji pokreće novu implementaciju kreira transakciju koja sadrži Smores potpis i rudar sa nadograđenim softverom rudari blok 7b koji sadrži ovu transakciju.
+
+Svaki čvor ili rudar koji nije nadogradio softver za proveru Smores potpisa sada ne može obraditi blok 7b. Iz njihove perspektive, i transakcija koja je sadržavala Smores potpis i blok 7b koji sadrži tu transakciju su nevažeći, jer ih procenjuju na osnovu starih pravila konsenzusa. Ovi čvorovi će odbaciti transakciju i blok i neće ih dalje širiti. Svi rudari koji koriste stara pravila neće prihvatiti blok 7b i nastaviće rudariti kandidatski blok čiji je roditelj blok 6. U stvari, rudari koji koriste stara pravila možda neće ni primiti blok 7b ako se svi čvorovi na koje su povezani takođe pridržavaju starih pravila i zato ne šire blok. Na kraju će moći rudariti blok 7a, koji je važeći po starim pravilima i ne sadrži nijednu transakciju sa Smores potpisima.
+
+Dva lanca se i dalje razilaze počevši od ove tačke. Rudari u lancu "b" nastaviće da prihvataju i rudare transakcije koje sadrže Smores potpise, dok će rudari na lancu "a" i dalje ignorisati ove transakcije. Čak i ako blok 8b ne sadrži transakcije potpisane Smores-om, rudari u lancu "a" ne mogu da ga obrade. Njima se čini da je to orphan, jer njegov roditelj "7" nije priznat kao validan blok.
+
+==== Hard fork-ovi: softver, mreža, rudarenje i lanac
+
+((("forks", "changing consensus rules", "software forks")))Za softverske inženjere, izraz "fork" ima drugo značenje, stvarajući konfuziju sa terminom "hard fork". U softveru sa otvorenim kodom pojavljuje se fork kada grupa programera odluči da sledi drugačiji put softvera i započne konkurentsku implementaciju projekta otvorenog koda. Već smo govorili o dve okolnosti koje mogu dovesti do hard fork-a: greška u pravilima konsenzusa i namerna izmena pravila konsenzusa. U slučaju namerne promene pravila konsenzusa, softverski fork prethodi hard fork-u. Međutim, da bi došlo do ove vrste hard fork-a, potrebno je razviti, usvojiti i pokrenuti novu softversku implementaciju pravila konsenzusa.
+
+Primeri softverskih fork-ova koji su pokušali da promene pravila konsenzusa uključuju Bitcoin XT, Bitcoin Classic i najnoviji Bitcoin Unlimited. Međutim, nijedan od ovih softverskih fork-ova nije rezultirao hard fork-om. Iako je softverski fork neophodni preduslov, on sam po sebi nije dovoljan za pojavljivanje hard fork-a. Da bi se došlo do hard fork-a, mora da se usvoji konkurentska implementacija i da se aktiviraju nova pravila od strane rudara, novčanika i posredničkih čvorova. Suprotno tome, postoje brojne alternativne implementacije Bitcoin Core-a, pa čak i softverski fork-ovi koji ne menjaju pravila konsenzusa i zabranjuju grešku, mogu istovremeno da postoje na mreži i  međusobno su kompatibilni, bez izazivanja hard forka.
+
+Pravila konsenzusa se mogu razlikovati na očigledne i izričite načine, u validaciji transakcija ili blokova. Pravila se takođe mogu razlikovati na suptilnije načine u primeni pravila konsenzusa, jer se primenjuju na bitkoin skripte ili kriptografske primitive kao digitalnog potpisa. Najzad, pravila konsenzusa se mogu razlikovati na nepredviđene načine zbog implicitnih ograničenja konsenzusa nametnutih sistemskim ograničenjima ili detaljima implementacije. Primer poslednjeg viđen je u neočekivanom hard fork-u u toku nadogradnje Bitcoin Core-a 0.7 na 0.8, zbog ograničenja u Berkeley DB implementaciji koja se koristi za skladištenje blokova.
+
+Hard fork možemo konceptualno zamisliti kako se razvija u četiri faze: softverski fork, mrežni fork, rudarski fork i fork lanca.
+
+Proces započinje kada programeri stvore alternativnu implementaciju klijenta, sa modifikovanim pravilima konsenzusa.
+
+Kada se ova implementacija fork-a primeni u mreži, određeni procenat rudara, korisnika novčanika i posrednih čvorova mogu usvojiti i pokrenuti ovu implementaciju. Dobijeni fork zavisi od toga da li se nova pravila konsenzusa odnose na blokove, transakcije ili neki drugi aspekt sistema. Ako se nova pravila konsenzusa odnose na transakcije, tada novčanik koji kreira transakciju prema novim pravilima može da se pripremi za mrežni fork, a zatim hard fork kada se transakcija rudari u jedan blok. Ako se nova pravila odnose na blokove, proces hard fork-a započeće kada se blok rudari po novim pravilima.
+
+Prvo, mreža će imati fork. Čvorovi zasnovani na originalnoj primeni pravila konsenzusa odbaciće sve transakcije i blokove koji se stvore prema novim pravilima. Zatim, čvorovi koji slede originalna pravila konsenzusa privremeno će zabraniti i isključiti sve čvorove koji im šalju ove nevažeće transakcije i blokove. Kao rezultat toga, mreža će se podeliti na dva dela: stari čvorovi ostaće povezani samo sa starim čvorovima, a novi čvorovi samo sa novim čvorovima. Jedna transakcija ili blok na osnovu novih pravila proširiće se kroz mrežu i rezultirati podelom u dve mreže.
+
+Jednom kada rudar pomoću novih pravila izrudari blok, rudarska snaga i lanac takođe će se odvojiti. Novi rudari će rudariti iznad novog bloka, dok će stari rudari rudariti poseban lanac na osnovu starih pravila. Zbog podeljene mreže rudari koji rade po različitim pravilima konsenzusa verovatno neće primati blokove jedni od drugih, jer su povezani u dve odvojene mreže.
+
+==== Rudari koji se razdvajaju i težina
+
+((("forks", "changing consensus rules", "diverging miners and difficulty")))Dok se rudari razdvajaju u rudarenju na dva različita lanca, snaga hešovanja se deli između lanaca. Snaga rudarenja se može podeliti u bilo kojoj proporciji između dva lanca. Nova pravila može pratiti samo manjina, ili velika većina rudarske snage.
+
+Pretpostavimo, na primer, razdvajanje 80%&#x2013;20%, pri čemu većina rudarske snage koristi nova konsenzusna pravila. Pretpostavimo i da se fork pojavljuje odmah nakon perioda iznova postavljanja cilja.
+
+Oba lanca bi nasledila težinu iz perioda novog postavljanja cilja. Nova pravila konsenzusa imala bi 80% prethodno raspoložive rudarske snage koja im je posvećena. Iz perspektive ovog lanca, rudarska snaga je naglo opala za 20% u odnosu na prethodni period. Blokovi će biti nađeni u proseku na svakih 12,5 minuta, što predstavlja 20% pada rudarske snage na raspolaganju za proširenje ovog lanca. Ova brzina izdavanja bloka će se nastaviti (zabranjivanjem bilo kakvih promena snage hešovanja) sve dok se 2016 blokova ne izrudari, što će trajati otprilike 25.200 minuta (sa 12,5 minuta po bloku), ili 17,5 dana. Nakon 17,5 dana uslediće usporavanje i težina će se prilagoditi (smanjiti za 20%) kako bi se ponovo proizveli blokovi od 10 minuta, na osnovu smanjene količine snage hešovanja u ovom lancu.
+
+Lanac manjine, koji rudari po starim pravilima sa samo 20% snage hešovanja, suočiće se sa mnogo težim zadatkom. Na ovom lancu blokovi će sada biti rudareni u proseku na svakih 50 minuta. Težina se neće prilagoditi još 2016 blokova, što će trajati 100.800 minuta, odnosno otprilike 10 nedelja. Ako pretpostavimo da je fiksni kapacitet po bloku, to će takođe rezultirati smanjenjem kapaciteta transakcije za faktor 5, jer je manje blokova po satu na raspolaganju za beleženje transakcija.
+
+==== Sporni hard fork-ovi
+
+((("forks", "changing consensus rules", "contentious hard forks")))((("hard forks")))Ovo je početak razvoja konsenzusnog softvera. Kao što je razvoj otvorenog koda promenio i metode i proizvode softvera i stvorio nove metodologije, nove alate i nove zajednice, razvoj konsenzusnog softvera predstavlja i novu granicu u računarskoj nauci. Izvan rasprava, eksperimenata i rasprave o putu razvoja bitkoina, videćemo nove razvojne alate, prakse, metodologije i zajednice.
+
+Hard fork-ovi se smatraju rizičnim jer prisiljavaju manjinu ili da se nadogradi ili da ostane u manjinskom lancu. Rizik od cepanja celog sistema na dva konkurentna sistema mnogi vide kao neprihvatljiv rizik. Kao rezultat toga, mnogi programeri nerado koriste mehanizam hard fork-a za primenu nadogradnji pravila konsenzusa, osim ako ne postoji skoro jednoglasna podrška cele mreže. Svi predlozi hard fork-a koji nemaju skoro jednoglasnu podršku smatraju se previše "spornim" da bi se isprobali bez rizika da se sistem podeli.
+
+Pitanje hard fork-ova veoma je kontraverzno u razvojnoj zajednici bitkoina, pogotovo što se odnosi na bilo koje predložene izmene pravila konsenzusa kojima se kontroliše ograničenje maksimalne veličine bloka. Neki programeri su protiv bilo kog oblika hard fork-a, smatrajući ga previše rizičnim. Drugi vide mehanizam hard fork-a kao suštinsko sredstvo za unapređenje pravila konsenzusa na način koji izbegava "tehnički dug (technical debt)" i pruža čist raskid sa prošlošću. Napokon, neki programeri vide hard fork-ove kao mehanizam koji bi trebalo koristiti retko, uz puno planiranja unapred i samo pod gotovo jednoglasnim konsenzusom.
+
+Već smo videli pojavu novih metodologija za rešavanje rizika hard fork-ova. U sledećem odeljku ćemo pogledati soft fork-ove, kao i BIP-34 i BIP-9 metode signalizacije i aktiviranja promena konsenzusa.
+
+==== Soft fork-ovi
+
+((("forks", "changing consensus rules", "soft forks")))((("soft forks", "defined")))Ne dovode sve promene pravila konsenzusa do hard fork-a. Samo konsenzusne promene koje nisu unapred kompatibilne uzrokuju fork. Ako se promena sprovede na takav način da neizmenjeni klijent i dalje vidi da je transakcija ili blok validan po prethodnim pravilima, promena se može dogoditi bez fork-a.
+
+Termin _soft fork_ uveden je da bi se ova metoda nadogradnje razlikovala od "hard fork-a". U praksi, soft fork uopšte nije fork. Soft fork je promena konsenzusnih pravila, koja je unapred kompatibilna i koja omogućava nenadograđenim klijentima da nastave da rade po konsenzusu sa novim pravilima.
+
+Jedan aspekt soft fork-a koji nije odmah očigledan je da se nadogradnje soft fork-a mogu koristiti samo za ograničavanje pravila konsenzusa, a ne za njihovo proširivanje. Da bi bile unapred kompatibilne, transakcije i blokovi kreirani po novim pravilima moraju biti važeći i po starim pravilima, ali ne i obrnuto. Nova pravila mogu ograničiti samo ono što je validno; u suprotnom, aktiviraće hard fork kada bude odbijen prema starim pravilima.
+
+Soft fork-ovi se mogu implementirati na više načina&#x2014;ovaj termin ne određuje specifičnu metodu, već skup metoda koje imaju jednu zajedničku stvar: ne zahtevaju da se svi čvorovi nadograde i ne teraju nenadograđene čvorove van konsenzusa.
+
+===== Soft fork-ovi redefinišu NOP kodove
+
+((("opcodes", "redefinition by soft forks")))((("soft forks", "redefinition of NOP codes")))U bitkoinu je implementiran veliki broj soft fork-ova, baziranih na ponovnoj interpretaciji NOP kodova. Bitcoin Script je imao deset kodova rezervisanih za buduću upotrebu, od NOP1 do NOP10. Prema pravilima konsenzusa, prisustvo ovih opcode-ova u skripti tumači se kao nula-potentni operater, što znači da nemaju efekta. Izvršenje se nastavlja nakon NOP kodova kao da ga nije bilo.
+
+Soft fork zato može da promeni semantiku NOP koda da bi joj dala novo značenje. Na primer, BIP-65 (+CHECKLOCKTIMEVERIFY+) reinterpretirao je NOP2 opcode. Klijenti koji primenjuju BIP-65 interpretiraju NOP2 kao +OP_CHECKLOCKTIMEVERIFY+ i nameću apsolutno pravilo konsenzusa zaključavanja za UTXO-e koji sadrže ovaj opcode u svojim skriptama za zaključavanje. Ova promena je soft fork, jer transakcija koja je validna pod BIP-65 važi i za bilo kog klijenta koji ne implementira (koji ne zna za) BIP-65. Starim klijentima skripta sadrži NOP kod koji se ignoriše.
+
+===== Drugi načini nadogradnje soft fork-a
+
+Reinterpretacija NOP kodova je istovremeno planirana i predstavlja očigledan mehanizam za nadogradnju konsenzusa. Međutim, nedavno je uveden još jedan mehanizam soft fork-ova koji se ne oslanja na NOP kodove za vrlo specifičnu vrstu promene konsenzusa. Ovo se detaljnije razmatra u <<segwit>>. Segwit je arhitektonska promena strukture transakcije koja pomera skriptu za otključavanje (svedoka) iz transakcije u spoljnu strukturu podataka (odvajajući je). Segwit je u početku zamišljen kao nadogradnja hard fork-a, pošto je modifikovao fundamentalnu strukturu (transakciju). U novembru 2015., programer koji je radio na Bitcoin Core-u predložio je mehanizam pomoću kojeg bi segwit mogao biti predstavljen kao soft fork. Mehanizam koji se koristi za to je modifikacija skripte za zaključavanje UTXO-a stvorene prema segwit pravilima, tako da neizmenjeni klijenti vide da je skripta za zaključavanje otkupljiva sa bilo kojom skriptom za otključavanje. Kao rezultat toga, segwit se može uvesti bez potrebe da se svaki čvor nadogradi ili odvoji od lanca: soft fork.
+
+Verovatno postoje i drugi mehanizmi, koji će se tek otkriti, a pomoću kojih nadogradnje mogu biti napravljene na unapred kompatibilan način kao soft fork.
+
+==== Kritike soft fork-ova
+
+((("forks", "changing consensus rules", "soft fork drawbacks")))((("soft forks", "drawbacks of")))Soft fork-ovi zasnovani na NOP-kodovima su relativno nekontroverzni. NOP kodovi stavljeni su u Bitcoin Script-i sa eksplicitnim ciljem da omoguće nedisruptivne nadogradnje.
+
+Međutim, mnogi programeri su zabrinuti da druge metode nadogradnje soft fork-ova dovode do neprihvatljivih kompromisa. Uobičajne kritike promena soft fork-ova uključuju:
+
+Tehnički dug:: Pošto su soft fork-ovi tehnički složeniji od nadogradnje hard fork-a, oni uvode _tehnički dug_, izraz koji se odnosi na povećanje budućih troškova održavanja koda zbog dizajnerskih kompromisa napravljenih u prošlosti. Složenost koda zauzvrat povećava verovatnoću grešaka i sigurnosnih ranjivosti.
+
+Opuštanje validacije: Nepromenjeni klijenti vide transakcije kao validne, ne procenjujući promenjena pravila konsenzusa. U stvari, nepromenjeni klijenti ne validiraju koristeći čitav niz pravila konsenzusa, jer su slepi za nova pravila. Ovo se odnosi na nadogradnje na bazi NOP-a, kao i ostale softverske nadogradnje.
+
+Nepovratne nadogradnje:: Zato što soft fork-ovi stvaraju transakcije sa dodatnim konsenzusnim ograničenjima, oni u praksi postaju nepovratne nadogradnje. Ako bi se soft fork ukinuo posle aktiviranja, svaka transakcija stvorena prema novim pravilima može dovesti do gubitka sredstava po starim pravilima. Na primer, ako se CLTV transakcija procenjuje prema starim pravilima, ne postoji ograničenje vremenske brave i može se potrošiti bilo kad. Zato kritičari tvrde da bi neuspeli soft fork koji je morao da se preokrene zbog greške gotovo sigurno doveo do gubitka sredstava.((("", startref="Crule10")))
+
+[[softforksignaling]]
+=== Signalizacija soft fork-a sa verzijom bloka
+
+((("forks", "changing consensus rules", "soft fork activation")))((("soft forks", "activation")))Kako soft fork-ovi omogućavaju neizmenjenim klijentima da nastave da rade u okviru konsenzusa, mehanizam za "aktiviranje" soft forka je da rudari signaliziraju spremnost: većina rudara se mora složiti da su spremni i voljni da sprovedu nova pravila konsenzusa. Da bi uskladili svoje akcije, postoji mehanizam signalizacije koji im omogućava da pokažu podršku za promenu pravila konsenzusa. Ovaj mehanizam je uveden aktiviranjem BIP-34 marta 2013. godine i zamenjen aktivacijom BIP-9 u julu 2016. godine.
+
+==== BIP-34 signalizacija i aktiviranje
+
+((("bitcoin improvement proposals", "Block v2, Height in Coinbase (BIP-34)")))Prva implementacija, u BIP-34, koristila je polje blok verzije kako bi rudari mogli da signaliziraju spremnost za određeno pravilo promene konsenzusa. Pre BIP-34, verzija bloka je postavljena na "1" po _konvenciji_, a ne pod prisilom _konsenzusa_.
+
+BIP-34 je definisao promenu pravila konsenzusa koja je zahtevala da polje coinbase-a (ulaz) transakcije coinbase-a sadrži visinu bloka. Pre BIP-34, coinbase je mogla da sadrži bilo koje proizvoljne podatke koje bi rudari izabrali da uključe. Nakon aktiviranja BIP-34, validni blokovi su morali da sadrže određenu visinu bloka na početku coinbase-a i da se identifikuju brojem verzije koji je veći ili jednak "2".
+
+Da bi signalizirali promenu i aktiviranje BIP-34, rudari su verziju bloka postavili na "2" umesto "1". Ovo nije odmah učinilo blokove verzije "1" nevažećim. Jednom aktivirani blokovi verzije "1" postaju nevažeći i svi blokovi verzije "2" trebalo bi da sadrže visinu bloka u coinbase-u da bi bili validni.
+
+BIP-34 je definisao mehanizam za aktiviranje u dva koraka, zasnovan na validnom prozoru od 1.000 blokova. Rudar bi signalizirao svoju individualnu spremnost za BIP-34 konstruišući blokove sa "2" kao brojem verzije. Precizno govoreći, ovi blokovi još uvek nisu morali da se pridržavaju novog pravila konsenzusa o uključivanju visine bloka u transakciju coinbase-a, jer pravilo konsenzusa još nije bilo aktivirano. Pravila konsenzusa aktivirana su u dva koraka:
+
+* Ako je 75% (750 od poslednjih 1.000 blokova) označeno verzijom "2", blokovi verzije "2" moraju da sadrže visinu bloka u transakciji coinbase-a ili će biti odbačeni kao nevažeći. Blokove verzije "1" mreža i dalje prihvata i oni ne moraju da sadrže visinu bloka. U ovom periodu postoje i stara i nova pravila konsenzusa.
+
+* Kada su 95% blokova (950 od poslednjih 1.000 blokova) verzije "2", blokovi verzije "1" se više ne smatraju važećim. Blokovi verzije "2" su važeći samo ako sadrže visinu bloka u coinbase-u (kao prema prethodnom pragu). Nakon toga, svi blokovi moraju biti u skladu sa novim pravilima konsenzusa, a svi važeći blokovi moraju sadržati visinu bloka u transakciji coinbase-a.
+
+Posle uspešne signalizacije i aktiviranja u skladu sa pravilima BIP-34, ovaj mehanizam je korišćen još dva puta za aktiviranje soft fork-ova:
+
+* https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki[BIP-66] Strogo DER kodiranje potpisa aktivirano je signalizacijom u stilu BIP-34 sa blok verzijom "3" i čineći nevažećim blokove verzije "2".
+
+* https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki[BIP-65] +CHECKLOCKTIMEVERIFY+ je aktiviran signalizacijom u stilu BIP-34 sa blok verzijom "4" i čineći nevažećim blokove sa verzijom "3".
+
+Nakon aktiviranja BIP-65, mehanizam signalizacije i aktiviranja BIP-34 je povučen iz upotrebe i zamenjen mehanizmom signalizacije BIP-9, čiji opis sledi.
+
+Standard je definisan u https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki[BIP-34 (Blok v2, visina u coinbase-u)].
+
+==== BIP-9 signalizacija i aktiviranje
+
+((("bitcoin improvement proposals", "Version bits with timeout and delay (BIP-9)")))((("bitcoin improvement proposals", "CHECKLOCKTIMEVERIFY (BIP-65)")))((("bitcoin improvement proposals", "Strict DER signatures (BIP-66)")))Mehanizam koji su koristili BIP-34, BIP-66 i BIP-65 bio je uspešan u aktiviranju tri soft fork-a. Međutim, zamenjen je jer je imao nekoliko ograničenja:
+
+* Upotrebljavajući celobrojne vrednosti verzije bloka, istovremeno se može aktivirati samo jedan soft fork, pa je potrebno koordinisati soft fork predloge i dogovoriti se o njihovom prioritetu i sekvenciranju.
+
+* Pored toga, što je blok verzija uvećana, mehanizam nije ponudio direktan način da se odbaci promena i zatim predloži druga. Ako se stari klijenti i dalje pokreću, mogu pogrešno da shvate signalizaciju za novu promenu kao signalizaciju za prethodno odbijenu promenu.
+
+* Svaka nova promena nepovratno je smanjila dostupne verzije bloka za buduće promene.
+
+BIP-9 je predložen da bi se prevazišli ovi izazovi i poboljšale brzina i lakoća sprovođenja budućih promena.
+
+BIP-9 tumači blok verziju kao bit polje umesto celog broja. Pošto je blok verzija prvobitno korišćena kao celi broj, verzije 1 do 4, na raspolaganju je samo 29 bita koji se mogu koristiti kao bit polje. To ostavlja 29 bita koji se mogu koristiti za nezavisnu i istovremenu signalizaciju spremnosti za 29 različitih predloga.
+
+BIP-9 takođe postavlja maksimalno vreme za signalizaciju i aktiviranje. Na ovaj način rudari ne moraju da signaliziraju doveka. Ako se predlog ne aktivira u roku od +TIMEOUT+-a (definisanim u predlogu), predlog se smatra odbačenim. Predlog se može ponovo poslati na signalizaciju sa drugim bitom, obnavljajući period aktivacije.
+
+Takođe, nakon što prođe +TIMEOUT+ i funkcija se aktivira ili odbije, signalni bit se može ponovo koristiti za neku drugu funkciju bez zabune. Zbog toga se može paralelno signalizirati do 29 promena, a posle +TIMEOUT+-a bitovi se mogu "reciklirati" za predlaganje novih promena.
+
+[NOTE]
+====
+Iako se bitovi za signalizaciju mogu ponovo koristiti ili reciklirati, sve dok se period glasanja ne preklapa, autori BIP-9 preporučuju da se bitovi ponovo upotrebe samo kad je potrebno; moglo bi doći do neočekivanog ponašanja zbog greški u starijem softveru. Ukratko, ne bi trebalo očekivati da ćemo ih ponovo koristiti dok svih 29 bitova ne budu upotrebljeni.
+====
+
+Predložene promene identifikuje struktura podataka koja sadrži sledeća polja:
+
+name:: Kratak opis koji se koristi za razlikovanje predloga. Najčešće BIP opisuje predlog, kao "bipN", gde je N broj BIP-a.
+
+bit:: 0 do 28, bit u verziji bloka koji rudari koriste za signalizaciju odobrenja za ovaj predlog.
+
+starttime:: Vreme (zasnovano na median vremenu prošlosti/Median Time Past ili MTP) za koje signaliziranje počinje nakon čega se vrednost bita tumači kao signalizacija spremnosti za predlog.
+
+endtime:: Vreme (zasnovano na MTP-u) nakon kojeg se promena smatra odbijenom ako nije dostigla prag aktivacije.
+
+Za razliku od BIP-34, BIP-9 broji signalizaciju za aktiviranje u celim intervalima na osnovu perioda postavljanja novog cilja težine od 2.016 blokova. Za svaki period postavljanja novog cilja, ako zbir blokova koji signaliziraju predlog prelazi 95% (1.916 2.016.), predlog će se kasnije aktivirati nakon postavljanja novog cilja.
+
+BIP-9 predlog nudi dijagram stanja koji ilustruje različite faze i prelaze predloga, kao što je prikazano u <<bip9states>>.
+
+Predlozi počinju u stanju +DEFINED+, nakon što su njihovi parametri poznati (definisani) u bitkoin softveru. Za blokove sa MTP-om nakon početnog vremena, predlog prelazi na stanje +STARTED+. Ako je prag glasanja premašen u roku za postavljanje novog cilja (retargeting) i vreme nije prekoračeno, predlog prelazi u stanje +LOCKED_IN+. Posle jednog perioda ponovnog postavljanja cilja, predlog postaje +ACTIVE+. Predlozi ostaju u stanju +ACTIVE+ trajno nakon što dostignu to stanje. Ako vreme istekne pre nego što je dostignut prag glasanja, predlog se menja u status +FAILED+, što pokazuje da je predlog odbijen. +FAILED+ predlozi ostaju trajno u tom stanju.
+
+[[bip9states]]
+.BIP-9 dijagram promene stanja
+image::images/mbc2_1010.png[BIP-9 Predlog dijagrama promene stanja]
+
+Prvo je implementiran BIP-9 za aktiviranje +CHECKSEQUENCEVERIFY+ i pridruženih BIP-ova (68, 112, 113). Predlog pod nazivom "csv" uspešno je aktiviran u julu 2016.((("", startref="forks10a")))
+
+Standard je definisan u https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki[BIP-9 (bitovi verzije sa vremenskim ograničenjem i kašnjenjem)].
+
+=== Konsenzus razvoja softvera
+
+((("mining and consensus", "consensus software development")))((("development environment", "consensus software development")))Konsenzus softver nastavlja da se razvija i mnogo se raspravlja o različitim mehanizmima za promenu pravila konsenzusa. Po svojoj prirodi, bitkoin postavlja vrlo visok prag u koordinaciji i konsenzusu za promene. Kao decentralizovani sistem, on nema "autoritet" koji može nametati svoju volju učesnicima mreže. Snaga se širi između više biračkih grupa kao što su rudari, glavni programeri, programeri novčanika, berze, trgovci i krajnji korisnici. Nijedna od ovih izbornih jedinica ne može jednostrano da donosi odluke. Na primer, dok rudari teoretski mogu da promene pravila prostom većinom (51%), oni su ograničeni pristankom ostalih izbornih jedinica. Ako deluju jednostrano, ostali učesnici mogu jednostavno odbiti da ih prate, zadržavajući ekonomsku aktivnost na manjinskom lancu. Bez ekonomske aktivnosti (transakcije, trgovci, novčanici, berze), rudari će rudariti bezvredne kovanice sa praznim blokovima. Ova difuzija moći znači da se svi učesnici moraju koordinirati ili da u suprotnom ne mogu biti nikakve promene. Status kvo je stabilno stanje ovog sistema sa samo nekoliko mogućih promena ukoliko postoji snažan konsenzus vrlo velikom većinom. Prag od 95% za soft fork-ove odražava tu realnost.
+
+((("hard forks")))Važno je uvideti da ne postoji savršeno rešenje za razvoj konsenzusa. I hard i soft fork-ovi podrazumevaju kompromise. Za neke vrste promena soft fork-ovi mogu biti bolji izbor; za druge opet hard fork-ovi mogu biti bolji izbor. Ne postoji savršen izbor; oba nose rizike. Stalna karakteristika razvoja konsenzusnog softvera ukazuje da je promena teška i da konsenzus nameće kompromis.
+
+Neki to vide kao slabost sistema konsenzusa. S vremenom ćete ga možda videti kao ja, kao najveću snagu sistema.

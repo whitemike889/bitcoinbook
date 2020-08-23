@@ -1,0 +1,117 @@
+[[appdx_bitcore]]
+Anhang
+
+== Bitcore
+
+
+((("Bitcore", id="bitcore16")))Bitcore ist eine Reihe von Tools, die von BitPay bereitgestellt werden. Ziel ist es, Bitcoin-Entwicklern einfach zu bedienende Tools zur Verfügung zu stellen. Fast der gesamte Code von Bitcore ist in JavaScript geschrieben. Es gibt einige Module, die speziell für NodeJS geschrieben wurden. Außerdem enthält das "node"-Modul von Bitcore den C++-Code von Bitcoin Core. Weitere Informationen finden Sie unter https://bitcore.io
+
+=== Bitcore Features
+
+* Bitcoin Full Node (bitcore-node)
+* Block Explorer (insight)
+* Block, Transaction und Wallet Utilities (bitcore-lib)
+* Direkte Kommunikation mit dem Bitcoin P2P-Netzwerk (bitcore-p2p)
+* Erzeugung der Seed Entropy Mnemonic (bitcore-mnemonic)
+* Zahlungsprotokoll (bitcore-payment-protocol)
+* Überprüfung und Unterzeichnung von Nachrichten (bitcore-message)
+* Elliptische Kurve Integriertes Verschlüsselungsschema (bitcore-ecies)
+* Wallet Service (bitcore-wallet-service)
+* Wallet Client (bitcore-wallet-client)
+* Playground (bitcore-playground)
+* Direkte Integration von Diensten mit Bitcoin Core (bitcore-node)
+
+=== Bitcore Library Beispiele
+
+==== Voraussetzungen
+
+* NodeJS >= 4.x oder nutzen Sie unser https://bitcore.io/playground[hosted online playground]
+
+Bei Verwendung von NodeJS und dem Knoten REPL:
+
+[source,bash]
+----
+$ npm install -g bitcore-lib bitcore-p2p
+----
+
+==== Wallet Beispiele für die Benutzung von bitcore-lib
+
+Erstellen einer neuen Bitcoin-Adresse mit zugehörigem Private Key:
+
+----
+> bitcore = require('bitcore-lib')
+> privateKey = new bitcore.PrivateKey()
+> address = privateKey.toAddress().toString()
+----
+
+Erstellen eines hierarchisch deterministischen Private Keys und einer Adresse:
+
+----
+> hdPrivateKey = bitcore.HDPrivateKey()
+> hdPublicKey = bitcore.HDPublicKey(hdPrivateKey)
+> hdAddress = new bitcore.Address(hdPublicKey.publicKey).toString()
+----
+
+Erstellen und Signieren einer Transaktion aus einer UTXO:
+
+----
+> utxo = {
+  txId: Transaktions-ID, die eine nicht ausgegebene Ausgabe enthält,
+  outputIndex: Output Index z.B. 0,
+  address: addressOfUtxo,
+  script: bitcore.Script.buildPublicKeyHashOut(addressOfUtxo).toString(),
+  satoshis: an die Adresse geschickter Betrag
+}
+> fee = 3000 //eingestellt entsprechend den Bedingungen im Netzwerk
+> tx = new bitcore.Transaction()
+        .from(utxo)
+        .to(address, 35000)
+        .fee(fee)
+        .enableRBF()
+        .sign(privateKeyOfUtxo)
+----
+
+Ersetzen der letzten Transaktion im Mempool (replace-by-fee):
+
+----
+> rbfTx = new Transaction()
+           .from(utxo)
+           .to(address, 35000)
+           .fee(fee*2)
+           .enableRBF()
+           .sign(privateKeyOfUtxo);
+> tx.serialize();
+> rbfTx.serialize();
+----
+
+Übertragung einer Transaktion an das Bitcoin Netzwerk
+(Hinweis: Nur gültige Transaktionen übertragen; siehe https://bitnodes.21.co/nodes[] zum Thema Peer Hosts):
+
+1. Kopieren Sie den untenstehenden Code in eine Datei namens _broadcast.js_.
+2. Die Variablen +tx+ und +rbfTx+ sind die Ausgabe von +tx.serialize()+ bzw. +rbfTx.serialize()+.
+3. Um Replace-by-Fee anzuwenden, muss der Peer die bitcoind Option +mempoolreplace+ unterstützen und sie auf +1+ setzen.
+4. Starten Sie den Datei-Knoten _broadcast.js_((("", startref="bitcore16"))):
+
+----
+var p2p = require('bitcore-p2p');
+var bitcore = require('bitcore-lib');
+var tx = new bitcore.Transaction('output from serialize function');
+var rbfTx = new bitcore.Transaction('output from serialize function');
+var host = 'ip address'; //use valid peer listening on tcp 8333
+var peer = new p2p.Peer({host: host});
+var messages = new p2p.Messages();
+peer.on('ready', function() {
+  var txs = [messages.Transaction(tx), messages.Transaction(rbfTx)];
+  var index = 0;
+  var interval = setInterval(function() {
+    peer.sendMessage(txs[index++]);
+    console.log('tx: ' + index + ' sent');
+    if (index === txs.length) {
+      clearInterval(interval);
+      console.log('disconnecting from peer: ' + host);
+      peer.disconnect();
+    }
+  }, 2000);
+});
+peer.connect();
+----

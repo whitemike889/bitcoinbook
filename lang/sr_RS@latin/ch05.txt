@@ -1,0 +1,490 @@
+[[ch05_wallets]]
+== Novčanici
+
+((("wallets", "defined")))Reč "novčanik" koristi se za opis nekoliko različitih stvari u bitkoinu.
+
+Novčanik je na najvišem nivou aplikacija koja služi kao primarni korisnički interfejs. Novčanik kontroliše pristup korisničkom novcu, time što upravlja ključevima i adresama, prati stanje i kreira i potpisuje transakcije.
+
+U užem smislu, iz perspektive programera, reč "novčanik" odnosi se na strukturu podataka koja se koristi za čuvanje i upravljanje korisničkim ključevima.
+
+U ovom poglavlju bavićemo se drugim značenjem, gde su novčanici kontejneri za privatne ključeve, koji se obično implementiraju kao struktuirani fajlovi ili jednostavne baze podataka.
+
+=== Opšti pregled tehonologije novčanika
+
+U ovom odeljku predstavićemo različite tehnologije koje se koriste za pravljenje bitkoin novčanika koji je lak za korišćenje, siguran i fleksibilan.
+
+((("wallets", "contents of")))Uobičajena zabluda o bitkoinu je da bitkoin novčanici sadrže bitkoin. U stvari, novčanik sadrži samo ključeve. "Kovanice" se beleže u blokčejnu na bitkoin mreži. Korisnici kontrolišu kovanice na mreži potpisivanjem transakcija sa ključevima u svojim novčanicima. ((("keychains")))U određenom smislu, bitkoin novčanik je _privezak za ključeve (keychain)_.
+
+[TIP]
+====
+Bitkoin novčanici sadrže ključeve, a ne kovanice. Svaki korisnik ima novčanik koji sadrži ključeve. Novčanici su zapravo privesci za ključeve koji sadrže parove privatnih/javnih ključeva (vidi <<private_public_keys>>). Korisnici potpisuju transakcije ključevima i na taj način dokazuju da su vlasnici izlaza transakcija (njihovih kovanica). Kovanice se čuvaju na blokčejnu u obliku izlaznih transakcija (često se označavaju kao vout ili txout).
+====
+
+((("wallets", "types of", "primary distinctions")))Postoje dve primarne vrste novčanika, koje se razlikuju po tome da li su ključevi koje sadrže međusobno povezani ili ne.
+
+((("JBOK wallets", seealso="wallets")))((("wallets", "types of", "JBOK wallets")))((("nondeterministic wallets", seealso="wallets")))Prvi tip je _nedeterministički novčanik_, pri čemu se svaki ključ nezavisno generiše iz nasumičnog broja. Ključevi nisu povezani jedni sa drugima. Ova vrsta novčanika je takođe poznata i kao JBOK novčanik iz fraze "Samo gomila ključeva" ili "Just a Bunch Of Keys".
+
+((("deterministic wallets", seealso="wallets")))Druga vrsta novčanika je _deterministički novčanik_, gde su svi ključevi izvedeni iz jednog glavnog ključa (master key), poznatog kao _seed (seme)_. Svi ključevi ove vrste novčanika su međusobno povezani i mogu se ponovo generisati ako imate izvorno seme. ((("key derivation methods")))Postoji nekoliko različitih načina za _derivaciju ključeva_ koji se koriste u determinističkim novčanicima. ((("hierarchical deterministic (HD) wallets", seealso="wallets")))Najčešće korišćena metoda derivacije koristi strukturu sličnu stablu i poznata je kao _hijerarhijsko deterministički_ ili _HD_ novčanik.
+
+((("mnemonic code words")))Deterministički novčanici se inicijalizuju iz semena (seed). Da bi se olakšala upotreba, semena se kodiraju kao engleske reči, poznate i kao _mnemonic code words_ (bukvalno: skraćenice koje se lako pamte).
+
+U narednih nekoliko odeljaka predstavljena je svaka od ovih tehnologija na visokom nivou.
+
+[[random_wallet]]
+==== Nedeterministički (nasumični) novčanici
+
+((("wallets", "types of", "nondeterministic (random) wallets")))U prvom bitkoin novčaniku (koji se sada zove Bitcoin Core) novčanici su bili zbirke nasumično generisanih privatnih ključeva. Na primer, originalni klijent Bitcoin Core generiše 100 nasumičnih privatnih ključeva unapred prilikom prvog pokretanja i generiše više ključeva po potrebi, koristeći svaki ključ samo jednom. Takvi novčanici se zamenjuju determinističkim novčanicima jer su nepodobni za upravljanje, pravljenje rezervnih kopija i importiranje. Nedostatak nasumičnih ključeva je da ako generišete mnogo njih, morate sačuvati kopije svih njih, što znači da se novčanik mora često bekapovati. Svaki ključ mora biti bekapovan, inače se sredstva koja kontroliše gube nepovratno ako novčanik postane nedostupan. Ovo je u direktnom sukobu sa principom izbegavanja upotrebljavanja jedne adresa više puta, time što se svaka bitkoin adresa koristi za samo jednu transakciju. Ponovna upotreba adresa smanjuje privatnost pošto povezuje više transakcija i adresa međusobno. Nedeterministički novčanik tipa 0 je loš izbor novčanika, posebno ako želite da izbegnete ponovnu upotrebu adrese, jer to podrazumeva da se upravlja sa mnogo ključeva, što stvara potrebu za čestim pravljenjem rezervnih kopija. Iako klijent Bitcoin Core uključuje novčanik tipa 0, Bitcoin Core programeri odvraćaju od njegovog korišćenja. <<Type0_wallet>> prikazuje nedeterministički novčanik, koji sadrži nevezani niz slučajnih ključeva.
+
+[TIP]
+====
+Upotreba nedeterminističkih novčanika se ne preporučuje ni za šta osim za jednostavne testove. Prosto su previše glomazni da bi se napravila sigurnosna kopija i da bi se upotrebljavali. Umesto toga, koristite industrijski standard: _HD novčanik_ sa _mnemoničkim_ semenom za bekap.
+====
+
+[[Type0_wallet]]
+[role="smallersixty"]
+.Tip-0 nedeterministički (nasumični) novčanik: kolekcija nasumično generisanih ključeva
+image::images/mbc2_0501.png["Non-Deterministic Wallet"]
+
+==== Deterministički (Seeded) novčanici
+
+((("wallets", "types of", "deterministic (seeded) wallets")))Deterministički novčanici, ili "Seeded" (po inicijalnom broju nazvanom seme) su novčanici koji sadrže privatne ključeve koji su svi izvedeni iz zajedničkog semena, korišćenjem jednosmerne heš funkcije. Seme je nasumično generisan broj koji se kombinuje sa drugim podacima, kao što je indeksni broj ili "kod lanca" (videti <<hd_wallets>>) da bi se dobili privatni ključevi. U determinističkom novčaniku, seme je dovoljno za povratak svih izvedenih ključeva, pa je zato dovoljna jedna sigurnosna kopija za vreme kreiranja. Seme je takođe dovoljno za import ili eksport novčanika, što omogućava jednostavnu migraciju svih korisničkih ključeva između različitih implementacija novčanika. <<Type1_wallet>> prikazuje logički dijagram determinističkog novčanika.
+
+[[Type1_wallet]]
+[role="smallersixty"]
+.Tip-1 deterministički (semenski) novčanik: deterministička sekvenca ključeva izvedena iz semena
+image::images/mbc2_0502.png["Deterministic Wallet"]
+
+[[hd_wallets]]
+==== HD novčanik (BIP-32/BIP-44)
+
+((("wallets", "types of", "hierarchical deterministic (HD) wallets")))((("hierarchical deterministic (HD) wallets")))((("bitcoin improvement proposals", "Hierarchical Deterministic Wallets (BIP-32/BIP-44)")))Deterministički novčanici su razvijeni kako bi se iz jednog "semena" lakše izvuklo više ključeva. Najnapredniji oblik novčanika je HD novčanik definisan standardom BIP-32. HD novčanici sadrže ključeve izvedene u strukturi stabla, tako da roditeljski ključ može proizvesti sekvencu dečjih ključeva, od kojih svaki može proizvesti niz ključeva unuka, i tako dalje, do beskrajne dubine. Ova struktura stabla prikazana je u <<Type2_wallet>>.
+
+[[Type2_wallet]]
+.Tip-2 HD novčanik: Stablo ključeva generisano iz jednog semena
+image::images/mbc2_0503.png["HD wallet"]
+
+HD novčanici nude dve glavne prednosti u odnosu na nasumične (nedeterminističke) ključeve. Prvo, struktura stabla može se koristiti za izražavanje dodatnog organizacionog značenja, kao kada se određena grana podključeva koristi za uplate, a druga grana za isplate. Grane ključeva takođe se mogu koristiti u korporativnom okruženju, za dodeljivanje različitih grana odeljenjima, filijalama, posebnim funkcijama ili računovodstvenim kategorijama.
+
+Druga prednost HD novčanika je u tome što korisnici mogu da kreiraju niz javnih ključeva bez pristupa odgovarajućim privatnim ključevima. To omogućava upotrebu HD novčanika na nesigurnom serveru ili pri kapacitetu samo za primanje, izdavanjem različitog javnog ključa za svaku transakciju. Javni ključevi ne moraju biti unapred učitani ili izvedeni, a server nema privatne ključeve koji mogu da troše sredstva.
+
+==== Seme i mnemonički kod (BIP-39)
+
+((("wallets", "technology of", "seeds and mnemonic codes")))((("mnemonic code words")))((("bitcoin improvement proposals", "Mnemonic Code Words (BIP-39)")))HD novčanici su veoma moćan mehanizam za upravljanje velikim brojem ključeva i adresa. Oni su još korisniji ako se kombinuju sa standardizovanim načinom stvaranja semena iz niza engleskih reči koje je lako prepisati, eksportovati i importovati sa jednog novčanika na drugi. To je poznato kao _mnemonika_, a standard je definisan u BIP-39. Danas većina bitkoin novčanika (kao i novčanici za druge kriptovalute) koristi ovaj standard i može da eksportuje i importuje semena za sigurnosnu kopiju i bekap koristeći interoperabilne mnemonike.
+
+Pogledajmo to iz praktične perspektive. Koje od sledećih semena je lakše prepisati, snimiti na papir, čitati bez greške, eksportovati i importovati u drugi novčanik?
+
+.Seme za deterministički novčanik, u heksadecimali
+----
+0C1E24E5917779D297E14D45F14E1A1A
+----
+
+.Seme za deterministički novčanik, iz mnemonike od 12 reči
+----
+army van defense carry jealous true
+garbage claim echo media make crunch
+----
+
+==== Najbolje prakse za novčanik
+
+((("wallets", "best practices for")))((("bitcoin improvement proposals", "Multipurpose HD Wallet Structure (BIP-43)")))Kako je tehnologija bitkoin novčanika sazrevala, pojavili su se određeni zajednički industrijski standardi zbog koji su bitkoin novčanic postali široko interoperabilni, jednostavni za upotrebu, sigurni i fleksibilni. Ovi zajednički standardi su:
+
+* Mnemoničke kod reči, zasnovane na BIP-39
+* HD novčanici, bazirani na BIP-32
+* Višenamenska struktura HD novčanika, zasnovana na BIP-43
+* Novčanici za više valuta i računa, zasnovani na BIP-44
+
+Ovi standardi mogu da se promene ili zastare zbog daljeg razvoja, ali za sada formiraju skup tehnologija za zaključavanje koje su postale de fakto standard za novčanike bitkoina.
+
+Standarde je usvojio široki spektar softverskog i hardverskog bitkoin novčanika, čineći sve ove novčanike interoperabilnim. Korisnik može eksportirati mnemoniku na jednom i importovati ga u drugi novčanik vraćajući sve transakcije, ključeve i adrese.
+
+((("hardware wallets")))((("hardware wallets", see="also wallets")))Neki primeri softverskih novčanika koji podržavaju ove standarde uključuju (po alfabetnom redosledu)  Breadwallet, Copay, Multibit HD, i Mycelium. Primeri hardverskih novčanika koji podržavaju ove standarde uključuju (po alfabetnom redosledu) Keepkey, Ledger, i Trezor.
+
+Sledeći odeljci detaljno ispituju svaku od ovih tehnologija.
+
+[TIP]
+====
+Ako implementirate bitkoin novčanik, on bi trebao da bude izgrađen kao HD novčanik, sa semenom kodiranim kao mnemonički kod za izradu bekap kopija, u skladu sa standardima BIP-32, BIP-39, BIP-43 i BIP-44, kako je opisano u sledećim odeljcima.
+====
+
+==== Korišćenje bitkoin novčanika
+
+((("wallets", "using bitcoin wallets")))U <<user-stories>> predstavili smo Gabrijela, ((("use cases", "web store", id="gabrielfive"))mladog tinejdžera preduzetnika u Rio de Žaneiru, koji vodi jednostavnu web prodavnicu koja prodaje bitkoin markirane majice, šolje za kafu i nalepnice.
+
+((("wallets", "types of", "hardware wallets")))Gabrijel koristi hardverski bitkoin novčanik Trezor (<<a_trezor_device>>) za sigurno upravljanje svojim bitkoinima. Trezor je jednostavan USB uređaj sa dva dugmeta koji čuva ključeve (u obliku HD novčanika) i potpisuje transakcije. Trezor novčanici implementiraju sve industrijske standarde koje smo videli u ovom poglavlju, tako da se Gabrijel ne oslanja na bilo kakvu vlasničku tehnologiju ili rešenje pojedinačnog dobavljača.
+
+[[a_trezor_device]]
+.Trezor uređaj: Hardverski bitkoin HD novčanik
+image::images/mbc2_0504.png[alt]
+
+Kada je Gabrijel prvi put koristio Trezor, uređaj je generisao mnemoniku i seme iz ugrađenog hardverskog generatora nasumičnih brojeva. Tokom ove faze inicijalizacije, novčanik je na ekranu prikazao numerisani niz reči, reč po reč (vidi <<trezor_mnemonic_display>>).
+
+[[trezor_mnemonic_display]]
+.Trezor koji prikazuje jednu od mnemoničkih reči
+image::images/mbc2_0505.png["Trezor wallet display of mnemonic word"]
+
+Zapisujući ovu mnemoniku, Gabrijel je stvorio sigurnosnu kopiju (vidi <<mnemonic_paper_backup>>) koja se može iskoristiti za povratak bekapa u slučaju gubitka ili oštećenja Trezor uređaja. Ova mnemonika se može koristiti za povratak podatka u novom Trezoru ili u bilo kom od mnogih kompatibilnih sofverskih ili hardverskih novčanika. Imajte na umu da je važan redosled reči, pa su mnemonik sigurnosne kopije na papiru numerisane razmacima za svaku reč. Gabrijel je morao pažljivo da zabeleži svaku reč u numerisanom polju da bi sačuvao tačan niz.
+
+[[mnemonic_paper_backup]]
+.Gabrijelove mnemonik sigurnosne papirne kopije
+[cols="<,^,<,^", width="80%"]
+|===
+|*1.*| _army_ |*7.*| _garbage_
+|*2.*| _van_ |*8.*| _claim_
+|*3.*| _defense_ |*9.*| _echo_
+|*4.*| _carry_ |*10.*| _media_
+|*5.*| _jealous_ |*11.*| _make_
+|*6.*| _true_ |*12.*| _crunch_
+|===
+
+[NOTE]
+====
+Mnemonika od 12 reči prikazana je u <<mnemonic_paper_backup>>, radi jednostavnosti. U stvari, većina hardverskih novčanika generiše sigurniju mnemoniku od 24 reči. Mnemonika se koristi na potpuno isti način, bez obzira na dužinu.
+====
+
+Za prvu implementaciju svoje web prodavnice, Gabrijel koristi jednu bitkoin adresu, generisanu na svom Trezor uređaju. Ovu jedinstvenu adresu koriste svi kupci za sve porudžbine. Kao što ćemo videti, ovaj pristup ima neke nedostatke i može se poboljšati HD novčanikom.((("", startref="gabrielfive")))
+
+=== Detalji novčanik tehnologije
+
+Pogledajte detaljnije sve važne industrijske standarde koje koriste mnogi bitkoin novčanici.
+
+[[mnemonic_code_words]]
+==== Mnemoničke kod reči (BIP-39)
+
+((("wallets", "technology of", "mnemonic code words")))((("mnemonic code words", id="mnemonic05")))((("bitcoin improvement proposals", "Mnemonic Code Words (BIP-39)", id="BIP3905")))Mnemonike su sekvence reči koje predstavljaju (kodiraju) slučajni broj koji se koristi kao seme za dobijanje određenog novčanika. Taj niz reči dovoljan je da se ponovo dobije seme i odatle ponovo generiše novčanik i svi izvedeni ključevi. Novčanik aplikacija koja implementira determininistički novčanik sa mnemoničkim rečima pokazaće korisniku niz od 12 do 24 reči pri prvom pravljenju novčanika. Taj niz reči su rezervna kopija novčanika i može se koristiti da se povrate i ponovo stvore svi ključevi u istoj ili bilo kojoj kompatibilnoj novčanik aplikaciji. Mnemoničke reči olakšavaju izradu sigurnosnih kopija novčanika jer ih je lako čitati i ispravno prepisati, u poređenju sa nasumičnim nizom brojeva.
+
+[TIP]
+====
+((("brainwallets")))Mnemoničke reči često se mešaju sa "brainwallets". To nije isto. Primarna razlika je u tome što se brainwallet (bukvalno novčanik mozga) sastoji od reči koje odabere korisnik, dok mnemoničke reči novčanik kreira nasumično i predstavi ih korisniku. Ova bitna razlika čini mnemoničke reči mnogo sigurnijim, jer su ljudi veoma loši izvori slučajnosti.
+====
+
+Mnemonički kodovi su definisani u BIP-39 (videti <<appdxbitcoinimpproposals>>). Imajte na umu da je BIP-39 jedan od načina primene mnemoničkog standardnog koda. ((("Electrum wallet", seealso="wallets")))Postoji drugi standard, sa drugačijim nizom reči, koje koristi Electrum novčanik i napravljen pre BIP-39. BIP-39 je predložila kompanija koja stoji iza Trezor hardverskih novčanika i nespojiva je sa Electrum-ovom implementacijom. Međutim, BIP-39 je sada dobio široku podršku industrije kroz desetine interoperabilnih implementacija i trebalo bi ih smatrati de fakto industrijskim standardom.
+
+BIP-39 definiše stvaranje mnemoničkog koda i semena, koje ovde opisujemo u devet koraka. Da bi bilo jasnije postupak je podeljen na dva dela: koraci 1 do 6 prikazani su u <<generating_mnemonic_words>> i koraci 7 do 9 prikazani su u <<mnemonic_to_seed>>.
+
+[[generating_mnemonic_words]]
+===== Generisanje mnemoničkih reči
+
+Novčanik automatski generiše mnemoničke reči koristeći standardizovani postupak definisan u BIP-39. Novčanik počinje od izvora entropije, dodaje kontrolni broj (checksum), a zatim entropiju povezuje sa listom reči:
+
+1. Napravite slučajni niz (entropiju) od 128 do 256 bita.
+2. Napravite kontrolni broj slučajnog niza uzimanjem prvih (dužina entropije/32) bitova njegovog SHA256 heša.
+3. Na kraj slučajne sekvence dodajte kontrolni broj.
+4. Podelite rezultat na segmente dužine od 11 bita.
+5. Povežite svaku 11-bitnu vrednost sa rečju iz unapred definisanog rečnika od 2048 reči.
+6. Mnemonički kod je niz reči.
+
+<<generating_entropy_and_encoding>> prikazuje kako se entropija koristi za generisanje mnemončkih reči.
+
+[[generating_entropy_and_encoding]]
+[role="smallerseventy"]
+.Generisanje entropije i kodiranja kao mnemoničke reči
+image::images/mbc2_0506.png["Generisanje entropije i kodiranja kao mnemoničke reči"]
+
+<<table_4-5>> prikazuje odnos između veličine podataka o entropiji i dužine mnemoničkih kodova u rečima.
+
+[[table_4-5]]
+.Mnemonički kodovi: entropija i dužina reči
+[options="header"]
+|=======
+| Entropija (bitovi) | Kontrolni broj (bitovi) | Entropija *+* kontrolni broj (bitovi) | Mnemonička dužina (reči)
+| 128 | 4 | 132 | 12
+| 160 | 5 | 165 | 15
+| 192 | 6 | 198 | 18
+| 224 | 7 | 231 | 21
+| 256 | 8 | 264 | 24
+|=======
+
+[[mnemonic_to_seed]]
+===== Od mnemonike do semena
+
+((("key-stretching function")))((("PBKDF2 function")))Mnemoničke reči predstavljaju entropiju dužine od 128 do 256 bita. Entropija se zatim koristi za dobijanje dužeg (512-bitnog) semena korišćenjem funkcije PBKDF2 za istezanje ključa. Proizvedeno seme se zatim koristi za izradu determinističkog novčanika i njegovih ključeva.
+
+((("salts")))((("passphrases")))Funkcija istezanja ključeva ima dva parametra: mnemoniku i _salt (bukvalno so)_. Svrha soli u funkciji istezanja ključa je da oteža izgradnju tabele za pretraživanje koja omogućava napad grubom silom. U standardu BIP-39, so ima drugu svrhu &#x2014; omogućava unošenje lozinke koja služi kao dodatni faktor sigurnosti koji štiti seme, kao što je detaljnije opisano u <<mnemonic_passphrase>>.
+
+Proces opisan u koracima 7 do 9 nastavlja se sa postupkom opisanim ranije u <<generating_mnemonic_words>>
+
+++++
+<ol start="7">
+	<li> Prvi parametar PBKDF2 funkcije za istezanje ključa je <em>mnemonika</em> proizvedeno u koraku 6. </li>
+	<li> Drugi parametar funkcije PBKDF2 istezanja ključa je <em>so (salt)</em> . So je sastavljena od string konstante " <code>mnemonic</code>" povezane sa opcionim nizom stringa lozinke koji daje korisnik. </li>
+	<li> PBKDF2 rasteže parametre mnemonike i soli koristeći 2048 krugova hešovanja sa algoritmom HMAC-SHA512, proizvodeći 512-bitnu vrednost kao krajnji izlaz. Ta 512-bitna vrednost je seme. </li>
+</ol>
+++++
+
+<<fig_5_7>> pokazuje kako se mnemonika koristi za stvaranje semena.
+
+[[fig_5_7]]
+.Od mnemonike do semena
+image::images/mbc2_0507.png["From mnemonic to seed"]
+
+[TIP]
+====
+Funkcija istezanja ključeva, sa 2048 krugova hešovanja, veoma je efikasna zaštita od napada grubom silom na mnemoniku ili lozinke. Izuzetno je skupo (u proračunu) isprobati više od nekoliko hiljada kombinacija lozinki i mnemonike, dok je broj mogućih izvedenih semena ogroman (2 ^512^).
+====
+
+Tables <<mnemonic_128_no_pass>>, and <<mnemonic_256_no_pass>> show some examples of mnemonic codes and the seeds they produce (either with or without a passphrase).
+
+[[mnemonic_128_no_pass]]
+.128-bitna entropija mnemoničkog koda, bez lozinke i rezultirajuće seme
+[cols="h,"]
+|=======
+| *Entropy input (128 bits)*| +0c1e24e5917779d297e14d45f14e1a1a+
+| *Mnemonic (12 words)* | +army van defense carry jealous true garbage claim echo media make crunch+
+| *Passphrase*| (none)
+| *Seed  (512 bits)* | +5b56c417303faa3fcba7e57400e120a0ca83ec5a4fc9ffba757fbe63fbd77a89a1a3be4c67196f57c39+
++a88b76373733891bfaba16ed27a813ceed498804c0570+
+|=======
+
+[[mnemonic_128_w_pass]]
+.128-bitni entropija mnemoničkog koda, sa lozinkom, proizvodi seme
+[cols="h,"]
+|=======
+| *Entropy input (128 bits)*| +0c1e24e5917779d297e14d45f14e1a1a+
+| *Mnemonic (12 words)* | +army van defense carry jealous true garbage claim echo media make crunch+
+| *Passphrase*| SuperDuperSecret
+| *Seed  (512 bits)* | +3b5df16df2157104cfdd22830162a5e170c0161653e3afe6c88defeefb0818c793dbb28ab3ab091897d0+
++715861dc8a18358f80b79d49acf64142ae57037d1d54+
+|=======
+
+
+[[mnemonic_256_no_pass]]
+.256-bitna entropija mnemoničkog koda, bez lozinke, proizvodi seme
+[cols="h,"]
+|=======
+| *Entropy input (256 bits)* | +2041546864449caff939d32d574753fe684d3c947c3346713dd8423e74abcf8c+
+| *Mnemonic (24 words)* | +cake apple borrow silk endorse fitness top denial coil riot stay wolf
+luggage oxygen faint major edit measure invite love trap field dilemma oblige+
+| *Passphrase*| (none)
+| *Seed (512 bits)* | +3269bce2674acbd188d4f120072b13b088a0ecf87c6e4cae41657a0bb78f5315b33b3a04356e53d062e5+
++5f1e0deaa082df8d487381379df848a6ad7e98798404+
+|=======
+
+[[mnemonic_passphrase]]
+===== Opciona lozinka u BIP-39
+
+((("passphrases")))BIP-39 standard omogućava upotrebu opcione lozinke za dobijanje semena. Ako se ne koristi lozinka, mnemonika se proteže sa solju koja se sastoji od konstantnog stringa +"mnemonike"+, stvarajući specifično 512-bitno seme iz bilo koje date mnemonike. Ako se koristi lozinka, funkcija istezanja proizvodi _različito_ seme iz iste mnemonike. U stvari, s obzirom na jednu mnemoniku, sve moguće lozinke vode ka drugom semenu. U suštini, ne postoji "pogrešna" lozinka. Sve lozinke su validne i sve dovode do različitih semena, formirajući ogroman niz mogućih neinicijalizovanih novčanika. Skup mogućih novčanika je toliko velik (2 ^512^) da ne postoji praktična mogućnost da se upotrebom sile ili slučajno pogodi koji se koristi.
+
+[TIP]
+====
+BIP-39 nema "pogrešnih" fraza. Svaka lozinka vodi do nekog novčanika, koji će biti prazan ukoliko nije prethodno korišćen.
+====
+
+Opciona lozinka stvara dve važne karakteristike:
+
+* Drugi faktor (nešto zapamćeno) koji čini mnemoniku beskorisnom, štiteći mnemonike na bekapu od kompromitovanja od strane lopova.
+
+* Oblik prihvatljivog poricanja (plausible deniability) ili "novčanika prinude", gde izabrana lozinka vodi do novčanika sa malom količinom sredstava koji se koristi da bi se napadaču skrenula pažnja sa "pravog" novčanika koji sadrži većinu sredstava.
+
+Međutim, važno je napomenuti da upotreba lozinke takođe unosi rizik od gubitka:
+
+* Ako je vlasnik novčanika onesposobljen ili mrtav i niko drugi ne zna lozinku, seme je beskorisno i sva sredstva koja su sačuvana u novčaniku se zauvek gube.
+
+* Suprotno tome, ako vlasnik izradi rezervnu kopiju lozinke na istom mestu kao i seme, ona poništava svrhu drugog faktora.
+
+Iako su lozinke vrlo korisne, treba ih koristiti samo u kombinaciji sa pažljivo planiranim postupkom sigurnosne kopije i povratka, uzimajući u obzir mogućnost preživljavanja vlasnika i omogućavanje njegovoj ili njenoj porodici da povrati imovinu u kriptovaluti.
+
+===== Rad sa mnemoničkim kodovima
+
+BIP-39 je implementirana kao biblioteka u mnogim različitim programskim jezicima:
+
+https://github.com/trezor/python-mnemonic[python-mnemonic]:: Referentna implementacija standarda od strane SatoshiLabs tima koji je predložio BIP-39, u Python-u
+
+https://github.com/bitcoinjs/bip39[bitcoinjs/bip39]:: BIP-39 implementacija, kao dela popularnog bitcoinJS frejmvork, u JavaScript-u
+
+https://github.com/libbitcoin/libbitcoin/blob/master/src/wallet/mnemonic.cpp[libbitcoin/mnemonic]:: BIP-39 implementacija, u sklopu popularnog Libbitcoin frejmvorka u pass:[<span class="keep-together">C++</span>]
+
+Postoji i BIP-39 generator implementiran u jednoj samostalnoj web stranici, što je izuzetno korisno za testiranje i eksperimentisanje. <<a_bip39_generator_as_a_standalone_web_page>> prikazuje samostalnu web stranicu koja generiše mnemoniku, semena i proširene privatne ključeve.
+
+[[a_bip39_generator_as_a_standalone_web_page]]
+.BIP-39 generator kao samostalna web stranica
+image::images/mbc2_0508.png["BIP-39 generator web-page"]
+
+((("", startref="mnemonic05")))((("", startref="BIP3905")))Stranica (https://iancoleman.github.io/bip39/) može da se koristi u web pretraživaču oflajn ili onlajn.
+
+==== Kreiranje HD novčanika iz semena
+
+((("wallets", "technology of", "creating HD wallets from root seed")))((("root seeds")))((("hierarchical deterministic (HD) wallets")))HD novčanici su stvoreni od jednog _početnog semena (rood seed)_, koji je 128-, 256- ili 512-bitni slučajni broj. Ovo seme najčešće nastaje iz jedne _mnemonike_ kako je detaljno opisano u prethodnom odeljku.
+
+Svaki ključ u HD novčaniku deterministički je izveden iz ovog početnog semena, što omogućava ponovno stvaranje celog HD novčanika iz tog semena u bilo kojem kompatibilnom HD novčaniku. To olakšava bekap, vraćanje, eksport i import HD novčanika koji sadrži hiljade ili čak milion ključeva jednostavnim prenošenjem same mnemonike iz koje potiče početno seme.
+
+Proces kreiranja originalnih ključeva (master keys) i originalnog lančanog koda (master chain code) za HD novčanik prikazan je u <<HDWalletFromSeed>>.
+
+[[HDWalletFromSeed]]
+.Kreiranje originalnih ključeva i lančanog koda iz početnog semena
+image::images/mbc2_0509.png["HDWalletFromRootSeed"]
+
+Početno seme se unosi u algoritam HMAC-SHA512, a rezultirajući heš se koristi za stvaranje _glavnog privatnog ključa (master private key)_ (m) i _glavnog lančanog koda (master chain code)_ (c).
+
+Glavni privatni ključ (m) zatim generiše odgovarajući glavni javni ključ (M) koristeći normalan proces množenja na eliptičkoj krivoj +m*G+ koji smo videli u <<pubkey>>.
+
+Lančani kod (c) se koristi za uvođenje entropije u funkciju koja stvara dečije (child) ključeve od roditeljskih (parent) ključeva, kao što ćemo videti u sledećem odeljku.
+
+===== Derivacija privatnog dečijeg ključa
+
+((("child key derivation (CKD)")))((("public and private keys", "child key derivation (CKD)")))HD novčanici koriste funkciju _child key derivation_ (CKD) (derivacija dečijeg ključa) za dobijanje dečijih ključeva od roditeljskih ključeva.
+
+Funkcije dečijeg ključa zasnivaju se na jednosmernoj heš funkciji koja kombinuje:
+
+* Roditeljski privatni ili javni ključ (kompresovani ECDSA ključ)
+* Seme koje se zove lančani kod (chain code) (256 bita)
+* Indeksni broj (32 bita)
+
+Lančani kod koristi se za uvođenje determinističkih nasumičnih podataka u proces, tako da poznavanje indeksa i dečijeg ključa nije dovoljno za dobijanje drugih dečijih ključeva. Poznavanje dečijeg ključa ne omogućava pronalazak njegove braće i sestara, osim ako takođe nemate lančani kod. Inicijalno seme lančanog koda (pri korenu stabla) se pravi od semena, dok se naredni kodovi dečijeg lanca dobijaju iz svakog roditeljskog lančanog koda.
+
+Ove tri stavke (roditeljski ključ, lančani kod i indeks) kombinuju se i hešuju kako bi se generisali dečiji ključevi, na sledeći način.
+
+Roditeljski javni ključ, lančani kod i broj indeksa se kombinuju i hešuju sa algoritmom HMAC-SHA512 za proizvodnju 512-bitnog heša. Ovaj 512-bitni heš je podeljen na dve 256-bitne polovine. Desna polovina 256 bita heš izlaza postaje kod lanca za dete. Leva polovina 256 bita heša dodaje se roditeljskom privatnom ključu kako bi se proizveo dečiji privatni ključ. U <<CKDpriv>>, to vidimo ilustrovano indeksom postavljenim na 0 da bi stvorilo dete "nula" (prvo po indeksu) od roditelja.
+
+[[CKDpriv]]
+.Proširenje roditeljskog privatnog ključa za kreiranje dečijeg privatnog ključa
+image::images/mbc2_0510.png["ChildPrivateDerivation"]
+
+Promena indeksa omogućava nam da proširimo roditelje i stvorimo drugu decu u nizu, npr. dete 0, dete 1, dete 2, itd. Svaki roditeljski ključ može imati 2,147,483,647 (2 ^31^) dece (2 ^31^ je polovina celokupnog raspona 2 ^32^, jer je druga polovina rezervisana za posebnu vrstu derivacije (razdvajanja), o kojoj ćemo kasnije govoriti u ovom poglavlju).
+
+Ponavljajući postupak na jednom nivou niz stablo, svako dete zauzvrat može postati roditelj i stvoriti sopstvenu decu, u beskonačnom broju generacija.
+
+===== Korišćenje izvedenih dečijih ključeva
+
+Dečiji privatni ključevi ne razlikuju se od nedeterminičkih (nasumičnih) ključeva. Pošto je funkcija derivacije jednosmerna funkcija, dečiji ključ se ne može koristiti za pronalazak roditeljskog ključa. Dečiji ključ se takođe ne može koristiti za pronalaženje braće i sestara. Ako imate n-to dete, ne možete da pronađete njegove braću i sestre, kao što su n&#x2013;1 dete ili n+1 dete, ili bilo koju drugu decu koja su deo sekvence. Samo roditeljski ključ i kod lanca mogu izvući svu decu. Bez šifre dečijeg lanca, dečiji ključ se ne može koristiti ni za dobijanje unuka. Da biste pokrenuli novu granu i stekli unuke, potrebni su vam i dečiji privatni ključ i kod dečijeg lanca.
+
+Za šta se može koristiti dečiji privatni ključ? Može se koristiti za pravljenje javnog ključa i bitkoin adrese. Zatim se može koristiti za potpisivanje transakcija da biste trošili bilo šta uplaćeno na tu adresu.
+
+[TIP]
+====
+Dečiji privatni ključ, odgovarajući javni ključ i bitkoin adresa se ne razlikuju od ključeva i adresa kreiranih nasumično. Činjenica je da su deo sekvence koja nije vidljiva van funkcije HD novčanika, a koja ih je stvorila. Jednom kada se kreiraju, oni rade isto kao „normalni“ ključevi.
+====
+
+===== Prošireni ključevi
+
+((("public and private keys", "extended keys")))((("extended keys")))Kao što ste videli ranije, funkcija derivacije ključeva može da se koristi za kreiranje dece na bilo kom nivou stabla, na osnovu tri ulaza: ključa, lančanog koda i indeksa željenog deteta. Dva ključna sastojka su šifra ključa i lančani kod, a zajedno se nazivaju _ prošireni ključ (extended key)_. Izraz "prošireni ključ" takođe bi se mogao smatrati "proširljivim ključem", jer se takav ključ može koristiti za dobijanje dece.
+
+Prošireni ključevi se skladište i prikazuju jednostavno kao spajanje 256-bitnog ključa i 256-bitnog lančanog koda u 512-bitni niz. Postoje dve vrste proširenih ključeva. Prošireni privatni ključ je kombinacija privatnog ključa i lančanog koda i može se koristiti za dobijanje dečjih privatnih ključeva (i iz njih, dečijih javnih ključeva). Prošireni javni ključ je javni ključ i kod lanca, koji se može koristiti za kreiranje dečijih javnih ključeva (_samo javnih!_), kao što je opisano u <<public_key_derivation>>.
+
+Zamislite produženi ključ kao koren jedne grane u strukturi stabla HD novčanika. Pomoću korena grane možete dobiti ostatak grane. Prošireni privatni ključ može da stvori potpunu granu, dok prošireni javni ključ može _samo_ da stvori granu javnih ključeva.
+
+[TIP]
+====
+Prošireni ključ sastoji se od privatnog ili javnog ključa i šifre lanca. Prošireni ključ može da stvori decu, generišući sopstvenu granu u strukturi stabla. Deljenje proširenog ključa omogućava pristup celoj grani.
+====
+
+Prošireni ključevi se kodiraju pomoću Base58Check-a radi lakšeg eksporta i importa između različitih novčanika kompatibilnih sa BIP-32&#x2013;kompatilnim novčanicima. Base58Check kodiranje za proširene ključeve koristi poseban broj verzije koji rezultira prefiksima "xprv" i "xpub" kada su kodirani u Base58 znakovima kako bi ih lakše prepoznali. Pošto je prošireni ključ od 512 ili 513 bita, takođe je i mnogo duži od ostalih Base58Check kodiranih stringova koje smo ranije videli.
+
+Evo primera proširenog _privatnog_ ključa, kodiranog u Base58Check-u:
+
+----
+xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c
+----
+
+Evo odgovarajućeg proširenog _javnog_ ključa, kodiranog u Base58Check-u:
+
+----
+xpub67xpozcx8pe95XVuZLHXZeG6XWXHpGq6Qv5cmNfi7cS5mtjJ2tgypeQbBs2UAR6KECeeMVKZBPLrtJunSDMstweyLXhRgPxdp14sk9tJPW9
+----
+
+[[public__child_key_derivation]]
+===== Derivacija javnog dečijeg ključa
+
+((("public and private keys", "public child key derivation")))Kao što je već pomenuto, vrlo korisna karakteristika HD novčanika je mogućnost izvođenja javnih dečijih ključeva iz javnih roditeljskih ključeva, _bez_ privatnih ključeva. To nam daje dva načina da dobijemo dečiji javni ključ: ili iz dečijeg privatnog ključa, ili direktno iz roditeljskog javnog ključa.
+
+Dakle, prošireni javni ključ može se koristiti za dobijanje svih _javnih_ ključeva (i samo javnih ključeva) u toj grani strukture HD novčanika.
+
+Ova prečica se može koristiti za kreiranje vrlo sigurnog javnog ključa - raspoređivanje na servere ili aplikacije gde oni imaju kopiju proširenog javnog ključa - bez ikakvih privatnih ključeva. Ova vrsta raspoređivanja može proizvesti neograničen broj javnih ključeva i bitkoin adresa, ali ne može potrošiti nikakav novac poslat na te adrese. U međuvremenu, na drugom, sigurnijem serveru, prošireni privatni ključ može dobiti sve odgovarajuće privatne ključeve za potpisivanje transakcija i trošenje novca.
+
+Česta primena ovog rešenja je instaliranje proširenog javnog ključa na web serveru koji opslužuje aplikaciju za elektronsku trgovinu. Web server može da koristi funkciju derivacije javnog ključa kako bi stvorio novu bitkoin adresu za svaku transakciju (npr. za klijentsku korpu za kupovinu). Web server neće imati privatne ključeve koji bi bili podložni krađi. Bez HD novčanika, jedini način da to učinite je da generišete hiljade bitkoin adresa na odvojenom sigurnom serveru i zatim ih prebacite na server e-trgovine. Taj pristup je nezgrapan i zahteva stalno održavanje kako bi se osiguralo da serveru za e-trgovinu ne "ponestane" ključeva.
+
+((("cold storage")))((("storage", "cold storage")))((("hardware wallets")))Još jedna uobičajena primena ovog rešenja je za hladno skladištenje ili hardverske novčanike. U tom scenariju, prošireni privatni ključ može biti smešten na papirnom novčaniku ili hardverskom uređaju (kao što je Trezor hardverski novčanik), dok se prošireni javni ključ može čuvati na mreži. Korisnik po želji može kreirati "primajuće" adrese, dok se privatni ključevi bezbedno čuvaju van mreže. Kako bi potrošio sredstva, korisnik može koristiti prošireni privatni ključ na oflajn bitkoin klijentu ili potpisati transakcije na uređaju sa hardverskim novčanikom (npr. Trezor). <<CKDpub>> ilustruje mehanizam za širenje roditeljskog javnog ključa kako bi se dobili dečiji javni ključevi.
+
+[[CKDpub]]
+.Proširenje roditeljskog javnog ključa za kreiranje dečijeg javnog ključa
+image::images/mbc2_0511.png["ChildPublicDerivation"]
+
+==== Korišćenje proširenog javnog ključa u web prodavnici
+
+((("wallets", "technology of", "using extended public keys on web stores")))Da vidimo kako se HD novčanici koriste nastavljajući našu priču o Gabrijelovoj web prodavnici.((("use cases", "web store", id="gabrielfivetwo")))
+
+Gabrijel je svoju web prodavnicu u početku pokrenuo iz hobija, a osnovao ju je na jednostavnoj hostovanoj Wordpress stranici. Njegova prodavnica bila je prilično jednostavna, sa samo nekoliko stranica i narudžbenicom sa jednom bitkoin adresom.
+
+Gabrijel je koristio prvu bitkoin adresu koju je generisao njegov Trezor uređaj kao glavnu bitkoin adresu za svoju prodavnicu. Na ovaj način sva primanja plaćanja biće uplaćena na adresu koju kontroliše njegov hardverski novčanik Trezor.
+
+Kupci bi predali porudžbinu pomoću narudžbenice i izvršili uplatu na Gabrijelovu objavljenu bitkoin adresu, pokrećući time slanje imejla sa podacima o porudžbini Gabrijelu da ga obradi. Sa samo nekoliko porudžbina nedeljno, ovaj sistem je radio dovoljno dobro.
+
+Međutim, mala web prodavnica postala je prilično uspešna i privukla je brojne narudžbine iz lokalne zajednice. Ubrzo je Gabrijel bio preplavljen narudžbinama. Sa svim nalozima koji plaćaju istu adresu, bilo je teško pravilno uskladiti narudžbine i transakcije, posebno kada se pojavi više naloga na isti iznos.
+
+Gabrijelov HD novčanik nudi mnogo bolje rešenje zahvaljujući mogućnosti izvođenja javnih dečijih ključeva bez poznavanja privatnih ključeva. Gabrijel može da učita prošireni javni ključ (xpub) na svoju web aplikaciju koji se može koristiti za dobijanje jedinstvene adrese za svaku porudžbinu kupca. Gabrijel može da troši sredstva sa svog Trezora, ali xpub učitan na web aplikaciji može samo da generiše adrese i prima sredstva. Ova karakteristika HD novčanika je odlična sigurnosna funkcija. Gabrijelova web aplikacija ne sadrži privatne ključeve pa joj stoga nije potreban visok nivo sigurnosti.
+
+Za eksport xpub, Gabrijel koristi web-bazirani softver u kombinaciji sa Trezorovim novčanikom. Za eksport ključeva mora da se priključi Trezor uređaj. Imajte na umu da hardverski novčanici nikada neće eksportirati privatne ključeve &#x2014; oni uvek ostaju na uređaju. <<export_xpub>> prikazuje web interfejs koji Gabrijel koristi za izvoz xpub-a.
+
+[[export_xpub]]
+. Izvoz xpub-a iz Trezor hardverskog novčanika
+image::images/mbc2_0512.png["Exporting the xpub from the Trezor"]
+
+Gabrijel kopira xpub u softver za bitkoin shop svoje web prodavnice. On koristi _Mycelium Gear_, koji je dodatak otvorenog koda za web prodavnice raznih web hostinga i sadržaja platformi. Mycelium Gear koristi xpub za generisanje jedinstvene adrese za svaku kupovinu.((("", startref="gabrielfivetwo")))
+
+===== Očvršćena derivacija dečijeg ključa (Hardened Child Key Derivation)
+
+((("public and private keys", "hardened child key derivation")))((("hardened derivation")))Mogućnost dobijanja grane javnih ključeva iz xpub-a je vrlo korisna, ali dolazi sa potencijalnim rizikom. Pristup xpub-u ne daje pristup dečijim privatnim ključevima. Međutim, s obzirom na to da xpub sadrži lančani kod, ako je dečiji privatni ključ poznat ili je nekako procureo, on može da se koristi pomoću lančanog koda za dobijanje svih ostalih privatnih ključeva. Jedan jedini procureli dečiji privatni ključ, zajedno sa roditeljskim lančanim kodom, otkriva sve privatne ključeve sve dece. Još gore, dečiji privatni ključ zajedno sa kodom roditeljskog lanca može da se koristi za dedukciju roditeljskog privatnog ključa.
+
+Da bi se suprotstavili ovom riziku, HD novčanici koriste alternativnu funkciju derivacije pod nazivom _očvršćena derivacija (hardened derivation)_, koja "narušava" odnos između roditeljskog javnog ključa i dečijeg lančanog koda. Očvršćena funkcija derivacije koristi dečiji privatni ključ za dobijanje koda dečijeg lanca, umesto roditeljskog javnog ključa. Ovo stvara "zaštitni zid" u nizu roditelj/dete, sa lančanim kodom koji se ne može koristiti za kompromitovanje roditeljskog ili privatnog ključa brata ili sestre. Očvršćena funkcija derivacije izgleda gotovo identično kao obična derivacija privatnog ključa, osim što se nadređeni privatni ključ koristi kao ulaz u funkciju heša, umesto roditeljskog javnog ključa, kao što je prikazano na dijagramu u <<CKDprime>>.
+
+[[CKDprime]]
+.Očvršćena derivacija dečijeg ključa; izostavlja roditeljski javni ključ
+image::images/mbc2_0513.png["ChildHardPrivateDerivation"]
+
+[role="pagebreak-before"]
+Kada se koristi očvršćena funkcija privatne derivacije, rezultirajući dečiji privatni ključ i kod lanca potpuno su različiti od onoga što bi rezultiralo iz funkcije normalne derivacije. Rezultirajuća "grana" ključeva može da se koristi za proizvodnju proširenih javnih ključeva koji nisu ranjivi, jer se lanac koji sadrže ne može iskoristiti za otkrivanje bilo kakvih privatnih ključeva. Očvršćena derivacija koristi se tako da stvori "razmak" u stablu iznad nivoa na kojem se koriste prošireni javni ključevi.
+
+Jednostavno rečeno, ako želite da iskoristite pogodnost xpub-a za dobijanje grane javnih ključeva, a da se ne izložite riziku da lančani kod procuri, trebalo bi da ga dobijete od očvršćenog roditelja, a ne od običnog roditelja. Kao najbolja praksa, deca nivoa-1 glavnih ključeva uvek se izvode kroz očvršćenu derivaciju, kako bi se sprečilo kompromitovanje matičnih ključeva.
+
+===== Indeksni brojevi za normalnu i očvršćenu derivaciju
+
+Indeksni broj koji se koristi u funkciji derivacije je 32-bitni celi broj. Da biste lako razlikovali ključeve izvedene normalnom funkcijom derivacije od ključeva izvedenih očvršćenom derivacijom, indeksni broj je podeljen u dva raspona. Indeksni brojevi između 0 i 2^31^&#x2013;1 (0x0 do 0x7FFFFFFF) koriste se _samo_ za normalnu derivaciju. Indeksni brojevi između 2^32^&#x2013;1 (0x80000000 to 0xFFFFFFFF) koriste se _samo_ za očvršćenu derivaciju. Dakle, ako je broj indeksa manji od  2^31^, dete je normalno, ali ako je indeksni broj jednak ili veći od 2^31^, dete je očvršćeno  (&#128578).
+
+Da bi se indeksni broj olakšao za čitanje i prikazivanje, broj indeksa za očvšćenu decu se prikazuje počevši od nule, ali sa simbolom "'". Prvi normalni dečiji ključ je prikazan kao 0, dok je prvo očvršćeno dete (indeks 0x80000000) prikazano kao 0++&#x27;++. Zatim bi drugi očvršćeni ključ imao indeks 0x80000001 i bio bi prikazan kao 1++&#x27;++, i tako dalje. Kada vidite indeks HD novčanika i++&#x27;++, to znači 2^31^+i.
+
+===== Identifikator ključa HD novčanika (putanja)
+
+((("hierarchical deterministic (HD) wallets")))Ključevi u HD novčaniku identifikuju se konvencijom o imenovanju "putanja", pri čemu je svaki nivo stabla odvojen kosom crtom (/) (vidi <<table_4-8>>). Privatni ključevi izvedeni iz glavnog privatnog ključa počinju sa „m“. Javni ključevi izvedeni iz glavnog javnog ključa počinju sa "M". Prema tome, prvi dečiji privatni ključ glavnog privatnog ključa je m/0. Prvi dečiji javni ključ je M/0. Unuče prvog deteta je m/0/1, i tako dalje.
+
+"Poreklo" ključa čita se sa desna nalevo, sve dok ne dođete do glavnog ključa iz kog je izveden. Na primer, identifikator m/x/y/z opisuje ključ koji je z-to dete ključa m/x/y, koji je y-to dete ključa m/x, koje je x-to dete od m.
+
+[[table_4-8]]
+Primeri putanja za HD novčanik
+[options="header"]
+|=======
+|HD path | opisani ključ
+| m/0 | Prvi (0) dečji privatni ključ od glavnog privatnog ključa (m)
+| m/0/0 | Prvi (0) dečiji privatni ključ od prvog deteta (m/0)
+| m/0'/0 | Prvo (0) normalno dete od prvog _očvršćenog_ deteta (m/0')
+| m/1/0 |  Prvi (0) dečiji privatni ključ od drugog deteta (m/1)
+| M/23/17/0/0 | Prvi (0) dečiji javni ključ od prvog deteta(M/23/17/0) od 18. deteta (M/23/17) od 24. deteta (M/23)
+|=======
+
+===== Kretanje po strukturi stabla HD novčanika
+
+Struktura stabla HD novčanika nudi ogromnu fleksibilnost. Svaki roditelj proširenog ključa može imati 4 milijarde dece: 2 milijarde normalne dece i 2 milijarde očvršćene dece. Svako od te dece može imati još 4 milijarde dece, i tako dalje. Drvo može biti veliko koliko vi želite, sa beskonačnim brojem generacija. Međutim, uz svu tu fleksibilnost, postaje prilično teško upravljanje tim beskonačnim stablom. Posebno je teško prenositi HD novčanike između implementacija, jer su mogućnosti za unutrašnju organizaciju na grane i podgrane beskrajne.
+
+Dva BIP-a nude rešenje ove složenosti kreiranjem nekih predloženih standarda za strukturu stabla HD novčanika. BIP-43 predlaže upotrebu prvog očvršćenog indeksa deteta kao posebnog identifikatora koji označava "svrhu" strukture drveta. Na osnovu BIP-43, HD novčanik treba da koristi samo jednu granu stabla nivoa-1, pri čemu indeksni broj identifikuje strukturu i imenski prostor ostatka drveta, definišući njegovu svrhu. Na primer, HD novčanik koji koristi samo granu m/i++&#x27;++/ treba da označi određenu svrhu i ta svrha je identifikovana brojem indeksa "i".
+
+Proširenjem te specifikacije, BIP-44 predlaže strukturu više računa kao "namenski" broj +44'+ pod BIP-43. Svi HD novčanici koji prate strukturu BIP-44 identifikovani su po tome što su koristili samo jednu granu drveta: m/44'/.
+
+BIP-44 određuje strukturu koja se sastoji od pet unapred definisanih nivoa stabla:
+
+-----
+m / purpose' / coin_type' / account' / change / address_index
+-----
+
+The first-level "purpose" is always set to +44'+. The second-level "coin_type" specifies the type of cryptocurrency coin, allowing for multicurrency HD wallets where each currency has its own subtree under the second level. There are three currencies defined for now: Bitcoin is m/44'/0', Bitcoin Testnet is m/44'/1', and Litecoin is m/44'/2'.
+
+The third level of the tree is "account," which allows users to subdivide their wallets into separate logical subaccounts, for accounting or organizational purposes. For example, an HD wallet might contain two bitcoin "accounts": m/44'/0'/0' and m/44'/0'/1'. Each account is the root of its own subtree.
+
+((("keys and addresses", see="also public and private keys")))On the fourth level, "change," an HD wallet has two subtrees, one for creating receiving addresses and one for creating change addresses. Note that whereas the previous levels used hardened derivation, this level uses normal derivation. This is to allow this level of the tree to export extended public keys for use in a nonsecured environment. Usable addresses are derived by the HD wallet as children of the fourth level, making the fifth level of the tree the "address_index." For example, the third receiving address for bitcoin payments in the primary account would be M/44'/0'/0'/0/2. <<table_4-9>> shows a few more examples.
+
+[[table_4-9]]
+.BIP-44 primeri strukture novčanika
+[options="header"]
+|=======
+|HD path | opisani ključ
+| M/44'/0'/0'/0/2 | The third receiving public key for the primary bitcoin account
+| M/44'/0'/3'/1/14 | The fifteenth change-address public key for the fourth bitcoin account
+| m/44'/2'/0'/0/1 | The second private key in the Litecoin main account, for signing transactions
+|=======

@@ -1,0 +1,1047 @@
+[[ch07]]
+[[adv_transactions]]
+== Napredne transakcije i skripte
+
+[[ch07_intro]]
+=== Uvod
+
+U prethodnom poglavlju predstavili smo osnovne elemente bitkoin transakcija i sagledali najčešći tip transakcijskih skripti, P2PKH skriptu. U ovom poglavlju pogledaćemo naprednije skripte i kako ih možemo koristiti za izgradnju transakcija sa složenim uslovima.
+
+Prvo ćemo pogledati _multisignature_ skripte. Zatim ćemo ispitati drugu najčešću skriptu transakcije, _Pay-to-Script-Hash_ (plati hešu skripte), koja otvara čitav svet složenih skripti. Zatim ćemo ispitati nove skript operatore koji dodaju vremensku dimenziju bitkoinu, preko _vremenskih brava_ (timelocks). Na kraju ćemo pogledati _Segregated Witness_ (odvojenog svedoka), arhitektonsku promenu strukture transakcija.
+
+[[multisig]]
+=== Multisignature 
+
+((("transactions", "advanced", "multisignature scripts")))((("transactions", "advanced", id="Tadv07")))((("scripting", "multisignature scripts", id="Smulti07")))((("multisignature scripts")))Multisignature skripte (skripte sa više potpisa) postavljaju uslov gde su N javnih ključeva u skripti, a najmanje M od njih moraju dati potpise za otključavanje sredstava. Ovo je takođe poznato kao M-od-N šema, gde je N ukupan broj ključeva i M je prag potpisa potrebnih za potvrdu. Na primer, multisignature 2-od-3 je ona u kojoj su tri javna ključa navedena kao potencijalni potpisnici od kojih se najmanje dva koriste za kreiranje potpisa za važeću transakciju za trošenje sredstava.
+
+Trenutno su _standardne_ multisignature skripte ograničene na najviše 3 navedena javna ključa, što znači da možete da napravite bilo koju kombinaciju od 1-od-1 do 3-od-3 multisignature skripte. Ograničenje od 3 navedena ključa će možda biti ukinuto do trenutka objave ove knjige, pa proverite funkciju +IsStandard()+ da biste videli šta mreža trenutno prihvata. Imajte na umu da se ograničenje od 3 ključa odnosi samo na standardne (goli, engl. "bare") multisignature skripte, a ne na multisignature skripte skrivene u skripti Pay-to-Script-Hash (P2SH). P2SH multisignature skripte su ograničene na 15 ključeva, što omogućava do 15-od-15 multisignature-a. Saznaćemo više o P2SH u <<p2sh>>.
+
+Opšti oblik skripte za zaključavanje koja postavlja M-od-N uslov na multisignature potpis je:
+
+----
+M <javni ključ 1> <javni ključ 2> ... <javni ključ N> N CHECKMULTISIG
+----
+
+gde je N ukupan broj javnih ključeva i M je prag potrebnih potpisa za trošenje izlaza.
+
+Skripta za zaključavanje koja postavlja 2-od-3 multisignature uslov izgleda ovako:
+
+----
+2 <javni ključ A> <javni ključ B> <javni ključ C> 3 CHECKMULTISIG
+----
+
+Prethodna skripta za zaključavanje može se zadovoljiti skriptom za otključavanje koja sadrži parove potpisa i javnih ključeva:
+
+----
+<potpis B> <potpis C>
+----
+ili bilo koju kombinaciju dva potpisa privatnih ključeva koji odgovaraju za ta tri navedena javna ključa.
+
+Dve skripte zajedno prave kombinovanu skriptu za proveru:
+
+----
+<potpis B> <potpis C> 2 <javni ključ A> <javni ključ B> <javni ključ C> 3 CHECKMULTISIG
+----
+
+Kada se izvrši, ova kombinovana skripta oceniće sa TRUE samo ako skripta za otključavanje odgovara uslovima koje postavlja skripta za zaključavanje. U ovom slučaju uslov je da skripta za otključavanje ima validan potpis sa dva privatna ključa koji odgovaraju dva od tri javna ključa postavljena kao uslov.
+
+[[multisig_bug]]
+===== Greška u izvršenju CHECKMULTISIG
+
+((("scripting", "multisignature scripts", "CHECKMULTISIG bug")))((("CHECKMULTISIG bug workaround")))Postoji greška u izvršavanju ++CHECKMULTISIG++-u koja zahteva pomalo neobično programiranje skripte. Kada se izvršava +CHECKMULTISIG+, on bi trebao da konzumira M+N+2 stavke na steku kao parametre. Međutim, zbog greške +CHECKMULTISIG+ će skinuti sa steka dodatnu vrednost ili vrednost više od očekivane.
+
+Pogledajte to detaljnije koristeći prethodni primer validacije:
+
+----
+<potpis B> <potpis C> 2 <javni ključ A> <javni ključ B> <javni ključ C> 3 CHECKMULTISIG
+----
+
+Prvo, +CHECKMULTISIG+ skine prvu stavku, a to je +N+ (u ovom primeru "3"). Zatim će skinuti +N+ stavke, koje su javni ključevi koji se mogu potpisivati. U ovom primeru to su javni ključevi A, B i C. Zatim će skinuti stavku +M+ sa steka, kvorum (koliko potpisa je potrebno). Ovde je M = 2. U ovom trenutku, +CHECKMULTISIG+ treba da skine ostale +M+ stavke, koje su potpisi, i proveri da li su validne. Nažalost, greška u implementaciji +CHECKMULTISIG+ skida sa steka jednu stavku više (ukupno M+1) nego što bi trebalo. Dodatna stavka se zanemaruje prilikom provere potpisa, tako da nema direktnog efekta na +CHECKMULTISIG+. Međutim, dodatna vrednost mora biti prisutna, jer ako je nema kada +CHECKMULTISIG+ pokuša da skine stavku sa prazog steka, to će izazvati stek grešku i skripta će neuspešno stati (označavajući transakciju nevažećom). Pošto se dodatni predmet zanemaruje, može biti bilo šta, ali obično se koristi +0+.
+
+Pošto je ova greška postala deo pravila konsenzusa, sada se mora uvek ponavljati. Ispravna provera skripte bi izgledala ovako:
+
+----
+0 <potpis B> <potpis C> 2 <javni ključ A> <javni ključ B> <javni ključ C> 3 CHECKMULTISIG
+----
+
+Dakle, skripta za otključavanje koja se zapravo koristi u multisig-u nije:
+
+----
+<potpis B> <potpis C>
+----
+
+nego je:
+
+----
+0 <potpis B><potpis C>
+----
+
+Ako sada vidite multisig skriptu za otključavanje, očekujte dodatni +0+, čija je jedina svrha rešavanje greške koja je slučajno postala pravilo konsenzusa.((("", startref="Smulti07")))
+
+[[p2sh]]
+=== Pay-to-Script-Hash (Plaćanje hešu skripte) (P2SH)
+
+((("transactions", "advanced", "Pay-to-Script-Hash")))((("scripting", "Pay-to-Script-Hash", id="Spay07")))Pay-to-Script-Hash (P2SH) predstavljen je 2012. kao moćna nova vrsta transakcije koja znatno pojednostavljuje upotrebu složenih skripti transakcija. Da bismo objasnili potrebu za P2SH, pogledajte praktičan primer.
+
+((("use cases", "import/export", id="mohamseven")))((("scripting", "Pay-to-Script-Hash", "import/export example")))((("Pay-to-Script-Hash (P2SH)", "import/export example")))U <<ch01_intro_what_is_bitcoin>> predstavili smo Mohameda, uvoznika elektronike sa sedištem u Dubaiju. Mohamedova kompanija koristi multisig bitkoin osobinu za svoje korporativne račune. Skripte za multisig potpise su jedna od najčešćih upotreba bitkoin naprednih skripting mogućnosti i imaju veoma moćne osobine. ((("accounts receivable (AR)")))Mohamedova kompanija koristi multisig skript za sva plaćanja mušterija, koja su u računovodstvenoj terminologiji poznata i kao "potraživanja". Pomoću multisignature šeme, sva plaćanja koja izvršavaju kupci zaključavaju se tako da zahtevaju najmanje dva potpisa za izvršavanje, jedan od Mohameda i jedan od njegovih partnera ili njegovog advokata koji ima rezervni ključ. Multisig šema nudi kontrolu korporativnog upravljanja i štiti od krađe, pronevere ili gubitka.
+
+Rezultirajuća skripta je prilično duga i izgleda ovako:
+
+----
+2 <javni ključ Mohameda> <javni ključ partner1> <javni ključ partner2> <javni ključ partner3> <javni ključ advokata> 5 CHECKMULTISIG
+----
+
+Iako su multisignature skripte moćne, one su nezgodne za upotrebu. S obzirom na prethodnu skriptu, Mohamed bi morao da dostavi ovu skriptu svakom kupcu pre plaćanja. Svaki kupac mora da koristi poseban softver za bitkoin novčanik sa mogućnošću kreiranja prilagođenih skripti transakcija, a svaka mušterija bi morala da razume kako da kreira transakciju pomoću prilagođenih skripti. Dalje, rezultirajuća transakcija bila bi oko pet puta veća od jednostavne uplatne transakcije, jer ova skripta sadrži veoma duge javne ključeve. Teret te velike transakcije kupac bi snosio u obliku naknada. Najzad, velika transakcijska skripta prenosila bi se u UTXO skup u RAM-u u svakom punom čvoru, sve dok ne bi bila potrošena. Sva ova pitanja otežavaju upotrebu složenih skripti za zaključavanje u praksi.
+
+P2SH je razvijen da bi rešio ove praktične poteškoće i učinio upotrebu složenih skripti jednostavnom kao uplate na bitkoin adresu. Sa P2SH plaćanjima, složena skripta za zaključavanje zamenjena je digitalnim otiskom prsta, kriptografskim hešom. Kada se transakcija koja pokušava da potroši UTXO predstavi kasnije, ona mora da sadrži skriptu koja odgovara hešu, pored skripte za otključavanje. Jednostavno rečeno, P2SH znači "platiti skripti koja odgovara ovom hešu, skripti koja će biti predstavljena kasnije, kada se potroši ovaj izlaz“.
+
+((("redeem scripts")))((("scripting", "redeem scripts")))U P2SH transakcijama skripta za zaključavanje koja je zamenjena hešom naziva se skriptom za  _ otkup (redeem)_ jer je predstavljena sistemu u vreme otkupa, a ne kao skripta za zaključavanje. <<without_p2sh>> prikazuje skriptu bez P2SH i <<with_p2sh>> prikazuje istu skriptu kodiranu sa P2SH.
+
+[[without_p2sh]]
+.Kompleksna skripta bez P2SH
+|=======
+| skripta za zaključavanje | 2 PubKey1 PubKey2 PubKey3 PubKey4 PubKey5 5 CHECKMULTISIG
+| skripta za otključavanje | Sig1 Sig2
+|=======
+
+[[with_p2sh]]
+.Kompleksna skripta sa P2SH
+|=======
+| skripta za otkup | 2 PubKey1 PubKey2 PubKey3 PubKey4 PubKey5 5 CHECKMULTISIG
+| skripta za zaključavanje | HASH160 <20-bajtni heš skripte za otkup> EQUAL
+| skripta za otključavanje | Sig1 Sig2 <skripta za otkup>
+|=======
+
+Kao što vidite iz tabele, uz P2SH složena skripta koja detaljno opisuje uslove za potrošnju rezultata (skripta za otkup) nije prikazana u skripti za zaključavanje. Umesto toga, samo je heš u skripti za zaključavanje, a sama skripta za otkup predstavljena je kasnije kao deo skripte za otključavanje kada se potroši izlaz. Ovo prebacuje teret naknade i složenosti sa pošiljaoca na primaoca (potrošača) transakcije.
+
+Pogledajmo Mohamedovu kompaniju, složenu multisig skriptu i rezultirajuću P2SH skriptu.
+
+Prvo, multisig skripta koju Mohamedova kompanija koristi za sve uplate kupaca:
+
+----
+2 <javni ključ Mohameda> <javni ključ partner1> <javni ključ partner2> <javni ključ partner3> <javni ključ advokata> 5 CHECKMULTISIG
+----
+
+Ako su rezervna mesta zamenjena stvarnim javnim ključevima (ovde prikazani kao 520-bitni brojevi počevši od 04), videćete da ova skripta postaje vrlo duga:
+
+----
+2
+04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C58704A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D99779650421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800 5 CHECKMULTISIG
+----
+
+Cela ova skripta umesto toga može biti predstavljena 20-bajtskim kriptografskim hešom, prvo primenom SHA256 heš algoritma, a zatim primenom RIPEMD160 algoritma na rezultat.
+
+Mi koristimo +libbitcoin-explorer+ (+bx+) u komandnoj liniji da bismo proizveli heš skripte, kao što sledi:
+
+----
+echo \
+2 \
+[04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C587] \
+[04A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49] \
+[047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D9977965] \
+[0421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5] \
+[043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800] \
+5 CHECKMULTISIG \
+| bx script-encode | bx sha256 | bx ripemd160
+54c557e07dde5bb6cb791c7a540e0a4796f5e97e
+----
+
+Serija naredbi iznad prvo kodira Mohamedovu multisig skriptu za otkup kao serijalizovanu heksadecimalno kodiranu bitkoin skriptu. Sledeća naredba +bx+ izračunava SHA256 heš od toga. Sledeća naredba +bx+ ponovo hešuje sa RIPEMD160-om, stvarajući konačni heš skripte:
+
+20-bajtni heš Mohamedove skripte za otkup je:
+
+----
+54c557e07dde5bb6cb791c7a540e0a4796f5e97e
+----
+
+Transakcija P2SH zaključava izlaz u ovom hešu umesto duže skripte za otkup, koristeći skriptu za zaključavanje:
+
+----
+HASH160 54c557e07dde5bb6cb791c7a540e0a4796f5e97e EQUAL
+----
+
+koja je, kao što vidite, znatno kraća. Umesto "plati ovoj multisig skripti sa 5 ključeva", ekvivalentna P2SH transakcija je "plati skripti sa ovim hešom". Klijent koji uplaćuje Mohamedovoj kompaniji u svojoj uplati treba da uključi samo ovu mnogo kraću skriptu za zaključavanje. Kada Mohamed i njegovi partneri žele da potroše ovaj UTXO, oni moraju da predstave originalnu skriptu za otkup (onu čiji je heš zaključao UTXO) i neophodne potpise za njeno otključavanje, ovako:
+
+----
+<Sig1> <Sig2> <2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG>
+----
+
+Te dve skripte su kombinovane u dve faze. Prvo, skripta za otkup se proverava prema skripti za zaključavanje kako biste bili sigurni da se heš poklapa:  
+
+----
+<2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG> HASH160 <redeem scriptHash> EQUAL
+----
+Ako se heš skripte za otkup poklapa, skripta za otključavanje izvršava se samostalno da bi otključala skriptu za otkup:
+
+----
+<Sig1> <Sig2> 2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG
+----
+
+Skoro sve opisane skripte u ovom poglavlju mogu da se implementiraju samo kao P2SH skripte. One ne mogu da se koriste direktno u skripti za zaključavanje UTXO.((("", startref="mohamseven")))
+
+==== P2SH adrese
+
+((("scripting", "Pay-to-Script-Hash", "addresses")))((("Pay-to-Script-Hash (P2SH)", "addresses")))((("bitcoin improvement proposals", "Address Format for P2SH (BIP-13)")))Još jedan važan deo P2SH je sposobnost kodiranja heša skripte kao adrese, kako je definisano u BIP-13. P2SH adrese su Base58Check kodirani 20-bajtni heš skripti, baš kao što su bitkoin adrese Base58Check kodirani 20-bajtni heš javnog ključa. P2SH adrese koriste prefiks verzije "5", što rezultira Base58Check-kodiranim adresama koje počinju sa "3".
+
+Na primer, Mohamedova složena skripta, hešovana i Base58Check kodirana kao P2SH adresa, postaje +39RF6JkABiHdIHkfChV6USGMe6Nsr66Gzv+. To možete potvrditi naredbom +bx+:
+
+----
+echo \
+'54c557e07dde5bb6cb791c7a540e0a4796f5e97e'\
+ | bx address-encode -v 5
+39RF6JqABiHdYHkfChV6USGMe6Nsr66Gzw
+----
+
+
+Mohamed može kupcima dati ovu "adresu", a oni mogu da koriste skoro bilo koji bitkoin novčanik za jednostavno plaćanje, kao da je reč o bitkoin adresi. Ta 3 prefiksa im daju nagoveštaj da je ovo posebna vrsta adrese, neka koja odgovara skripti umesto javnom ključu, koja inače deluje na potpuno isti način kao i plaćanje na bitkoin adresu.
+
+P2SH adrese kriju svu složenost, tako da osoba koja vrši uplatu ne vidi skriptu.
+
+==== Prednosti P2SH
+
+((("scripting", "Pay-to-Script-Hash", "benefits of")))((("Pay-to-Script-Hash (P2SH)", "benefits of")))P2SH nudi sledeće prednosti u poređenju sa direktnom upotrebom složenih skripti za zaključavanje izlaza:
+
+* Složene skripte se zamenjuju kraćim otiscima prstiju u izlazu transakcije, što čini transakciju manjom.
+* Skripte se mogu kodirati kao adresa, tako da pošiljaocu i novčaniku pošiljaoca nije potreban složen inženjering za implementaciju P2SH.
+* P2SH teret konstruisanja skripte prebacuje na primaoca, a ne na pošiljaoca.
+* P2SH prebacuje teret čuvanja podataka za duge skripte sa izlaza (koji se dodatno čuva na blokčejnu u UTXO skupu) na ulaz (skladišteno samo na blokčejnu).
+* P2SH prebacuje teret čuvanja podataka duge skripte iz sadašnjeg vremena (plaćanje) u buduće vreme (kada se troši).
+* P2SH prebacuje trošak naknade za transakciju duge skripte sa pošiljaoca na primaoca, koji mora da koristi dugu skriptu za otkup kako bi ga potrošio.
+
+==== Skripta za otkup i validacija
+
+((("scripting", "Pay-to-Script-Hash", "redeem scripts and validation")))((("Pay-to-Script-Hash (P2SH)", "redeem scripts and validation")))((("redeem scripts")))((("validation")))Pre verzije 0.9.2 Bitcoin Core klijenta, Pay-to-Script-Hash je bio ograničen na standardne tipove skripti za bitkoin transakcije, funkcijom +IsStandard()+. To znači da je skripta za otkup predstavljena u transakciji potrošnje mogla biti samo jedan od standardnih tipova: P2PK, P2PKH ili multisig.
+
+Od verzije 0.9.2 klijenta Bitcoin Core-a, P2SH transakcije mogu sadržati bilo koju validnu skriptu, čineći P2SH standard mnogo fleksibilnijim i omogućavajući eksperimentisanje sa mnogim novim i složenim vrstama transakcija.
+
+Ne možete staviti P2SH skriptu u skriptu za otkup P2SH, jer P2SH specifikacija nije rekurzivna. Takođe, dok je tehnički moguće ubaciti +RETURN+ (vidi <<op_return>>) u skriptu za otkup, pošto vas ništa u pravilima ne sprečava, nema nikakve praktične koristi jer izvršavanjem +RETURN+ tokom provere ta transakcija će biti označena nevažećom.
+
+Imajte na umu pošto skripta za otkup nije predstavljena mreži dok ne pokušate da potrošite P2SH izlaz, ako zaključate izlaz sa hešom nevažeće skripte za otkup, on će bez obzira na to biti obrađen. UTXO će se uspešno zaključati. Međutim, nećete ga moći potrošiti jer potrošena transakcija koja uključuje skriptu za otkup, neće biti prihvaćena jer je nevažeća skripta. Ovo stvara rizik, jer možete zaključati bitkoin u P2SH koji se kasnije ne može potrošiti. Mreža će prihvatiti skriptu za zaključavanje P2SH, čak iako odgovara nevažećoj skripti za otkup, jer heš skripte ne daje oznaku kakvu skriptu predstavlja.((("", startref="Spay07")))
+
+[WARNING]
+====
+((("warnings and cautions", "accidental bitcoin locking")))Skripta za zaključavanje P2SH sadrži heš skripte za otkup, što ne pruža tragove u vezi sa sadržajem same skripte za otkup. P2SH transakcija smatraće se važećom i biće prihvaćena čak iako skripta za otkup nije validna. Možete slučajno da zaključate bitkoin tako da ga kasnije ne može potrošiti.
+====
+
+
+
+[[op_return]]
+=== Snimanje izlaznih podataka (RETURN)
+
+((("transactions", "advanced", "data recording output")))((("scripting", "data recording output")))((("RETURN operator")))((("data recording (nonpayment data)")))((("nonpayment data")))((("blockchain (the)", "nonpayment data recording")))((("digital notary services"))) Potencijal distribuirane i vremenski označene bitkoin knjige, blokčejna, daleko prevazilazi plaćanja. Mnogi programeri su pokušali da koriste skripting jezik transakcija da bi iskoristili sigurnost i otpornost sistema za aplikacije kao što su digitalne usluge notara, sertifikati akcija i pametni ugovori (smart contracts). Rani pokušaji korišćenja bitkoin skripti za te svrhe uključivali su stvaranje izlaznih transakcija koje su beležile podatke u blokčejnu; na primer, snimanje digitalnog otiska fajla na takav način da je svako mogao utvrditi dokaz postojanja (proof-of-existence) tog fajla za određeni datum, pozivajući se na tu transakciju.
+
+((("blockchain bloat")))((("bloat")))((("unspent transaction outputs (UTXO)")))((("UTXO sets")))Upotreba blokčejna za skladištenje podataka nepovezanih sa plaćanjem u bitkoinima je sporna tema. Mnogi programeri takav postupak smatraju zloupotrebom i žele da ga obeshrabre. Drugi na to gledaju kao na demonstraciju ogromnih mogućnosti blokčejn tehnologije i  nastoje da ohrabre takvo eksperimentisanje. Oni koji se žale na uključivanje podataka koji nisu povezani sa plaćanjem, tvrde da to pretrpava blokčejn ("blockchain bloat"), opterećujući one koji rade sa punim bitkoin čvorovima, trošeći njihov prostor na disku za podatke koji nisu bili predviđeni da ih blokčejn prenosi. Povrh toga, takve transakcije stvaraju UTXO koji ne može da se potroši, koristeći se odredišnom bitkoin adresom kao poljem slobodnog oblika od 20 bajta. Pošto se adresa koristi za podatke bez odgovarajućeg privatnog ključa ni rezultirajući UTXO _nikad_ neće moći da se potroši; to je lažno plaćanje. Te transakcije koje se nikada ne mogu potrošiti, nikada se ne uklanjaju sa UTXO skupa i dovode do toga da se veličina UTXO skupa podataka zauvek poveća ili "pretrpa".
+
+U verziji 0.9 Bitcoin Core klijenta postignut je kompromis uvođenjem +RETURN+ operatora. +RETURN+ omogućava programerima da dodaju 80 bajtova neplaćenih podataka u izlazu transakcije. Međutim, za razliku od upotrebe "lažnog" UTXO-a, operator +RETURN+ stvara eksplicitno _dokazivo nepotrošiv_ izlaz, koji ne treba da se čuva u skupu UTXO-a. +RETURN+ izlazi se beleže na blokčejnu, tako da troše prostor na disku i doprinose povećanju veličine blokčejna, ali ne povećavaju UTXO skup ili UTXO memorijski pul podataka i ne opterećuju pune čvorove troškovima skupe RAM memorije.
+
++RETURN+ skripte izgledaju ovako:
+
+----
+RETURN <podaci>
+----
+
+((("Proof of Existence")))((("DOCPROOF prefix")))Deo podataka je ograničen na 80 bajtova i najčešće predstavlja heš, kao što je izlaz iz algoritma SHA256 (32 bajta). Mnoge aplikacije stavljaju prefiks ispred podatka da bi lakše identifikovale aplikaciju. Na primer, usluga http://proofofexistence.com[Proof of Existence (Dokaz postojanja)] digitalnim servisom overavanja kod notara koristi 8-bajtni prefiks +DOCPROOF+, koji je ASCII kodiran u heksadecimali +44 4f 43 50 52 4f 4f 46+.
+
+Imajte na umu da ne postoji "skripta za otključavanje" koja odgovara +RETURN+-u koji bi se eventualno mogao koristiti za "trošenje" +RETURN+ izlaza. Smisao +RETURN+-a je u tome što ne možete trošiti novac zaključan u tom izlazu, zato ga ne treba držati u UTXO skupu kao potencijalno potrošiv +RETURN+, pošto je _dokazivo nepotrošiv_. +RETURN+ je obično izlaz sa nultim iznosom bitkoina, jer svaki bitkoin dodeljen takvom izlazu je efektivno zauvek izgubljen. Ako je +RETURN+ referenca kao ulaz u transakciji, mehanizam za proveru skripte će zaustaviti izvršenje skripte za potvrdu i označiće transakciju nevažećom. Izvršavanje +RETURN+-a u osnovi uzrokuje da se skripta vrati sa +FALSE+ i zaustavi. Tako da ako slučajno navedete izlaz +RETURN+ kao ulaz u transakciji, ta transakcija će biti nevažeća.
+
+Standardna transakcija (ona koja odgovara +IsStandard()+ proverama) može imati samo jedan +RETURN+ izlaz. Međutim, jedan +RETURN+ izlaz može da se kombinuje u transakciji sa izlazima bilo koje druge vrste.
+
+Dve nove opcije komandne linije su dodate u Bitcoin Core-u počev od verzije 0.10. Opcija +datacarrier+ kontroliše prenošenje i rudarenje +RETURN+ transakcija, sa difoltom na "1" kako bi ih prihvatili. Opcija +datacarriersize+ uzima numerički argument koji određuje maksimalnu veličinu u bajtovima +RETURN+ skripte, difolt je 83 bajta, što omogućava maksimalno 80 bajtovni +RETURN+ podataka plus jedan bajt +RETURN+ opkoda i dva bajta +PUSHDATA+ opckoda.
+
+[NOTE]
+====
++RETURN+ je u početku predložen sa ograničenjem od 80 bajta, ali je ograničenje smanjeno na 40 bajta nakon puštanja funkcije. U februaru 2015. godine, u verziji 0.10 Bitcoin Core-a, limit je podignut na 80 bajtova. Čvorovi mogu izabrati da ne prenose dalje ili da ne rudare +RETURN+, ili da prenose dalje i rudare +RETURN+ samo ako sadrži manje od 80 bajta podatka.
+====
+
+=== Vremenske brave (timelocks)
+
+((("transactions", "advanced", "timelocks")))((("scripting", "timelocks", id="Stimelock07")))((("nLocktime field")))((("scripting", "timelocks", "uses for")))((("timelocks", "uses for")))Timelocks može da se prevede kao vremenske brave. One ograničavaju transakcije tako da se izlaz može potrošiti samo nakon određenog vremena. Bitkoin je od početka imao funkciju vremenske brave na nivou transakcije. Implementiran je sa poljem +nLocktime+ u transakciji. Dve nove karakteristike vremenske brave predstavljene su krajem 2015. i sredinom 2016, koje nude vremenske brave na nivou UTXO-a. To su +CHECKLOCKTIMEVERIFY+ i +CHECKSEQUENCEVERIFY+.
+
+Vremenske brave su korisne za kasnije knjiženje transakcija i zaključavanje sredstava do određenog datuma u budućnosti. Što je još važnije, vremenske brave proširuju bitkoin skriptovanje na vremensku dimenziju, omogućavajući složene višestepene pametne ugovore.
+
+[[transaction_locktime_nlocktime]]
+==== Locktime (vreme zaključavanja) transakcije (nLocktime)
+
+((("scripting", "timelocks", "nLocktime")))((("timelocks", "nLocktime")))Bitkoin je od početka imao funkciju vremenske brave (timelock) na nivou transakcije. Vreme zaključavanja (locktime) transakcije je parametar na nivou transakcije (polje u strukturi podataka transakcije), koji definiše najranije vreme validnosti transakcije i kada može da se prenese na mrežu ili doda u blokčejn. Locktime je takođe poznat kao +nLocktime+ na osnovu naziva promenljive koja se koristi u Bitcoin Core bazi podataka. U većini transakcija je postavljeno na nulu da nagovesti neposredno širenje i izvršavanje. Ako je +nLocktime+ veći od nule i iznosi manje od 500 miliona, to se tumači kao visina bloka, što znači da transakcija nije validna i neće biti prosleđena ili uključena u blokčejn pre zadate visine bloka. Ako je veća ili jednaka 500 miliona, tumači se kao vremenski Unix Epoch timestamp (sekunde protekle od 1. januara 1970.) i transakcija nije validna pre određenog vremena. Izvorni sistemi moraju da zadrže transakcije sa +nLocktime+ koji određuje budući blok ili vreme i da ih proslede na bitkoin mrežu tek pošto postanu validne. Ako se transakcija prenese u mrežu pre navedenog +nLocktime+, prvi čvor koji dobije transakciju odbiće je kao nevažeću i neće je predati drugim čvorovima. Upotreba +nLocktime+-a je ekvivalentna postdatiranju papirnog čeka.
+
+[[locktime_limitations]]
+===== Ograničenja Locktime-a transakcije
+
++nLocktime+ ograničava trošenje nekih izlaza u budućnosti, ali ipak nije nemoguće da se potroše pre tog vremena. To može da se objasni sledećim primerom.
+
+((("use cases", "buying coffee", id="alicesseven")))Alisa potpisuje transakciju trošeći jedan od svojih izlaza na Bobovu adresu i postavlja transakciju +nLocktime+ za 3 meseca u budućnosti. Alisa šalje tu transakciju Bobu na čuvanje. Sa ovom transakcijom Alisa i Bob znaju da:
+
+* Bob ne može da pošalje transakciju kako bi otkupio sredstva dok ne isteknu 3 meseca.
+* Bob može da prenese transakciju nakon 3 meseca.
+
+Međutim:
+
+* Alisa može da kreira drugu transakciju i dvostruko potroši iste ulaze bez zaključavanja. Dakle, Alisa može da potroši isti UTXO pre isteka 3 meseca.
+* Bob nema garancije da Alisa to neće učiniti.
+
+Važno je da se shvate ograničenja transakcije +nLocktime+. Jedina garancija je da Bob neće moći da joj otkupi vrednosti pre isteka 3 meseca. Nema garancije da će Bob dobiti sredstva. Da bi se postigla takva garancija, ograničenje vremenske brave mora da se postavi na sam UTXO i postane deo skripte za zaključavanje, a ne transakcije. To se postiže sledećim oblikom vremenske brave, zvanim Check Lock Time Verify (CLTV).
+
+==== Check Lock Time Verify (CLTV)
+
+((("Check Lock Time Verify (CLTV)", id="cltv07")))((("timelocks", "Check Lock Time Verify (CLTV)")))((("scripting", "timelocks", "Check Lock Time Verify (CLTV)")))((("bitcoin improvement proposals", "CHECKLOCKTIMEVERIFY (BIP-65)")))U decembru 2015, u bitkoin je uveden novi oblik vremenske brave uz pomoć soft fork nadogradnje. Na osnovu specifikacije BIP-65, nova operacija skripte pod nazivom _CHECKLOCKTIMEVERIFY_ (_CLTV_) je dodata u skripting jezik. +CLTV+ je vremenska brava po izlazu, a ne vremenska brava po transakciji kao što je slučaj sa +nLocktime+. To omogućava mnogo veću fleksibilnost u načinu primene vremenskih brava.
+
+Jednostavno rečeno, dodavanjem +CLTV+ opkoda u skriptu za otkup jednog izlaza on ograničava taj izlaz, tako da se može potrošiti tek nakon što prođe određeno vreme.
+
+[TIP]
+====
+Dok je +nLocktime+ vremenska brava na nivou transakcije, +CLTV+ je vremenska brava zasnovana na izlazu.
+====
+
++CLTV+ ne zamenjuje +nLocktime+, već ograničava određene UTXO-e tako da se mogu potrošiti samo u budućoj transakciji sa +nLocktime+ postavljenim na veću ili jednaku vrednost.
+
+Opcija +CLTV+ opkod uzima jedan parametar kao ulaz, izražen brojem u istom formatu kao +nLocktime+ (bilo visina bloka ili Unix epoch vreme). Kao što je naznačeno sufiksom +VERIFY+, +CLTV+ je vrsta opkoda koja zaustavlja izvršenje skripte ako je rezultat +FALSE+. Ako je TRUE, izvršenje se nastavlja.
+
+Da biste zaključali izlaz sa +CLTV+, ubacite ga u skriptu za otkup izlaza u transakciji koja stvara izlaz. Na primer, ako Alisa plaća Bobovoj adresi, izlaz obično sadrži P2PKH skriptu kao što je ova:
+
+----
+DUP HASH160 <Bobov heš javnog ključa> EQUALVERIFY CHECKSIG
+----
+
+Da biste ga vremenski ograničili, recimo 3 meseca od sada, transakcija bi bila P2SH transakcija sa skriptom za otkup poput ove:
+
+----
+<sada + 3 meseca> CHECKLOCKTIMEVERIFY DROP DUP HASH160 <Bobov heš javnog ključa> EQUALVERIFY CHECKSIG
+----
+
+gde je +<sada {plus} 3 meseca>+ visina bloka ili vrednost vremena procenjena za oko 3 meseca od trenutka kada je transakcija izrudarena: trenutna visina bloka {plus} 12,960 (blokova) ili trenutno Unix epoch vreme {plus} 7,760,000 (sekundi). Za sada, ne brinite o +DROP+ opkodu koji sledi +CHECKLOCKTIMEVERIFY+; biće uskoro objašnjen.
+
+Kada Bob pokuša da potroši ovaj UTXO, on konstruiše transakciju koja UTXO navodi kao ulaz. On koristi svoj potpis i javni ključ u skripti za otključavanje tog ulaza i postavlja na +nLocktime+ transakcije da bude jednaka ili veća od vremenske brave u +CHECKLOCKTIMEVERIFY+ koju je Alisa stavila. Nakon toga Bob emituje transakciju na bitkoin mreži.
+
+Bobova transakcija se procenjuje na sledeći način. Ako je parametar +CHECKLOCKTIMEVERIFY+ koji je Alisa postavila manji od ili jednak +nLocktime+ transakcije potrošnje, izvršavanje skripte se nastavlja (deluje kao da je izvršena &#x201d;prazna operacija&#x201d; ili NOP opkod). U suprotnom se izvršavanje skripte zaustavlja i transakcija se smatra nevažećom.
+
+Tačnije, +CHECKLOCKTIMEVERIFY+ ne uspeva i zaustavlja izvršavanje, označavajući transakciju nevažećom ako (izvor: BIP-65):
+
+1. je stek prazan; ili
+1. je gornja stavka na steku manja od 0; ili
+1. vrsta locktime-a (visina naspram vremenskog pečata) na vrhu steka i polje +nLocktime+ nisu isti; ili
+1. je stavka na vrhu steka veća od polja +nLocktime+; ili
+1. je polje +nSequence+ ulaza 0xffffffff.
+
+[NOTE]
+====
++CLTV+ i +nLocktime+ koriste isti format da bi opisali vremenske brave (timelocks), bilo visinu bloka ili proteklo vreme u sekundama od Unix epoch vremena. Kada se koriste zajedno, format +nLocktime+ mora da odgovara formatu +CLTV+ u izlazima&#x2014;oba se moraju pozivati ili na visinu bloka ili na vreme u sekundama.
+====
+
+Nakon izvršenja, ako je +CLTV+ uslov zadovoljen, vremenski parametar koji mu je prethodio ostaje kao gornja stavka na steku i možda će morati da bude ispušten sa +DROP+ za ispravno izvršavanje narednih skript opkodova. Iz tog razloga često ćete videti +CHECKLOCKTIMEVERIFY+, a zatim +DROP+.
+
+Korišćenjem +nLocktime+ u kombinaciji sa +CLTV+, scenario opisan u <<locktime_limitations>> se menja. Alisa više ne može da potroši novac (jer je zaključan Bobovim ključem) i Bob ne može da ga potroši pre nego što istekne 3-mesečno vreme zaključavanja.((("", startref="alicesseven")))
+
+Uvođenjem funkcije vremenske brave direktno u skripting jezik, +CLTV+ nam omogućava da razvijemo veoma zanimljive složene skripte.((("", startref="cltv07")))
+
+Standard je definisan u https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki[BIP-65 (CHECKLOCKTIMEVERIFY)].
+
+==== Relativne vremenske brave (relative timelocks)
+
+Obe +nLocktime+ i +CLTV+ su  ((("timelocks", "relative timelocks", id="Trelative07")))((("scripting", "timelocks", "relative timelocks")))((("relative timelocks", id="relativetime07"))) _apsolutne vremenske brave_ u tome što one određuju apsolutnu tačku u vremenu. Sledeće dve funkcije vremenskih brava koje ćemo ispitati su _relativne vremenske brave_ u kojima one određuju, kao uslov trošenja rezultata, vreme proteklo od potvrđivanja izlaza u blokčejnu.
+
+Relativne vremenske brave su korisne jer omogućavaju da se lanac od dve ili više međuzavisnih transakcija drži izvan lanca, istovremeno namećući vremensko ograničenje na jednu transakciju koja je zavisna od vremena proteklog od potvrde prethodne transakcije. Drugim rečima, sat ne počinje da odbrojava dok se UTXO ne zabeleži na blokčejnu. Ova funkcionalnost je posebno korisna u dvosmernim kanalima stanja (state channels) i Lightning mrežama, kao što ćemo videti u <<state_channels>>.
+
+Relativne vremenske brave, poput apsolutnih vremenskih brava, realizuju se i sa funkcijom na nivou transakcije i sa opkodom na nivou skripte. Relativna vremenska brava na nivou transakcije implementira se kao pravilo konsenzusa na vrednosti +nSequence+, koje je polje transakcije koje se postavlja na svaki ulaz transakcije. Relativne vremenske brave na nivou skripte implementiraju su sa opkodom +CHECKSEQUENCEVERIFY+ (CSV).
+
+((("bitcoin improvement proposals", "Relative lock-time using consensus-enforced sequence numbers (BIP-68)")))((("bitcoin improvement proposals", "CHECKSEQUENCEVERIFY (BIP-112)")))Relativne vremenske brave se implementiraju u skladu sa specifikacijama na https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki[BIP-68, Relative lock-time using consensus-enforced sequence numbers] i https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki[BIP-112, CHECKSEQUENCEVERIFY].
+
+BIP-68 i BIP-112 su aktivirani u maju 2016. kao nadogradnja konsenzusnih pravila soft fork-om.
+
+==== Relativne vremenske brave sa nSequence
+
+((("nSequence field")))((("scripting", "timelocks", "relative timelocks with nSequence")))Relativne vremenske brave mogu da se postave na svaki ulaz transakcije postavljanjem polja +nSequence+ u svakom od njenih ulaza.
+
+===== Prvobitno značenje nSequence
+
+Polje + nSequence + je prvobitno imalo namenu (ali nikad pravilno implementirano) da omogući promenu transakcija u mempool-u. Takvom upotrebom transakcija koja sadrži ulaze sa +nSequence+ vrednošću ispod 2^32^ - 1 (0xFFFFFFFF) ukazuje na transakciju koja još nije "završena". Takva transakcija bi se zadržavala u mempool-u sve dok je ne zameni drugom transakcijom, koja troši iste ulaze sa većim  +nSequence+ vrednostima. Kada se dobije transakcija čiji ulazi imaju +nSequence+ sa vrednošću 0xFFFFFFFF, smatraće se "završenom" i izrudarenom.
+
+Prvobitno značanje +nSequence+ nikada nije pravilno primenjeno i vrednost +nSequence+ se obično stavlja na 0xFFFFFFFF u transakcijama koje ne koriste vremenske brave. Za transakcije sa +nLocktime+ ili +CHECKLOCKTIMEVERIFY+, vrednost +nSequence+ mora biti postavljena na manje od 2^31^ da bi čuvari vremenske brave imali efekat, kao što je ispod objašnjeno.
+
+===== nSequence kao relativna vremenska brava koja se nameće konsenzusom
+
+Od aktiviranja BIP-68, nova pravila konsenzusa primenjuju se za svaku transakciju koja sadrži ulaz čija je +nSequence+ vrednost manja od 2^31^ (bit 1<<31 nije postavljen). U smislu programiranja, to znači da ako nije postavljen najvažniji bit (bit 1<<31), ta oznaka predstavlja "relativno vreme zaključavanja" (relative locktime). U suprotnom (bit 1<<31 postavljen), vrednost +nSequence+ je rezervisana za druge namene kao što su uključivanje +CHECKLOCKTIMEVERIFY+, + nLocktime +, Opt-In-Replace-By-Fee i druge buduće funkcije.
+
+Ulazi transakcije sa +nSequence+ vrednostima manjim od 2^31^ tumače se kao da imaju relativnu vremensku bravu. Takva transakcija je validna samo nakon što je ulaz ostario za relativni iznos vremenske brave. Na primer, transakcija sa jednim ulazom sa +nSequence+ relativnom vremenskom bravom od 30 blokova je validna samo kada je prošlo najmanje 30 blokova od trenutka kada je UTXO na ulazu izrudaren. Pošto je +nSequence+ polje na nivou ulaza, transakcija može da sadrži bilo koji broj ulaza vremenske brave, a svi moraju biti dovoljno stari da bi transakcija bila validna. Transakcija može da uključuje i ulaze sa vremenskim bravama (+nSequence+ < 2^31^) i ulaze bez relativne vremenske brave (+nSequence+ >= 2^31^).
+
+Vrednost +nSequence+ je navedena u blokovima ili sekundama, ali u nešto drugačijem formatu nego što smo videli da se koristi u +nLocktime+-u. Oznaka za različite tipove se koristi za razlikovanje između blokova za vrednosti odbrojavanja blokova i vrednosti odbrojavanja u sekundama. Ta oznaka tipa postavljena je u 23. najmanjem bitu (tj. vrednost 1<<22). Ako je postavljena oznaka tipa, vrednost +nSequence+ se tumači kao množilac od 512 sekundi. Ako oznaka tipa nije postavljena, vrednost +nSequence+ tumači se kao broj blokova.
+
+Kada se +nSequence+ tumači kao relativna vremenska brava, uzimaju se u obzir samo 16 najmanje važnih bitova. Jednom kada se ocene oznake (bitovi 32 i 23), vrednost +nSequence+-a se obično "prikriva" 16-bitnom maskom (npr. +nSequence+ & 0x0000FFFF).
+
+<<bip_68_def_of_nseq>> prikazuje binarnu šemu +nSequence+ vrednosti, kako je definisana u BIP-68.
+
+[[bip_68_def_of_nseq]]
+.BIP-68 definicija nSequence kodiranja (Izvor: BIP-68)
+image::images/mbc2_0701.png["BIP-68 definicija nSequence kodiranja"]
+
+
+Relativne vremenske brave zasnovane na primoravanju konsenzusne vrednosti +nSequence+ su definisani u BIP-68.
+
+Standard je definisan u https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki[BIP-68, Relative lock-time using consensus-enforced sequence numbers].
+
+==== Relativne vremenske brave (Relative Timelocks) sa CSV-om
+
+((("scripting", "timelocks", "relative timelocks with CHECKSEQUENCEVERIFY"))) ((("CHECKSEQUENCEVERIFY (CSV)")))Baš kao CLTV i +nLocktime+, postoji i opkod skripta za relativne vremenske brave koje prave +nSequence+ vrednost još moćniju u skriptama. Taj je opkod +CHECKSEQUENCEVERIFY+, koji se ukratko naziva i +CSV+.
+
+Kada +CSV+ operativni kod (opkod) ocenjuje u UTXO skripti za otkup, on omogućava potrošnju samo u transakciji čija je ulazna +nSequence+ vrednost veća ili jednaka parametru +CSV+. U suštini ovo ograničava trošenje UTXO-a dok ne protekne određeni broj blokova ili sekundi u odnosu na vreme rudarenja UTXO-a.
+
+Kao i kod CLTV-a, vrednost u +CSV+-u mora da odgovara formatu u odgovarajućoj vrednosti +nSequence+. Ako je +CSV+ naveden u blokovima, onda mora biti i +nSequence+. Ako je +CSV+ naveden u sekundama, onda mora biti i +nSequence+.
+
+Relativne vremenske brave sa +CSV+ su posebno korisne kada se stvori i potpiše nekoliko (lančanih) transakcija, ali se ne šire kada se čuvaju "van lanca". Dečija transakcija ne može da se koristi sve dok se roditeljska transakcija ne raširi, izrudari i ostari (ima nekoliko blokova posle nje) u vremenu određenom u relativnoj vremenskoj bravi. Primena ovog slučaja upotrebe može da se vidi u <<state_channels>> i <<lightning_network>>.((("", startref="relativetime07")))((("", startref="Trelative07")))
+
++CSV+ je detaljno definisan u https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki[BIP-112, CHECKSEQUENCEVERIFY].
+
+
+==== Medijana-Prošlog-Vremena (Median-Time-Past)
+
+((("scripting", "timelocks", "Median-Tme-Past")))((("Median-Tme-Past")))((("timelocks", "Median-Tme-Past")))Kao deo aktiviranja relativnih vremenskih brava, takođe je došlo do promene u načinu izračunavanja "vremena" za vremenske brave (apsolutne i relativne). U bitkoinu postoji suptilna, ali vrlo značajna razlika između vremena zida i vremena konsenzusa. Bitkoin je decentralizovana mreža, što znači da svaki učesnik ima svoju perspektivu vremena. Događaji na mreži se ne odvijaju odmah svuda. Za perspektivu svakog čvora mora da se uzme u obzir latencija mreže. Na kraju se sve sinhronizuje da bi se stvorila zajednička knjiga transakcija. Bitkoin postiže konsenzus svakih 10 minuta o stanju knjige kakva je postojala u _prošlosti_.
+
+Rudari postavljaju skup vremenskih pečata (timestamps) u zaglavljima blokova. Postoji određeni stepen širine koji je dozvoljen u konsenzusnim pravilima da bi se uzele u obzir razlike u tačnosti sata među decentralizovanim čvorovima. Međutim, ovo stvara nesrećni poriv među rudarima da lažu o vremenu u bloku kako bi zaradili dodatne naknade tako što uključuju transakcije sa vremenskim bravama koje još nisu sazrele (matured). Pogledajte sledeći odeljak za više informacija.
+
+Da bi se otklonio podsticaj na laž i ojačala bezbednost vremenskih brava, predložen je BIP i aktiviran je istovremeno sa BIP-ovima za relativne vremenske brave. Ovo je BIP-113, koji definiše novo konsenzusno merenje vremena pod nazivom _Medijana-Prošlog-Vremena (Median-Time-Past)_.
+
+Medijana-Prošlog-Vremena se izračunava uzimanjem vremenskih pečata poslednjih 11 blokova i izračunavanjem medijane. To srednje vreme tada postaje konsenzusno vreme i koristi se za računanje vremena. Uzimanjem srednje tačke od otprilike dva sata u prošlosti, smanjuje se uticaj vremenskih pečata bilo kog bloka. Uključivanjem 11 blokova, nijedan rudar ne može da utiče na vremenske pečate da bi dobio naknade od transakcija sa vremenskom bravom koja još nije sazrela.
+
+Medijana-Prošlog-Vremena menja implementaciju računanja vremena za +nLocktime+, +CLTV+, +nSequence+ i +CSV+. Vreme konsenzusa koje izračuna Medijana-Prošlog-Vremena uvek je približno jedan sat iza realnog proteklog vremena. Ako kreirate vremenske brave transakcija, trebalo bi to da uzmete u obzir prilikom procene željene vrednosti za kodiranje u +nLocktime+, +nSequence+, +CLTV+ i +CSV+.
+
+Medijana-Prošlog-Vremena je navedena u https://github.com/bitcoin/bips/blob/master/bip-0113.mediawiki[BIP-113].
+
+[[fee_sniping]]
+==== Odbrana vremenske brave od gađanja naknade (Fee Sniping)
+
+((("scripting", "timelocks", "defense against fee-sniping")))((("timelocks", "defense against fee-sniping")))((("fees", "fee sniping")))((("security", "defense against fee-sniping")))((("sniping")))Gađanje naknade (fee sniping) je teoretski napad u kome rudari pokušavaju da promene prošle blokove "gađanjem" transakcije budućih blokova sa visokom nagradom kako bi povećali njihovu profitabilnost.
+
+Na primer, recimo da je najviši postojeći blok #100,000. Ako umesto pokušaja da izrudare blok #100,001 za proširenje blokčejna, neki rudari pokušaju ponovo da izrudare #100.000. Ovi rudari mogu da odaberu bilo koju važeću transakciju (koja još nije izrudarena) u svoj kandidatski blok #100.000. Ne moraju ponovo da rudare blok sa istim transakcijama. U stvari oni imaju motivaciju da odaberu najpovoljnije transakcije (sa najvišom naknadom po kB) koje će uključiti u svoj blok. Mogu da uključe bilo koje transakcije koje su bile u "starom" bloku #100,000, kao i sve transakcije iz trenutnog mempool-a. U suštini oni imaju mogućnost da povuku transakcije iz "sadašnjosti" u iznova isipisanu "prošlost" kada ponovo stvore blok #100,000.
+
+Danas ovaj napad nije posebno unosan, jer je nagrada za blok mnogo veća od ukupne naknade po bloku. Ali u jednom trenutku u budućnosti, naknade za transakcije će predstavljati najveći deo nagrade (ili čak čitavu nagradu). Tada će ovaj scenario postati neizbežan.
+
+Da bi se sprečilo "gađanje nadoknade", kada Bitcoin Core stvara transakcije, on koristi +nLocktime+ da bi ih po difoltu ograničio na "sledeći blok". U našem scenariju, Bitcoin Core bi postavljao +nLocktime+ na 100,001 na bilo kojoj transakciji koju je stvorio. U normalnim okolnostima ovaj +nLocktime+ nema efekta&#x2014;transakcije su ionako mogle da budu uključene samo u blok #100,001; koji je sledeći blok.
+
+Pod blokčejn fork napadom rudari ne bi mogli da povuku transakcije sa visokom naknadom iz mempool-a, jer bi sve te transakcije bile sa vremenskom bravom na bloku #100,001. Oni mogu samo iznova da izrudare #100,000 sa bilo kojim transakcijama koje su bile validne u to vreme, u suštini ne dobijajući nove naknade.
+
+Da bi se to postiglo, Bitcoin Core postavlja +nLocktime+ na sve nove transakcije <sadašnji blok # + 1> i postavlja +nSequence+ na svim ulazima na 0xFFFFFFFE da se omogući +nLocktime+.((("", startref="Stimelock07")))
+
+=== Skripte sa kontrolom protoka (uslovne klauzule)
+
+((("transactions", "advanced", "flow control scripts")))((("scripting", "flow control scripts", id="Sflow07")))((("conditional clauses", id="condition07")))((("flow control", id="flow07")))Jedna od moćnih karakteristika bitkoin skripti je kontrola protoka (flow control), poznata i kao uslovne klauzule (conditional clauses). Verovatno ste upoznati sa kontrolom protoka u raznim programskim jezicima koji koriste konstrukciju +IF...THEN...ELSE+. Uslovne klauzule bitkoina izgledaju malo drugačije, ali su u osnovi iste konstrukcije.
+
+Na osnovnom nivou bitkoin uslovni opkodovi (operativni kodovi) omogućavaju nam da izgradimo skriptu za otkup koja ima dva načina otključavanja, zavisno od +TRUE+/+FALSE+ rezultata procene logičkog stanja. Na primer, ako je x +TRUE+, skripta za otkup je A, a ELSE skripta za otkup je B (if(x=TRUE) redeem_script=A; else redeem_script=B;).
+
+Dodatno uslovni izrazi bitkoina mogu da se "ugnezde" (nested) u nedogled, što znači da uslovna klauzula može da sadrži drugu unutar nje, koja opet sadrži neku drugu, itd. Kontrola protoka Bitcoin Script-a može se koristiti za izgradnju vrlo složenih skripti sa stotinama ili čak hiljadama mogućih putanja izvršenja. Ne postoji ograničenje gnezdenja, ali pravila konsenzusa nameću ograničenje na maksimalnu veličinu skripti u bajtovima.
+
+Bitkoin implementira kontrolu protoka koristeći +IF+, +ELSE+, +ENDIF+ i +NOTIF+ opkodove. Uz to, uslovni izrazi mogu sadržati i logičke operatore kao što su +BOOLAND+, pass:[<span class="keep-together"><code>BOOLOR</code></span>], i +NOT+.
+
+Na prvi pogled možda će vam se skripte za kontrolu protoka bitkoina učiniti zbunjujućim. To je zato što je Bitcoin Script stek jezik. Na isti način na koji +1 {plus} 1+ izgleda "naopačke" kada se izrazi kao +1 1 ADD+, klauzule za kontrolu protoka u bitkoinu takođe izgledaju "naopačke".
+
+U većini tradicionalnih (proceduralnih) programskih jezika kontrola protoka izgleda ovako:
+
+.Pseudokod kontrole protoka u većini programskih jezika
+----
+if (uslov):
+  kod koji se pokreće kada je stanje tačno
+else:
+  kod koji se pokreće kada je stanje netačno
+kod koji se pokreće u oba slučaja
+----
+
+U stek baziranom jeziku kao Bitcoin Script-a logično stanje dolazi pre +IF+, zbog čega izgleda "naopačke", ovako:
+
+.Bitcoin Script kontrola protoka
+----
+uslov
+IF
+  kod koji se pokreće kada je stanje tačno
+ELSE
+  kod koji se pokreće kada je stanje netačno
+ENDIF
+kod koji se pokreće u oba slučaja
+----
+
+Kada čitate Bitcoin Script imajte na umu da stanje koje se procenjuje (evaluira) dolazi _pre_ +IF+ opkoda (opcode).
+
+==== Uslovne klauzule sa VERIFY opkodovima (opcodes)
+
+((("VERIFY opcodes")))((("IF clauses")))((("opcodes", "VERIFY")))Drugi oblik uslova u Bitcoin Script-i je bilo koji opkod koji završava na +VERIFY+. Sufiks +VERIFY+ znači da ako procenjeni uslov nije +TRUE+, izvršavanje skripte se odmah prekida i transakcija se smatra nevažećom.
+
+((("guard clauses")))Za razliku od +IF+ klauzule, koja nudi alternativne putanje izvršavanja, sufiks +VERIFY+ deluje kao _zaštitna klauzula_, nastavljajući samo ako je preduslov ispunjen.
+
+Na primer, sledeća skripta zahteva Bobov potpis i jednu tajnu sliku ili tekst koji proizvodi određeni heš. Za otključavanje moraju biti ispunjena oba uslova:
+
+.Skripta za otkup sa +EQUALVERIFY+ zaštitnom klauzulom.
+----
+HASH160 <očekivani heš> EQUALVERIFY <Bobov javni ključ> CHECKSIG
+----
+
+Da bi to otkupio, Bob mora da konstruiše skriptu za otključavanje koja predstavlja važeću tajnu sliku ili tekst i potpis:
+
+.Skripta za otključavanje koja zadovoljava gornju skriptu za otkup
+----
+<Bobob potpis> <heš tajne slike ili teksta>
+----
+
+Bez predstavljanja tajne slike ili teksta Bob ne može doći do dela skripte koja proverava njegov potpis.
+
+[role="pagebreak-after"]
+Ovaj skript može da se napiše sa +IF+-om umesto:
+
+.Skripta za otkup sa +IF+ zaštitnom klauzulom
+----
+HASH160 <očekivani heš> EQUAL
+IF
+   <Bobov javni ključ> CHECKSIG
+ENDIF
+----
+
+Bobova skripta za otključavanje je identična:
+
+.Skripta za otključavanje koja zadovoljava gornju skriptu za otkup
+----
+<Bobob potpis> <heš tajne slike ili teksta>
+----
+
+Skripta sa +IF+ radi istu stvar kao i kad se koristi opkod sa sufiksom +VERIFY+; oba deluju kao zaštitne klauzule. Međutim, konstrukcija +VERIFY+ je efikasnija, jer koristi dva opkoda manje.
+
+Dakle, kada se koristi +VERIFY+, a kada +IF+? Ako samo pokušavate da prikačite preduslov (zaštitnu klauzulu), onda je bolji +VERIFY+. Međutim, ako želite da imate više putanja izvršavanja (kontrole protoka), tada vam treba +IF...ELSE+ klauzula kontrole protoka.
+
+[TIP]
+====
+((("EQUAL opcode")))((("opcodes", "EQUAL")))((("EQUALVERIFY opcode")))((("opcodes", "EQUALVERIFY")))Opkod kao što je +EQUAL+ staviće rezultat (+TRUE+/+FALSE+) na stek i ostaviti ga tamo za procenu sa sledećim opkodovima. Suprotno tome opkod +EQUALVERIFY+ sufiks ne ostavlja ništa na steku. Opkodovi koji završavaju sa +VERIFY+ ne ostavljaju rezultat na steku.
+====
+
+==== Korišćenje kontrole protoka u skriptama
+
+Vrlo česta upotreba kontrole protoka u Bitcoin Script-u je za pravljenje skripte za otkup koja nudi više putanja izvršavanja, a svaka na drugačiji način otkupljuje UTXO.
+
+((("use cases", "buying coffee")))Pogledajte jednostavan primer gde imamo dva potpisnika, Alise i Boba, i bilo ko od njih može da otkupi vrednost. Sa multisig-om bi se to izrazilo kao skripta 1-od-2. Radi demonstracije učinićemo istu stvar sa klauzulom +IF+:
+
+----
+IF
+ <Alisin javni ključ> CHECKSIG
+ELSE
+ <Bobov javni ključ> CHECKSIG
+ENDIF
+----
+
+Gledajući ovu skriptu za otkup možda se pitate: "Gde je uslov? Ništa ne prethodi +IF+ klauzuli!"
+
+Uslov nije deo skripte za otkup. Umesto toga uslov će biti ponuđen u skripti za otključavanje, omogućavajući Alisi i Bobu da "odaberu" koji put izvršavanja žele.
+
+Alisa to otkupljuje sa skriptom za otključavanje:
+----
+<Alisin potpis> 1
+----
+
++1+ na kraju služi kao uslov (+TRUE+), zbog kojeg će +IF+ klauzula izvršiti prvu putanju otkupa za koju Alisa ima potpis.
+
+Da bi Bob ovo otkupio, morao bi da odabere drugu putanju izvršavanja tako što bi dao +FALSE+ vrednost +IF+ klauzuli:
+
+----
+<Bobov potpis> 0
+----
+
+Bobova skripta za otključavanje stavlja +0+ na stek, što uzrokuje da +IF+ klauzula izvrši drugu (+ELSE+) skriptu, za šta je potreban Bobov potpis.
+
+Pošto +IF+ klauzule mogu biti ugnezdene, možemo da stvorimo "lavirint" putanja izvršavanja. Skripta za otključavanje može da obezbedi "mapu" biranja putanje izvršavanja koja će se zapravo izvršiti:
+
+----
+IF
+  script A
+ELSE
+  IF
+    script B
+  ELSE
+    script C
+  ENDIF
+ENDIF
+----
+
+U ovom scenariju postoje tri putanje izvršavanja (+skripta A+, +skripta B + i +skripta C+). Skripta za otključavanje pruža putanju u obliku niza +TRUE+ ili +FALSE+ vrednosti. Na primer, za biranje puta +skripta B+, skripta za otključavanje mora se završiti sa +1 0+ (+TRUE+, +FALSE+). Ove vrednosti će biti stavljene na stek tako da druga vrednost (+FALSE+) završi na vrhu steka. Spoljna +IF+ klauzula skine +FALSE+ vrednost i izvršava prvu +ELSE+ klauzulu. Tada se vrednost +TRUE+ pomiče na vrh steka i procenjuje unutrašnji (ugnezdeni) +IF+, biranjem +B+ putanje izvršavanja.
+
+Pomoću ove konstrukcije možemo izgraditi skriptu za otkup sa desetinama ili stotinama putanja izvršavanja, a svaka nudi drugačiji način za otkup UTXO-a. Da bi se potrošio, konstruišite skriptu za otključavanje koja bira putanju izvršavanja postavljanjem odgovarajućih +TRUE+ i +FALSE+ vrednosti na stek na svakoj kontrolnoj tački protoka.((("", startref="Sflow07")))((("", startref="flow07")))((("", startref="condition07")))
+
+=== Primer složene skripte
+
+((("transactions", "advanced", "example")))((("scripting", "complex script example", id="Scomplex07")))U ovom odeljku kombinujemo mnoge koncepte iz ovog poglavlja u jedan jedini primer.
+
+((("use cases", "import/export", id="mohamseventwo")))Naš primer se odnosi  priču o Mohamedu, vlasniku kompanije u Dubaiju, koji vodi posao uvoza/izvoza.
+
+((("transactions", "advanced", "multisignature scripts")))((("scripting", "multisignature scripts", "import/export example")))((("multisignature scripts")))U ovom primeru, Mohamed želi da izgradi račun za kapital kompanije sa fleksibilnim pravilima. Šema koju on kreira zahteva različite nivoe autorizacije zavisno od vremenskih brava. Učesnici u multisig šemi su Mohamed, njegova dva partnera Said i Zaira, i advokat kompanije Abdul. Tri partnera donose odluke na osnovu pravila većine, tako da se dva od tri moraju složiti. Međutim, u slučaju problema sa ključevima, oni hoće da njihov advokat povrati sredstva pomoću jednog od tri potpisa partnera. Konačno, ako su svi partneri neko vreme nedostupni ili onesposobljeni, oni žele da advokat bude u mogućnosti da direktno upravlja računom.
+
+Evo skripte za otkup koju je Mohamed osmislio da bi to postigao (linije su numerisane XX-om):
+
+.Promenljiv multisig sa vremenskom bravom
+----
+01  IF
+02    IF
+03      2
+04    ELSE
+05      <30 dana> CHECKSEQUENCEVERIFY DROP
+06      <javni ključ advokata Abdula> CHECKSIGVERIFY
+07      1
+08    ENDIF
+09    <Mohamedov javni ključ> <Saidov javni ključ> <Zairin javni ključ> 3 CHECKMULTISIG
+10  ELSE
+11    <90 dana> CHECKSEQUENCEVERIFY DROP
+12    <javni ključ advokata Abdula> CHECKSIG
+13  ENDIF
+----
+
+Mohamedova skripta implementira tri putanje izvršavanja koristeći ugnezdene +IF...ELSE+ kontrolne klauzule protoka.
+
+U prvoj putanji izvršavanja ova skripta deluje jednostavno kao 2-od-3 multisig sa tri partnera. Ova putanja izvršavanja sastoji se od linija 3 i 9. Linija 3 postavlja kvorum multisiga na +2+ (2-od-3). Ova putanja izvršavanja može se odabrati stavljanjem +TRUE TRUE+ na kraju skripte za otključavanje:
+
+.Skripta za otključavanje za prvu putanju izvršavanja (2-od-3 multisig)
+----
+0 <Mohamedov potpis> <Zairin potpis> TRUE TRUE
+----
+
+
+[TIP]
+====
++0+ se nalazi na početku ove skripte za otključavanje zbog greške u +CHECKMULTISIG+, koja skida dodatnu vrednost sa steka. +CHECKMULTISIG+ zanemaruje dodatnu vrednost, ali mora biti prisutna ili skripta neće uspeti. Stavljanje +0+ (najčešće) je rešenje te greške, kako je opisano u <<multisig_bug>>.
+====
+
+Druga putanja izvršavanja može da se koristi tek nakon isteka 30 dana od stvaranja UTXO-a. Tada je potreban potpis advokata Abdula i jednog od tri partnera (multisig 1-od-3). To se postiže linijom 7, koja postavlja kvorum za multisig na +1+. Da bi se odabrala ova putanja izvršavanja, skripta za otključavanje završavala bi se sa +FALSE TRUE+:
+
+.Skripta za otključavanje za drugu putanju izvršavanja (advokat +1-od-3+)
+----
+0 <Saidov potpis> <Abdulov potpis> FALSE TRUE
+----
+
+[TIP]
+====
+Zašto +FALSE TRUE+? Nije li to naopako? Pošto su dve vrednosti prisutne na steku, prvo je stavljen +FALSE+, zatim +TRUE+ jedan na drugi. +TRUE+ je _prvi_ skinut sa +IF+ opkodom.
+====
+
+Napokon, treća putanja izvršavanja omogućava advokatu Abdulu da sredstva troši sam, ali tek nakon 90 dana. Da biste odabrali ovu putanju izvršavanja, skripta za otključavanje mora da se završi sa +FALSE+:
+
+.Skripta za otključavanje za treću putanju izvršavanja (samo za advokata)
+----
+<Abdulov potpis> FALSE
+----
+
+Pokušajte da pokrenete skriptu na papiru da vidite kako se ponaša izvršavanje na steku.
+
+Još nekoliko stvari koje treba da uzmete u obzir kada čitate ovaj primer. Pogledajte da li možete da pronađete odgovore:
+
+* Zašto advokat ne može da napravi otkup u bilo kom trenutku sa trećom putanjom izvršavanja tako što će ga odabrati sa +FALSE+ na skripti za otključavanje?
+
+* Koliko putanja izvršavanja se može koristiti 5, 35 i 105 dana nakon što je UTXO izrudaren?
+
+* Da li su sredstva izgubljena ako advokat izgubi svoj ključ? Da li se vaš odgovor menja ako je prošao 91 dan?
+
+* Kako partneri "resetuju" sat svakih 29 ili 89 dana da bi sprečili advokata da pristupi sredstvima?
+
+* Zašto neki +CHECKSIG+ opkodovi u ovoj skripti imaju +VERIFY+ sufiks, dok drugi nemaju?((("", startref="Scomplex07")))((("", startref="mohamseventwo")))
+
+[[segwit]]
+=== Odvojeni svedok (Segregated Witness)
+
+((("segwit (Segregated Witness)", id="Ssegwit07")))Odvojeni svedok ili Segregated Witness (segwit) je nadogradnja pravila o konsenzusu bitkoina i protokola mreže, predložen i implementiran kao soft fork (meka račva) BIP-9 koja je aktivirana na bitkoin mainnet-u 1. avgusta 2017.
+
+U kriptografiji se termin "svedok" koristi da bi se opisalo rešenje kriptografske zagonetke. U bitkoin terminima svedok zadovoljava kriptografski uslov postavljen na nepotrošeni izlaz transakcije (UTXO).
+
+U kontekstu bitkoina, digitalni potpis je _jedna vrsta svedoka_, dok je svedok u širom smislu rešenje koje može da zadovolji uslove nametnute UTXO-om i da otključa taj UTXO za potrošnju. Izraz "svedok" je opštiji pojam za "skriptu za otključavanje" ili "scriptSig".
+
+Pre uvođenja segwita, svaki ulaz u transakciju praćen je podacima svedoka koji su ga otključali. Podaci svedoka su ugrađeni u transakciju kao deo svakog ulaza. Pojam _odvojeni svedok_, ili ukratko _segwit_, jednostavno znači odvajanje skripte potpisa ili za otključavanje određenog izlaza. Zamislite "odvojeni scriptSig" ili "odvojeni potpis" u najjednostavnijem obliku.
+
+Dakle, odvojeni svedok je arhitektonska promena bitkoina koja ima za cilj da podatke o svedocima premesti iz polja +scriptSig+ (skripta za otključavanje) transakcije u posebnu strukturu podataka _svedok ili witness_ koja prati transakciju. Klijenti mogu zatražiti podatke o transakciji sa ili bez pratećih podataka svedoka.
+
+U ovom odeljku ćete videti neke od prednosti odvojenog svedoka, opis mehanizma koji se koristi za raspoređivanje i primenu ove promene u arhitekturi i pokazati upotrebu odvojenog svedoka u transakcijama i adresama.
+
+Odvojeni svedok je definisan u sledećim BIP-ovima:
+
+https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki[BIP-141] :: Glavna definicija odvojenog svedoka.
+
+https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki[BIP-143] :: Verifikacija potpisa transakcije za verziju 0 programa svedoka
+
+https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki[BIP-144] :: Peer Services&#x2014;Nove mrežne poruke i formati za serijalizaciju
+
+https://github.com/bitcoin/bips/blob/master/bip-0145.mediawiki[BIP-145] :: Ažuriranje getblocktemplate-a za odvojene svedoke (za rudarenje)
+
+https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki[BIP-173]:: Base32 format adrese za native (odgovarajuće) izlaze svedoka v0-16
+
+
+==== Zašto odvojeni svedok?
+
+Odvojeni svedok je arhitektonska promena koja ima nekoliko efekata na skalabilnost, bezbednost, ekonomske podsticaje i performanse bitkoina:
+
+Zloupotreba (malleability) transakcije: Premeštanjem svedoka van transakcije, heš transakcije koji se koristi kao identifikator više ne uključuje podatke svedoka. Pošto su podaci svedoka jedini deo transakcije koje može da modifikuje treće lice (videti <<segwit_txid>>), njihovim uklanjanjem takođe se uklanja mogućnost napada radi zloupotrebe transakcija. Sa odvojenim svedokom hešovi transakcije postaju nepromenjivi za bilo koga osim za kreatora transakcije, što značajno poboljšava implementaciju mnogih drugih protokola koji se oslanjaju na naprednu izgradnju bitkoin transakcija, kao što su kanali za plaćanje, lančane transakcije i lightning mreže.
+
+Verzija skripti :: Uvođenjem skripti odvojenih svedoka svakoj skripti za zaključavanje prethodi broj _verzije skripte_, slično kao što transakcije i blokovi imaju brojeve verzija. Dodavanje broja verzije skripte omogućava nadogradnju jezika skripte na unazad kompatibilan način (tj. korišćenjem soft fork nadogradnji) da bi se uveli novi operandi skripti, sintaksa ili semantika. Mogućnost nadogradnje skripting jezika na nedisruptivni (nondisruptive) način uveliko će ubrzati stopu inovacija u bitkoinu.
+
+Skaliranje mreže i skladišta :: Podaci svedoka često doprinose ukupnoj veličini transakcije. Složenije skripte poput onih koje se koriste za multisig ili kanale za plaćanje su veoma velike. U nekim slučajevima te skripte predstavljaju većinu (više od 75%) podataka u transakciji. Premeštanjem podataka svedoka izvan transakcije, odvojeni svedok poboljšava skalabilnost bitkoina. Čvorovi mogu ukloniti podatke svedoka nakon validacije potpisa ili ih zanemariti u potpunosti kada rade pojednostavljenu verifikaciju plaćanja. Podaci svedoka ne moraju se prenositi na sve čvorove i ne moraju ih svi čvorovi sačuvati na disku.
+
+Optimizacija verifikacije potpisa :: Odvojeni svedok nadograđuje funkcije potpisa (+CHECKSIG+, +CHECKMULTISIG+ itd.) da bi smanjio algoritamsku složenost računanja. Pre segwita algoritam koji se koristio za potpisivanje zahtevao je određeni broj heš operacija koji je bio proporcionalan veličini transakcije. Računanja hešovanja podataka povećala su se sa O(n^2^) u odnosu na broj operacija potpisa, uvodeći značajno računarsko opterećenje na sve čvorove koji potvrđuju potpis. Sa segwitom, algoritam se menja da bi se složenost smanjila na O(n).
+
+Poboljšanje oflajn potpisivanja :: Potpisi odvojenih svedoka sadrže vrednost (iznos) na koju upućuje svaki ulaz u hešu koji je potpisan. Ranije je uređaj za oflajn potpisivanje, kao što je hardverski novčanik, morao da proveri količinu svakog ulaza pre potpisivanja transakcije. To se obično postizalo strimovanjem velike količine podataka o prethodnim transakcijama koje se navode kao ulazi. Pošto je izlaz sada deo heša za preuzete obaveze koji je potpisan, vanmrežnom uređaju nisu potrebne prethodne transakcije. Ako se iznosi ne preklapaju (pogrešno su predstavljeni kompromitovanim onlajn sistemom), potpis će biti nevažeći.
+
+==== Kako funkcioniše odvojeni svedok
+
+Na prvi pogled, čini se da je odvojeni svedok promena načina na koji se grade transakcije i samim tim funkcija na nivou transakcije, ali nije. Zapravo, odvojeni svedok je promena u načinu na koji se troše pojedinačni UTXO-i i zato je karakteristika na bazi izlaza.
+
+Transakcija može da potroši izlaze odvojenog svedoka ili tradicionalne (inline-witness) izlaze ili oboje. Zato nema puno smisla da se transakcija naziva "transakcijom odvojenog svedoka". Pre bi trebalo da označimo specifične izlazne transakcije kao "izlaze odvojenog svedoka“.
+
+Kada transakcija potroši UTXO, ona mora da obezbedi svedoka. U tradicionalnom UTXO-u, skripta za zaključavanje zahteva da se podaci svedoka dodaju _unutra_ u ulaznom delu transakcije koja troši UTXO. Međutim, odvojeni svedok UTXO posebno navodi skriptu za zaključavanje koja može biti zadovoljena podacima svedoka izvan ulaza (odvojeno).
+
+==== Soft fork (kompatibilnost unazad)
+
+Odvojeni svedok je značajna promena u arhitekturi izlaza i transakcija. Takva bi promena obično zahtevala istovremeno menjanje svakog bitkoin čvora i novčanika da bi se promenila pravila konsenzusa&#x2014;što je poznato i kao hard fork (tvrda račva). Umesto toga, odvojeni svedok se uvodi uz promenu koja remeti mnogo manje, a koja je kompatibilna unazad, poznata i kao soft fork (meka račva). Ova vrsta nadogradnje omogućava neažuriranom softveru da ignoriše promene i nastavi da radi bez ikakvih poremećaja.
+
+Izlazi odvojenog svedoka konstruisani su tako da ih stariji sistemi, koji nisu svesni promene, mogu i dalje potvrditi. Starom novčaniku ili čvoru, odvojeni svedok izgleda kao izlaz koji _svako može da potroši_. Takvi se rezultati mogu potrošiti sa praznim potpisom, zato činjenica da nema transakcije unutar transakcije (odvojena je) ne poništava transakciju. Noviji novčanici i rudarski čvorovi, međutim, vide izlaz odvojenog svedoka i očekuju da će u podacima o svedocima transakcije pronaći validnog svedoka za njega.
+
+==== Primeri izlaza odvojenih svedoka i transakcija
+
+Pogledajmo neke od naših primera transakcija da bismo videli kako bi se promenile sa odvojenim svedokom. Prvo ćemo pogledati kako se plaćanje putem Pay-to-Public-Key-Hash (P2PKH) menja programom odvojenih svedoka. Zatim ćemo pogledati ekvivalent odvojenog svedoka za skriptu „Pay-to-Script-Hash“ (P2SH). Na kraju, pogledaćemo kako se oba prethodna programa odvojenih svedoka mogu ugraditi u P2SH skriptu.
+
+[[p2wpkh]]
+===== Pay-to-Witness-Public-Key-Hash (Plati hešu javnog ključa svedoka) (P2WPKH)
+
+U <<cup_of_coffee>>, ((("use cases", "buying coffee", id="aliced")))Alisa je kreirala transakciju kako bi Bobu platila šolju kafe. Ta transakcija je stvorila izlaz P2PKH sa vrednošću od 0,015 BTC-a koju Bob može potrošiti. Skripta izlaza izgleda ovako:
+
+.Primer izlazne skripte P2PKH
+----
+DUP HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 EQUALVERIFY CHECKSIG
+----
+
+Pomoću odvojenog svedoka, Alisa bi kreirala skriptu Pay-to-Witness-Public-Key-Hash (P2WPKH, plati hešu javnog ključa svedoka), koja izgleda ovako:
+
+.Primer izlazne skripte P2WPKH
+----
+0 ab68025513c3dbd2f7b92a94e0581f5d50f654e7
+----
+
+Kao što vidite, skripta za zaključavanje odvojenog svedoka je mnogo jednostavnija od tradicionalnog izlaza. Sastoji se od dve vrednosti koje su gurnute na stek evaluacije skripte. Za starog (onog koji nije svestan segwit-a) bitkoin klijenta, dva elementa na steku bi izgledala kao rezultat koji svako može da potroši i ne zahteva potpis (ili bolje rečeno, može se potrošiti sa praznim potpisom). Novijem klijentu koji nije svestan segwit-a, prvi broj (0) se tumači kao broj verzije (_verzija svedoka_), a drugi deo (20 bajtova) ekvivalent je skripte za zaključavanje koji je poznat kao _program svedoka_. Program za svedoke od 20 bajtova prosto je heš javnog ključa, kao u P2PKH skripti.
+
+Sada, pogledajmo odgovarajuću transakciju koju Bob koristi da bi potrošio ovaj izlaz. Za originalnu skriptu (bez segwit-a), Bobova transakcija bi morala da uključi potpis unutar ulaza transakcije:
+
+.Dekodirana transakcija koja prikazuje izlaz P2PKH koji se troši sa potpisom
+----
+[...]
+“Vin” : [
+"txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+"vout": 0,
+     	 "scriptSig": “<Bob’s scriptSig>”,
+]
+[...]
+----
+
+Međutim, da bi potrošio izlaz odvojenog svedoka, transakcija nema potpis na tom ulazu. Umesto toga, Bobova transakcija ima prazan +scriptSig+ i uključuje odvojenog svedoka, van same transakcije:
+
+.Dekodiranje transakcije koja prikazuje izlaz P2WPKH koji se troši sa odvojenim podacima svedoka
+----
+[...]
+“Vin” : [
+"txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+"vout": 0,
+     	 "scriptSig": “”,
+]
+[...]
+“witness”: “<Bobovi podaci svedoka>”
+[...]
+----
+
+===== Izgradnja novčanika P2WPKH
+
+Izuzetno je važno imati na umu da P2WPKH treba da kreira isključivo primalac plaćanja, a ne da ih pošiljalac pretvara iz poznatog javnog ključa, P2PKH skripte ili adrese. Pošiljalac ne može znati da li novčanik primaoca ima mogućnost da konstruiše segwit transakcije i troši P2WPKH izlaze.
+
+Uz to, izlazi P2WPKH moraju biti konstruisani iz heša _kompresovanog_ javnog ključa. Nekompresovani javni ključevi su nestandardni u segwitu i možda će biti izričito onemogućeni u budućem soft fork-u. Ako je heš koji se koristi u P2WPKH došao od nekompresovanog javnog ključa, on može biti nepotrošiv i možete izgubiti sredstva. P2WPKH izlaze trebalo bi da kreira novčanik primaoca dobijanjem kompresovanog javnog ključa iz njihovog privatnog ključa.
+
+[WARNING]
+====
+P2WPKH treba da konstruiše primalac plaćanja pretvaranjem kompresovanog javnog ključa u P2WPKH heš. Nikada ne bi trebalo da transformišete P2PKH skriptu, bitkoin adresu ili nekompresovani javni ključ u skriptu svedoka P2WPKH.
+====
+
+[[p2wsh]]
+===== Pay-to-Witness-Script-Hash (Plati hešu skripte svedoka) (P2WSH)
+
+((("use cases", "import/export", id="mohamappd")))Drugi tip programa svedočenja odgovara skripti Pay-to-Script-Hash (P2SH) (plati hešu skripte). Videli smo ovu vrstu skripti u <<p2sh>>. U tom primeru, Mohamedova kompanija je koristila P2SH za izražavanje multisig skripte. Uplate Mohamedovoj kompaniji kodirane su skriptom za zaključavanje poput ove:
+
+.Primer izlazne skripte P2SH
+----
+HASH160 54c557e07dde5bb6cb791c7a540e0a4796f5e97e EQUAL
+----
+
+Ova skripta P2SH odnosi se na heš _skripte za otkup_ koja definiše 2-od-3 multisig zahteva za trošenje sredstava. Da bi potrošio ovaj izlaz, Mohamedova kompanija bi predstavila skriptu za otkup (čiji je heš isti kao heš skripte na izlazu P2SH) i potpise neophodne za zadovoljavanje te skripte za otkup, sve unutar ulaza transakcije:
+
+.Dekodirana transakcija koja pokazuje trošenje P2SH izlaza
+----
+[...]
+“Vin” : [
+"txid": "abcdef12345...",
+"vout": 0,
+     	 "scriptSig": “<SigA> <SigB> <2 PubA PubB PubC PubD PubE 5 CHECKMULTISIG>”,
+]
+----
+
+Pogledajmo kako bi ceo ovaj primer bio nadograđen na segwit. Ako bi Mohamedovi kupci koristili novčanik kompatibilan sa segwit-om, izvršili bi plaćanje kreirajući izlaz Pay-to-Witness-Script-Hash (P2VSH) koji bi izgledao ovako:
+
+.Primer izlazne skripte P2WSH
+----
+0 a9b7b38d972cabc7961dbfbcb841ad4508d133c47ba87457b4a0e8aae86dbb89
+----
+
+Opet, kao i na primeru P2WPKH, možete videti da je ekvivalentna skripta za odvojenog svedoka mnogo jednostavnija i izostavlja različite operatore skripte koje vidite u P2SH skriptama. Umesto toga, program odvojenog svedoka sastoji se od dve vrednosti stavljene na stek: verzije svedoka (0) i 32-bajtnog SHA256 heša skripte za otkup.
+
+[TIP]
+====
+Dok P2SH koristi 20-bajtni +RIPEMD160(SHA256 (skripta))+ heš, program svedoka P2WSH koristi 32-bajtni +SHA256(skripta)+ heš. Ova razlika u izboru algoritma hešovanja je namerna i koristi se za razlikovanje te dve vrste programa svedoka (P2WPKH i P2WSH) po dužini heša i za pružanje jače sigurnosti P2WSH (128 bit sigurnost u P2WSH u odnosu na 80 bita sigurnosti u P2SH).
+
+====
+
+Mohamedova kompanija može potrošiti izlaz P2WSH prezentujući ispravnu skriptu za otkup i dovoljno potpisa da je zadovolji. I skripta za otkup i potpisi biće odvojeni _izvan_ potrošne transakcije kao deo podataka svedoka. Unutar transakcije, novčanik Mohameda ((("", startref="mohamappd"))) stavio bi prazan +scriptSig+:
+
+.Dekodirana transakcija koja prikazuje izlaz P2WSH koji se troši sa posebnim podacima svedoka
+----
+[...]
+“Vin” : [
+"txid": "abcdef12345...",
+"vout": 0,
+     	 "scriptSig": “”,
+]
+[...]
+“svedok”: “<SigA> <SigB> <2 PubA PubB PubC PubD PubE 5 CHECKMULTISIG>”
+[...]
+----
+
+===== Razlika između P2WPKH i P2WSH
+
+U prethodna dva odeljka demonstrirali smo dve vrste programa svedoka: <<p2wpkh>> i <<p2wsh>>. Obe vrste programa svedoka sastoje se od jednog jedinog bajta verzije, a zatim dužeg heša. Izgledaju vrlo slično, ali se tumače vrlo različito: jedan se tumači kao heš javnog ključa, koji je zadovoljen potpisom, a drugi kao heš skripte, a zadovoljava se skriptom za otkup. Ključna razlika između njih je dužina heša:
+
+* Heš javnog ključa u P2WPKH iznosi 20 bajtova
+* Heš skripte u P2WSH je 32 bajta
+
+Ovo je jedina razlika koja novčaniku omogućava da razlikuje ove dve vrste programa svedočenja. Posmatrajući dužinu heša, novčanik može utvrditi koja vrsta programa svedoka je u pitanju, P2WPKH ili P2WSH.
+
+==== Nadogradnja na odvojenog svedoka
+
+Kao što vidimo iz prethodnih primera, prelazak na odvojene svedoke je proces iz dva koraka. Prvo, novčanici moraju da stvore posebne izlaze tipa segwit. Zatim ove izlaze mogu potrošiti novčanici koji znaju kako da konstruišu odvojene transakcije svedoka. U primerima, Alisin novčanik je bio svestan da postoji segwit i bio je u mogućnosti da stvori posebne izlaze sa skriptom odvojenih svedoka. Bobov novčanik takođe je svestan segwita i u stanju je da potroši te izlaze. Ono što na primeru ne može biti očigledno je da u praksi Alisin novčanik mora da _zna_ da Bob koristi novčanik koji je svestan segwit-a i koji može da troši ove izlaze. U suprotnom, ako Bobov novčanik nije nadograđen i Alisa pokušava da izvrši segwit uplate Bobu, Bobov novčanik neće moći da otkrije ove uplate.
+
+[TIP]
+====
+Za P2WPKH i P2WSH vrste plaćanja potrebno je nadograditi novčanike pošiljaoca i primaoca da bi mogli koristiti segwit. Pored toga, novčanik pošiljaoca mora znati da je novčanik primaoca svestan segwita.
+====
+
+Odvojeni svedok neće se istovremeno implementirati na celoj mreži. Umesto toga, odvojeni svedok je implementiran kao nadogradnja kompatibilna unazad, gde _stari i novi klijenti mogu da koegzistiraju_. Programeri novčanika će nezavisno nadograđiti softver za novčanike kako bi dodali segwit mogućnosti. Vrste plaćanja P2WPKH i P2WSH koriste se kada su pošiljalac i primalac svesni segwita. Tradicionalni P2PKH i P2SH nastaviće da rade za nenadograđene novčanike. To dozvoljava dva važna scenarija, o kojima je reč u sledećem odeljku:
+
+* Sposobnost novčanika pošiljaoca koji nije svestan segwita da izvrši uplatu u novčanik primaoca koji može da obrađuje segwit transakcije
+
+* Sposobnost novčanika pošiljaoca koji je svestan segwit-a da prepozna i razlikuje primaoce koji su svesni segwit-a i one koji to nisu, po njihovim _adresama_.
+
+===== Ugradnja odvojenog svedoka u P2SH
+
+Pretpostavimo, na primer, da Alisin novčanik nije nadograđen na segwit, ali Bobov novčanik jeste i može da rukuje segwit transakcijama. Alisa i Bob mogu da koriste "stare" ne-segwit transakcije. Ali Bob bi verovatno želeo da koristi segwit da smanji naknade za transakcije, koristeći popust koji se odnosi na podatke svedoka.
+
+U ovom slučaju Bobov novčanik može konstruisati P2SH adresu koja u sebi sadrži segwit skriptu. Alisin novčanik ovo smatra "normalnom" P2SH adresom i može vršiti plaćanja na nju bez ikakvog znanja o segwitu. Bobov novčanik tada može da izvrši to plaćanje segwit transakcijom, koristeći svu prednost segwit-a i smanjujući troškove transakcije.
+
+Oba oblika skripte svedoka, P2WPKH i P2WSH, mogu biti ugrađene u P2SH adresu. Prva je označen kao P2SH (P2WPKH), a druga kao P2SH (P2WSH).
+
+===== Pay-to-Witness-Public-Key-Hash unutar Pay-to-Script-Hash-a
+
+Prvi oblik skripte svedoka koju ćemo ispitati je P2SH (P2WPKH). Ovo je program svedoka Pay-to-Witness-Public-Key-Hash, ugrađen unutar skripte Pay-to-Script-Hash, tako da ga može koristiti novčanik koji nije svestan segwita.
+
+Bobov novčanik konstruiše program svedoka P2WPKH sa Bobovim javnim ključem. Ovaj program svedoka se zatim hešuje i rezultirajući heš je kodiran kao P2SH skripta. P2SH skripta se pretvara u bitkoin adresu, onu koja počinje sa "3", kao što smo videli u <<p2sh>> odeljku.
+
+Bobov novčanik počinje programom svedoka P2WPKH kojeg smo videli ranije:
+
+.Bobov program svedoka P2WPKH
+----
+0 ab68025513c3dbd2f7b92a94e0581f5d50f654e7
+----
+
+Program svedoka P2WPKH sastoji se od verzije svedoka i Bobovog hešovanog javnog ključa od 20 bajtova.
+
+Bobov novčanik zatim štiti prethodni program svedoka, prvo sa SHA256, zatim sa RIPEMD160, stvarajući još jedan heš od 20 bajtova.
+
+Koristimo +bx+ iz komandne linije da se to uradi:
+
+.HASH160 od P2WPKH programa svedoka 
+----
+echo \
+'0 [ab68025513c3dbd2f7b92a94e0581f5d50f654e7]'\
+ | bx script-encode | bx sha256 | bx ripemd160
+3e0547268b3b19288b3adef9719ec8659f4b2b0b
+----
+
+
+Nakon toga, heš skripta za otkup se pretvara u bitkoin adresu. Koristimo ponovo +bx+ u komandnoj liniji:
+
+.P2SH adresa
+----
+echo \
+'3e0547268b3b19288b3adef9719ec8659f4b2b0b' \
+| bx address-encode -v 5
+37Lx99uaGn5avKBxiW26HjedQE3LrDCZru
+----
+
+Sada, Bob može prikazati ovu adresu kupcima koji plaćaju kafu. Alisin novčanik može uplatiti na +37Lk99uaGn5avKBkiV26HjedKE3LrDCZru+, baš kao i na bilo koju drugu bitkoin adresu.
+
+Da bi platio Bobu, Alisin novčanik će zaključati izlaz pomoću P2SH skripte:
+----
+HASH160 3e0547268b3b19288b3adef9719ec8659f4b2b0b EQUAL
+----
+
+Iako Alisin novčanik nema podršku za segwit, Bob koji kreira uplatu može da je potroši segwit transakcijom.((("", startref="aliced")))
+
+===== Pay-to-Witness-Script-Hash unutar Pay-to-Script-Hash-a
+
+Slično tome, program svedočenja P2WSH za skriptu sa multisig-om ili drugu komplikovanu skriptu može biti ugrađen unutar P2SH skripte i adrese, omogućavajući bilo kom novčaniku da izvrši plaćanja koja su segwit kompatibilna.
+
+Kao što smo videli u <<p2wsh>>, Mohamedova kompanija ((("use cases", "import/export")))koristi plaćanje odvojenog svedoka sa multisig skriptama. Kako bi bilo koji klijent mogao da plati njegovoj kompaniji, bez obzira da li su novčanici nadograđeni za segwit, Mohamedov novčanik može da ugradi program svedoka P2WSH unutar P2SH skripte.
+
+Prvo, Mohammedov novčanik izbacuje skriptu za otkup sa SHA256 (samo jednom). Iskoristimo +bx+ da to uradimo u komandnoj liniji:
+
+.Mohamedov novčanik kreira program svedoka P2WSH
+----
+echo \
+2 \ [04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C587] \
+[04A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49] \
+[047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D9977965] \
+[0421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5] \
+[043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800] \
+5 CHECKMULTISIG \
+| bx script-encode | bx sha256
+9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73
+----
+
+Zatim se hešovana skripta za otkup pretvara u program svedoka P2WSH:
+
+----
+0 9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73
+----
+
+Zatim se program za svedoke hešuje sa SHA256 i RIPEMD160, stvarajući novi 20-bajtni heš, kakav se koristi u tradicionalnom P2SH. Koristimo +bx+ u komandnoj liniji da to učinimo:
+
+.HASH160 programa svedoka P2WSH
+----
+ echo \
+'0 [9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73]'\
+ | bx script-encode | bx sha256 | bx ripemd160
+86762607e8fe87c0c37740cddee880988b9455b2
+----
+
+Zatim novčanik gradi P2SH bitkoin adresu iz ovog heša. Opet, koristimo +bx+ za proračun u komandnoj liniji:
+
+.P2SH bitkoin adresa
+----
+echo \
+'86762607e8fe87c0c37740cddee880988b9455b2'\
+ | bx address-encode -v 5
+3Dwz1MXhM6EfFoJChHCxh1jWHb8GQqRenG
+----
+
+Sada Mohamedovi klijenti mogu uplaćivati na ovu adresu bez ikakve potrebe da podrže segwit. Da bi poslao uplatu Mohamedu, novčanik će zaključati izlaz sledećom P2SH skriptom:
+
+.P2SH skripta koja se koristi za zaključavanje plaćanja Mohamedovom multisig-u
+----
+HASH160 86762607e8fe87c0c37740cddee880988b9455b2 EQUAL
+----
+
+Mohamedova kompanija tada može da konstruiše segwit transakcije kako bi potrošila ove isplate, koristeći segwit funkcije uključujući niže naknade za transakcije.
+
+===== Adrese odvojenih svedoka
+
+Čak i nakon aktiviranja segwit-a, biće potrebno neko vreme dok se većina novčanika ne nadogradi. U početku će segwit biti ugrađen u P2SH, kao što smo videli u prethodnom odeljku, kako bi se olakšala kompatibilnost između novčanika koji su svesni i onih koji nisu svesni segwit-a.
+
+Međutim, jednom kada novčanici budu široko podržavali segwit, imaće smisla kodirati skripte svedoka direktno u native formatu adrese dizajniranom za segwit, umesto da ga ugrađujete u P2SH.
+
+Native format segwit adrese je definisan u BIP-173:
+
+https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki[BIP-173]:: Base32 format adrese za native (odgovarajuće) izlaze svedoka v0-16
+
+BIP-173 kodira samo skriptu svedoka (P2WPKH i P2WSH). Nije kompatibilan sa skriptama P2PKH ili P2SH bez segwit-a. BIP-173 je Base32 kodiran sa kontrolnim brojem, u poređenju sa Base58 kodiranom "tradicionalnom" bitkoin adresom. BIP-173 adrese se takođe nazivaju _bech32_ adresama, koje se izgovaraju "beh 32", aludirajući na upotrebu algoritma za otkrivanje grešaka "BCH" i Base32 skupa za kodiranje sa 32 znaka.
+
+BIP-173 adrese koriste alfanumerički niz od 32 znaka, koji su pažljivo odabrani da bi se smanjile greške u slučaju pogrešnog čitanja ili pogrešnog unošenja. Biranjem samo cifara i malih slova, bech32 se lakše čita, izgovora i 45% efikasnije se kodira u QR kodovima.
+
+BCH algoritam za otkrivanje grešaka je veliko poboljšanje u odnosu na prethodni algoritam kontrolnog broja (od Base58Check-a), koji omogućava ne samo otkrivanje, već i ispravljanje grešaka. Kada otkriju grešku, Interfejsi polja za unos adresa (poput tekstualnih polja u obrascima) mogu otkriti i istaknuti koji je znak najverovatnije pogrešno unet.
+
+Iz specifikacije BIP-173, evo nekoliko primera bech32 adresa:
+
+Mainnet P2WPKH:: bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4
+Testnet P2WPKH:: tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx
+Mainnet P2WSH:: bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3
+Testnet P2WSH:: tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7
+
+Kao što vidite u ovim primerima, niz segwit bech32 znaka dugačak je do 90 znakova i sastoji se iz tri dela:
+
+Deo čitljiv za ljude: Ovaj prefiks "bc" ili "tb" identifikuje mainnet ili testnet.
+
+Separator:: cifra "1" koja nije deo skupa za kodiranje od 32 znaka i može se pojaviti u ovom položaju samo kao separator
+
+Deo podatka:: Najmanje 6 alfanumeričkih znakova, kontrolnim brojem kodirana skripta svedoka
+
+U ovom trenutku samo nekoliko novčanika prihvata ili proizvodi native segwit adrese bech32, ali kako se usvajanje segwita povećava, viđaćete ih sve češće i češće.
+
+[[segwit_txid]]
+===== Identifikatori transakcije
+
+((("transaction IDs (txid)")))Jedna od najvećih prednosti odvojenog svedoka je ta što eliminiše zloupotrebu (malleability) transakcija trećih lica.
+
+Pre segwita, treća lica su mogla suptilno da izmene potpise transakcija, menjajući ID transakcije (heš), a ne menjajući im bilo koje osnovno svojstvo (ulaz, izlaz, iznos). To je stvorilo mogućnosti za DoS (denial-of-service) napade, kao i napade protiv loše napisanog softvera za novčanike, koji su pretpostavljali da se nepotvrđeni hešovi transakcije ne mogu menjati.
+
+Uvođenjem odvojenog svedoka, transakcije imaju dva identifikatora, +txid+ i +wtxid +. Tradicionalni ID transakcije +txid+ je dvostruki SHA256 heš serijalizovane transakcije, bez podataka o svedoku. Transakcija +wtxid+ je dvostruki SHA256 heš sa novim formatom serijalizacije transakcije sa podacima svedoka.
+
+Tradicionalni +txid+ se izračunava na potpuno isti način kao i kod transakcije bez segwit-a. Međutim, budući da segwit transakcije imaju prazne ++scriptSig++-ove u svakom ulazu, ne postoji deo transakcije koji treće lice može da modifikuje. Dakle, u segwit transakciji, treće lice ne može da promeni +txid+, čak i kada transakcija nije potvrđena.
+
++wtxid+ je kao "prošireni" ID, jer heš takođe sadrži podatke svedoka. Ako se transakcija prenese bez podataka o svedocima, tada su +wtxid+ i +txid+ identični. Imajte na umu da pošto +wtxid+ uključuje podatke svedoka (potpise) i podaci svedoka mogu biti zloupotrebljeni dok se transakcija ne potvrdi. Treća lica mogu smatrati nepromenjive samo +wtxid+ segwit transakcije i to samo ako su _svi_ ulazi u transakciju segwit ulazi.
+
+[TIP]
+====
+Odvojene transakcije svedoka imaju dve identifikacije (ID): +txid+ i +wtxid+. +txid+ je heš transakcije bez podatka o svedoku, a +wtxid+ je heš koji uključuje podatke svedoka. +txid+ transakcije u kojoj su svi ulazi segwit ulazi nije podložan zloupotrebi transakcija trećeg lica.
+====
+
+==== Novi algoritam za potpisivanje odvojenog svedoka
+
+Odvojeni svedok menja semantiku četiri funkcije provere potpisa  (+CHECKSIG+, +CHECKSIGVERIFY+, +CHECKMULTISIG+, i +CHECKMULTISIGVERIFY+), menjajući način izračunavanja heša za obavezivanje transakcije.
+
+Potpisi u bitkoin transakcijama primenjuju se na _hešu obavezivanja (commitment hash)_, koji se izračunava iz podataka o transakciji i zaključava određene delove podataka koji ukazuju na obavezivanje potpisnika tim vrednostima. Na primer, u jednostavnom potpisu tipa +SIGHASH_ALL+, heš obavezivanja uključuje sve ulaze i izlaze.
+
+Nažalost, način na koji se heš obavezivanja izračunava uveo je mogućnost da se čvor koji potvrđuje potpis može primorati na izvršavanje značajnog broja računanja heša. Konkretno, heš operacije se povećavaju u O(n^2^) u odnosu na broj operacija potpisa u transakciji. Napadač bi, prema tome, mogao da napravi transakciju sa veoma velikim brojem operacija za potpis, zbog čega cela bitkoin mreža mora da izvrši stotine ili hiljade heš operacija da bi verifikovala transakciju.
+
+Segwit je predstavljao priliku da se reši ovaj problem promenom načina na koji se izračunava heš obavezivanja. Za programe segwit verzije 0 programi svedoka koriste proveru potpisa sa poboljšanim algoritmom hešovanja obavezivanja kako je specificirano u BIP-143.
+
+Novi algoritam postiže dva važna cilja. Prvo, broj heš operacija povećava se mnogo postupnije na O(n) broj operacija potpisa, smanjujući mogućnost stvaranja DoS napada prekomerno složenim transakcijama. Drugo, heš obavezivanja sada uključuje i vrednost (iznose) svakog ulaza kao deo obaveze. To znači da se potpisnik može obavezati na određenu ulaznu vrednost bez potrebe da "skine" i proveri prethodnu transakciju na koju ulaz upućuje. U slučaju van-mrežnih uređaja, kao što su hardverski novčanici, to značajno pojednostavljuje komunikaciju između glavnog računara i hardverskog novčanika, uklanjajući potrebu za strimovanjem prethodnih transakcija radi potvrde. Hardverski novčanik može prihvatiti ulaznu vrednost "kao što je navedeno" od strane nepouzdanog hosta. Pošto je potpis nevažeći ako ta ulazna vrednost nije tačna, hardverski novčanik ne mora da potvrdi vrednost pre potpisivanja ulaza.
+
+==== Ekonomski podsticaji za odvojene svedoke
+
+Bitkoin rudarski čvorovi i puni čvorovi imaju troškove za resurse koji se koriste za podršku bitkoin mreže i blokčejna. Kako se količina bitkoin transakcija povećava, tako se povećavaju i troškovi resursa (CPU, mrežni kapacitet, prostor na disku, memorija). Rudarima se ti troškovi nadoknađuju naknadama koje su proporcionalne veličini svake transakcije (u bajtovima). Puni čvorovi koji ne rudare ne primaju nadoknadu, pa na njima nastaju troškovi, jer moraju da pokreću autoritativni, potpuno validirajući čvor sa punim indeksom, možda zato što se čvor koristi za upravljanje bitkoin biznisom.
+
+Bez naknada za transakcije, rast bitkoin podataka sigurno bi se drastično povećao. Naknade su namenjene usklađivanju potreba korisnika bitkoina sa teretom koji njihove transakcije nameću mreži, putem tržišnog mehanizma otkrivanja cena.
+
+Obračun naknada na osnovu veličine transakcije tretira sve podatke u transakciji kao jednake troškove. Ali iz perspektive punih čvorova i rudara, neki delovi transakcije nose mnogo veće troškove. Svaka transakcija dodata u bitkoin mrežu utiče na potrošnju četiri resursa na čvorovima:
+
+Prostor na disku :: Svaka transakcija se čuva u blokčejnu, dodajući ukupnoj veličini blockčejna. Blokčejn se čuva na disku, ali skladištenje se može optimizovati "obrezivanjem" starijih transakcija.
+
+CPU :: Svaka transakcija mora biti potvrđena, za šta je potrebno CPU vreme.
+
+Širina opsega :: Svaka transakcija se prenosi (putem flood propagation (širenja poplave)) preko mreže najmanje jednom. Bez ikakve optimizacije u protokolu širenja bloka, transakcije se ponovo prenose kao deo bloka, udvostručavajući uticaj na kapacitet mreže.
+
+Memorija :: Čvorovi koji potvrđuju transakcije zadržavaju UTXO indeks ili čitav UTXO skup u memoriji kako bi ubrzali potvrđivanje. S obzirom da je memorija bar za jedan red veličine skuplja od diska, rast UTXO skupa disproporcionalno doprinosi troškovima pokretanja čvora.
+
+Kao što vidite sa liste, nema svaki deo transakcije isti uticaj na troškove pokretanja čvora ili na sposobnost bitkoina da  skalira kako bi podržavao više transakcija. Najskuplji deo transakcije su novokreirani izlazi jer se dodaju u UTXO skup u memoriji. Radi poređenja, potpisi (podaci svedoka) dodaju najmanje tereta mreži i troškovima za pokretanje čvora, jer se podaci svedoka samo jednom validiraju, a zatim se više ne upotrebljavaju. Dalje, odmah nakon primanja nove transakcije i potvrđivanja podataka svedoka, čvorovi mogu odbaciti te podatke svedoka. Ako se naknade izračunavaju na osnovu veličine transakcije, bez razlike između ove dve vrste podataka, tada tržišni podsticaji za naknade nisu usklađeni sa stvarnim troškovima nametnutim transakcijom. U stvari, trenutna struktura naknade zapravo podstiče suprotno ponašanje, jer su podaci o svedocima najveći deo transakcije.
+
+Podsticaji koje naknade stvaraju su važni, jer utiču na ponašanje novčanika. Za sastavljanje transakcija, svi novčanici moraju primeniti određenu strategiju koja uzima u obzir brojne faktore, kao što su poverljivost (smanjivanje ponovne upotrebe adresa), fragmentacija (stvaranje mnogo sitnog kusura) i naknada. Ako naknade prevladavaju u motivisanju novčanika da koriste što manje moguće ulaza u transakcijama, to može dovesti do biranja UTXO-a i promene strategija adrese koje nenamerno povećavaju UTXO skup.
+
+Transakcije konzumiraju UTXO u svojim ulazima i kreiraju novi UTXO sa svojim izlazima. Dakle, transakcija koja ima više ulaza nego izlaza, rezultiraće smanjenjem skupa UTXO-a, dok će transakcija koja ima više izlaza nego ulaza rezultirati povećavanjem UTXO skupa. Razmotrimo _razliku_ između ulaza i izlaza i nazovimo je "neto-novih-UTXO-a". To je važna metrika, jer nam govori kakav će uticaj imati transakcija na najskuplji mrežni resurs, UTXO skup u memoriji. Transakcija sa pozitivnim neto-novih-UTXO-a dodatno opterećuje taj resurs. Transakcija sa negativnim neto-novih-UTXO-a smanjuje teret. Zato želimo da ohrabrimo transakcije koje imaju negativni ili neutralni neto-novih-UTXO-a.
+
+Pogledajmo primer koji pokazuje koje podsticaje stvara računanje naknade za transakcije, sa i bez odvojenog svedoka. Razmotrićemo dve različite transakcije. Transakcija A je transakcija sa tri ulaza i dva izlaza, i ima neto-novih-UTXO metriku od &#x2013;1, što znači da troši jedan UTXO više nego što stvara, smanjujući skup UTXO-a za jedan. Transakcija B je transakcija sa 2 ulaza i 3 izlaza, i ima neto-novih-UTXO metriku od 1, što znači da dodaje jedan UTXO u UTXO skup, namećući dodatne troškove celoj bitkoin mreži. Obe transakcije koriste multisig skripte (2-od-3) da bi pokazale kako složene skripte povećavaju uticaj odvojenog svedoka na naknade. Pretpostavimo da je provizija 30 satošija po bajtu i popust 75% na podatke svedoka:
+
+++++
+<dl>
+<dt>Bez odvojenog svedoka</dt>
+<dd>
+<p>Naknada transakcije: 25,710 satošija</p>
+<p>Naknada transakcije B: 18.990 satošija</p>
+</dd>
+
+<dt>Sa odvojenim svedokom</dt>
+<dd>
+<p>Naknada transakcija A: 8,130 satošija</p>
+<p>Naknada transakcija B: 12,045 satošija</p>
+</dd>
+</dl>
+++++
+
+
+Obe transakcije su jeftinije kada se implementira odvojeni svedok. Ali ako uporedimo troškove te dve transakcije, vidimo da je pre odvojenog svedoka naknada veća za transakciju koja ima negativan neto-novih-UTXO-a. Nakon odvojenog svedoka, naknade za transakcije usklađuju se sa podsticajem da se minimalizuje stvaranje novog UTXO-a tako da greškom ne kaznimo transakcije sa mnogo ulaza.
+
+Zato odvojeni svedok ima dve glavne posledice na naknade koje plaćaju korisnici bitkoina. Prvo, segwit smanjuje ukupne troškove transakcija popustom na podatake svedoka i povećanjem kapaciteta bitkoin blokčejna. Drugo, popust segwita na podatke svedoka ispravlja pogrešno izbalansirane podsticaje koji su nenamerno stvorile pretrpavanje UTXO skupa. ((("", startref="Tadv07")))((("", startref="Ssegwit07")))

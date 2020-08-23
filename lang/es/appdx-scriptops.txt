@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[apéndice]
+== Operadores, Constantes y Símbolos del Lenguaje de Script de Transacción
+
+[NOTE]
+====
+La fuente de las tablas y descripciones se encuentra en https://en.bitcoin.it/wiki/Script[].
+====
+
+<<tx_script_ops_table_pushdata>> muestra los operadores que "empujan" o introducen valores a la pila.((("transacciones", "scripts y Lenguaje de Script", id="TRlang14")))((("scripting", "operadores del Lenguaje de Script, constantes, y símbolos", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+.Empujar valor a la pila
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| OP_0 o OP_FALSE | 0x00 | Un array vacío es empujado a la pila
+| del 1 al 75 | 0x01 hasta 0x4b | El comando "empuja" los próximos N bytes a la pila, donde N es de 1 a 75 bytes
+| OP_PUSHDATA1 | 0x4c | El siguiente byte del script debe contener un número N; por ende empújense los siguientes N bytes a la pila
+| OP_PUSHDATA2 | 0x4d | Los siguientes 2 bytes del script contienen al número N; por ende empújense los siguientes N bytes a la pila
+| OP_PUSHDATA4 | 0x4e | Los siguientes 4 bytes del script contienen al número N; por ende empújense los siguientes N bytes a la pila
+| OP_1NEGATE | 0x4f | Empújese el valor "-1" a la pila
+| OP_RESERVED | 0x50 | Halt&#x2014;Transacción inválida a no ser que el comando se encuentre dentro de una clausula OP_IF por ser ejecutada
+| OP_1 u OP_TRUE| 0x51 | Empujar el valor "1" a la pila
+| desde el OP_2 al OP_16 | de 0x52 al 0x60 |  Para el comando OP_N, empújese el valor "N" hacia la pila, por ejemplo, OP_2 empuja el valor "2"
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> muestra operadores de control de flujo condicional.
+
+[[tx_script_ops_table_control]]
+.Control de flujo condicional
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| OP_NOP | 0x61 | No hacer nada
+| OP_VER | 0x62 | Halt&#x2014;Transacción inválida a no ser que el comando se encuentre en una clausula OP_IF por ser ejecutada
+| OP_IF | 0x63 | Ejecutar las siguientes órdenes si el tope de la pila no es 0
+| OP_NOTIF | 0x64 | Ejecutar las siguientes órdenes si el tope de la pila es 0
+| OP_VERIF | 0x65 | Halt&#x2014;Transacción inválida
+| OP_VERNOTIF | 0x66 | Halt&#x2014;Transacción inválida
+| OP_ELSE | 0x67 | Ejecutar solo si las instrucciones previas no fueron ejecutadas
+| OP_ENDIF | 0x68 | Fin del bloque OP_IF, OP_NOTIF u OP_ELSE
+| OP_VERIFY | 0x69 | Comprueba la parte superior de la pila, detener y anular la transacción si no es VERDADERO
+| OP_RETURN | 0x6A | Detener e invalidar la transacción
+|=======
+
+<<tx_script_ops_table_timelock>> muestra operadores utilizados para bloqueos temporales.
+
+[[tx_script_ops_table_timelock]]
+.Operaciones de bloqueos temporales
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| OP_CHECKLOCKTIMEVERIFY (previamente OP_NOP2) | 0xb1 | Marca una transacción como inválida si el valor en el tope de la pila es mayor que el valor del campo "nLockTime" de la transacción, de lo contrario, la interpretación del script continúa la ejecución tal y como si un comando OP_NOP se hubiese ejecutado. La transacción también será invalida si: 1. la pila está vacía; o 2. el valor del tope de la pila es negativo; o 3. el valor del tope de la pila es mayor o igual que 500000000 mientras que el valor del campo "nLockTime" de la transacción es menor que 500000000, o vice versa; o 4. el valor del campo de entrada "nSequence" es igual a 0xffffffff. La semántica precisa del comando se encuentra especificada en la BIP-65 
+| OP_CHECKSEQUENCEVERIFY (previamente OP_NOP3) | 0xb2 | Marca la transacción como inválida si el bloqueo temporal relativo de la entrada (establecido por la BIP 0068 mediante el parámetro "nSequence") no es mas largo o igual que el valor del ítem ubicado al tope de la pila.  La semántica precisa del comando se encuentra especificada en la BIP-112|
+|=======
+
+<<tx_script_ops_table_stack>> muestra operadores utilizados para manipular la pila.
+
+[[tx_script_ops_table_stack]]
+.Operaciones en la pila
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| OP_TOALTSTACK | 0x6b | Saca al elemento que está en el tope de la pila principal y lo coloca al tope de una pila alternativa
+| OP_FROMALTSTACK | 0x6c | Saca al elemento que está en el tope de una pila alternativa y lo coloca en el tope de la pila principal
+| OP_2DROP | 0x6d | Elimina los dos elementos más altos de la pila
+| OP_2DUP | 0x6e | Duplica los dos elementos más altos de la pila
+| OP_3DUP | 0x6F | Duplica los tres elementos más altos de la pila
+| OP_2OVER | 0x70 | Copia a los elementos tercero y cuarto de la pila y los coloca en el tope de la misma, en el mismo orden
+| OP_2ROT | 0x71 | Mueve al quinto y sexto elementos de la pila y los coloca en la parte superior de la misma, en el mismo orden
+| OP_2SWAP | 0x72 | Intercambia de posición a los dos pares de elementos ubicados en el tope de la pila, es decir, toma al tercer y cuarto elementos de la pila y los mueve al tope en ese mismo orden
+| OP_IFDUP | 0x73 | Si el elemento ubicado en el tope de la pila no es cero (0), entonces se duplica
+| OP_DEPTH | 0x74 | Cuenta los elementos que hay la pila y empuja a la pila el número resultante
+| OP_DROP | 0x75 | Elimina el elemento que se ubica al tope de la pila
+| OP_DUP | 0x76 | Duplica el elemento que se ubica al tope de la pila
+| OP_NIP | 0x77 | Elimina el segundo elemento más alto de la pila
+| OP_OVER | 0x78 | Copia al segundo elemento más alto de la pila y lo coloca en el tope
+| OP_PICK | 0x79 | Toma el elemento ubicado al tope de la pila y lo interpreta como un número "N", y a continuación, copia el elemento enésimo desde el tope de la pila hacia abajo y lo coloca al tope de la pila
+| OP_ROLL | 0x7a | Toma el elemento ubicado al tope de la pila y lo interpreta como un número "N", y a continuación, mueve el elemento enésimo desde el tope de la pila hacia abajo y lo coloca al tope de la pila
+| OP_ROT | 0x7b | Toma al tercer elemento más alto de la pila y lo mueve al tope de la misma
+| OP_SWAP | 0x7c | Intercambia de posición a los dos elementos más altos de la pila
+| OP_TUCK | 0x7d | Lleva a cabo el comando OP_SWAP con los dos elementos más altos de la pila y luego copia el elemento que ha quedado en segundo lugar y lo coloca en el tope de la pila 
+|=======
+
+<<tx_script_ops_table_splice>> muestra operadores para cadenas.
+
+[[tx_script_ops_table_splice]]
+.Operaciones de unión de cadenas
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| _OP_CAT_ | 0x7e | Desactivada (concatena los dos  elementos más altos de la pila)
+| _OP_SUBSTR_ | 0x7f | Desactivada (devuelve una sección de una cadena)
+| _OP_LEFT_ | 0x80 | Desactivada (devuelve la cadena de elementos que yacen más a la izquierda)
+| _OP_RIGHT_ | 0x81 | Desactivada (devuelve la cadena de elementos que yacen más a la derecha)
+| OP_SIZE | 0x82 | Calcula la longitud de cadena del elemento superior de la pila y devuelve el resultado en el tope de la misma 
+|=======
+
+<<tx_script_ops_table_binmath>> muestra operadores de aritmética binaria y de lógica booleana.
+
+[[tx_script_ops_table_binmath]]
+.Aritmética binaria y condicional
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| _OP_INVERT_ | 0x83 | Deshabilitado (Invierte todos los bits del elemento en el tope de la pila)
+| _OP_AND_ | 0x84 | Deshabilitado (ejecuta un AND booleano con los dos elementos más altos de la pila)
+| _OP_OR_ | 0x85 | Deshabilitado (ejecuta un OR booleano con los dos elementos más altos de la pila)
+| _OP_XOR_ | 0x86 | Deshabilitado (ejecuta un XOR booleano con los dos elementos más altos de la pila)
+| OP_EQUAL | 0x87 | Empuja VERDADERO (1) al tope de la pila si los dos primeros elementos son exactamente iguales, y empuja FALSO (0) en caso contrario
+| OP_EQUALVERIFY | 0x88 | Hace lo mismo que OP_EQUAL, pero a continuación, ejecuta OP_VERIFY para detener la ejecución de la máquina virtual si no se obtuvo VERDADERO
+| OP_RESERVED1 | 0x89 | Halt&#x2014;Invalida la transacción a no ser que el comando se ejecute dentro de una clausula OP_IF por ser ejecutada
+| OP_RESERVED2 | 0x8a | Halt&#x2014;Invalida la transacción a no ser que el comando se ejecute dentro de una clausula OP_IF por ser ejecutada
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>> muestra operadores numéricos (aritméticos).
+
+[[tx_script_ops_table_numbers]]
+.Operadores numéricos
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| OP_1ADD | 0x8b | Sumar 1 al ítem superior de la pila   
+| OP_1SUB | 0x8c | Restar 1 al ítem superior de la pila
+| _OP_2MUL_ | 0x8d | Deshabilitado (multiplicar al ítem en el tope de la pila por el número 2)
+| _OP_2DIV_ | 0x8e | Deshabilitado (dividir al ítem en el tope de la pila entre el número 2)
+| OP_NEGATE | 0x8F | Invierte el signo aritmético del elemento en el tope de la pila
+| OP_ABS | 0x90 | Cambiar el signo del elemento en el tope de la pila, cualquiera que sea, a positivo
+| OP_NOT | 0x91 | Niega lógicamente al elemento en el tope de la pila. Es decir, si el valor del elemento en el tope es 0 o 1 (posee un valor booleano), lo cambia a 1 o 0, de lo contrario devuelve 0
+| OP_0NOTEQUAL | 0x92 | Si el elemento del tope es 0 devuelve 0, en caso contrario devuelve 1
+| OP_ADD | 0x93 | Toma los dos elementos más altos de la pila, los suma, y coloca el resultado en el tope
+| OP_SUB | 0x94 | Se toman los dos elementos más altos de la pila, se le resta al valor del segundo elemento, el valor del primero, y se devuelve el resultado en el tope de la pila
+| _OP_MUL_ | 0x95 | Deshabilitado (multiplica los dos elementos más altos de la pila)
+| _OP_DIV_ | 0x96 | Deshabilitado (divide el segundo elemento más alto de la pila entre el primero)
+| _OP_MOD_ | 0x97 | Deshabilitado (devuelve el residuo que resulta de la división del segundo elemento más alto de la pila entre el primero)
+| _OP_LSHIFT_ | 0x98 | Deshabilitado (Toma e interpreta al elemento más alto de la pila como un número "N". Luego toma los N bits más a la izquierda del segundo elemento más alto de la pila y se los invierte, conservando su signo)
+| _OP_RSHIFT_ | 0x99 | Deshabilitado (Toma e interpreta al elemento más alto de la pila como un número "N". Luego toma los N bits más a la derecha del segundo elemento más alto de la pila y se los invierte, conservando su signo)
+| OP_BOOLAND | 0x9a | Ejecuta la operación booleana AND con los dos elementos más altos de la pila
+| OP_BOOLOR | 0x9b | Ejecuta la operación booleana OR con los dos elementos más altos de la pila
+| OP_NUMEQUAL | 0x9c | Devuelve VERDADERO si los dos elementos superiores de la pila son dos números iguales
+| OP_NUMEQUALVERIFY | 0x9d | Hace lo mismo que NUMEQUAL, y después ejecuta OP_VERIFY para detener la ejecución si no es VERDADERO
+| OP_NUMNOTEQUAL | 0x9e | Devuelve VERDADERO si los dos elementos superiores de la pila no son números iguales
+| OP_LESSTHAN | 0x9f | Devuelve VERDADERO si el valor del segundo elemento es menor que el del elemento superior
+| OP_GREATERTHAN | 0xa0 | Devuelve VERDADERO si el valor del segundo elemento es mayor que el del elemento superior
+| OP_LESSTHANOREQUAL | 0xa1 | Devuelve VERDADERO si el segundo elemento es menor o igual que el elemento superior
+| OP_GREATERTHANOREQUAL | 0xa2 | Devuelve VERDADERO si el segundo elemento es mayor o igual que el elemento superior
+| OP_MIN | 0xa3 | Devuelve el menor de los dos elementos superiores 
+| OP_MAX | 0xa4 | Devuelve el mayor de los dos elementos superiores
+| OP_WITHIN | 0xa5 | Devuelve VERDADERO si el tercer elemento está entre el segundo elemento (o igual) y el primer elemento
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> muestra operadores de funciones criptográficas.
+
+[[tx_script_ops_table_crypto]]
+.Operaciones criptográficas y de cálculos de hash
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| OP_RIPEMD160 | 0xa6 | Devuelve el hash RIPEMD160 del elemento superior
+| OP_SHA1 | 0xa7 | Devuelve el hash SHA1 del elemento superior
+| OP_SHA256 | 0xa8 | Devuelve el hash SHA256 del elemento superior
+| OP_HASH160 | 0xa9 | Devuelve el hash RIPEMD160(SHA256(x)) del elemento superior x
+| OP_HASH256 | 0xaa | Devuelve el hash SHA256(SHA256(x)) del elemento superior x
+| OP_CODESEPARATOR | 0xab | Marca el comienzo de los datos a ser firmados
+| OP_CHECKSIG | 0xac | Extrae del tope de la pila una llave pública y una firma y verifica la firma con el hash de los datos de la transacción; devuelve VERDADERO si el resultado es congruente
+| OP_CHECKSIGVERIFY | 0xad | Hace lo mismo que CHECKSIG, pero después ejecuta OP_VERIFY para detener la ejecución si no se obtiene VERDADERO
+| OP_CHECKMULTISIG | 0xae | Ejecuta CHECKSIG para cada par de firma y llave pública proporcionados. Todos deben coincidir. Un error de código en la aplicación elimina de la pila un elemento extra, por lo que se hace necesario prefijar el operador con OP_NOP para solucionarlo.
+| OP_CHECKMULTISIGVERIFY | 0xaf | Hace lo mismo que CHECKMULTISIG, pero después ejecuta OP_VERIFY para detener la ejecución si no se obtiene VERDADERO
+|=======
+
+<<tx_script_ops_table_nop>> muestra símbolos no-operacionales.
+
+[[tx_script_ops_table_nop]]
+.No-operadores
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| desde OP_NOP1 al OP_NOP10 | de 0xb0 a 0xb9 | No hace nada, comando ignorado
+|=======
+
+
+<<tx_script_ops_table_internal>> muestra códigos operacionales reservados para su uso por parte del intérprete de scripts interno.((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+.Códigos OP reservados para el uso del intérprete interno
+[opciones="título"]
+|=======
+| Símbolo | Valor (hexadecimal) | Descripción
+| OP_SMALLDATA | 0xf9 | Representa un campo pequeño de datos 
+| OP_SMALLINTEGER | 0xfa | Representa un campo de entero pequeño
+| OP_PUBKEYS | 0xfb | Representa campos de llave pública
+| OP_PUBKEYHASH | 0xfd | Representa un campo de hash de llave pública
+| OP_PUBKEY | 0xfe | Representa un campo de llave pública
+| OP_INVALIDOPCODE | 0xff | Representa cualquier código OP que no esté asignado actualmente
+|=======

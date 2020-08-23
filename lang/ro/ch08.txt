@@ -1,0 +1,338 @@
+[[bitcoin_network_ch08]]
+== Rețeaua Bitcoin
+
+=== Arhitectura de rețea De-la-Egal-la-Egal
+
+((("rețeaua bitcoin", "arhitectura de-la-egal-la-egal")))((("de-la-egal-la-egal (P2P)")))Bitcoin este structurat cu o arhitectură de rețea de-la-egal-la-egal peste internet. Termenul de-la-egal-la-egal (peer-to-peer), sau P2P, înseamnă că toate calculatoarele care participă la rețea sunt egale unul cu celălalt, că sunt toate egale, că nu există noduri ”speciale” și că toate nodurile împart sarcina furnizării serviciilor de rețea. Nodurile de rețea se interconectează într-o rețea celulară cu o topologie ”plată”. Nu există vreun server, nici un serviciu centralizat și nici o ierarhie în rețea. Nodurile dintr-o rețea P2P furnizează și consumă servicii în același timp, reciprocitatea fiind stimulentul pentru participare. Rețelele P2P sunt, în mod inerent, rezistente, descentralizate și deschise. Un exemplu preeminent al unei arhitecturi de rețea P2P a fost internetul timpuriu, unde nodurile din rețeaua IP erau egale. Arhitectura de internet de astăzi este mai ierarhică, dar Protocolul Internet își păstrează încă esența de topologie plată. Dincolo de bitcoin, cea mai mare și de succes aplicație a tehnologiilor P2P este schimbul de fișiere, cu Napster fiind pionier și BitTorrent ca fiind cea mai recentă evoluție a arhitecturii.
+
+Arhitectura de rețea P2P bitcoin este mult mai mult decât o alegere topologică. Bitcoin este prin design un sistem de numerar digital P2P, iar arhitectura rețelei este atât o reflecție cât și o fundație a acestei caracteristici de bază. Descentralizarea controlului este un principiu de proiectare de bază care poate fi atins și menținut doar printr-o rețea de consens P2P descentralizată.
+
+((("rețeaua bitcoin", "definit")))Termenul ”rețea bitcoin” se referă la colecția de noduri care rulează protocolul P2P bitcoin. Pe lângă protocolul P2P bitcoin, există și alte protocoale, cum ar fi Stratum, care sunt utilizate pentru minerit și portofele ușoare sau mobile. Aceste protocoale suplimentare sunt furnizate de servere de rutare gateway care accesează rețeaua bitcoin folosind protocolul P2P bitcoin și apoi extind acea rețea la nodurile care rulează alte protocoale. De exemplu, serverele Stratum conectează nodurile de minerit Stratum prin protocolul Stratum la rețeaua principală bitcoin și creează puntea de la protocolul Stratum la protocolul P2P bitcoin. Folosim termenul ”rețea bitcoin extinsă” pentru a ne referi la rețeaua globală care include protocolul P2P bitcoin, protocoalele bazinelor de minerit, protocolul Stratum și orice alte protocoale conexe care conectează componentele sistemului bitcoin.
+
+=== Tipuri de Noduri și Rolurile lor
+
+((("rețeaua bitcoin", "tipuri de noduri și roluri", id="BNnode08")))((("bitcoin nodes", "tipuri și roluri", id="BNtype08")))Deși nodurile din rețeaua P2P bitcoin sunt egale, ele pot avea diferite roluri depinzând de funcționalitatea pe care o susțin. Un nod bitcoin este o colecție de funcții: rutare, bază de date lanț-de-blocuri, minerit și servicii pentru portofel. Un nod complet cu toate aceste patru funcții este prezentat în <<full_node_reference>>.
+
+[[full_node_reference]]
+[role="smallerfifty"]
+.Un nod de rețea bitcoin cu toate cele patru funcții: portofel, miner, bază de date completă lanț-de-blocuri și rutare de rețea
+image::images/mbc2_0801.png["FullNodeReferenceClient_Small"]
+
+Toate nodurile includ funcția de rutare pentru a participa la rețea și ar putea include și alte funcționalități. Toate nodurile validează și propagă tranzacțiile și blocurile, și descoperă și mențin conexiunile cu alte noduri. În exemplul cu noduri complete din <<full_node_reference>>, funcția de rutare este indicată printr-un cerc numit ”Nod Rețea de Rutare” (Network Routing Node) sau cu litera ”N”.
+
+(((”clieți nod-complet”)))Unele noduri, numite noduri complete, mențin, de asemenea, o copie completă și actualizată a lanțului-de-blocuri. Nodurile complete pot verifica în mod autonom și autoritar orice tranzacție fără referință externă. (((”verificarea simplă a plății (SPV)”))))Unele noduri mențin doar un subset al lanțului-de-blocuri și verifică tranzacțiile folosind o metodă numită _verificare simplificată a plății_ (simplified payment verification) sau SPV. (((”clienți supli”)))Aceste noduri sunt cunoscute sub numele de noduri SPV sau noduri suple (lightweight). În exemplul cu noduri complete din figură, funcția bazei de date lanț-de-blocuri cu nod-complet este indicată de un cerc numit ”lanț-de-blocuri complet” (Full Blockchain) sau litera ”B.” În <<bitcoin_network>>, nodurile SPV sunt desenate fără cercul ”B”, arătând că nu au o copie completă a lanțului-de-blocuri.
+
+((("noduri bitcoin", "noduri de minerit")))((("minerit și consens", "noduri de minerit")))((("algoritmul dovadă de lucru")))((("minerit și consens", "algoritmul dovadă de lucru")))Nodurile de minerit concurează pentru a crea blocuri noi prin rularea de  hardware specializat pentru rezolvarea algoritmului Dovadă-de-Lucru. Unele noduri de minerit sunt, de asemenea, noduri complete, menținând o copie completă a lanțului-de-blocuri, în timp ce altele sunt noduri suple (lightweight) care participă la bazinul de minerit și depind de un server de bazin să mențină un nod complet. Funcția de minerit este prezentată în nodul complet sub forma unui cerc numit ”Miner” sau litera ”M”.
+
+Portofelele pentru utilizatori ar putea face parte dintr-un nod complet, așa cum se întâmplă de obicei în cazul clienților bitcoin desktop. Din ce în ce mai multe portofele pentru utilizatori, în special cele care rulează pe dispozitive cu restricții de resurse, cum ar fi smartphone-urile, sunt noduri SPV. Funcția portofel este prezentată în <<full_node_reference>> ca un cerc numit ”Portofel” (Wallet) sau litera ”W”.
+
+În plus față de principalele tipuri de noduri din protocolul P2P bitcoin, există servere și noduri care rulează alte protocoale, cum ar fi protocoale specializate pentru bazin de minerit și protocoale suple (lightweight) pentru accesul clienților.
+
+<<node_type_ledgend>> arată cele mai frecvente tipuri de noduri din rețeaua bitcoin extinsă.
+
+=== Rețeaua Bitcoin Extinsă
+
+((("", startref="BNnode08")))((("", startref="BNtype08")))((("rețeaua bitcoin", "activitățile rețelei extinse")))Rețeaua principală bitcoin, care rulează protocolul P2P bitcoin, constă între 5.000 și 8.000 de noduri de ascultare care rulează diverse versiuni ale clientului referință bitcoin (Bitcoin Core) și câteva sute de noduri care rulează diverse alte implementări ale protocolului P2P bitcoin, precum Bitcoin Classic, Bitcoin Unlimited, BitcoinJ, Libbitcoin, btcd și bcoin. Un procent mic din nodurile din rețeaua P2P bitcoin sunt, de asemenea, noduri de minerit, care concurează în procesul de minare, validând tranzacțiile și creând noi blocuri. Diverse companii mari interfațează cu rețeaua bitcoin rulând clienți cu noduri complete bazate pe clientul Bitcoin Core, cu copii complete ale lanțului-de-blocuri și un nod de rețea, dar fără funcții de minerit sau de portofel. Aceste noduri acționează ca routere de margine de rețea, permițând să se construiască deasupra lor alte servicii (burse-de-schimb, portofele, exploratori de blocuri, procesarea plăților pentru comercianți).
+
+Rețeaua extinsă bitcoin include rețeaua care rulează protocolul bitcoin P2P, descris mai devreme, precum și noduri care rulează protocoale specializate. În rețeaua P2P principală bitcoin sunt atașate o serie de servere de bazin și gateway-uri de protocol care conectează noduri care rulează alte protocoale. Aceste alte noduri de protocol sunt în mare parte noduri de bazin de minerit (a se vedea <<mining>>) și clienți portofel supli, care nu țin o copie completă a lanțului-de-blocuri.
+
+<<bitcoin_network>> arată rețeaua bitcoin extinsă cu diferitele tipuri de noduri, servere gateway, routere de margine și clienți portofel și diferitele protocoale pe care le folosesc pentru a se conecta între ele.
+
+[[node_type_ledgend]]
+.Diferite tipuri de noduri în rețeaua bitcoin extinsă
+image::images/mbc2_0802.png["BitcoinNodeTypes"]
+
+[[bitcoin_network]]
+.Rețeaua extinsă bitcoin care prezintă diferite tipuri de noduri, gateway-uri și protocoale
+image::images/mbc2_0803.png["BitcoinNetwork"]
+
+=== Rețelele Releu Bitcoin
+
+((("rețeaua bitcoin", "Rețelele Releu Bitcoin")))((("rețele bitcoin")))În timp ce rețeaua P2P bitcoin răspunde nevoilor generale ale unei largi varietăți de tipuri de noduri, prezintă o latență de rețea prea mare pentru nevoile specializate ale nodurilor de minerit.
+
+((("propagare", "rețele de releu și")))Minerii Bitcoin sunt angajați într-o competiție contra-cronometru pentru a rezolva problema Dovadă-de-Lucru și a extinde lanțul-de-blocuri (vezi <<mining>>). În timp ce participă la această competiție, minerii bitcoin trebuie să reducă la minimum timpul dintre propagarea unui bloc câștigător și începutul rundei următoare a competiției. În domeniul mineritului, latența rețelei este direct legată de marjele de profit.
+
+O _Rețea Releu Bitcoin_ este o rețea care încearcă să minimizeze latența în transmiterea blocurilor între mineri. Prima http://www.bitcoinrelaynetwork.org[Rețea Releu Bitcoin]  a fost creată de dezvoltatorul core Matt Corallo în 2015 pentru a permite sincronizarea rapidă a blocurilor între mineri cu latență foarte scăzută. Rețeaua era formată din mai multe noduri specializate găzduite pe infrastructura Amazon Web Services din întreaga lume și servea la conectarea majorității minerilor și bazinelor de minerit.
+
+((("Fast Internet Bitcoin Relay Engine (FIBRE)")))((("optimizarea bloc compact")))Rețeaua Releu Bitcoin inițială a fost înlocuită în 2016 prin introducerea _Fast Internet Bitcoin Relay Engine_ sau http://bitcoinfibre.org[_FIBRE_], creată de asemenea de dezvoltatorul core Matt Corallo. FIBER este o rețea de relee bazată pe UDP, care transmite blocuri în cadrul unei rețele de noduri. FIBER implementează o optimizare a _blocului compact_ pentru a reduce și mai mult cantitatea de date transmise și latența rețelei.
+
+((("Falcon Relay Network")))O altă rețea de relee (încă în faza de propunere) este http://www.falcon-net.org/about[_Falcon_], bazată pe cercetări făcute la Universitatea Cornell. Falcon folosește ”cut-through-routing” în loc de ”store-and-forward” pentru a reduce latența prin propagarea părților din blocuri, așa cum sunt primite, mai degrabă decât așteptarea până la primirea unui bloc complet.
+
+Rețelele de releu nu sunt un înlocuitor pentru rețeaua P2P bitcoin. În schimb, sunt rețele de suprapunere care asigură conectivitate suplimentară între nodurile cu nevoi specializate. La fel cum autostrăzile nu sunt înlocuitori pentru drumurile rurale, ci mai degrabă scurtături între două puncte cu trafic intens, încă mai aveți nevoie de drumuri mici pentru a vă conecta la autostrăzi.
+
+=== Descoperirea Rețelei
+
+((("rețeaua bitcoin", "descoperirea extinsă a rețelei", id="BNextend08")))((("noduri bitcoin", "descoperirea rețelei", id="BNodiscover08")))Când un nou nod începe, trebuie să descopere alte noduri bitcoin din rețea pentru a putea participa. Pentru a începe acest proces, un nou nod trebuie să descopere cel puțin un alt nod existent în rețea și să se conecteze la acesta. Locația geografică a altor noduri este irelevantă; topologia rețelei bitcoin nu este definită geografic. Prin urmare, orice noduri bitcoin existente pot fi selectate la întâmplare.
+
+Pentru a se conecta la un nod cunoscut, nodurile stabilesc o conexiune TCP, de obicei la portul 8333 (portul cunoscut în general ca cel folosit de bitcoin), sau la un port alternativ, dacă este furnizat. La stabilirea unei conexiuni, nodul va porni o ”strângere de mână” (a se vedea <<network_handshake>>) prin transmiterea unui mesaj de _versiune_, care conține informații de identificare, incuzând:
+
+`nVersion`:: Versiunea protocolului P2P bitcoin pe care clientul o ”vorbește” (de exemplu, 70002)
+`nLocalServices`:: O listă de servicii locale acceptate de nod, în prezent doar `NODE_NETWORK`
+`nTime`:: Data și ora curentă
+`addrYou`:: Adresa IP a celuilalt nod, din perspectiva nodului curent
+`addrMe`:: Adresa IP a nodului local, descoperită de nodul local
+`subver`:: O sub-versiune care arată tipul de software care rulează pe acest nod (de exemplu, pass:[<span class="keep-together"><code>/Satoshi:0.9.2.1/</code></span>])
+`BestHeight`:: Înălțimea blocului din lanțul-de-blocuri al acestui nod
+
+(Consultați http://bit.ly/1qlsC7w[GitHub] pentru un exemplu de mesaj de _versiune_.)
+
+Mesajul de _versiune_ este întotdeauna primul mesaj trimis de orice nod către un alt nod. Nodul local care primește un mesaj de _versiune_ va examina versiunea `nVersion` raportată de la distanță și va decide dacă nodul de la distanță este compatibil. Dacă nodul de la distanță este compatibil, nodul local va recunoaște mesajul de _versiune_ și va stabili o conexiune prin trimiterea unui `verack`.
+
+Cum găsește un nou nod alte noduri (semeni)? Prima metodă constă în interogarea DNS folosind o serie de ”semințe DNS” (DNS seeds), care sunt servere DNS care furnizează o listă de adrese IP a nodurilor bitcoin. Unele dintre aceste semințe DNS oferă o listă statică de adrese IP a nodurilor stabile de ascultare bitcoin. Unele dintre semințele DNS sunt implementări personalizate ale BIND (Berkeley Internet Name Daemon) care returnează un subset aleatoriu dintr-o listă de adrese de noduri bitcoin colectate de un crawler sau un nod bitcoin care rulează de multă vreme. Clientul Bitcoin Core conține numele a cinci semințe DNS diferite. Diversitatea proprietarilor și diversitatea implementării diferitelor semințe DNS oferă un nivel ridicat de fiabilitate pentru procesul inițial de pornire. În clientul Bitcoin Core, opțiunea de a utiliza semințele DNS este controlată de opțiunea `-dnsseed` (setată la 1 în mod implicit, pentru a utiliza sămânța DNS).
+
+În mod alternativ, unui nod care tocmai a pornit și nu știe nimic din rețea trebuie să i se ofere adresa IP a cel puțin unui nod bitcoin, după care poate stabili conexiuni prin prezentări ulterioare. Argumentul din linia de comandă `-seednode` poate fi utilizat pentru a vă conecta la un singur nod doar pentru prezentări care îl utilizează ca o sămânță. După ce nodul de sămânță inițial este utilizat pentru a forma prezentări, clientul se va deconecta de la acesta și va folosi nodurile nou-descoperite.
+
+[[network_handshake]]
+.Strângerea inițială de mână între noduri (semeni)
+image::images/mbc2_0804.png["NetworkHandshake"]
+
+Odată ce una sau mai multe conexiuni sunt stabilite, noul nod va trimite un mesaj `addr` care conține propria adresă IP către vecinii săi. La rândul lor, vecinii vor transmite mesajul `addr` către vecinii lor, asigurându-se că nodul nou conectat devine bine cunoscut și mai bine conectat. În plus, nodul nou conectat poate trimite `getaddr` către vecini, cerându-le să returneze o listă de adrese IP ale altor semeni. În acest fel, un nod poate găsi semeni (peers) pentru a se conecta și pentru a face cunoscută existența sa în rețea pentru ca alte noduri să îl găsească. <<address_propagation>> ((("propagare", "propagare și descoperire de adrese"))) arată protocolul de descoperire a adresei.
+
+
+[[address_propagation]]
+.Propagarea și descoperirea adresei
+image::images/mbc2_0805.png["AddressPropagation"]
+
+Un nod trebuie să se conecteze la câțiva semeni (peers) diferiți pentru a stabili diverse căi (rute) în rețeaua bitcoin. Căile nu sunt persistente - nodurile vin și pleacă - și astfel nodul trebuie să continue să descopere noi noduri, deoarece pierde conexiunile vechi, precum și să ajute alte noduri atunci când pornesc. O singură conexiune este necesară pentru pornirea inițială, deoarece primul nod poate oferi prezentări către semenii săi și acei semeni pot oferi prezentări suplimentare. De asemenea, este inutil și este o risipă de resurse de rețea să vă conectați la mai mult de o mână de noduri. După pornirea inițială, un nod își va aminti cele mai recente conexiuni cu semenii, astfel încât, dacă este repornit, poate restabili rapid conexiunile cu rețeaua sa anterioară. Dacă niciunul dintre foștii semeni nu răspunde la solicitarea de conectare a acestuia, nodul poate utiliza nodurile de sămânță pentru a porni din nou.
+
+Pe un nod care rulează clientul Bitcoin Core, puteți enumera conexiunile cu semenii (peer) cu comanda `getpeerinfo`:
+
+[source,bash]
+----
+$ bitcoin-cli getpeerinfo
+----
+[source,json]
+----
+[
+    {
+        "addr" : "85.213.199.39:8333",
+        "services" : "00000001",
+        "lastsend" : 1405634126,
+        "lastrecv" : 1405634127,
+        "bytessent" : 23487651,
+        "bytesrecv" : 138679099,
+        "conntime" : 1405021768,
+        "pingtime" : 0.00000000,
+        "version" : 70002,
+        "subver" : "/Satoshi:0.9.2.1/",
+        "inbound" : false,
+        "startingheight" : 310131,
+        "banscore" : 0,
+        "syncnode" : true
+    },
+    {
+        "addr" : "58.23.244.20:8333",
+        "services" : "00000001",
+        "lastsend" : 1405634127,
+        "lastrecv" : 1405634124,
+        "bytessent" : 4460918,
+        "bytesrecv" : 8903575,
+        "conntime" : 1405559628,
+        "pingtime" : 0.00000000,
+        "version" : 70001,
+        "subver" : "/Satoshi:0.8.6/",
+        "inbound" : false,
+        "startingheight" : 311074,
+        "banscore" : 0,
+        "syncnode" : false
+    }
+]
+----
+
+Pentru a nu ține cont de gestionarea automată a semenilor (peers) și pentru a specifica o listă de adrese IP, utilizatorii pot oferi opțiunea `-connect=<IPAddress>` și să specifice una sau mai multe adrese IP. Dacă se utilizează această opțiune, nodul se va conecta numai la adresele IP selectate, în loc să descopere și să mențină automat conexiunile cu semenii.
+
+Dacă nu există trafic pe o conexiune, nodurile vor trimite periodic un mesaj pentru a menține conexiunea. Dacă un nod nu a comunicat pe o conexiune timp de mai mult de 90 de minute, se presupune că este deconectat și se va căuta un alt seamăn (peer). Astfel, rețeaua se adaptează dinamic la nodurile tranzitorii și la problemele de rețea și poate crește și micșora organic, după cum este necesar, fără niciun control central.((("", startref="BNextend08")))((("", startref="BNodiscover08")))
+
+=== Noduri Complete
+
+((("rețeaua bitcoin", "noduri complete")))((("clienți nod-complet")))((("lanțul-de-blocuri", "noduri lanț-de-blocuri complete")))Nodurile complete sunt noduri care mențin un lanț-de-blocuri complet cu toate tranzacțiile. Mai exact, probabil că ar trebui numiți ”noduri lanț-de-blocuri complet”. În primii ani de bitcoin, toate nodurile erau noduri complete, iar în prezent clientul Bitcoin Core este un nod complet lanț-de-blocuri. În ultimii doi ani, cu toate acestea, au fost introduse noi forme de clienți bitcoin care nu mențin un lanț-de-blocuri complet, ci funcționează ca și clienți supli (lightweight). Le vom examina mai detaliat în secțiunea următoare.
+
+((("blocuri", "blocul geneză")))((("blocul geneză")))((("lanțul de blocuri", "blocul geneză")))Nodurile lanț-de-blocuri complete mențin o copie completă și la zi a lanțului-de-blocuri bitcoin cu toate tranzacțiile, pe care îl construiesc și îl verifică în mod independent, începând chiar de la primul bloc (blocul geneză) și construind până la cel mai recent bloc cunoscut din rețea. Un nod lanț-de-blocuri complet poate verifica în mod independent și autoritar orice tranzacție fără a recurge sau a depinde de orice alt nod sau sursă de informații. Nodul lanț-de-blocuri complet se bazează pe rețea pentru a primi actualizări despre noile blocuri de tranzacții, pe care apoi le verifică și le încorporează în copia sa locală a lanțului-de-blocuri.
+
+((("noduri bitcoin", "noduri complete")))Rularea unui nod lanț-de-blocuri complet vă oferă experiența bitcoin pură: verificarea independentă a tuturor tranzacțiilor fără a fi nevoie să vă bazați sau să aveți încredere în orice alte sisteme. Este ușor să vă dați seama dacă rulați un nod complet, deoarece necesită mai mult de o sută de GB de spațiu pe disc pentru a stoca lanțul-de-blocuri complet. Dacă aveți nevoie de mult spațiu pe disc și durează două-trei zile pentru a vă sincroniza în rețea, atunci executați un nod complet. Acesta este prețul independenței complete și al libertății față de o autoritate centrală.
+
+((("Clientul Satoshi")))Există câteva implementări alternative ale clienților bitcoin cu lanț-de-blocuri complet, construite folosind diferite limbaje de programare și arhitecturi software. Cu toate acestea, cea mai comună implementare este clientul de referință Bitcoin Core, cunoscut și sub numele de client Satoshi. Peste 75% din nodurile din rețeaua bitcoin rulează diverse versiuni ale Bitcoin Core. Este identificat ca ”Satoshi” în textul sub-versiunii trimis în mesajul de _versiune_ și afișat de comanda `getpeerinfo` așa cum am văzut anterior; de exemplu, `/Satoshi:0.8.6/`.
+
+=== Schimbul de ”Inventar”
+
+((("rețeaua bitcoin", "sincronizarea lanțului-de-blocuri")))Primul lucru pe care îl va face un nod complet odată ce se conectează la semeni (peers) este să incerce să construiască un lanț-de-blocuri complet. Dacă este un nod complet nou și nu are deloc un lanț-de-blocuri, atunci cunoaște un singur bloc, blocul geneză, care este încorporat static în software-ul client. Începând cu blocul nr. 0 (blocul geneză), noul nod va trebui să descarce sute de mii de blocuri pentru a se sincroniza cu rețeaua și pentru a restabili întregul lanț-de-blocuri.
+
+((("lanțul-de-blocuri", "sincronizarea lanțului-de-blocuri")))((("sincronizare")))Procesul de sincronizare a lanțului-de-blocuri începe cu mesajul de _versiune_, deoarece acesta conține `BestHeight`, înățimea curentă a lanțului-de-blocuri pentru un nod (număr de blocuri). Un nod va vedea mesajele de _versiune_ de la semenii săi, va ști câte blocuri au fiecare și va putea compara cu câte blocuri are în propriul său lanț-de-blocuri. Nodurile pereche vor schimba un mesaj `getblocks` care conține rezumatul (amprenta digitală) a blocului superior de pe lanțul-de-blocuri local. Unul dintre semeni (peers) va putea identifica rezumatul primit ca aparținând unui bloc care nu se află în vârf, ci mai degrabă aparține unui bloc mai vechi, deducând astfel că propriul său lanț-de-blocuri local este mai lung decât cel al semenilor săi.
+
+Nodul care are lanțul-de-blocuri mai lung are mai multe blocuri decât celălalt nod și poate identifica de care blocuri are nevoie celălalt nod pentru a ”ajunge din urmă”. Acesta va identifica primele 500 de blocuri pentru a partaja și transmite rezumatul lor folosind un mesaj `inv` (inventar). Nodul căruia îi lipsesc o parte din aceste blocuri le va recupera, prin emiterea unei serii de mesaje `getdata` care solicită datele complete ale blocului și identificând blocurile solicitate folosind rezumatele din mesajul `inv`.
+
+Să presupunem, de exemplu, că un nod are doar blocul geneză. Acesta va primi apoi un mesaj `inv` de la semenii săi care conține rezumatele următoarelor 500 de blocuri din lanț. Acesta va începe să solicite blocuri de la toți semenii săi conectați, distribuind sarcina și asigurându-se că nu va copleși niciun seamăn cu solicitări. Nodul urmărește câte blocuri sunt ”în tranzit” pe conexiunea de la semeni, adică blocuri pe care le-a solicitat, dar nu le-a primit, verificând că nu depășește o anumită limită (`MAX_BLOCKS_IN_TRANSIT_PER_PEER`). În acest fel, dacă are nevoie de foarte multe blocuri, va trimite noi solicitări doar pe măsură ce solicitările anterioare sunt îndeplinite, permițând colegilor să controleze ritmul actualizărilor și să nu copleșească rețeaua. Pe măsură ce fiecare bloc este primit, acesta este adăugat la lanțul-de-blocuri, așa cum vom vedea în <<blockchain>>. Pe măsură ce lanțul-de-blocuri local este construit, sunt solicitate și primite mai multe blocuri, iar procesul continuă până când nodul se apropie de restul rețelei.
+
+Acest proces de comparare a lanțului-de-blocuri local cu semenii și de a recupera blocurile lipsă se întâmplă de fiecare dată când un nod se deconectează pentru o perioadă oarecare de timp. Indiferent dacă un nod a fost deconectat timp de câteva minute și lipsesc câteva blocuri, sau o lună și lipsesc câteva mii de blocuri, începe prin a trimite `getblocks`, primește un răspuns `inv` și începe să descarce blocurile care lipsesc. <<inventory_synchronization>> arată protocolul de propagare a inventarului și a blocurilor.
+
+[[inventory_synchronization]]
+[role="smallerfifty"]
+.Nod care își sincronizează lanțul-de-blocuri prin preluarea blocurilor de la un seamăn
+image::images/mbc2_0806.png["InventorySynchronization"]
+
+[[spv_nodes]]
+=== Noduri de Verificare Simplificată a Plății (SPV)
+
+((("rețeaua bitcoin", "noduri SPV", id="BNspvnodes08")))((("noduri bitcoin", "noduri SPV", id="BNospv08")))((("verificarea-simplificată-a-plății (SPV)", id="simple08")))Nu toate nodurile au capacitatea de a stoca lanțul-de-blocuri complet. Mulți clienți bitcoin sunt proiectați pentru a rula pe dispozitive cu spațiu și putere limitată, cum ar fi smartphone-uri, tablete sau sisteme încorporate. Pentru astfel de dispozitive, se utilizează o metodă _simplificată de verificare a plății_ (simplified payment verification - SPV) pentru a le permite să funcționeze fără a stoca lanțul-de-blocuri complet. Aceste tipuri de clienți se numesc clienți SPV sau clienți supli. Pe măsură ce adoptarea bitcoin crește, nodul SPV devine cea mai frecventă formă de nod bitcoin, în special pentru portofelele bitcoin.
+
+Nodurile SPV descarcă doar anteturile blocurilor și nu descarcă tranzacțiile incluse în fiecare bloc. Lanțul rezultat de blocuri, fără tranzacții, este de 1.000 de ori mai mic decât lanțul-de-blocuri complet. Nodurile SPV nu pot construi o imagine completă a tuturor UTXO-urilor disponibile pentru cheltuire, deoarece nu au informații despre toate tranzacțiile din rețea. Nodurile SPV verifică tranzacțiile folosind o metodă ușor diferită care se bazează pe semeni pentru a oferi la cerere viziuni parțiale ale părților relevante ale lanțului-de-blocuri.
+
+Ca o analogie, un nod complet este ca un turist într-un oraș străin, echipat cu o hartă detaliată a fiecărei străzi și a tuturor adreselor. Prin comparație, un nod SPV este ca un turist într-un oraș străin, care solicită străinilor indicații de orientare rând pe rând, în timp ce el stie doar de o stradă principală. Deși ambii turiști pot verifica existența unei străzi vizitând-o, turistul fără hartă nu știe ce se află pe vreuna dintre străzile laterale și nu știe ce alte străzi există. Situat în fața străzii Bisericii 23, turistul fără hartă nu poate ști dacă există alte zeci de adrese ”Bisericii 23” în oraș și dacă aceasta este cea corectă. Cea mai bună șansă a unui turist fără hartă este să întrebe destui oameni și să spere că unii dintre ei nu încearcă să-l jefuiască.
+
+SPV verifică tranzacțiile prin referire la _adâncimea_ lor în lanțul-de-blocuri în loc de _înălțime_. În timp ce un nod lanț-de-blocuri complet va construi un lanț complet verificat de mii de blocuri și tranzacții care ajung până la (în timp) blocul geneză, un nod SPV va verifica lanțul tuturor blocurilor (dar nu toate tranzacțiile) și va lega acel lanț la tranzacția dorită.
+
+De exemplu, atunci când examinăm o tranzacție în blocul 300.000, un nod complet leagă toate cele 300.000 de blocuri până la blocul geneză și construiește o bază de date completă a UTXO-urilor, stabilind validitatea tranzacției prin confirmarea că UTXO-ul a rămas necheltuit. Un nod SPV nu poate valida dacă UTXO-ul este necheltuit. În schimb, nodul SPV va stabili o legătură între tranzacție și blocul care o conține, folosind o _cale merkle_ (merkle path, vezi <<merkle_trees>>). Apoi, nodul SPV așteaptă până când vede cele șase blocuri 300.001 - 300.006 adunate deasupra blocului care conține tranzacția și îl verifică prin stabilirea adâncimii sale sub blocurile 300.006 - 300.001. Faptul că alte noduri din rețea au acceptat blocul 300.000 și au depus apoi efortul necesar pentru a produce alte șase blocuri deasupra acestuia, dovedește, indirect, că tranzacția nu a fost cheltuită de două ori.
+
+Un nod SPV nu poate fi convins că o tranzacție există într-un bloc atunci când tranzacția nu există. Nodul SPV stabilește existența unei tranzacții într-un bloc prin solicitarea unei dovezi de cale merkle și prin validarea Dovezii-de-Lucru în lanțul de blocuri. Cu toate acestea, existența unei tranzacții poate fi ”ascunsă” de un nod SPV. Un nod SPV poate dovedi cu siguranță că există o tranzacție, dar nu poate verifica dacă o tranzacție, cum ar fi o cheltuire dublă a aceluiași UTXO, nu există deoarece nu are o înregistrare a tuturor tranzacțiilor. Această vulnerabilitate poate fi utilizată într-un atac  denial-of-service sau pentru un atac de cheltuire dublă împotriva nodurilor SPV. Pentru a se apăra împotriva acestui lucru, un nod SPV trebuie să se conecteze aleatoriu la mai multe noduri, pentru a crește probabilitatea ca acesta să fie în contact cu cel puțin un nod sincer. Această necesitate de conectare aleatorie înseamnă că nodurile SPV sunt, de asemenea, vulnerabile la atacurile de partajare a rețelei sau atacurile Sybil, unde sunt conectate la noduri false sau rețele false și nu au acces la noduri oneste sau la adevărata rețea bitcoin.
+
+În cele mai multe scopuri practice, nodurile SPV bine conectate sunt suficient de sigure, ajungând la un echilibru între nevoile de resurse, practicalitate și securitate. Cu toate acestea, pentru o securitate infailibilă, nimic nu bate rularea unui nod lanț-de-blocuri complet.
+
+[TIP]
+====
+Un nod lanț-de-blocuri complet verifică o tranzacție inspectând întregul lanț de mii de blocuri de sub aceasta pentru a garanta că UTXO nu este cheltuită, în timp ce un nod SPV verifică cât de adânc este îngropat blocul, având o mână de blocuri deasupra lui.
+====
+
+Pentru a obține anteturile blocului, nodurile SPV folosesc un mesaj `getheaders` în loc de `getblocks`. Seamănul (peer) care răspunde va trimite până la 2.000 de anteturi de bloc folosind un singur mesaj `headers`. Procesul este același cu cel folosit de un nod complet pentru a prelua blocurile complete. Nodurile SPV stabilesc, de asemenea, un filtru pe conexiunea cu semenii, pentru a filtra fluxul de blocuri viitoare și tranzacții trimise de colegi. Orice tranzacție de interes este preluată folosind o cerere `getdata`. Seamănul (peer) generează un mesaj `tx` care conține tranzacțiile, ca răspuns. <<spv_synchronization>> arată sincronizarea anteturilor blocurilor.
+
+Deoarece nodurile SPV trebuie să obțină anumite tranzacții pentru a le verifica selectiv, ele creează, de asemenea, un risc pentru confidențialitate. Spre deosebire de nodurile lanț-de-blocuri complete, care colectează toate tranzacțiile din fiecare bloc, solicitările nodului SPV pentru date specifice pot dezvălui din neatenție adresele din portofel. De exemplu, o terță parte care monitorizează o rețea ar putea ține evidența tuturor tranzacțiilor solicitate de un portofel pe un nod SPV și le poate folosi pentru a asocia adrese bitcoin cu utilizatorul portofelului, afectând confidențialitatea utilizatorului.
+
+[[spv_synchronization]]
+.Un nod SPV care sincronizează anteturile blocurilor
+image::images/mbc2_0807.png["SPVSynchronization"]
+
+La scurt timp după introducerea nodurilor SPV/suple, dezvoltatorii bitcoin au adăugat o caracteristică numită _filtru bloom_ pentru a aborda riscurile de confidențialitate ale nodurilor SPV. Filtrele bloom permit nodurilor SPV să primească un subset de tranzacții, fără a dezvălui cu exactitate care sunt adresele de care sunt interesate, printr-un mecanism de filtrare care folosește probabilități mai degrabă decât șabloane fixe.((("", startref="BNspvnodes08")))((("", startref="simple08")))
+
+[[bloom_filters]]
+=== Filtre Bloom
+
+((("rețeaua bitcoin", "filtre bloom", id="BNebloom08")))((("filtre bloom", id="bloom08")))((("confidențialitate, păstrare", id="privacy08")))((("securitate", "păstrarea confidențialității", id="Sprivacy08")))Un filtru bloom este un filtru de căutare probabilistică, o modalitate de a descrie un șablon dorit fără a-l specifica exact. Filtrele bloom oferă un mod eficient de a exprima un șablon de căutare în timp ce protejează confidențialitatea. Acestea sunt folosite de nodurile SPV pentru a le cere semenilor tranzacții care corespund unui tipar specific, fără a dezvălui exact adresele, cheile sau tranzacțiile pe care le caută.
+
+În analogia noastră anterioară, un turist fără hartă cere indicații către o anumită adresă, ”Str. Bisericii 23”. Dacă cere străinilor indicații către această stradă, el își dezvăluie din greșeală destinația. Un filtru bloom este ca și cum ar întreba ”Există străzi în acest cartier al căror nume se termină în _I-C-I-I_?” O întrebare de genul acesta dezvăluie mult mai puțin despre destinația dorită decât să întrebe de ”Str. Bisericii 23”. Folosind această tehnică, un turist ar putea specifica adresa dorită cu mai multe detalii, cum ar fi ”se termină cu _R-I-C-I-I_” sau mai puțin detaliat ca ”se termină cu I”. Modificând precizia căutării, turistul dezvăluie mai multe sau mai puține informații, în detrimentul obținerii unor rezultate mai mult sau mai puțin precise. Dacă întreabă folosind un tipar mai puțin specific, primește mult mai multe adrese posibile și o mai bună confidențialitate, dar multe dintre rezultate sunt irelevante. Dacă întreabă folosind un tipar foarte specific, obține mai puține rezultate, dar pierde confidențialitatea.
+
+Filtrele bloom servesc această funcție permițând unui nod SPV să specifice un tipar de căutare pentru tranzacții care poate fi ajustat către precizie sau către confidențialitate. Un filtru mai specific va produce rezultate precise, dar în detrimentul dezvăluirii tiparelor de care nodul SPV este interesat, dezvăluind astfel adresele deținute de portofelul utilizatorului. Un filtru mai puțin specific va produce mai multe date despre mai multe tranzacții, multe irelevante pentru nod, dar va permite nodului să mențină o mai bună confidențialitate.
+
+==== Cum Funcționează Filtrele Bloom
+
+Filtrele bloom sunt implementate ca un șir de dimensiune variabilă de N cifre binare și un număr variabil M de funcții de rezumare. Funcțiile de rezumare sunt proiectate pentru a produce întotdeauna o ieșire între 1 și N, corespunzând șirului de cifre binare. Funcțiile de rezumare sunt generate deterministic, astfel încât orice nod care implementează un filtru bloom va folosi întotdeauna aceleași funcții de rezumare și va obține aceleași rezultate pentru o intrare specifică. Prin alegerea diferitelor filtre de lungime (N) și a unui număr diferit (M) de funcții de rezumare, filtrul bloom poate fi reglat, variind nivelul de precizie și, prin urmare, confidențialitatea.
+
+În <<bloom1>>, folosim un șir foarte mic de 16 biți și un set de trei funcții de rezumare pentru a demonstra cum funcționează filtrele bloom.
+
+[[bloom1]]
+.Un exemplu de filtru bloom simplist, cu un câmp de 16 biți și trei funcții de rezumare
+image::images/mbc2_0808.png["Bloom1"]
+
+Filtrul bloom este inițializat astfel încât șirul de biți să fie pe zero. Pentru a adăuga un tipar la filtrul bloom, tiparul este rezumat de fiecare funcție de rezumare pe rând. Aplicând prima funcție de rezumare la intrare rezultă un număr cuprins între 1 și N. Bitul corespunzător din șir (indexat de la 1 la N) este găsit și setat la _1_, înregistrând astfel ieșirea funcției de rezumare. Apoi, următoarea funcție de rezumare este folosită pentru a seta un alt bit și așa mai departe. Odată ce toate M funcțiile de rezumare au fost aplicate, tiparul de căutare va fi ”înregistrat” în filtrul bloom ca biți M care au fost schimbați de la _0_ la _1_.
+
+<<bloom2>> este un exemplu de adăugare a unui tipar ”A” la filtrul simplu bloom prezentat în <<bloom1>>.
+
+Adăugarea unui al doilea tipar este la fel de simplă ca repetarea acestui proces. Tiparul este rezumat de fiecare funcție de rezumare pe rând, iar rezultatul este înregistrat prin setarea biților la _1_. Rețineți că, pe măsură ce un filtru bloom este umplut cu mai multe tipare, rezultatul funcției de rezumare ar putea coincide cu un bit care este deja setat la _1_, caz în care bitul nu este modificat. În esență, pe măsură ce mai multe tipare se înregistrează pe biți care se suprapun, filtrul bloom începe să fie saturat cu mai mulți biți setați la _1_ și precizia filtrului scade. Acesta este motivul pentru care filtrul este o structură de date probabilistică - devine mai puțin precis pe măsură ce se adaugă mai multe tipare. Precizia depinde de numărul de tipare adăugate față de dimensiunea șirului de biți (N) și de numărul funcțiilor de rezumare (M). Un șir de biți mai mare și mai multe funcții de rezumare pot înregistra mai multe tipare cu o precizie mai mare. Un șir de biți mai mic sau mai puține funcții de rezumare vor înregistra mai puține tipare și vor produce mai puțină precizie.
+
+[[bloom2]]
+.Adăugarea unui tipar ”A” la filtrul bloom simplu
+image::images/mbc2_0809.png["Bloom2"]
+
+<<bloom3>> este un exemplu de adăugare a unui al doilea tipar ”B” la filtrul bloom simplu.
+
+[[bloom3]]
+[role="smallereighty"]
+.Adăugarea unui al doilea tipar ”B” la filtrul bloom simplu
+image::images/mbc2_0810.png["Bloom3"]
+
+Pentru a testa dacă un tipar face parte dintr-un filtru bloom, tiparul este rezumat de fiecare funcție de rezumare, iar modelul de biți rezultat este testat față de șirul de biți. Dacă toți biții indexați de funcțiile de rezumare sunt setați la _1_, atunci tiparul este _probabil_  înregistrat în filtrul bloom. Deoarece biții pot fi setați din cauza suprapunerii din mai multe tipare, răspunsul nu este sigur, ci este mai degrabă probabilistic. În termeni simpli, o potrivire cu un filtru bloom este echivalent cu un ”Poate, Da”.
+
+<<bloom4>> este un exemplu de testare a existenței tiparului ”X” în filtrul bloom simplu. Biții corespunzători sunt setați la _1_, deci tiparul probabil se potrivește.
+
+[[bloom4]]
+[role="smallereighty"]
+.Testarea existenței tiparului ”X” în filtrul bloom. Rezultatul este o potrivire pozitivă probabilistică, însemnând ”Poate”
+image::images/mbc2_0811.png["Bloom4"]
+
+Dimpotrivă, dacă un tipar este testat pe filtrul bloom și oricare dintre biți este setat la _0_, acest lucru dovedește că tiparul nu a fost înregistrat în filtrul bloom. Un rezultat negativ nu este o probabilitate, ci o certitudine. În termeni simpli, o potrivire negativă pe un filtru bloom este un ”Absolut Nu!”.
+
+<<bloom5>> este un exemplu de testare a existenței tiparului ”Y” în filtrul bloom simplu. Unul dintre biții corespunzători este setat pe _0_, deci tiparul cu siguranță nu este o potrivire.
+
+[[bloom5]]
+.Testarea existenței tiparului ”Y” în filtrul bloom. Rezultatul este o potrivire negativă absolută, însemnând ”Absolut Nu!”
+image::images/mbc2_0812.png[]
+
+=== Cum Folosesc Nodurile SPV Filtre Bloom
+
+Filtrele bloom sunt utilizate pentru a filtra tranzacțiile (și blocurile care le conțin) pe care un nod SPV le primește de la semenii săi, selectând doar tranzacții de interes pentru nodul SPV, fără să dezvăluie care sunt adresele sau cheile de care este interesat.
+
+((("ID-uri de tranzacție (txid)")))Un nod SPV va inițializa un filtru bloom ca fiind ”gol”; în această stare, filtrul bloom nu se va potrivi cu niciun tipar. Nodul SPV va face apoi o listă cu toate adresele, cheile și rezumatele de care este interesat. Va face acest lucru prin extragerea rezumatului cheii publice și rezumatul scriptului și ID-urile tranzacțiilor din orice UTXO controlat de portofelul său. Nodul SPV adaugă apoi fiecare dintre acestea la filtrul bloom, astfel încât filtrul bloom se va ”potrivi” dacă aceste tipare sunt prezente într-o tranzacție, fără a dezvălui tiparele în sine.
+
+((("noduri bitcon", "noduri complete")))Nodul SPV va trimite apoi un mesaj `filterload` către seamăn (peer), conținând filtrul bloom pentru a fi utilizat în conexiune. Pe partea seamănului (peer), filtrele bloom sunt aplicate pentru fiecare tranzacție primită. Nodul complet verifică mai multe părți ale tranzacției față de filtrul bloom, căutând o potrivire care include:
+
+* ID-ul tranzacției
+* Componentele de date din scripturile de blocare ale fiecăreia dintre ieșirile tranzacției (fiecare cheie și rezumat din script)
+* Fiecare dintre intrările tranzacției
+* Fiecare componentă de date a semnăturii pentru intrare (sau scripturi martor)
+
+Verificând toate aceste componente, filtrele bloom pot fi utilizate pentru a se potrivi cu rezumate de chei publice, scripturi, valori `OP_RETURN`, chei publice în semnături sau orice componentă viitoare a unui contract inteligent sau a unui script complex.
+
+După ce un filtru este stabilit, seamănul (peer) va testa apoi ieșirile fiecărei tranzacții cu filtrul bloom. Numai tranzacțiile care se potrivesc filtrului sunt trimise către nod.
+
+Ca răspuns la un mesaj `getdata` de la nod, semenii vor trimite un mesaj `merkleblock` care conține doar anteturile blocurilor pentru blocurile care se potrivesc cu filtrul și o cale merkle (vezi <<merkle_trees>>) pentru fiecare tranzacție care se potrivește. Seamănul (peer) va trimite apoi mesaje `tx` care conțin tranzacțiile care se potrivesc cu filtrul.
+
+Deoarece nodul complet trimite tranzacții către nodul SPV, nodul SPV elimină orice validări pozitive false și folosește tranzacțiile potrivite pentru a actualiza setul UTXO și soldul portofelului. Pe măsură ce își actualizează propria perspectivă asupra setului UTXO, modifică, de asemenea, filtrul bloom pentru a se potrivi cu orice tranzacții viitoare care fac referire la UTXO-ul pe care tocmai l-a găsit. Nodul complet folosește apoi noul filtru bloom pentru a potrivi noi tranzacții iar întregul proces se repetă.
+
+Nodul care setează filtrul bloom poate să adauge tipare iteractiv la filtru trimițând un mesaj  `filteradd`. Pentru a goli filtrul bloom, nodul poate trimite un mesaj `filterclear`. Deoarece nu este posibil să eliminați un tipar dintr-un filtru bloom, un nod trebuie să steargă și să retrimită un nou filtru bloom dacă un model nu mai este dorit.
+
+Protocolul de rețea și mecanismul de filtrare bloom pentru nodurile SPV este definit în http://bit.ly/1x6qCiO[BIP-37 (Peer Services)].((("", startref="BNebloom08")))((("", startref="bloom08")))
+
+
+=== Nodurile SPV și Confidențialitatea
+
+Nodurile care implementează SPV au o confidențialitate mai slabă decât un nod complet. Un nod complet primește toate tranzacțiile și, prin urmare, nu dezvăluie nicio informație referitor la utilizarea unei anumite adrese din portofel. Un nod SPV primește o listă filtrată de tranzacții asociate cu adresele care se află în portofelul său. Drept urmare, reduce confidențialitatea proprietarului.
+
+Filtrele bloom sunt o modalitate de a reduce pierderea confidențialității. Fără ele, un nod SPV ar trebui să enumere în mod explicit adresele de care este interesat, creând o încălcare gravă confidențialității. Cu toate acestea, chiar și cu filtre bloom, un adversar care monitorizează traficul unui client SPV sau conectat la acesta direct ca nod în rețeaua P2P poate colecta suficiente informații pe parcursul timpului pentru a afla adresele din portofelul clientului SPV.
+
+=== Conexiuni Criptate și Autentificate
+
+((("rețeaua bitcoin", "conexiuni criptate")))((("criptare")))((("autentificare")))Majoritatea utilizatorilor noi de bitcoin presupun că comunicarea în rețea a unui nod bitcoin este criptată. De fapt, implementarea inițială a bitcoin comunică în totalitate în mod clar. Deși aceasta nu este o problemă majoră de confidențialitate pentru nodurile complete, este o problemă mare pentru nodurile SPV.
+
+Ca o modalitate de a crește confidențialitatea și securitatea rețelei P2P bitcoin, există două soluții care asigură criptarea comunicațiilor: _Transport Tor_ și _Autentificare și Criptare P2P_ cu BIP-150/151.
+
+==== Transport Tor
+
+((("rețeaua Tor")))((("Rețeaua de Rutare Onion (Tor)")))Tor, care vine de la _Rețeaua de Rutare Onion_ (The Onion Routing network), este un proiect și o rețea software care oferă criptarea și încapsularea datelor prin distribuirea aleatorie de căi de rețea care oferă anonimat, nedepistare și confidențialitate.
+
+Bitcoin Core oferă mai multe opțiuni de configurare care vă permit să rulați un nod bitcoin cu traficul său transportat prin rețeaua Tor. În plus, Bitcoin Core poate oferi, de asemenea, un serviciu ascuns Tor care permite altor noduri Tor să se conecteze la nodul dumneavoastră direct peste Tor.
+
+Începând cu versiunea 0.12 a Bitcoin Core, un nod va oferi automat un serviciu Tor ascuns dacă este capabil să se conecteze la un serviciu Tor local. Dacă aveți Tor instalat și procesul Bitcoin Core rulează ca utilizator cu permisiuni adecvate pentru a accesa cookie-ul de autentificare Tor, acesta ar trebui să funcționeze automat. Folosiți indicatorul `debug` pentru a activa depanarea Bitcoin Core pentru serviciul Tor astfel:
+
+----
+$ bitcoind --daemon --debug=tor
+----
+
+Ar trebui să vedeți "tor: ADD_ONION successful" în loguri, ceea ce indică faptul că Bitcoin Core a adăugat un serviciu ascuns în rețeaua Tor.
+
+Puteți găsi mai multe instrucțiuni cu privire la rularea Bitcoin Core ca serviciu ascuns Tor în documentația Bitcoin Core (_docs/tor.md_) și în diverse tutoriale online.
+
+==== Autentificare și Criptare De-la-Egal-la-Egal
+
+((("Autentificare și criptare de-la-egal-la-egal")))((("propuneri de îmbunătățire bitcoin", "Authentifcare Semeni (BIP-150)")))((("propuneri de îmbunătățire bitcoin", "Criptarea comunicării de-la-egal-la-egal (BIP-151)")))Două propuneri de îmbunătățire bitcoin, BIP-150 și BIP-151, adaugă sprijin pentru autentificarea P2P și criptarea în rețeaua P2P bitcoin. Aceste două BIP-uri definesc servicii opționale care pot fi oferite de nodurile bitcoin compatibile. BIP-151 permite criptarea negociată pentru toate comunicațiile între două noduri care acceptă BIP-151. BIP-150 oferă o autentificare opțională, care permite nodurilor să-și autentifice reciproc identitatea folosind ECDSA și chei private. BIP-150 necesită ca, înainte de autentificare, cele două noduri să fi stabilit comunicări criptate conform BIP-151.
+
+La momentul ianuarie 2017, BIP-150 și BIP-151 nu sunt implementate în Bitcoin Core. Cu toate acestea, cele două propuneri au fost puse în aplicare de cel puțin un client alternativ bitcoin numit _bcoin_.
+
+BIP-150 și BIP-151 permit utilizatorilor să ruleze clienți SPV care se conectează la un nod complet de încredere, folosind criptare și autentificare pentru a proteja confidențialitatea clientului SPV.
+
+În plus, autentificarea poate fi utilizată pentru a crea rețele de noduri bitcoin de încredere și pentru a preveni atacurile Man-in-the-Middle. În cele din urmă, criptarea P2P, dacă este utilizată pe scară largă, ar consolida rezistența bitcoin la analiza traficului și supravegherea vieții private, în special în țările totalitare, unde utilizarea internetului este puternic controlată și monitorizată.
+
+((("", startref="BNospv08")))((("", startref="privacy08")))((("", startref="Sprivacy08")))Standardul este definit în https://github.com/bitcoin/bips/blob/master/bip-0150.mediawiki[BIP-150 (Peer Authentication)] și https://github.com/bitcoin/bips/blob/master/bip-0151.mediawiki[BIP-151 (Peer-to-Peer Communication Encryption)].
+
+=== Bazine de Tranzacții
+
+((("rețeaua bitcoin", "bazine de tranzacții")))((("bazine de tranzacții")))((("bazine de memorie (mempools)")))Aproape fiecare nod din rețeaua bitcoin păstrează o listă temporară de tranzacții neconfirmate numită _memory pool_, _mempool_ sau _bazin de tranzacții_. Nodurile folosesc acest bazin pentru a urmări tranzacțiile cunoscute în rețea, dar care nu sunt încă incluse în lanțul-de-blocuri. De exemplu, un nod portofel va folosi bazinul de tranzacții pentru a urmări plățile primite în portofelul utilizatorului care au fost primite de rețea, dar încă nu sunt confirmate.
+
+Pe măsură ce tranzacțiile sunt primite și verificate, acestea sunt adăugate în bazinul de tranzacții și transmise la nodurile vecine pentru a se propaga în rețea.
+
+((("bazine orfan")))((("tranzacții", "orfan")))Unele implementări de noduri mențin, de asemenea, un grup separat de tranzacții orfane. Dacă intrările unei tranzacții se referă la o tranzacție care nu este încă cunoscută, cum ar fi un părinte care lipsește, tranzacția orfană va fi stocată temporar în grupul orfan până la sosirea tranzacției părinte.
+
+Atunci când o tranzacție este adăugată la bazinul de tranzacții, bazinul orfan este verificat pentru orfani care fac referire la ieșirile acestei tranzacții (copiii acesteia). Orice orfani care se potrivesc sunt apoi validați. Dacă sunt valide, aceste tranzacții sunt eliminate din bazinul de orfani și sunt adăugate în bazinul de tranzacții, completând lanțul care a început cu tranzacția părinte. Având în vedere tranzacția recent adăugată, care nu mai este orfană, procesul se repetă căutând în mod recursiv alți descendenți, până când nu se vor mai găsi niciunii. Prin acest proces, sosirea unei tranzacții părinte declanșează o reconstrucție în cascadă a unui întreg lanț de tranzacții interdependente, prin re-unirea orfanilor cu părinții lor.
+
+Atât bazinul de tranzacții, cât și bazinul de orfani (atunci când este implementat) sunt stocate în memoria locală și nu sunt salvate pe disc; mai degrabă, sunt populate dinamic din mesajele de rețea primite. Când un nod pornește, ambele bazine sunt goale și sunt populate treptat cu noi tranzacții primite de la rețea.
+
+Unele implementări ale clientului bitcoin mențin, de asemenea, o bază de date sau un bazin UTXO , care este setul tuturor ieșirilor necheltuite de pe lanțul-de-blocuri. Deși numele ”bazin UTXO” sună similar cu bazin de tranzacții, acesta reprezintă un set diferit de date. Spre deosebire de bazinele de tranzacții și de orfani, bazinul UTXO nu este inițializat gol, ci conține, în schimb, milioane de elemente de ieșiri de tranzacții necheltuite, tot ceea ce nu este cheltuit de la blocul geneză până în prezent. Bazinul UTXO poate fi stocat în memoria locală sau sub forma unei tabele de baze de date indexate pentru stocarea persistentă.
+
+În timp ce bazinele de tranzacții și de orfani reprezintă perspectiva locală a unui singur nod și pot varia semnificativ de la nod la nod, în funcție de momentul în care nodul a fost pornit sau repornit, bazinul UTXO reprezintă consensul emergent al rețelei și, prin urmare, va varia puțin între noduri. În plus, bazinele de tranzacții și de orfani conțin doar tranzacții neconfirmate, în timp ce bazinul UTXO conține numai ieșiri confirmate.

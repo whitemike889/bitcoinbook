@@ -1,0 +1,250 @@
+[preface]
+== Glosario Rápido
+
+Este glosario rápido contiene muchos de los términos relacionados con bitcoin. Estos términos se usan en todo el libro. Agregue una marca para una rápida referencia.
+
+dirección::
+    Una dirección bitcoin se parece a +1DSrfJdB2AnWaFNgSbv3MZC2m74996JafV+. Consiste en una cadena de letras y números. Es realmente una versión codificada en formato “base58check” del hash de una llave pública de 160 bits. Tal y como podríamos pedirle a otros que nos envíen un correo a nuestra dirección de correo electrónico, así también le podemos pedir a otros que nos envíen bitcoins a una de nuestras direcciones de bitcoin.
+
+bip::
+    Propuestas de Mejora de Bitcoin. Son un conjunto de propuestas que los miembros de la comunidad bitcoin han presentado para mejorar a bitcoin. Por ejemplo, BIP-21 es una propuesta para mejorar el esquema uniforme de identificación de recursos (del inglés, el “URI”) de bitcoin.
+
+bitcoin::
+    Es el nombre de la unidad monetaria (la moneda), la red y el software.
+
+bloque::
+    Una agrupación de transacciones, marcada con un sello de tiempo y una huella digital del bloque anterior. La cabecera de bloque se procesa mediante función hash para generar una prueba de trabajo, validando así las transacciones. Los bloques válidos se agregan a la cadena de bloques principal por consenso de la red.
+
+cadena de bloques::
+	Es una lista de bloques validados, cada uno vinculado a su predecesor hasta el bloque génesis.
+
+Problema de los Generales Bizantinos::
+    Un sistema informático confiable debe ser capaz de hacer frente a las fallas de uno o más de sus componentes. Un componente fallido puede exhibir un tipo de comportamiento que a menudo se pasa por alto, es decir, enviar información conflictiva a diferentes partes del sistema. El problema de hacer frente a este tipo de falla se expresa de manera abstracta como el “Problema de los Generales Bizantinos”.
+
+coinbase::
+	Un campo especial utilizado como la única entrada para las transacciones de coinbase. El entrada coinbase permite reclamar la recompensa del bloque y proporciona hasta 100 bytes para datos arbitrarios.
+	No debe confundirse con la Transacción de Coinbase.
+
+transacción coinbase::
+	Es la primera transacción en un bloque. Siempre es creada por un minero; incluye una sola entrada, la entrada coinbase.
+	No debe confundirse con “Coinbase”.
+
+almacenamiento en frío::
+	Se refiere a mantener una reserva de bitcoins a ser controlados fuera de línea. El almacenamiento en frío se logra cuando las llaves privadas de Bitcoin se crean y se almacenan en un entorno seguro fuera de línea. El almacenamiento en frío es importante para cualquier persona que posea bitcoins. Las computadoras en línea son vulnerables a los piratas informáticos y no deben usarse para manejar una cantidad significativa de bitcoins.
+
+confirmaciones::
+	Una vez que una transacción se incluye en un bloque, tiene una confirmación. Tan pronto como se extrae otro bloque en la misma cadena de bloques, la transacción tiene dos confirmaciones, y así sucesivamente. Seis o más confirmaciones se consideran prueba suficiente de que una transacción no se puede revertir.
+
+consenso::
+    Es lo que sucede cuando varios nodos, generalmente la mayoría de los nodos en la red, poseen todos los mismos bloques en su mejor cadena de bloques validada localmente.
+    No debe confundirse con “reglas de consenso”.
+
+reglas de consenso::
+    Son las reglas de validación de los bloques que siguen los nodos completos para mantenerse en consenso con todos los demás nodos.
+    No debe confundirse con “consenso”.
+
+dificultad::
+	Es una configuración universal de la red que controla cuánto cómputo es necesario para producir una prueba de trabajo válida.
+
+reajuste de dificultad::
+	Es un recálculo de la dificultad, aplicable a toda la red, que ocurre una vez cada 2.016 bloques y toma en cuenta la potencia de hash de los 2.016 bloques anteriores.
+
+objetivo de dificultad::
+    Es un nivel de dificultad tal que le permite a la capacidad de cómputo universal de la red encontrar un bloque aproximadamente cada 10 minutos.
+
+doble gasto::
+    Un gasto duplicado es el resultado de gastar con éxito algo de dinero más de una vez. Bitcoin se protege contra el gasto duplicado, verificando cada transacción que se agrega a la cadena de bloques, para garantizar que las entradas de dichas transacciones no se hayan utilizado previamente.
+
+ECDSA::
+    El algoritmo de firma digital de curva elíptica o del inglés, “ECDSA” es un algoritmo criptográfico utilizado por Bitcoin para garantizar que los fondos solo puedan ser gastados por sus legítimos propietarios.
+
+nonce extra::
+    A medida que aumentaba la dificultad, los mineros a menudo recorrían los 4 mil millones de valores del nonce sin encontrar un bloque. Debido a que el script de la entrada coinbase puede almacenar entre 2 a 100 bytes de datos, los mineros comenzaron a usar ese espacio como espacio de “nonce extra”, lo que les permite explorar un rango mucho más grande de valores de cabecera de bloque para encontrar bloques válidos.
+
+comisiones::
+	El remitente de una transacción a menudo incluye una comisión a la red para procesar la transacción solicitada. La mayoría de las transacciones requieren una tarifa mínima de 0.5 mBTC.
+
+bifurcación::
+    Las bifurcaciones, también conocidas como bifurcaciones accidentales, ocurren cuando dos o más bloques tienen la misma altura de bloque, bifurcando la cadena de bloques. Por lo general, ocurre cuando dos o más mineros encuentran bloques casi al mismo tiempo. También puede suceder como parte de un ataque.
+
+bloque génesis::
+	Fue el primer bloque en la cadena de bloques, utilizado para inicializar la criptomoneda.
+
+bifurcación fuerte::
+    Una bifurcación fuerte, también conocida como Cambio por “Hard-Forking”, es una divergencia permanente en la cadena de bloques, que ocurre comúnmente cuando los nodos no actualizados no pueden validar los bloques creados por los nodos actualizados que siguen nuevas reglas de consenso.
+    No debe confundirse con bifurcaciones a secas, una bifurcación suave, una bifurcación de software o una bifurcación de código en el estándar “Git”.
+
+monedero hardware::
+    Un monedero hardware es un tipo especial de billetera de bitcoin que almacena las llaves privadas del usuario en un dispositivo de hardware de seguridad.
+
+hash::
+    Una huella digital de alguna entrada binaria.
+
+bloqueos por hash o “hashlocks”::
+    Un bloqueo por hash es un tipo de acertijo que restringe el gasto de una salida hasta que se revela públicamente un dato secreto específico. Los bloqueo por hash o “hashlock”, tienen la propiedad útil de que una vez que se abre públicamente el hashlock, también se puede abrir cualquier otro hashlock asegurado con el mismo secreto. Esto hace posible crear múltiples salidas que están aseguradas por el mismo hashlock y que todas se pueden gastar al mismo tiempo.
+
+protocolo de Jerarquía Determinista o HD::
+    Es un protocolo de creación y transferencia de llaves jerárquico determinista (o del inglés “HD”) (propuesta de mejora BIP32), que permite crear llaves secundarias a partir de llaves primarias bajo una misma jerarquía.
+
+cartera HD::
+    Carteras que utilizan el protocolo de creación y transferencia de llaves jerárquico-determinista (Protocolo HD) (BIP32).
+
+semilla de cartera HD::
+    La semilla de un monedero HD o semilla raíz, es un valor potencialmente corto utilizado como semilla para generar la llave privada maestra y el código de cadena maestro para una billetera HD.
+
+HTLC::
+    Un Contrato blindado por un acertijo Hash y un Bloqueo Temporal (o del inglés “TimeLock”) o también “HTLC” (Hash TimeLock Contract) es un tipo de promesa de pagos que utiliza “hashlocks” y “timelocks” para exigir que el receptor de un pago reconozca haber recibido el pago antes de cierta fecha límite al generar una prueba criptográfica de pago, so pena de perder la capacidad de reclamar dicho pago, devolviéndolo al pagador.
+
+KYC::
+    Conozca a su cliente (del inglés: “KYC”) es el procedimiento que sigue un negocio, identificando y verificando la identidad de sus clientes. El término también se utiliza para referirse a la regulación bancaria que rige estas actividades.
+
+LevelDB::
+    Una “LevelDB” es una biblioteca de almacenamiento de código abierto de llaves-valores en disco. LevelDB es una biblioteca liviana y de un solo propósito para mantener enlaces de manera persistente con muchas plataformas.
+
+Red “Lightning Network”::
+    La red Lightning Network es una implementación de contratos blindados por Hash y Timelocks (HTLC) con canales de pago bidireccionales que permite que los pagos sean enrutados de manera segura a través de múltiples canales de pago entre pares. Esto permite la formación de una red donde cualquier par en la misma puede pagar a cualquier otro par, incluso si no tienen un canal abierto directamente entre sí.
+
+Bloqueo Temporal o “Locktime”::
+    El bloqueo temporal “Locktime”, o más técnicamente nLockTime, es la parte de una transacción que indica la hora más temprana o el bloque más temprano a partir del cual esa transacción puede agregarse a la cadena de bloques.
+
+Tanque de Memoria o “mempool”::
+    El tanque de memoria de bitcoin (o el “pool” de memoria) es una colección de todas las transacciones agrupadas en un bloque de datos, que han sido verificadas por los nodos de bitcoin, pero que aún no se han confirmado.
+
+raíz de merkle::
+    Es el nodo raíz de un árbol de merkle, un descendiente de todos los pares de hash que hay en el árbol. Las cabeceras de bloque deben incluir una raíz de merkle válida que descienda de todas las transacciones que existan en ese bloque.
+
+árbol de merkle::
+    Es una base de datos con estructura de árbol construida mediante el cálculo de los hash de emparejados de datos (las hojas), luego emparejando y calculando el hash sucesivo de los resultados hasta que quede un solo hash, la raíz de merkle. En Bitcoin, las hojas son casi siempre transacciones de un mismo bloque.
+
+minero::
+    Un nodo de red que encuentra pruebas de trabajo válidas para nuevos bloques, mediante procesos de cómputo donde se calcula una función hash repetitivamente.
+
+multifirma::
+    Una firma múltiple (multifirma) hace referencia a aquel procedimiento donde se  requiere más de una llave para autorizar una transacción de bitcoin.
+
+red::
+    Es una red entre pares iguales que propaga transacciones y bloques a cada nodo bitcoin en la red.
+
+nonce::
+    El "nonce" en un bloque de bitcoin es un campo de 32 bits (4 bytes) cuyo valor se establece de modo que el hash del bloque contenga una serie de ceros iniciales. El resto de los campos no se deben cambiar, ya que tienen un significado definido.
+
+transacciones fuera de la cadena u “off-chain”::
+    Una transacción fuera de la cadena es un movimiento de valores que ocurre al margen la cadena de bloques. Si bien una transacción confirmada en la cadena&#x2014;generalmente se conoce simplemente como __una transacción__&#x2014;ésta modifica la cadena de bloques y depende de la cadena de bloques para determinar su validez; pero una transacción fuera de la cadena se basa en otros métodos para registrar y validar dicha transacción.
+
+código transaccional u “opcode”::
+    Son códigos de operación en el lenguaje de script de Bitcoin que o bien realizan “empuje” de datos o bien ejecutan funciones específicas dentro de instrucciones script de llave pública (o pubkey) o en instrucciones script de verificación de firmas.
+
+protocolo Open Assets::
+    El Protocolo “Open Assets” es una capa de servicios simple y poderosa construida sobre la cadena de bloques de bitcoin. Permite la emisión y transferencia de activos creados por el usuario.
+
+OP_RETURN::
+    Un código operativo o transaccional, utilizado en una de las salidas, de las así llamadas transacciones “OP_RETURN”. No debe confundirse con una transacción OP_RETURN.
+
+transacción OP_RETURN::
+    Un tipo de transacción que agrega datos arbitrarios a una secuencia de comandos de salida o de llave pública demostrablemente indestructible que los nodos completos no tienen que almacenar en su base de datos UTXO. No debe confundirse con el código de operación OP_RETURN.
+
+bloque huérfano::
+    Son bloques cuyo bloque padre no ha sido procesado por el nodo local, por lo que aún no se pueden validar por completo. No debe confundirse con el bloque vencido.
+
+transacciones huérfanas::
+    Transacciones que no pueden ingresar al tanque de memoria debido a que están faltando una entrada válida o más en dichas transacciones.
+
+salida::
+    “Salida”, salida de una transacción o “TxOut” hace referencia a una salida en una transacción que contiene dos campos: un campo de valor para transferir cero o más satoshis y una secuencia de comandos de salida o “pubkey” para indicar qué condiciones deben cumplirse para que esos satoshis se puedan gastar o utilizar más adelante.
+
+P2PKH::
+    (Pagar-al-Hash-de-una-Llave-Pública) Son aquellas transacciones que pagan a una dirección bitcoin que contiene scripts del tipo P2PKH o en inglés “Pay-To-Pub-Key-Hash”. Una salida bloqueada por un script P2PKH puede desbloquearse (gastarse) presentando una llave pública y una firma digital creada por la llave privada que le corresponde.
+
+P2SH::
+    Pagar-al-Hash-de-un-Script (o del inglés: P2SH o “Pay-to-Script-Hash”) es un nuevo y poderoso tipo de transacción que simplifica enormemente el uso de scripts de transacción complejas. Con el estándar P2SH, el script complejo que detalla las condiciones para gastar una salida (o el “script de canje”) no se presenta en el script de bloqueo. En cambio, solo un hash está en el script de bloqueo.
+
+dirección P2SH::
+    Las direcciones P2SH son codificaciones bajo formato “Base58Check” del hash de 20 bytes de un script, las direcciones P2SH usan el prefijo de versión "5", que da como resultado direcciones codificadas Base58Check que comienzan con un "3". Las direcciones P2SH ocultan toda la complejidad, de modo que la persona que realiza un pago no ve el script.
+
+P2WPKH::
+    La firma de un P2WPKH (Pagar-al-Testigo-del-Hash-de-una-Llave-Pública, o del inglés “Pay-to-Witness-Public-Key-Hash”) contiene la misma información que el estándar P2PKH, pero se encuentra en el campo “testigo” de la transacción en lugar del campo “scriptSig”. El “scriptPubKey” también se modifica.
+
+P2WSH::
+    La diferencia entre P2SH y P2WSH (Pay-to-Witness-Script-Hash) está en el cambio de ubicación de la prueba criptográfica del campo “scriptSig” que se reubica en el campo del testigo y la “scriptPubKey”, que también se modifica.
+
+cartera en papel::
+    En el sentido más específico, una cartera en papel es un documento que contiene todos los datos necesarios para generar cualquier número de llaves privadas de Bitcoin, formando una billetera de llaves. Sin embargo, las personas a menudo usan el término para referirse a cualquier forma de almacenar bitcoin fuera de línea como un documento físico. Esta segunda definición también incluye llaves en papel y códigos redimibles.
+
+canales de pago::
+    Un canal de micropagos o canales de pago es una clase de técnicas diseñadas para permitir a los usuarios realizar múltiples transacciones de bitcoin sin tener que encomendar todas estas transacciones a la cadena de bloques de bitcoin. En un canal de pago típico, solo se agregan dos transacciones a la cadena de bloques, pero se puede realizar un número ilimitado o casi ilimitado de pagos entre los participantes.
+
+minería en agrupaciones::
+    La minería en agrupación es un enfoque de minería en el que múltiples clientes generadores contribuyen con la producción de un bloque y luego dividen la recompensa del bloque según la potencia de procesamiento aportada.
+
+Prueba de Participación::
+    La Prueba de Participación (o del inglés Proof-of-Stake; PoS) es un método por el cual la red de la cadena de bloques de una criptomoneda tiene como objetivo lograr un consenso distribuido. La prueba de participación pide a los usuarios que demuestren la propiedad de una cierta cantidad de moneda (su "participación" en la moneda).
+
+Prueba-de-Trabajo::
+    Es un paquete de datos que requiere de una cantidad de cómputo significativo para poder calcularlo. En bitcoin, los mineros deben encontrar una solución numérica para el algoritmo SHA256 que cumpla con un objetivo universal de toda la red, el objetivo de dificultad.
+
+recompensa::
+    Es una cantidad de monedas incluida en cada nuevo bloque como recompensa de la red para el minero que encontró la solución de la Prueba-de-trabajo. Actualmente es de 12,5 BTC por bloque.
+
+RIPEMD-160::
+    RIPEMD-160 es una función hash criptográfica de 160 bits. RIPEMD-160 es una versión reforzada de RIPEMD con un resultado hash de 160 bits, y se espera que sea seguro durante los próximos diez años o más.
+
+satoshi::
+    Un satoshi es la denominación más pequeña de bitcoin que se puede grabar en la cadena de bloques. Es el equivalente de 0,00000001 bitcoin y lleva el nombre del creador de Bitcoin, Satoshi Nakamoto.((("satoshi")))
+
+Satoshi Nakamoto::
+    Satoshi Nakamoto es el nombre utilizado por la persona o personas que diseñaron Bitcoin y crearon su implementación de referencia original, Bitcoin Core. Como parte de la implementación, también idearon la primera base de datos para la cadena de bloques. En el proceso, fueron los primeros en resolver el problema del gasto duplicado para la moneda digital. Su identidad real sigue siendo desconocida.
+
+Script::
+    Bitcoin utiliza un sistema de secuencias de comandos para las transacciones. Basados en el lenguaje FORTH de programación, el script es simple, basado en comandos de pila y es procesado de izquierda a derecha. A propósito no es un lenguaje de Turing completo, ya que este lenguaje no posee bucles.
+
+ScriptPubKey (también conocido como el script “pubkey”)::
+    ScriptPubKey o pubkey script, es un script incluido en las salidas de una transacción que establece las condiciones que deben cumplirse para que los satoshis que estas resguardan, se gasten. Los datos para cumplir las condiciones se pueden proporcionar en un script de firma.
+
+ScriptSig (también conocido como script de firma)::
+    ScriptSig o el script de firma, son los datos generados por un usuario que ejecuta un gasto que casi siempre se utilizan como variables para satisfacer el desafío del script conocido como “pubkey”.
+
+llave secreta (también conocida como llave privada)::
+	Es el número secreto que desbloquea los bitcoins enviados a la dirección correspondiente. pass:[<span class="keep-together">Un llave secreta</span>] tiene el siguiente aspecto:
++
+----
+5J76sF8L5jTtzE96r66Sf8cka9y44wdpJjMwCxR3tzLh3ibVPxh
+----
+
+Testigo Segregado::
+    El Testigo Segregado es una mejora del protocolo de Bitcoin en el que la data de la firma (o el "testigo") se separa de la data del remitente/receptor para optimizar aún más la estructura de las transacciones. El Testigo Segregado se implementó como una bifurcación suave; un cambio que técnicamente hace que las reglas del protocolo de Bitcoin sean más restrictivas.
+
+SHA::
+    El algoritmo de hash seguro o de sus siglas en inglés el “SHA”, es una familia de funciones de hash criptográfico publicadas por el Instituto Nacional (Norteamericano) de Estándares y Tecnología (NIST).
+
+Verificación de Pago Simplificado (SPV)::
+    La verificación de pago simplificado o SPV es un método para verificar qué transacciones particulares han sido incluidas en un bloque, sin tener que descargar todo el bloque. Este método de verificación a menudo es utilizado por el software de clientes ligeros de Bitcoin.
+
+bifurcación suave::
+    Una Bifurcación Suave o Cambio de “Soft-Forking” es una bifurcación temporal en la cadena de bloques, que ocurre comúnmente cuando los mineros que usan nodos no actualizados no siguen una nueva regla de consenso sobre la que sus nodos no conocen.
+    No debe confundirse con una bifurcación a secas, una bifurcación fuerte, una bifurcación de software o bifurcación bajo el protocolo Git.
+
+bloque vencido::
+    Es todo aquel bloque que ha sido minado con éxito, pero que no está incluido en la mejor cadena de bloques actual, probablemente porque otro bloque a la misma altura fue colocado en su lugar primero. No debe confundirse con el concepto de bloque huérfano.
+
+Bloqueos Temporales o timelocks::
+    Un bloqueo temporal es un tipo de blindaje que restringe el gasto de algunos bitcoins hasta que se alcance algún momento del tiempo específico en el futuro o se haya alcanzado cierta altura de bloque en la cadena. Los bloqueos temporales ocupan un lugar destacado en muchos contratos de Bitcoin, incluidos los canales de pago y los contratos por bloqueo de tiempo y de hash.
+
+transacción::
+    En términos simples, se trata de una transferencia de bitcoins desde una dirección a otra. Más precisamente, una transacción es una estructura de datos firmada que expresa una transferencia de valor. Las transacciones se transmiten a través de la red bitcoin, son recopiladas por los mineros, e incluidas en los bloques, lo que las perpetúa en la cadena de bloques.
+
+pool de transacciones::
+    Se trata de la misma colección desordenada de transacciones, también conocida como “tanque de memoria” (mempool) y que no están todavía en ningún bloque de la cadena principal, pero para las cuales existen ya las transacciones que convalidan sus entradas.
+
+Completitud de Turing::
+    Un lenguaje de programación se denomina “Turing completo” si puede ejecutar los mismos programas que una máquina de Turing también puede ejecutar, con suficiente tiempo y memoria.
+
+salida de transacción sin gastar (de sus siglas en inglés: UTXO)::
+    Una UTXO es cualquier salida de una transacción que no ha sido gastada y que se puede gastar al referirse como la entrada de una nueva transacción.
+
+cartera/monedero::
+    Se trata de aquel software que contiene todas las direcciones de bitcoin de un usuario y sus correspondientes llaves secretas. Puede utilizarse para enviar, recibir y almacenar nuestros bitcoins.
+
+Formato de Importación de Cartera (de sus siglas en inglés: WIF)::
+    El WIF o el Formato de Importación de Cartera es un estándar de intercambio de datos diseñado para permitir la exportación e importación de una sola llave privada a la vez, con un banderín que indica si se utiliza o no una llave pública comprimida.
+
+Algunas de estas definiciones fueron aportadas bajo una licencia CC-BY de https://en.bitcoin.it/wiki/Main_Page[bitcoin Wiki] o de otras fuentes de documentación de código abierto.

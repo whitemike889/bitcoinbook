@@ -1,0 +1,288 @@
+[[ch02_bitcoin_overview]]
+== A bitcoin működése
+
+=== Tranzakciók, blokkok, bányászat és a blokklánc
+
+((("bitcoin","áttekintése",  id="BCover02")))((("központi szervezet")))((("decentralizált rendszerek", "bitcoin áttekintés", id="DCSover02")))A szokásos banki és pénzügyi rendszerektől eltérően a bitcoin a decentralizált bizalomra épül. A bitcoin esetében a bizalom nem egy központi szervezet révén jön létre, melyben mindenki megbízik, hanem a bizalom a rendszer különböző résztvevői közötti interakciók eredményeképpen előálló tulajdonság. Ebben a fejezetben oly módon szerzünk áttekintő képet a bitcoinról, hogy végigkövetjük egy tranzakciónak a rendszeren belüli útját, és megvizsgáljuk, hogy az elosztott közmegegyezés (konszenzus) módszere révén hogyan válik a tranzakció „megbízhatóvá”, és végül hogyan kerül rögzítésre az összes tranzakciót tartalmazó elosztott főkönyvben, vagyis a blokkláncban. A későbbi fejezetekben részletesen megismerjük a tranzakciók, a hálózat és a bányászat mögött álló technológiát.
+
+==== A bitcoin áttekintése
+
+A lenti <<bitcoin-overview>> áttekintő ábrán láthatjuk, hogy a bitcoin rendszer a következőkből áll: az egyes felhasználókhoz tartozó, kulcsokat tartalmazó pénztárcákból, a hálózaton végigterjedő tranzakciókból, és bányászokból, akik a számításaik révén (egymással versenyezve) megteremtik a konszenzust a blokkláncon, amely az összes tranzakció hiteles főkönyve.
+
+
+((("blokkláncfelfedező webhelyek")))Mindegyik példa a bitcoin hálózat egy tényleges tranzakcióján alapul, és a felhasználók (Joe, Alice, Bob és Gopesh) közötti történéseket szimulálja oly módon, hogy az egyik pénztárcából a másikba küld pénzt. Miközben a bitcoin hálózatban és a blokkláncon végigkövetjük a tranzakciókat, az egyes lépések megjelenítésére egy _blokkláncfelfedezőt_ fogunk használni. A blokkláncfelfedező egy olyan webalkalmazás, amely egy bitcoinos keresőmotorként funkcionál, és lehetővé teszi, hogy a segítségével címek, tranzakciók és blokkok után kutassunk, és megvizsgáljuk a közöttük lévő összefüggéseket.
+
+[[bitcoin-overview]]
+.A bitcoin áttekintése
+image::images/msbt_0201.png["A bitcoin áttekintése"]
+
+((("Bitcoin Block Explorer")))((("BlockCypher Explorer")))((("blockchain.info")))((("BitPay Insight")))Népszerű blokkláncfelfedezők többek között:
+
+* https://live.blockcypher.com[BlockCypher Explorer]
+* https://blockchain.info[blockchain.info]
+* https://insight.bitpay.com[BitPay Insight]
+* https://blockstream.info[Blockstream Explorer]
+
+Mindegyikben van egy kereső funkció, amelynek egy bitcoin cím, egy tranzakció hash (zanza), egy blokkszám vagy blokk hash adható meg, és amely lekérdezi az ennek megfelelő adatokat a bitcoin hálózatról. Mindegyik tranzakció és blokk példában egy URL-t is szerepeltetni fogunk, amely közvetlenül a megfelelő bejegyzésre mutat, ami ily módon részletesen tanulmányozható.
+
+
+[[cup_of_coffee]]
+==== Vegyünk egy csésze kávét
+
+((("felhasználás", "kávé vásárlás", id="UCcoffee02")))Az előző fejezetben bemutatott új felhasználó, Alice, épp most tett szert az első bitcoinjára. Az <<getting_first_bitcoin>> részben Alice találkozott a barátjával, Joe-val, hogy némi készpénzért bitcoint vásároljon tőle. A Joe által létrehozott tranzakció révén Alice pénztárcájába 0,10 BTC került. Alice első kiskereskedelmi tranzakciója az lesz, hogy vesz egy csésze kávét Bob Palo Alto-i kávézójában.
+
+((("árfolyamok", "meghatározása")))Bob csak nemrég, elektronikus pénztárrendszerének modernizálása óta fogadja el a bitcoint. Bob kávézójában az árak a helyi pénznemben (USA dollárban) vannak feltüntetve, de a kasszánál az ügyfeleknek lehetőségük van dollárral vagy bitcoinnal fizetni. Alice rendel egy csésze kávét, Bob pedig a kasszánál rögzíti a tranzakciót, mint ahogy azt minden tranzakciónál teszi. A pénztárgép a végösszeget az aktuális árfolyam szerint USA dollárról bitcoinra konvertálja, és mindkét pénznemben kijelzi az árat:
+
+----
+Összeg:
+$1.50 USD
+0,015 BTC
+----
+
+
+((("milliBit")))Bob azt mondja: „Ez egy dollár ötven, azaz tizenöt milliBit lesz”.
+
+((("fizetési kérések")))((("QR kódok", "fizetési kérések")))Bob pénztárrendszere ezen felül megjelenít egy QR kódot, amely a tranzakcióhoz tartozó _fizetési kérést_ tartalmazza (lásd <<payment-request-QR>>).
+
+A „fizetési kérés” nem csupán egy bitcoin címet tartalmazó QR kód, hanem egy QR kóddal kódolt URL, amely egy címet, a fizetendő összeget és egy általános leírást tartalmaz, pl. „Bob kávézója”. A bitcoin pénztárca ennek segítségével tudja összeállítani a fizetség elküldéséhez szükséges adatokat, és egyidejűleg a felhasználó számára olvasható formában megjeleníteni azokat. Ha bepásztázzuk a fenti QR kódot, akkor mi is azt látjuk, amit Alice.
+
+
+[[payment-request-QR]]
+.Fizetési kérést tartalmazó QR kód
+image::images/mbc2_0202.png["fizetési-kérés"]
+
+[TIP]
+====
+((("QR kódok", "figyelmeztetések és óvatosság")))((("tranzakciók", "figyelmeztetések és óvatosság")))((("figyelmeztetések és óvatosság", "ne küldjön pénzt a könyvben megjelenő címekre")))Próbálja meg ezt bepásztázni a pénztárcájával, hogy lássa a címet és az összeget, de NE KÜLDJÖN PÉNZT.
+====
+[[payment-request-URL]]
+.A fizetési kérést tartalmazó fenti QR kód a BIP-21-ben definiált következő URL-t kódolja:
+----
+bitcoin:1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA?
+amount=0.015&
+label=Bob%27s%20Cafe&
+message=Purchase%20at%20Bob%27s%20Cafe
+
+Az URL részei
+
+Egy bitcoin cím: "1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA"
+A fizetendő összeg:  "0.015"
+A bitcoin címhez tartozó címke: "Bob's Cafe" (Bob kávézója)
+A fizetség leírása: "Purchase at Bob's Cafe" (Vásárlás Bob kávézójában)
+----
+
+Alice az okostelefonjával bepásztázza a kijelzőn megjelenő QR kódot. A telefonon megjelenik a +0,0150 BTC+ kifizetés +Bob kávézójá+nak. Alice a Küldés gombbal engedélyezi a kifizetést. Néhány másodpercen belül (körülbelül ugyanannyi idő alatt, mint amennyi egy hitelkártyás fizetéshez szükséges), Bob kasszáján megjelenik a tranzakció, és ezzel befejeződik a folyamat.
+
+A következő részekben részletesebben meg fogjuk vizsgálni ezt a tranzakciót. Megnézzük, hogy Alice pénztárcája hogyan hozza létre a tranzakciót, hogyan továbbítódik a tranzakció a hálózaton keresztül, hogy kerül ellenőrzésre, és végül hogyan tudja Bob további tranzakciókban elkölteni ezt az összeget.
+
+[NOTE]
+====
+((("törtrész")))((("millibitcoin")))((("satoshi")))A bitcoin hálózat képes kezelni a bitcoin törtrészeit is, a millibitcoinoktól (ami a bitcoin 1/1000 része) egészen a bitcoin 1/100 000 000 részéig, aminek satoshi a neve. Ebben a könyvben az összeg nagyságától függetlenül a „bitcoin” szót fogjuk használni, a legkisebb egységtől (1 satoshi) az összes, valaha kibányászásra kerülő (21 000 000) bitcoinig bezárólag.
+====
+
+Egy blokkfelfedező weboldal segítségével megvizsgálhatja Alice tranzakcióját Bob kávézójának (<<view_alice_transaction>>):
+
+[[view_alice_transaction]]
+.Tekintse meg Alice tranzakcióját: https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[blockchain.info]
+====
+----
+https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2
+----
+====
+
+=== Bitcoin tranzakciók
+
+((("tranzakciók","definíciója")))A tranzakció azt tudatja a hálózattal, hogy egy bitcoin tulajdonos engedélyezte bizonyos számú bitcoin átutalását egy másik tulajdonos számára. Ha az új tulajdonos el akarja költeni ezeket a bitcoinokat, akkor létrehoz egy újabb tranzakciót, amely engedélyezi az átutalást egy harmadik felhasználó számára, és így tovább, véges végig egy tulajdonosi láncban.
+
+==== Tranzakció kimenetek és bemenetek
+
+((("tranzakciók", "áttekintés", id="Tover02")))((("bemenetek és kimenetek", "alapok")))A tranzakciók olyanok, mint egy kettős könyvelés főkönyvének a sorai. Minden egyes tranzakcióban egy vagy több „bemenet” van, ami terhelést jelent egy bitcoin számlával szemben. A tranzakció másik oldalán egy vagy több „kimenet” van, ami jóváírásként hozzáadódik egy bitcoin számlához. ((("díjak, "tranzakciós díjak")))A bemenetek és kimenetek (terhelések és jóváírások) nem szükségszerűen ugyanazt a számot eredményezik, ha összeadjuk őket. A kimenetek összege kicsit kevesebb, mint a bemenetek összege, a különbség pedig egy hallgatólagos _tranzakciós díj_, vagyis egy kis fizetség, melyet az a bányász kap meg, amelyik a tranzakciót a főkönyvbe befoglalja. A <<transaction-double-entry>> részben tranzakciónk a főkönyvi nyilvántartásban egy sorként jelenik meg.
+
+A tranzakciók minden egyes átutalásra kerülő (bemeneti) bitcoin összegre vonatkozóan bizonyítékot tartalmaznak arra vonatkozóan, hogy a tulajdonos valóban birtokolja őket. Ez a bizonyíték a tulajdonos digitális aláírása, amelyet bárki ellenőrizni tud. ((("bitcoin elköltése", "definíció")))A bitcoin szóhasználatával élve, „elkölteni” valamit azt jelenti, hogy aláírunk egy tranzakciót, amely egy előző tranzakcióból egy új tulajdonosnak továbbít értéket. Az új tulajdonost a bitcoin címe azonosítja.
+
+[[transaction-double-entry]]
+.Tranzakciók kettős könyvelésként ábrázolva
+image::images/mbc2_0203.png["Tranzakció kettős könyvelés"]
+
+==== Tranzakciók lánca
+
+((("tranzakciók lánca")))Alice a Bob kávéházának szóló fizetség során egy előző tranzakciót használ bemenetként. Az előző fejezetben Alice a barátjától, Joe-tól készpénzért vett bitcoint. Ez a tranzakció bitcoin értéket hozott létre, amelyet Alice kulcsa zárol. Alice a Bob kávéháza számára létrehozott új tranzakció bemeneteként erre az előző tranzakcióra hivatkozik, és új kimeneteket hoz létre, a kávéért történő fizetség és a visszajáró pénz számára. A tranzakciók egy láncot alkotnak, amelyben a legutolsó tranzakciók bemenetei megfelelnek az előző tranzakciók kimeneteinek. Alice kulcsa szolgáltatja azt az aláírást, amely felszabadítja az előző tranzakció kimeneteit, vagyis ily módon bizonyítja a bitcoin hálózat számára, hogy ő a pénzösszeg tulajdonosa. A kávéért történő fizetséget Bob címéhez rendeli hozzá, ezáltal „akadályt állít” ezen a kimeneten, azzal a követelménnyel, hogy Bob aláírására van szükség, ha Bob szeretné elkölteni ezt az összeget. Ez jelenti az érték továbbítást Alice és Bob között. Az Alice és Bob közötti tranzakciós láncot az <<blockchain-mnemonic>> szemlélteti.
+
+[[blockchain-mnemonic]]
+.Egy tranzakciós lánc, ahol az egyik tranzakció kimenete alkotja a következő tranzakció bemenetét
+image::images/mbc2_0204.png["Tranzakciók lánca"]
+
+==== Visszajáró pénz
+
+((("visszajáró, adása")))((("visszajáró címek")))((("címek", "visszajáró címek")))Sok bitcoin tranzakció tartalmaz olyan kimeneteket, amelyek mind az új, mind a jelenlegi tulajdonos egy-egy címére hivatkoznak. Utóbbit _visszajáró_ címnek nevezzük. Ennek oka, hogy a tranzakció bemenetek, hasonlóan a valuta címletekhez, oszthatatlanok. Ha ön egy 5 dollárba kerülő árucikket egy 20 dollárossal fizet ki, visszajáróként 15 dollárt vár a bolttól. Hasonló dolog érvényes a bitcoin tranzakció bemeneteire. Ha ön egy egy 5 bitcoinba kerülő árucikket vásárol, de csak egy 20 bitcoinos bemenet áll rendelkezésére, a bolt tulajdonosának egy 5 bitcoinos kimenetet, és önmagának egy 15 bitcoinos kimenetet küldene visszajáróként (mínusz tranzakciós költségek). Fontos, hogy a visszajáró cím nem feltétlenül azonos a bemeneti címmel. Adatvédelmi célból gyakori, hogy a tulajdonos pénztárcája erre célra új címet generál.
+
+Felhasználó által indított fizetés esetén különböző pénztárcák különböző stratégiákat választhatnak a bemenetek egyesítésére. Egyesíthetnek több kisebb bemenetet, vagy használhatnak egyet, ami nagyobb vagy egyenlő a kívánt összeggel. Ha a pénztárca nem képes bemenetek oly módú egyesítésére, hogy az pontosan megegyezzen a tranzakciós díjjal megnövelt  összeggel, visszajárót kell, hogy generáljon. Ez nagyon hasonlít ahhoz, ahogy a hagyományos pénzt kezeljük. Ha mindig a nálunk lévő legnagyobb címlettel fizetünk, egy halom aprópénz lesz a zsebünkben. Ha mindig aprópénzzel fizetünk, csak nagyobb címleteink lesznek. Az emberek öntudatlanul megtalálják e két véglet közötti középutat, és a bitcoin pénztárca-fejlesztők e középút leprogramozására törekszenek.
+
+((("tranzakciók", "definíciója")))((("kimenetek és bemenetek", "definíciója")))((("bemenetek", see="kimenetek és bemenetek")))Összegezve, a _tranzakciók_ az értéket a _tranzakció bemeneteiből_ a _tranzakció kimeneteibe_ továbbítják. A bemenet hivatkozás egy előző tranzakció kimenetére, azt adja meg, hogy honnan származik az érték. Egy tranzakció kimenete meghatározott értéket rendel az új tulajdonos címéhez, valamint tartalmazhat visszajáró kimenetet is az előző tulajdonos számára. Egy tranzakció kimenetei egy új tranzakció bemeneteiként használhatók. Ily módon egy tulajdonosi lánc jön létre, amin az érték címről címre vándorol (lásd <<blockchain-mnemonic>>).
+
+==== A leggyakrabban előforduló tranzakciók
+
+A leggyakoribb tranzakció az egyik címről egy másik címre történő egyszerű fizetség, amely gyakran tartalmaz valamilyen „visszajáró” pénzt, melyet az eredeti tulajdonosnak juttatnak vissza. Ennek a tranzakciótípusnak egy bemenete és két kimenete van, amint azt az <<transaction-common>> mutatja:
+
+[[transaction-common]]
+.A leggyakoribb tranzakció
+image::images/mbc2_0205.png["Gyakori tranzakciók"]
+
+Egy másik, gyakori tranzakció több bemenetet egyetlen kimenetben összesít (lásd <<transaction-aggregating>>). Ez annak felel meg, amikor a valós világban egy csomó érméért és bankjegyért egyetlen nagyobb bankjegyet kapunk. A pénztárca alkalmazások néha azért hoznak létre ilyen tranzakciókat, hogy a számos kisebb összeget, melyek visszajáró pénzek voltak, kitakarítsák.
+
+[[transaction-aggregating]]
+.Összegeket egyesítő tranzakció
+image::images/mbc2_0206.png["Összegeket egyesítő tranzakció"]
+
+Végül, a bitcoin főkönyv gyakori tranzakció típusa az is, amely egyetlen bemenetet több kimenetté oszt fel, ahol a kimenetek különböző személyekhez tartoznak (lásd <<transaction-distributing>>). Ezt a tranzakciótípust az üzleti vállalkozások pénz elosztásra használják, pl. amikor egy fizetési lista alapján több alkalmazottnak küldenek fizetést.((("", startref="Tover02")))
+
+[[transaction-distributing]]
+.Pénz elosztó tranzakció
+image::images/mbc2_0207.png["Pénz elosztó tranzakció"]
+
+=== Egy tranzakció létrehozása
+
+((("tranzakciók","létrehozása", id="Tconstruct02")))((("pénztárcák", "tranzakciók létrehozása")))Alice pénztárca programja a megfelelő bemenetek és kimenetek kiválasztásával az Alice előírásának megfelelő tranzakciót hozza létre. Alice-nak csak a célszemélyt és az összeget kell megadnia, a többit a pénztárca program automatikusan elvégzi anélkül, hogy Alice-nak törődnie kellene a részletekkel. Fontos, hogy egy pénztárca program még akkor is képes tranzakciók létrehozására, ha teljesen offline állapotú. Hasonlóan ahhoz, ahogy egy otthon megírt csekket is el lehet küldeni egy borítékban a banknak, egy tranzakció létrehozása és aláírása sem követeli meg, hogy a program kapcsolatban legyen a bitcoin hálózattal.
+
+==== A megfelelő bemenetek kiválasztása
+
+((("kimenetek és bemenetek", "bemenetek megtalálása és nyomon követése")))Alice pénztárca programjának először olyan bemeneteket kell találnia, amelyekkel lehetséges a Bobnak küldendő összeg kifizetése. A legtöbb pénztárca program nyomon követi a pénztárca címeihez tartozó összes elkölthető kimenetet. Ennek megfelelően, Alice pénztárcájában ott lesz Joe tranzakciójából annak a kimenetnek a másolata, amely akkor jött létre, amikor Alice bitcoint vett Joe-tól (lásd <<getting_first_bitcoin>>). Azoknak a bitcoin pénztárca alkalmazásoknak, melyek teljes kliensként futnak, másolatuk van a blokklánc összes tranzakciójának elköltetlen kimeneteiről. Ez lehetővé teszi, hogy a pénztárca program tranzakció bemeneteket hozhasson létre, valamint hogy gyorsan ellenőrizze, hogy a bejövő tranzakcióknak helyesek-e a bemenetei. Mivel egy teljes kliens sok tárhelyet foglal, a legtöbb felhasználó "pehelysúlyú" klienseket futtat. Ezek a kliensek csak a felhasználó saját el nem költött kimeneteit tartják nyilván.
+
+Ha a pénztárca programban nincs meg az összes elköltetetlen tranzakciós kimenet másolata, akkor a program a bitcoin hálózatból le tudja kérdezni ezt az adatot, vagy úgy, hogy különféle szolgáltatók API-jait használja, vagy egy teljes bitcoin csomópont alkalmazásprogramozási felületén (API-n) keresztüli lekérdezésével. Az <<example_2-2>> egy API kérési példát szemléltet, melyet egy adott URL-re kiadott HTTP GET kéréssel hoztunk létre. Az URL visszaadja, hogy egy adott címhez milyen az el nem költött tranzakciós kimenetek tartoznak, vagyis megadja azokat az adatokat, melyek egy alkalmazás számára szükségesek, ha az alkalmazás szeretné létrehozni a kimenetek elköltéséhez szükséges tranzakció bemeneteket. Egy parancssorból futtatható, egyszerű _cURL_ HTTP klienssel kapjuk meg a választ:
+
+[[example_2-2]]
+.Az Alice bitcoin címéhez tartozó el nem költött kimenetek megkeresése
+====
+[source,bash]
+----
+$ curl https://blockchain.info/unspent?active=1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK
+----
+====
+
+[source,json]
+----
+{
+
+	"unspent_outputs":[
+
+		{
+			"tx_hash":"186f9f998a5...2836dd734d2804fe65fa35779",
+			"tx_index":104810202,
+			"tx_output_n": 0,
+			"script":"76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac",
+			"value": 10000000,
+			"value_hex": "00989680",
+			"confirmations":0
+		}
+
+	]
+}
+----
+
+
+A választ az <<example_2-2>> mutatja. Eszerint a bitcoin hálózat egyetlen egy el nem költött kimenetről tud (amely még nem lett felhasználva), és ez Alice +1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK+ címéhez tartozik. A válasz egy hivatkozást tartalmaz arra a tranzakcióra, amelyben ez az el nem költött kimenet (a Joe-tól érkező pénz) van. A kimenet értéke satoshiban van megadva, a 10 millió satoshi 0,10 bitcoinnak felel meg. Ezen információ birtokában Alice pénztárca alkalmazása létre tud hozni egy tranzakciót, amely ezt az értéket az új tulajdonosok címeire továbbítja.
+
+[TIP]
+====
+Tekintse meg https://www.blockchain.com/btc/tx/7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18[Joe tranzakcióját Alice-nek].
+====
+
+Mint látható, Alice pénztárcájában elegendő bitcoin van az egyetlen el nem költött kimenetben ahhoz, hogy kifizesse a kávéját. Ha nem ez lenne a helyzet, akkor a pénztárca programnak „végig kellene bogarásznia” egy halom kisebb el nem költött kimenetet, hasonlóan ahhoz, mint amikor valaki egy fizikai pénztárcából újabb és újabb pénzérméket vesz elő, hogy ki tudja fizetni a kávéját. Mindkét esetben szükség van a visszajáró pénz kezelésére. Ezt a következő részben fogjuk látni, amikor a pénztárca alkalmazás létrehozza a tranzakció kimeneteket (a kifizetéseket).
+
+
+==== A kimenetek létrehozása
+
+((("kimenetek és bemenetek","kimenetek létrehozása")))A tranzakció kimenete egy szkript formájában jön létre. Ez a szkript akadályt hoz létre, és az összeg csak úgy használható fel, ha a szkripthez valaki ismeri a megoldást. Egyszerűbben mondva, az Alice által létrehozott tranzakció kimenetében egy olyan szkript lesz, ami ezt mondja: „Ez a kimenet annak fizethető ki, aki be tud mutatni egy olyan aláírást, amely Bob címéhez tartozó kulccsal történt”. Mivel az a kulcs, amely ehhez a címhez tartozik, csak Bob pénztárcájában van meg, ezért csak Bob pénztárcája képes ilyen aláírásra, és ily módon a kimenet elköltésére. Alice tehát azzal, hogy aláírást kér a Bobtól, „megakadályozza”, hogy más is elkölthesse a kimenet értékét.
+
+A tranzakciónak lesz egy második kimenete is, mivel Alice pénze egy 0,10 BTC értékű kimenetben áll rendelkezésre, ami túl sok a 0,015 BTC-be kerülő kávéért. Alice-nak 0,085 BTC visszajár. A visszajáró pénzt Alice pénztárca programja kimenetként kezeli, ugyanabban a tranzakcióban, amelyben a Bobnak történő kifizetést. Lényegében Alice pénztárcája a pénzt két kifizetésre bontja: egy Bobnak történő kifizetésre és egy saját magának történő visszafizetésre. Alice a visszajáró pénzhez tartozó kimenetet egy későbbi tranzakcióban tudja majd felhasználni (elkölteni).
+
+Végül, ahhoz, hogy a hálózat gyorsan feldolgozza a tranzakciót, Alice pénztárca programja egy kis díjat alkalmaz. A díj a tranzakcióban nem jelenik meg explicit módon, hanem a bemenetek és kimenetek különbsége. Ha Alice a második kimenetben 0,085 helyett csak 0,0845 értéket ad meg, akkor 0,0005 BTC (fél millibitcoin) marad. A bemenet 0,10 BTC-jét a két kimenet nem költi el teljesen, mivel a kimenetek összege kisebb lesz, mint 0,10. Az így keletkező különbség a tranzakciós díj, amely azé a bányászé lesz, aki a tranzakciót ellenőrzi és blokkba foglalja, amely utána a blokkláncba kerül.
+
+A tranzakció a bitcoin blokkláncon a következő URL-lel íratható ki, amint azt az <<transaction-alice>> mutatja:
+
+[[transaction-alice]]
+[role="smallerseventyfive"]
+.Alice Bob kávézójával kapcsolatos tranzakciója
+image::images/mbc2_0208.png["Alice kávé tranzakció"]
+
+[[transaction-alice-url]]
+[TIP]
+====
+Tekintse meg https://www.blockchain.com/btc/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[Alice tranzakcióját Bob kávézójának].
+====
+
+==== A tranzakció hozzáadása a nyilvántartáshoz
+
+Alice pénztárca programja egy 258 bájt hosszú tranzakciót hozott létre. A tranzakció mindent tartalmaz, ami az összeg feletti tulajdonjog bizonyításához szükséges, és az összeget egy új tulajdonoshoz rendeli hozzá. Ez az a pont, amikor a tranzakciót el kell küldeni a bitcoin hálózatba, ahol az be fog épülni a blokkláncba. A következő részben látni fogjuk, hogyan válik egy tranzakció egy új blokk részévé, és hogyan történik az új blokk „kibányászása”. Végül látni fogjuk, hogy miután az új blokk a blokklánc részévé vált, hogyan lesz a blokk egyre megbízhatóbb, ahogyan a blokklánc egyre több blokkal bővül.
+
+===== A tranzakció elküldése
+
+((("továbbítás","folyamata")))Mivel a tranzakció tartalmazza a feldolgozásához szükséges összes információt, nem számít, hogyan vagy honnan küldjük el a bitcoin hálózatba. A bitcoin hálózat egy egyenrangú csomópontokból álló, ún. peer-to-peer hálózat, amelyben az egyes bitcoin kliensek számos más bitcoin klienshez kapcsolódnak. A bitcoin hálózat célja az, hogy az összes résztvevőnek továbbítsa a tranzakciókat és a blokkokat.
+
+===== A tranzakció szétterjedése
+
+((("bitcoin csomópontok","definíciója")))((("csomópontok", see="bitcoin csomópontok")))Bármely rendszer, szerver, asztali alkalmazás vagy pénztárca, amely a bitcoin protokoll "nyelvét beszélve" részt vesz a bitcoin hálózaton, egy ún. _bitcoin csomópont_. Alice pénztárca programja az új tranzakciót bármelyik bitcoin csomópontnak el tudja küldeni, ha azzal valamilyen Internet kapcsolata van. A kapcsolat lehet vezetékes, WiFi, mobil stb. Szükségtelen, hogy Alice bitcoin pénztárcája Bob bitcoin pénztárcájával közvetlen kapcsolatban legyen, vagy hogy a kávéházban lévő Internet kapcsolatot használja, bár mindkét dolog lehetséges. ((("szétterjedés", "elárasztásos módszer")))((("elárasztásos módszer")))Egy tetszőleges bitcoin hálózati csomópont, amely egy előzőleg még nem látott érvényes tranzakcióval találkozik, azonnal továbbítja azt vele a kapcsolatban lévő összes többi csomópontnak. Ezt a módszert _elárasztásnak_ (flooding) hívják. Emiatt a peer-to-peer hálózatban a tranzakció gyorsan szétterjed, és a csomópontok nagy részéhez néhány másodpercen belül eljut.
+
+===== Hogyan látja mindezt Bob
+
+Ha Bob bitcoin pénztárca programja közvetlenül Alice pénztárca programjával van kapcsolatban, akkor Bob kliense lesz az első, amelyik a megkapja a tranzakciót. De ha Alice pénztárcája más csomópontokon keresztül küldi el a tranzakciót, a tranzakció akkor is néhány másodpercen belül eljut Bob pénztárcájához. Bob pénztárcája Alice tranzakcióját azonnal bejövő fizetésként fogja azonosítani, mivel olyan kimenetet tartalmaz, amely Bob kulcsaival elkölthető. Bob pénztárca programja azt is ellenőrizni tudja, hogy a tranzakció jól formált-e, előzőleg elköltetlen kimeneteket használ-e és kellő nagyságú tranzakciós díjat tartalmaz-e ahhoz, hogy a befoglalják a következő blokkba. Ezek után Bob viszonylag kis kockázattal feltételezheti, hogy a tranzakció blokkba foglalása és megerősítése hamarosan megtörténik.
+
+[TIP]
+====
+((("megerősítések", "kis értékű tranzakciók", secondary-sortas="kis értékű tranzakciók")))A bitcoin tranzakciókkal kapcsolatban gyakori félreértés az, hogy 10 percet kell várni a tranzakció „megerősítéséhez”, vagyis amíg bele nem kerül egy új blokkba, vagy 60 percet 6 teljes megerősítéshez. Noha a megerősítés biztosítja, hogy a tranzakciót az egész hálózat ugyanolyannak lássa, az olyan kis értékű tételek esetén, mint egy pohár kávé, felesleges a várakozás. Egy érvényes, kis értékű tranzakció megerősítés nélküli elfogadása nem jelent nagyobb kockázatot, mint egy hitelkártyával történő fizetés azonosító okmány vagy aláírás nélküli elfogadása, márpedig ez gyakori manapság.((("", startref="Tconstruct02")))
+====
+
+=== Bitcoin bányászat
+
+((("bányászat és konszenzus", "áttekintése", id="MACover02")))((("blokklánc (a)", "bányászat áttekintése", id="BToverview02")))Alice tranzakciója tehát szétterjedt a bitcoin hálózatban. Addig azonban nem lesz a _blokklánc_ része, amíg egy _bányászatnak_ nevezett folyamat le nem ellenőrzi és be nem foglalja egy blokkba. Részletesebb magyarázat a <<mining>> részben található.
+
+A bitcoin rendszer a bizalmat elvégzett számításokra alapozza. A tranzakciókat _blokkokba_ rendezi, amihez rendkívül sok számításra van szükség, de a blokkok ellenőrzéséhez kevésre. Ez a folyamat a bányászat, és a bitcoin esetén két célra szolgál:
+
+* ((("bányászat és konszenzus", "konszenzus szabályok", "biztonság megteremtése")))((("konszenzus", see="bányászat és konszenzus")))A bányász csomópontok a bitcoin _konszenzus szabályainak_ megfelelően minden tranzakciót ellenőriznek. Ebből kifolyólag, a bányászat teremti meg a biztonságot a bitcoin tranzakciók számára, az érvénytelen, vagy helytelen formátumú tranzakciók elvetésével.
+* A bányászat révén jön létre minden egyes blokkban az új bitcoin, majdnem úgy, ahogy egy központi bank új pénzt nyomtat. A létrejövő bitcoin mennyisége limitált, és idővel csökkenő kibocsátási rátát követ.
+
+
+A bányászat finom egyensúlyt teremt költség és jutalom között. Egy matematikai probléma megoldása érdekében áramot fogyaszt. Egy sikeres bányász _jutalmat_ gyűjt be új bitcoin és tranzakciós díjak formájában. A jutalmat azonban csak akkor gyűjtheti be, ha az összes tranzakciót ellenőrizte a _konszenzus_ szabályainak megfelelően. Ez a kényes egyensúly teremti meg a biztonságot a bitcoin számára, központi szervezet nélkül.
+
+A bányászat olyasféle dolog, mint egy hatalmas sudoku játék, melyet egymással párhuzamosan játszanak, és amely mindig újra indul, ha valaki talál egy megoldást. A játék nehézségét automatikusan úgy választják meg, hogy körülbelül 10 perc legyen a megoldáshoz szükséges idő. Képzeljünk el egy hatalmas sudoku rejtvényt, melyben néhány ezer a sorok és szolopok száma. Egy kész megoldás nagyon gyorsan ellenőrizhető. De ha a rejtvény még nincs kitöltve, akkor a megoldásához nagyon sok munkára van szükség! A sudoku bonyolultsága a méretének a módosításával szabályozható (mennyi legyen a sorok és az oszlopok száma), de még akkor is nagyon egyszerű az ellenőrzése, ha nagyon nagy. A bitcoinnál használt „rejtvény” kriptográfiai hashen alapul, és hasonló jellemzőkkel rendelkezik: aszimmetrikusan nehéz a megoldása, de könnyű az ellenőrzése és a nehézsége állítható.
+
+((("bányászat és konszenzus", "bányászfarmok és bányatársaságok")))Az <<user-stories>> részben bemutattuk Jinget, aki egy vállalkozó Sanghajban. Jing egy _bányászfarmot_ működtet, egy olyan vállalkozást, ami több ezer specializált bányászgép segítségével versenyez a jutalomért. Kb. 10 percenként Jing bányászgépei sok ezer hasonló rendszerrel versenyeznek, hogy megoldást találjanak egy tranzakciókból álló blokkhoz. ((("munkabizonyíték algoritmus")))((("bányászat és konszenzus", "munkabizonyíték algoritmus")))Az ilyen megoldás neve: „munkabizonyíték”. A megoldáshoz másodpercenként több trillió hash (zanza) műveletet kell a teljes bitcoin hálózatban elvégezni. A „munkabizonyíték” algoritmusa abból áll, hogy a blokk fejéből és egy véletlen számból az SHA256 titkosítási algoritmussal egy hasht (zanzát) képez, és ezt mindeddig ismétli, amíg létre nem jön egy előre meghatározott minta. Az adott körben az a bányász nyeri meg a versenyt, aki elsőként talál egy ilyen megoldást, és publikálja a blokkot a blokkláncon.
+
+Jing 2010-ben kezdett bányászni. Egy gyors asztali számítógéppel kereste az új blokkokhoz a megfelelő munkabizonyítékot. Ahogy egyre több bányász csatlakozott a bitcoin hálózathoz, a megoldandó probléma nehézsége gyorsan nőtt. Jing és a többi bányász hamarosan speciálisabb hardverre, nagy teljesítményű grafikus processzorokra (GPU, Graphical Processing Unit) tért át, amely játékokhoz használt asztali számítógépekben vagy konzolokban található meg gyakran. Ennek a könyvnek az írása idején a nehézség már olyan magas, hogy csak ASIC-ekkel (ASIC, Application Specific Integrated Circuit → BOÁK, Berendezés Orientált Integrált Áramkör) kifizetődő a bányászat. Az ASIC-okban sok száz hash-képző egység van hardverrel megvalósítva. Ezek egy szilícium morzsán, egymással párhuzamosan futnak. ((("bányatársaságok", "definíciója")))Jing csatlakozott egy „bányatársasághoz” is, ami egy lottózó közösséghez hasonlóan lehetővé teszi, hogy a résztvevők egyesítsék az erőforrásaikat és osztozzanak a jutalmon. Jing cége most napi 24 órában, több ezer ASIC géppel bányászik. A villanyszámláját úgy fizeti, hogy eladja a bányászattal előállított bitcoinokat, és még némi nyereségre is szert tesz.
+
+=== Blokkok létrehozása a tranzakciókból
+
+((("blokkok","tranzakciók bányászata")))A felhasználók pénztárcáiból és egyéb alkalmazásokból folyamatosan érkeznek a hálózatba az új tranzakciók. A bitcoin hálózat csomópontjai ezeket egy ellenőrizetlen tranzakciókból álló, átmeneti „pool”-ba (gyűjtőterületre) helyezik. A bányászok egy új blokk felépítésének a megkezdésekor az ellenőrizetlen tranzakciókat erről a területről egy új blokkhoz adják hozzá, majd megpróbálják bizonyítani az új blokk érvényességét a bányász algoritmus (munkabizonyíték) segítségével. A bányászat folyamatát részletesen a <<mining>> rész ismerteti.
+
+Azt, hogy mely tranzakciók kerülnek be a blokkba, a tranzakciós díj és néhány egyéb tényező befolyásolja. Mindegyik bányász egy új blokk bányászatához kezd, amint megkapja a hálózattól az előző blokkot, mivel ebből tudja, hogy elvesztette a verseny előző fordulóját. Mindegyik bányász azonnal egy új blokkot hoz létre, feltölti tranzakciókkal és az előző blokk ujjlenyomatával, majd megkezdi az új blokkhoz a munkabizonyíték kiszámítását. Mindegyik bányász egy speciális tranzakciót foglal bele a blokkba, amely jutalomként újonnan előállított bitcoinokat (ez jelenleg 12,5 BTC blokkonként) plusz a blokkban lévő tranzakciók tranzakciós díjainak összegét fizeti ki a bányász saját bitcoin címére. Ha a bányász talál egy megoldást, amely a blokkot érvényessé teszi, akkor „megnyeri” ezt a jutalmat, mivel a sikeresen létrehozott blokk a a globális blokklánc részévé válik, és a blokkban lévő, jutalmat tartalmazó tranzakció elkölthetővé válik. ((("bányatársaságok, "működése")))Jing, aki egy bányatársaság tagja, úgy állította be a szoftverét, hogy egy új blokk létrehozásakor a jutalom a bányatársaság címére kerüljön. Innen a jutalom egy részét a bányatársaság Jingnek és a többi bányásznak osztja szét, azzal arányosan, hogy mennyi munkát végeztek az utolsó körben.
+
+((("blokkjelöltek")))((("blokkok", "blokkjelöltek")))Alice tranzakcióját közvetítette a hálózat, és az bekerült az ellenőrizetlen tranzakciók pooljába. Miután a bányász szoftver ellenőrizte, a tranzakció bekerült egy új, ún. _blokkjelölt_ blokkba. A bányatársaságban résztvevő bányászok azonnal elkezdték kiszámítani a munkabizonyítékot a blokkjelöltre. Kb. 5 perccel azt követően, hogy a tranzakciót Alice pénztárcája szétküldte, Jing egyik ASIC bányagépe talált egy megoldást a blokkhoz, és ezt bejelentette a hálózaton. Miután a nyertes blokkot a többi bányász ellenőrizte, a következő blokk előállítására újabb versenybe kezdtek.
+
+Jing nyertes blokkja a 277316. blokként a blokklánc részévé vált, amely Alice tranzakciójával együtt 419 tranzakciót tartalmaz. A tranzakciót tartalmazó blokk „egy megerősítést” jelent a tranzakció számára. 
+
+[TIP]
+====
+Az Alice tranzakcióját tartalmazó blokk itt látható: https://blockchain.info/btc/block/277316[Alice tranzakciója].
+====
+
+((("megerősítések", "szerepe a tranzakciókban")))Kb. 19 perccel ezután egy másik bányász egy újabb blokkot állított elő, a 277317-ik blokkot. Mivel ez a blokk az előző (277316.) blokkon alapul, amely tartalmazta Alice tranzakcióját, a blokkban lévő számítások tovább erősítik az előző blokkban lévő tranzakciók iránti bizalmat. A tranzakciót tartalmazó blokk fölötti blokkok egy-egy újabb megerősítést jelentenek a tranzakció számára. Amint a blokkok egymásra halmozódnak, exponenciálisan egyre nehezebb a tranzakció megfordítása, emiatt egyre megbízhatóbbá válik.
+
+((("genezis blokk")))((("blokkok", "genezis blokk")))((("blokklánc (a)", "genezis blokk")))A lenti <<block-alice1>> ábrán a 277316. blokkot láthatjuk, amely Alice tranzakcióját tartalmazza. Alatta 277316 db blokk van (beleértve a 0. blokkot), amely egy blokkláncként kapcsolódik egymáshoz, egészen a 0. blokkig visszamenőleg, amely az ún. _genezis blokk_. Idővel, ahogy a blokkok „magassága” egyre nő, úgy lesz a számítási nehézség az egyes blokkok és a lánc egésze szempontjából is egyre nagyobb. Azok a blokkok, melyeket az Alice tranzakcióját tartalmazó blokk után lettek kibányászva, további megerősítést jelentenek, mivel egy egyre hosszabb láncban egyre több és több számítást testesítenek meg. A tranzakciót tartalmazó blokk fölötti blokkok számítanak „megerősítésnek”. A 6-nál több megerősítéssel rendelkező blokkok visszavonhatatlannak tekinthetők, mivel 6 blokk érvénytelenítéséhez és újraszámításához hatalmas számítási kapacitásra lenne szükség. A bányászat folyamatát és szerepét a bizalom kialakulásában a <<mining>> részben fogjuk részletesen megvizsgálni.((("", startref="BToverview02")))((("", startref="MACover02")))
+
+[[block-alice1]]
+.Alice tranzakciója a 277316. blokkban található
+image::images/mbc2_0209.png["Alice blokkba foglalt tranzakciója"]
+
+=== A tranzakció elköltése
+
+((("bitcoin elköltése", "Egyszerűsített Fizetési Ellenőrzés (SPV)")))((("Egyszerűsített Fizetési Ellenőrzés (SPV)")))Most, hogy Alice tranzakciója egy blokk részeként be lett ágyazva a blokkláncba, része lett a bitcoin elosztott főkönyvének, és az összes bitcoin alkalmazás számára látható. Mindegyik bitcoin kliens külön-külön képes ellenőrizni, hogy a tranzakció érvényes és elkölthető-e. A teljes kliensek képesek nyomon követni a pénzmozgást attól a pillanattól kezdve, ahogy a bitcoinok először létrejöttek a blokkban, tranzakcióról tranzakcióra, egészen addig, amíg el nem érnek Bob címéhez. A pehelysúlyú kliensek Egyszerűsített Fizetési Ellenőrzésre képesek (lásd [SPV], Simple Payment Verification), melynek során megállapítják, hogy a tranzakció része a blokkláncnak, és elég sok blokk lett-e már kibányászva utána, ami szavatolja, hogy a bányászok a tranzakciót érvényesnek tekintik (lásd <<spv_nodes>>).
+
+Bob most már el tudja költeni ennek a tranzakciónak és egyéb tranzakcióknak a kimenetét. Például Bob egy beszállítót úgy tud kifizetni, hogy Alice kávéért történő fizetségét ennek az új tulajdonosnak utalja át. A legvalószínűbb eset az, hogy Bob bitcoin programja a sok kis fizetséget egy nagyobb fizetségben egyesíti, esetleg az egész napi bitcoin bevételt egyetlen egy tranzakcióba koncentrálja. A különféle befizetéseket ez a tranzakció egyetlen kimeneten (és egyetlen címen) egyesíti. Az összesítő tranzakciók ábráját lásd az <<transaction-aggregating>> résznél.
+
+Amikor Bob elkölti az Alice-tól és a többi ügyféltől kapott fizetséget, akkor ezzel a tranzakciós láncot bővíti. Tegyük fel, hogy Bob a Bangalore-i web tervezőnek, Gopeshnek((("felhasználási esetek", "offshore szerződéses szolgáltatások"))) fizet egy új weblapért. Ekkor a tranzakciós lánc a következőképpen fog kinézni: <<block-alice2>>.
+
+[[block-alice2]]
+.Alice tranzakciója, mint a Joe-tól Gopeshig tartó tranzakciós lánc része
+image::images/mbc2_0210.png["Alice tranzakciója, tranzakciók láncolatának részeként"]
+
+Ebben a fejezetben láthattuk, hogy a tranzakciók hogyan képeznek láncolatot, amely tulajdonosról tulajdonosra továbbítja az értéket. Nyomon követtük Alice tranzakcióját, pénztárcabeli keletkezésétől, a bitcoin hálózaton keresztül a bányászokig, akik a blokkláncon rögzítették azt. A könyv további részében a pénztárcák, címek, aláírások, tranzakciók, a hálózat és végül a bányászat mögött álló technológiákat vizsgáljuk meg részletesebben.((("", startref="BCover02")))((("", startref="DCSover02"))) ((("", startref="UCcoffee02")))

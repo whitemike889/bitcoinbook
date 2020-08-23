@@ -1,0 +1,288 @@
+[[ch02_bitcoin_overview]]
+== Bitcoin ทำงานอย่างไร
+
+=== การทำธุรกรรม, Block, การขุด, และ Blockchain
+
+((("bitcoin", "overview of", id="BCover02")))((("central trusted authority")))((("decentralized systems", "bitcoin overview", id="DCSover02")))ระบบ Bitcoin ตั้งอยู่บนพื้นฐานของการกระจายศูนย์กลางความเชื่อถือ ซึ่งเป็นสิ่งที่แตกต่างจากระบบธนาคารและระบบ payment แบบดั้งเดิม โดยแทนที่จะให้อำนาจตัวกลางที่มีความน่าเชื่อถือ bitcoin สร้างความเชื่อถือขึ้น โดยอาศัยปฏิสัมพันธ์ระหว่างผู้ใช้งานในระบบ ในบทนี้ เราจะพิจารณาการทำงานของ bitcoin ตั้งแต่ระดับบน ผ่านการตามติดการเดินทางของธุรกรรมผ่านระบบของ bitcoin จับตาดูการเปลี่ยนสถานะเป็นธุรกรรมที่ 'เชื่อถือได้' และได้รับการยอมรับโดยกลไกของระบบฉันทามติที่ไร้ศูนย์กลางก่อนที่จะถูกบันทึกลงบนสมุดบัญชีสาธารณะ หรือ blockchain โดยในบทถัดไป เราจะดำดิ่งลงสู่ technology ที่อยู่เบื้องหลังการทำธุรกรรม ระบบโครงข่าย และการขุด ต่อไป
+
+==== ภาพรวมของ Bitcoin
+
+จาก diagram แสดงภาพรวมการทำงานของ Bitcoin ใน <<bitcoin-overview>> เราจะเห็นได้ว่า ระบบของ bitcoin นั้นประกอบไปด้วยผู้ใช้งานที่มี wallet ซึ่งเก็บ keys ไว้ภายใน, ธุรกรรมที่แพร่กระจายไปตามโครงข่ายของระบบ และนักขุดที่แข่งขันกันทางการประมวลผล เพื่อสร้างฉันทามติบน blockchain ซึ่งเป็นสมุดบัญชีกลางที่รวมรวมธุรกรรมทั้งหมด
+
+
+((("blockchain explorer sites")))ตัวอย่างทั้งหมดในบทนี้ อ้างอิงถึงธุรกรรมที่เกิดขึ้นจริงบนระบบ bitcoin network โดยเป็นการจำลองการโต้ตอบระหว่างผู้ใช้งาน (Joe, Alice, Bob และ Gopesh) ผ่านการส่งเงินจาก wallet หนึ่งไปยังอีก wallet หนึ่ง เพื่อติดตามธุรกรรมเหล่านี้บน blockchain เราจะใช้บริการเว็บไชต์ _blockchain explorer_ เพื่อให้เห็นภาพที่ชัดเจนในทุกขั้นตอน โดย blockchain explorer เป็น web application ที่ทำงานเหมือน search engine สำหรับ bitcoin ในลักษณะที่มันทำให้เราสามารถค้นหา bitcoin address, ธุรกรรม และ blocks ต่างๆได้ ทำให้เราสามารถมองเห็นปฏิสัมพันธ์ระหว่างสิ่งเหล่านี้
+
+[[bitcoin-overview]]
+.Bitcoin overview
+image::images/mbc2_0201.png["Bitcoin Overview"]
+
+((("Bitcoin Block Explorer")))((("BlockCypher Explorer")))((("blockchain.info")))((("BitPay Insight")))Blockchain explorer ที่เป็นที่นิยม ได้แก่:
+
+* https://live.blockcypher.com[BlockCypher Explorer]
+* https://blockchain.info[blockchain.info]
+* https://insight.bitpay.com[BitPay Insight]
+* https://blockstream.info[Blockstream Explorer]
+
+Explorer เหล่านี้นั้นมีระบบค้นหาที่คุณสามารถนำ bitcoin address, transaction hash,block number หรือ blockhash ไปค้นหาข้อมูลที่เกี่ยวข้องจากเครือข่ายของ bitcoin ได้ โดยเราจัดเตรียม URL สำหรับตัวอย่าง Block และ ธุรกรรมต่างๆ ทั้งหมดไว้ เพื่อให้คุณสามารถลองเข้าไปดูและศึกษาได้ในรายละเอียดด้วยตัวเอง
+
+
+[[cup_of_coffee]]
+==== การซื้อกาแฟ 1 แก้ว
+
+((("use cases", "buying coffee", id="UCcoffee02"))) เราได้พูดถึง Alice ไปในบทที่แล้วตอนนี้เธอเป็นผู้ใช้งานหน้าใหม่ที่เพิ่งได้ bitcoin มาครั้งแรก  <<getting_first_bitcoin>> ในบทแรก Alice กับเพื่อนของเธอ Joe ได้แลกเปลี่ยนเงินสดเป็น bitcoin โดยธุรกรรมนั้นถูกสร้างจากเงินของ Joe เพื่อส่งไปยัง wallet ของ Alice เป็นจำนวน 0.10 BTC ตอนนี้ Alice กำลังจะลองทำธุรกรรมด้วยการซื้อกาแฟที่ร้านกาแฟของ Bob ที่ Palo Alto, California
+
+((("exchange rates", "determining"))) ร้านกาแฟของ Bob เพิ่งเริ่มรับ bitcoin ในการใช้จ่ายโดยการเพิ่ม bitcoin ลงไปในระบบ point of sale ซึ่งร้านกาแฟของ Bob นั้นตั้งราคาขายสิ่งของไว้เป็นสกุลเงินท้องถิ่น (USD) แต่ที่เค้าเตอร์ลูกค้าจะมีตัวเลือกว่าเขาสามารถจ่ายเป็นเงินดอลลาร์หรือ bitcoin ก็ได้ Alice จึงสั่งกาแฟ จากนั้น Bob ก็กรอกข้อมูลการซื้อกาแฟเข้าระบบ เช่นเดียวกับที่เขาทำกับทุกธุรกรรมการซื้อขาย ระบบ Point of sale จะทำการแปลงราคาของกาแฟจากหน่วย USD เป็น bitcoin โดยอิงจากราคาตลาดและแสดงราคาในหน่วยของทั้งสองสกุล
+
+----
+ยอดรวม:
+$1.50 USD
+0.015 BTC
+----
+
+
+((("millibits"))) Bob จึงบอกว่า "15 USD หรือ 15 millibits."
+
+((("payment requests")))((("QR codes", "payment requests"))) ระบบ point of sale ของ Bob จึงได้สร้าง QR code พิเศษที่มีข้อมูล _payment request_ (ดู<<payment-request-QR>>)
+
+มันไม่เหมือน QR code ทั่วไปที่มีข้อมูลแค่ bitcoin address ปลายทาง payment request เป็น QR ที่ถูกเข้ารหัสจาก address ปลายทาง จำนวนเงิน และข้อมูลทั่วไปเช่น "ร้านกาแฟของ Bob" ซึ่งมันจะทำให้ wallet ของ bitcoin สามารถใส่ข้อมูลต่างๆและส่งข้อมูลการชำระแก่ผู้ใช้งาน คุณสามารถแสกน QR code นี้และคุณจะเห็นในสิ่งเดียวกับที่ Alice เห็น
+
+
+[[payment-request-QR]]
+.Payment request QR code
+image::images/mbc2_0202.png["payment-request"]
+
+[TIP]
+====
+((("QR codes", "warnings and cautions")))((("transactions", "warnings and cautions")))((("warnings and cautions", "avoid sending money to addresses appearing in book"))) ลองสแกน QR code นี้ด้วย wallet ของคุณเพื่อดู address ปลายทางและจำนวนเงิน แต่อย่าส่งเงินไป
+====
+[[payment-request-URL]]
+ข้อมูล URL ต่อไปนี้ ถูกเข้ารหัสไว้ใน QR Code สำหรับการเรียกรับเงิน ตามหลักการที่กำหนดไว้ใน BIP-21:
+----
+bitcoin:1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA?
+amount=0.015&
+label=Bob%27s%20Cafe&
+message=Purchase%20at%20Bob%27s%20Cafe
+
+ส่วนประกอบของ URL
+
+bitcoin address: "1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA"
+จำนวนเงิน: "0.015"
+ชื่อผู้รับของ address ปลายทาง: "ร้านกาแฟของ Bob"
+รายละเอียดของการชำระเงิน "ชำระสินค้าที่ร้านกาแฟของ Bob"
+----
+
+Alice นำ smartphone ของเธอขึ้นมาอ่าน Barcode ที่แสดงขึ้นบนจอ และ smartphone ของเธอก็จะแสดงรายละเอียดการชำระเงินจำนวน +0.0150 BTC+ ไปยัง +ร้านกาแฟของ Bob+  จากนั้นเธอจึงกด Send เพื่ออนุมัติการชำระเงิน ภายในเวลาไม่กี่วินาที (พอๆ กับกับระยะเวลาที่ใช้ในการอนุมัตรการชำระเงินผ่านบัตรเครดิต) Bob ก็จะเห็นธุรกรรมปรากฏขึ้นบนจุดชำระเงิน และการทำธุรกรรมก็จะเสร็จสมบูรณ์
+
+ในส่วนต่อมา เราจะมาลงลึกในเชิงรายละเอียดของธุรกรรม เราจะมาดูว่า wallet ของ Alice สร้างธุรกรรมอย่างไร, กระจายมันไปยังเครือข่ายได้อย่างไร, มันถูดตรวจสอบอย่างไร, และสุดท้าย Bob จะนำเงินจำนวนนั้นไปใช้ในธุรกรรมต่อๆ ไปได้อย่างไร
+
+[NOTE]
+====
+((("fractional values")))((("milli-bitcoin")))((("satoshis"))) เครื่อขายของ bitcoin นั้นสามารถทำธุรกรรมเป็นเศษส่วนย่อยๆได้ ตัวอย่างเช่น จาก millibtc หรือ 1/1000 ของ 1 bitcoin ไปจนถึง 1/100,000,000 ของ 1 bitcoin ซึ่งเรียกว่า satoshi โดยตลอดหนังสือเล่มนี้เราจะใช้คำว่า "bitcoin" เพื่ออ้างอิงถึงจำนวนใดก็ได้ในสกุลเงิน Bitcoin ตั้งแต่หน่วยที่เล็กที่สุด (1 satoshi) ไปจนถึงจำนวน Bitcoin ทั้งหมดที่สามารถผลิตได้จากการขุด (21,000,000)
+====
+
+คุณสามารถตรวจสอบธุรกรรมของ Alice ในร้านกาแฟของ Bob บน Blockchain ได้ผ่าน block explorer (<<view_alice_transaction>>):
+
+[[view_alice_transaction]]
+.ดูข้อมูลธุรกรรมของอลิสได้ที่ https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[blockchain.info]
+====
+----
+https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2
+----
+====
+
+=== ธุรกรรมของ Bitcoin
+
+((("transactions", "defined"))) โดยทั่วไปแล้วธุรกรรมคือสิ่งที่บอกกับเครือข่ายว่าเจ้าของ bitcoin จำนวนหนึ่ง ได้อนุมัติการส่งเงินจำนวนนั้นไปยังอีกคนหนึ่ง ซึ่งผู้ที่ได้รับเงินจะสามารถใช้ bitcoin ได้โดยสร้างธุรกรรมเพื่ออนุมัติการส่ง Bitcoin ไปยังอีกคนหนึ่ง เป็นการต่อห่วงโซ่ของความเป็นเจ้าของ (chain of ownership) ต่อไปเรื่อยๆ
+
+==== Inputs และ Outputs ของธุรกรรม
+
+((("transactions", "overview of", id="Tover02")))((("outputs and inputs", "basics of")))ธุรกรรมนั้นก็เปรียบเสมือนบรรทัดของข้อมูลที่บันทึกลงในระบบบัญชีคู่ (double-entry bookkeeping) แต่ละธุรกรรมจะประกอบไปด้วยอย่างน้อยหนึ่ง input หรือมากกว่า ซึ่งเปรียบเสมือนการ debit จากบัญชี Bitcoin หนึ่ง และในอีกฝั่งหนึ่งก็ประกอบไปด้วยอย่างน้อยหนึ่ง output หรือมากกว่า ซึ่งก็เป็นเสมือนการเพิ่ม credit ไปยังอีกบัญชี Bitcoin หนึ่ง อย่างไรก็ตามมูลค่าฝั่ง Input และ Output ไม่จำเป็นที่จะต้องมีจำนวนเท่ากันเสมอไป โดยมูลค่ารวมฝั่ง Output จะมีจำนวนน้อยกว่ามูลค่ารวมฝั่ง Input ซึ่งจำนวนที่แตกต่างกันนั้นเป็นสิ่งที่ระบุถึง _transaction fee_, ซึ่งเป็นเงินจำนวนหนึ่งที่จะถูกจ่ายไปให้ miner ที่เป็นผู้จดบันทึกธุรกรรมลงบนสมุดบัญชี  <<transaction-double-entry>> แสดงตัวอย่างธุรกรรมของ bitcoin ที่แสดงในรูปแบบของข้อมูลในสมุดบัญชี
+
+ข้อมูลในธุรกรรมยังประกอบไปด้วยหลักฐานยืนยันความเป็นเจ้าของในจำนวน bitcoin ที่กำลังจะถูกใช้ (inputs) โดยหลักฐานจะอยู่ในรูปแบบของลายเซ็นต์ดิจิทัล (Digital signature) ของเจ้าของเงิน ซึ่งสามารถถูกตรวจสอบโดยผู้ใดก็ได้อย่างเสรี ((("spending bitcoin", "defined"))) คำว่า "การใช้" (spending) ในความหมายของ Bitcoin หมายถึงการเซ็นต์อนุมัติการทำธุรกรรมเพื่อส่งต่อมูลค่าจากธุรกรรมที่ผ่านมาไปยังเจ้าของใหม่ที่ระบุใน bitcoin address
+
+[[transaction-double-entry]]
+ธุรกรรม แสดงในลักษณะระบบบัญชีคู่
+image::images/mbc2_0203.png["Transaction Double-Entry"]
+
+==== ห่วงโซ่ธุรกรรม
+
+((("chain of transactions"))) การชำระเงินของ Alice ให้กับร้านกาแฟของ Bob นั้นใช้ output ของธุรกรรมก่อนหน้าเป็น input ซึ่งในบทที่แล้ว Alice ได้รับ bitcoin จาก Joe เพื่อนของเธอโดยแลกเปลี่ยนกับเงินสด ธุรกรรมนั้นได้สร้างค่าของ bitcoin จำนวนหนึ่ง ที่ถูกล็อคโดย key ของ Alice และธุรกรรมใหม่ของเธอที่จ่ายให้ร้านกาแฟของ Bob นั้นจะอ้างอิงธุรกรรมก่อนหน้าโดยใช้มันเป็น Input สำหรับการสร้าง output ใหม่ในการชำระค่ากาแฟและรับเงินทอน จึงเกิดเป็นห่วงโซ่ของธุรกรรม ที่ input ในธุรกรรมล่าสุด จะสอดคล้องกับ output ในธุรกรรมก่อนหน้า โดย key ของ Alice จะมีลายเซ็นต์ (signature) ที่สามารถปลดล็อค output ของธุรกรรมก่อนหน้าเหล่านั้น เป็นการพิสูจน์ต่อระบบ bitcoin ว่าเธอเป็นเจ้าของเงินเหล่านั้นจริง และเมื่อเธอผูกจำนวนเงินในการชำระเงินเข้ากับ address ของ Bob ก็จะเป็นการสร้าง 'สิ่งกีดขวาง' ให้กับ output ใหม่โดยมีข้อแม้ว่า Bob จะต้องสร้างลายเซ็นต์ เพื่อที่จะใช้เงินจำนวนนั้น สิ่งนี้แสดงให้เห็นถึงการส่งมูลค่าระหว่าง Alice และ Bob, ห่วงโซ่ธุรกรรมจาก Joe ถึง Alice ถึง Bob นั้นถูกแสดงใน <<blockchain-mnemonic>>
+
+[[blockchain-mnemonic]]
+ห่วงโซ่ธุรกรรมที่ output ของธุรกรรมหนึ่งจะเป็น input ของธุรกรรมถัดไป
+image::images/mbc2_0204.png["Transaction chain"]
+
+==== การทอนเงิน
+
+((("change, making")))((("change addresses")))((("addresses", "change addresses")))  ธุรกรรมของ bitcoin ส่วนมากจะมี output ที่อ้างอิงถึงทั้ง address ของผู้รับและ address ของผู้ส่งที่เรียกว่า _change_ address (address _เงินทอน_) ทั้งนี้เป็นเพราะ input ของธุรกรรมนั้นไม่สามารถแบ่งแยกย่อยได้เช่นเดียวกับธนบัตรที่ไม่สามารถแยกย่อยได้ ถ้าคุณซื้อของราคา 5 USD ในร้านค้าและใช้เงิน 20 USD คุณจะได้รับเงินทอน 15 USD ซึ่งมันก็เป็นรูปแบบบเดียวกับ input ของธุรกรรม bitcoin ถ้าคุณซื้อของที่มีมูลค่า 5 bitcoin แล้วคุณใช้ 20 bitcoin เป็น input คุณจะส่ง output จำนวน 5 bitcoin ให้กับเจ้าของร้านค้าและสร้าง output อีก 15 bitcoin มอบให้กับตัวคุณเองเป็นเงินทอน (ไม่รวมถึงค่าธรรมเนียม) สิ่งสำคัญคือ change address ไม่จำเป็นต้องเป็น address เดียวกับ input และด้วยเหตุผลทางความปลอดภัย wallet ของเจ้าของจึงมักจะสร้าง address ใหม่เพื่อรับเงินทอนเสมอ
+
+Wallet ที่ต่างกันอาจมีหลักการและกลยุทธ์ที่แตกต่างกันในการรวบรวม input เพื่อทำการชำระเงินตามความต้องการของผู้ใช้งานที่ โดยมันอาจเลือกที่จะรวบรวมเงินจาก input เล็กๆ จำนวนมาก หรือเลือกที่จะใช้ input ที่มีมูลค่ามากกว่าหรือเท่ากับจำนวนเงินที่ต้องการชำระ นอกเสียจากว่า wallet จะนั้นสามารถรวบรวม input ให้มีมูลค่าพอดีกับจำนวนที่ต้องการชำระและค่าธรรมเนียมแล้ว wallet จะต้องสร้างเงินทอนขึ้นมา ซึ่งมันก็คล้ายกับวิธีที่คนทั่วไปใช้เงินสด ถ้าคุณใช้แต่ธนบัตรขนาดใหญ่ๆ สุดท้ายกระเป๋าคุณก็จะเต็มไปด้วยเศษเงินเล็กๆ และถ้าคุณใช้แต่เศษเงินเล็กๆ คุณก็จะมีแต่ธนบัตรขนาดใหญ่ๆ โดยทั่วไปแล้วผู้คนจะสามารถหาจุดสมดุลย์ระหว่างกรณีที่สุดโต่งทั้งสองขั้วนี้ได้โดยจิตใต้สำนึก และความสมดุลย์นี้ คือสิ่งที่ผู้พัฒนา bitcoin wallet ต่างพยายามที่จะสร้างขึ้นให้สำเร็จ
+
+((("transactions", "defined")))((("outputs and inputs", "defined")))((("inputs", see="outputs and inputs"))) โดยสรุปแล้วธุรกรรม (_transactions_)นั้นจะส่งต้องมูลค่าจาก _transaction inputs_ ไปยัง _transaction outputs_ โดยค่าของ input นั้นจะถูกอ้างอิงจาก output ของธุรกรรมที่ผ่านมา เป็นการบอกว่ามูลค่านั้นมาจากที่ใด ส่วน output ของธุรกรรมจะเป็นการส่งมูลค่าจำนวนหนึ่งไปยัง bitcoin address ของเจ้าของคนใหม่ และอาจมี output ที่เป็นเงินทอนกลับมาให้เจ้าของเดิมรวมอยู่ด้วย output ของธุรกรรมหนึ่งสามารถใช้เป็น input ในการสร้างธุรกรรมใหม่ได้ เป็นการสร้างห่วงโซ่ของความเป็นเจ้าของ (chain of ownership) เมื่อมูลค่าถูกส่งต่อจากคนหนึ่งไปยังอีกคนหนึ่ง(ดูได้ที่<<blockchain-mnemonic>>)
+
+==== รูปแบบทั่วไปของธุรกรรม
+
+รูปแบบของธุรกรรมที่เห็นได้บ่อยคือการชำระเงินจาก address หนึ่งไปยังอีก address หนึ่งซึ่งรูปแบบนี้มักจะมี "เงินทอน" คืนให้กับผู้โอน ธุรกรรมรูปแบบนี้จะมี 1 input และ 2 output ตามที่แสดงใน <<transaction-common>>
+
+[[transaction-common]]
+ธุรกรรมทั่วไป
+image::images/mbc2_0205.png["Common Transaction"]
+
+อีกรูปแบบหนึ่งของธุรกรรมที่สามารถพบเห็นได้ทั่วไปคือการรวม input จำนวนมาก ให้เหลือเพียง 1 output (ดูได้ที่<<transaction-aggregating>>) ซึ่งมันคล้ายกับการแลกเหรียญหรือแลกธนบัตรให้กลายเป็นธนบัตรที่มีมูลค่าสูงขึ้น ธุรกรรมชนิดนี้มักจะถูกสร้างจาก wallet application เพื่อจัดระเบียบเงินจำนวนเล็กๆจำนวนมาก ที่ได้รับเป็นเงินทอนจากการชำระเงิน
+
+[[transaction-aggregating]]
+.การรวมเงินของธุรกรรม
+image::images/mbc2_0206.png["Aggregating Transaction"]
+
+และรูปแบบสุดท้ายของธุรกรรมที่พบเห็นได้บ่อยๆในบัญชีของ bitcoin คือธุรกรรมที่มี 1 input และมี output จำนวนมาก (ดูได้ที่<<transaction-distributing>>) ธุรกรรมประเภทนี้มักเกิดขึ้นจากผู้ใช้งานประเภทธุรกิจ ในการกระจายเงิน เช่นเมื่อมีการจ่ายเงินเดือนให้กับพนักงานหลายคน ((("", startref="Tover02")))
+
+[[transaction-distributing]]
+.การกระจายเงินของธุรกรรม
+image::images/mbc2_0207.png["Distributing Transaction"]
+
+=== การสร้างธุรกรรม
+
+((("transactions", "constructing", id="Tconstruct02")))((("wallets", "constructing transactions"))) wallet ของ Alice นั้นจะมีวิธีในการเลือก input และ output ที่เหมาะสมในการสร้างธุรกรรมในแบบที่ Alice ต้องการ Alice เพียงต้องใส่แค่ จำนวนเงินและ address ปลายทาง และที่เหลือก็ปล่อยให้เป็นหน้าที่ของ wallet โดยที่เธอไม่จำเป็นต้องเห็นรายละเอียดใดๆ สิ่งที่สำคัญคือ wallet นั้นสามารถสร้างธุรกรรมได้แม้ว่าจะไม่ได้เชื่อมต่อกับระบบอะไรเลย เหมือนกับการที่เราเขียนเช็คที่บ้านแล้วค่อยส่งไปให้ธนาคารในซองจดหมาย ธุรกรรมนั้นไม่จำเป็นต้องถูกสร้างและเซ็นตอนที่มันเชื่อมต่อกับเครือข่ายของ bitcoin แต่อย่างใด
+
+==== การหา Input ที่ถูกต้อง
+
+((("outputs and inputs", "locating and tracking inputs")) ในขั้นแรก Wallet ของ Alice จำเป็นต้องมองหา input ที่จะสามารถชำระเงินให้ Bob ได้ตามจำนวนที่ต้องการ โดยปกติ wallet ส่วนใหญ่จะสามารถมองเห็น Output ที่สามารถใช้ได้ทั้งหมด ของทุก address ใน wallet ดังนั้น wallet ของ Alice จึงจะมีสำเนาของ output จากธุรกรรมของ Joe ที่สร้างขึ้นเมื่อเธอทำการแลก Bitcoin กับเงินสด (ดูที่ <<getting_first_bitcoin>> ) bitcoin wallet ที่เป็น full-node client จะมีสำเนาของ unspent output จากทุกๆธุรกรรมบน blockchain ซึ่งทำให้ wallet สามารถสร้าง input ของธุรกรรมใหม่ และยังสามารถตรวจสอบธุรกรรมที่กำลังจะเข้ามาใหม่ ว่ามี input ที่ถูกต้องหรือไม่ ได้อย่างรวดเร็ว อย่างไรก็ตาม เนื่องจาก full node client นั้นใช้พื้นที่ในการเก็บข้อมูลจำนวนมาก ผู้ใช้งานส่วนใหญ่จึงนิยมที่จะใช้ "lightweight" client ที่สามารถเห็นเพียง unspent output ของผู้ใช้งานได้เท่านั้น
+
+ถ้า wallet ไม่ได้เก็บสำเนาของ unspent transaction outputs มันก็ยังสามารถดึงข้อมูลจากเครือข่ายของ bitcoin โดยใช้ API ต่างๆ หรือขอข้อมูลจาก full-node ผ่าน API <<example_2-2>> แสดงให้เห็นถึง API request ที่ใช้คำสั่ง HTTP GET ไปยัง URL ที่กำหนดไว้ URL นั้นจะคืนค่า unspent transaction outputs ใน address นั้น ทำให้ application ใดๆ สามารถมีข้อมูลที่เพียงพอต่อการสร้าง transaction input เพื่อนำมาใช้จ่าย เราสามารถใช้คำสั่งง่ายๆ อย่าง _cURL_ ผ่าน command line HTTP Client  เพื่อเรียกดูข้อมูลดังกล่าว
+
+[[example_2-2]]
+.เรียกดู unspent transaction output ทั้งหมดใน bitcoin address ของ Alice
+====
+[source,bash]
+----
+$ curl https://blockchain.info/unspent?active=1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK
+----
+====
+
+[source,json]
+----
+{
+
+	"unspent_outputs":[
+
+		{
+			"tx_hash":"186f9f998a5...2836dd734d2804fe65fa35779",
+			"tx_index":104810202,
+			"tx_output_n": 0,
+			"script":"76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac",
+			"value": 10000000,
+			"value_hex": "00989680",
+			"confirmations":0
+		}
+
+	]
+}
+----
+
+
+ผลลัพท์ที่ได้จาก <<example_2-2>> แสดง unspent output จำนวน 1 output (ที่ยังไม่ได้ถูกเรียกใช้งาน) อยู่ภายใต้ Address ที่ Alice เป็นเจ้าของ +1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK+ ผลลัพท์นี้ยังรวมไปถึงการอ้างอิงธุรกรรมที่ unspent output นี้ถูกบรรจุอยู่ (การชำระเงินจาก Joe) และจำนวนเงินในหน่วย Satoshi จำนวน 10 ล้าน satoshi ซึ่งมีค่าเท่ากับ 0.10 bitcoin และด้วยข้อมูลเหล่านี้ wallet ของ alice จะสามารถสร้างธุรกรรมที่จะส่งต่อมูลค่าไปสู่ address ของเจ้าของใหม่ได้
+
+[TIP]
+====
+View the https://www.blockchain.com/btc/tx/7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18[transaction from Joe to Alice].
+====
+
+คุณจะเห็นว่า wallet ของ Alice นั้นมี bitcoin เพียงพอสำหรับการชำระค่ากาแฟอยู่ใน unspent output เพียง output เดียว ในกรณีที่ไม่ได้เป็นเช่นนี้ wallet ของ Alice อาจต้อง "คุ้ย" หาเงินจากกอง unspent output เล็กๆ ย่อยๆ จำนวนมาก เฉกเช่นการค่อยๆ หยิบเหรียญจากกระเป่าสตางค์จนกว่าจะพอที่จะจ่ายค่ากาแฟได้ และในทั้งสองกรณีนี้ ก็ยังอาจมีความจำเป็นที่จะต้องมีการทอนเงินเกิดขึ้น ซึ่งเราจะแสดงให้เห็นในส่วนถัดไป เมื่อ wallet ทำการสร้าง transaction output ขึ้น (เพื่อการจ่ายเงิน)
+
+
+การสร้าง outputs
+
+((("outputs and inputs", "creating outputs")))A transaction output is created in the form of a script that creates an encumbrance on the value and can only be redeemed by the introduction of a solution to the script. In simpler terms, Alice's transaction output will contain a script that says something like, "This output is payable to whoever can present a signature from the key corresponding to Bob's address." Because only Bob has the wallet with the keys corresponding to that address, only Bob's wallet can present such a signature to redeem this output. Alice will therefore "encumber" the output value with a demand for a signature from Bob.
+
+ธุรกรรมนี้จะมี output ที่สองอีกด้วยเพราะเงินของ Alice นั้นอยู่ในรูปของ output 0.10 BTC ซึ่งเป็นเงินจำนวนมากเกินไปสำหรับกาแฟที่มีมูลค่า 0.015 BTC Alice จำเป็นจะต้องได้เงินทอนจำนวน 0.085 BTC ซึ่งการจ่ายเงินทอนของ Alice นั้นจะถูกสร้างโดย Wallet ของ Alice ในรูปของ output ในธุรกรรมเดียวกันที่จ่ายให้ Bob โดยหลักการแล้ว Wallet ของ Alice จะแตกเงินของเธอออกเป็นสองส่วน ส่วนหนึ่งจ่ายให้แก่ Bob และอีกส่วนหนึ่งจ่ายให้กับตัวเธอเอง ซึ่งเธอสามารถใช้ output ที่เป็นเงินทอนในธุรกรรมต่อๆ ไปได้
+
+ท้ายที่สุด เพื่อให้ธุรกรรมได้รับการประมวลผลภายในเวลาที่ไม่นานเกินไปนัก wallet ของ Alice ก็จะทำการเพิ่มค่าธรรมเนียมเล็กน้อยเข้าไปด้วย ซึ่งค่าธรรมเนียมนี้จะไม่ได้ถูกแสดงอย่างชัดเจนในธุรกรรมที่เกิดขึ้น หากแต่เป็นเป็นจำนวนที่สามารถคำนวณได้จากความแตกต่างของ input และ output ตัวอย่างเช่นแทนที่ Alice จะได้รับเงินทอน 0.085 Alice กลับสร้าง output ที่สองที่มีมูลค่าเพียง 0.0845 จะทำให้มีส่วนต่าง เป็นเศษเหลืออยู่ที่ 0.0005 BTC (ครึ่ง millibitcoin) เห็นได้ว่า  input ที่มี 0.10 BTC นี้จะไม่ได้ถูกใช้ทั้งหมดเพียงแค่ 2 output ซึ่งส่วนต่างนั้นคือค่าธรรมเนียม ( _transaction fee_) ที่จะถูกมอบให้กับนักขุดเป็นค่าธรรมเนียมในการตรวจสอบและเพิ่มธุรกรรมลงไปใน block ที่จะถูกบันทึกลงใน blockchain
+
+ผลลัพท์ของธุรกรรมนั้นสามารถดูได้โดยใช้ blockchain explorer ซึ่งเป็น web application อย่างที่แสดงให้เห็นใน<<transaction-alice>>.
+
+[[transaction-alice]]
+[role="smallerseventyfive"]
+ธุรกรรมของ Alice ที่จ่ายไปยังร้านกาแฟของ Bob
+image::images/mbc2_0208.png["Alice Coffee Transaction"]
+
+[[transaction-alice-url]]
+[TIP]
+====
+View the https://www.blockchain.com/btc/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[transaction from Alice to Bob's Cafe].
+====
+
+==== การเพิ่มธุรกรรมลงในบัญชี
+
+ธุรกรรมที่ถูกสร้างโดย Wallet ของ Alice นั้นมีขนาด (ความยาว) 258 bytes และมีทุกอย่างที่จำเป็นสำหรับการยืนยันความเป็นเจ้าของของเงิน และการระบุเจ้าของใหม่ (ผู้รับ) ของเงินนั้น ถึงตอนนี้ธุรกรรมจะต้องถูกส่งเข้าไปในเครือข่าย bitcoin ที่ซึ่งมันจะกลายเป็นส่วนหนึ่งของ blockchain ในส่วนถัดไปเราจะมาดูกันว่าธุรกรรมนั้นกลายเป็นส่วนหนึ่งของ block ที่ถูกสร้างขึ้นใหม่ได้อย่างไร และ block นั้นถูก "ขุด" ได้อย่างไร และท้ายที่สุด เราจะได้เห็นว่า เพราะเหตุใด block ใหม่ที่ได้รับการบรรจุเข้าไปใน blockchain จะได้รับความเชื่อถือจากระบบเครือข่าย bitcoin สูงขึ้นทุกครั้งที่มีการบรรจุ block ใหม่ๆ ตามมา
+
+===== การส่งธุรกรรม
+
+((("propagation", "process of"))) เนื่องจากธุรกรรมนั้นมีข้อมูลทั้งหมดที่จำเป็นต้องถูกประมวลผล มันจึงไม่จำเป็นว่ามันจะถูกส่งไปอย่างไรหรือที่ไหนในเครือข่ายของ bitcoin เครือข่ายของ bitcoin เป็นเครือข่ายแบบ peer to peer ที่ bitcoin client แต่ละตัวจะเชื่อมต่อกับ bitcoin client ตัวอื่นๆ เครือข่ายของ bitcoin นั้นมีขึ้นเพื่อส่งธุรกรรมและ block ไปยังทุกคนที่เข้าร่วมกับระบบ
+
+===== ธุรกรรมถูกส่งต่อไปอย่างไร
+
+((("bitcoin nodes", "defined")))((("nodes", see="bitcoin nodes"))) ไม่ว่าจะเป็น server, โปรแกรมบน Desktop, หรือแม้แต่ wallet หรือระบบใดๆก็ตาม เราจะเรียกผู้ที่เข้าร่วมกับเครือข่ายของ bitcoin และติดต่อสื่อสารกันผ่าน bitcoin protocal ว่า _bitcoin node_ โดย Wallet ซึ่ง Alice นั้นสามารถส่งธุรกรรมที่เกิดขึ้นใหม่ไปที่ bitcoin node ใดๆก็ตามผ่านรูปแบบการเชื่อมต่อต่างๆไม่ว่าจะเป็น สายอินเทอร์เนต WiFi สัญญาณโทรศัพท์ หรือวิธีอื่นๆ โดยที่ bitcoin wallet ของ Alice นั้นไม่จำเป็นต้องเชื่อมต่อกับ bitcoin wallet ของ Bob โดยตรง และเธอก็ไม่จำเป็นต้องใช้อินเทอร์เนตที่ร้านของ Bob แต่อย่างไรก็ตามทั้งสองกรณีที่กล่าวมาก็เป็นวิธีที่ทำได้เช่นกัน ((("propagation", "flooding technique")))((("flooding technique"))) เมื่อ bitcoin node ใดก็ตาม ได้รับธุรกรรมที่มันไม่เคยเห็นมาก่อน มันจะทำการส่งต่อธุรกรรมนั้นไปยัง node อื่นๆ ที่เชื่อมต่ออยู่ทันที ซึ่งวิธีส่งแบบนี้เราเรียกมันว่า _flooding_ ซึ่งหมายความว่า ธุรกรรมนั้นจะแพร่กระจายตัวบนเครือข่ายแบบ peer to peer นี้อย่างรวดเร็ว และเข้าถึง node ส่วนใหญ่ในเวลาเพียงไม่กี่วินาที
+
+===== มุมมองของ Bob
+
+If Bob's bitcoin wallet application is directly connected to Alice's wallet application, Bob's wallet application might be the first node to receive the transaction. However, even if Alice's wallet sends the transaction through other nodes, it will reach Bob's wallet within a few seconds. Bob's wallet will immediately identify Alice's transaction as an incoming payment because it contains outputs redeemable by Bob's keys. Bob's wallet application can also independently verify that the transaction is well formed, uses previously unspent outputs, and contains sufficient transaction fees to be included in the next block. At this point Bob can assume, with little risk, that the transaction will shortly be included in a block and confirmed.
+
+[TIP]
+====
+((("confirmations", "of small-value transactions", secondary-sortas="small-value transactions"))) หนึ่งในความเข้าใจผิดเกี่ยวกับธุรกรรมของ bitcoin คือความเชื่อว่ามันจะต้องถูก "ยืนยัน" โดยการรอเป็นเวลา 10 นาทีเพื่อให้มี Block ใหม่เกิดขึ้น หรือต้องรอถึง 60 นาทีเพื่อให้มีการยืนยันครบ 6 ครั้ง ซึ่งแม้ว่าการยืนยันจะเป็นสิ่งที่ทำให้เราแน่ใจได้ว่าธุรกรรมนั้นถูกยอมรับจากเครือข่ายทั้งหมดแล้ว อย่างไรก็ตามการรอคอยการยืนยันเป็นเวลานานนั้น เป็นสิ่งที่ไม่จำเป็นสำหรับสิ่งที่มีมูลค่าน้อยอย่างกาแฟ ผู้ค้าสามารถยอมรับธุรกรรมที่มีมูลค่าไม่มากโดยที่มันไม่ต้องถูกยืนยันเลยก็ได้ ซึ่งมันไม่ได้มีความเสี่ยงมากไปกว่าการรับชำระผ่านบัตรเครดิตโดยไม่มีการยืนยันตัวตนหรือลายเซ็นต์ เฉกเช่นที่ผู้ค้าทั่วไปยอมรับเป็นปกติในปัจจุบัน ((("", startref="Tconstruct02")))
+====
+
+=== การขุด bitcoin
+
+((("mining and consensus", "overview of", id="MACover02")))((("blockchain (the)", "overview of mining", id="BToverview02"))) ธุรกรรมของ Alice นั้นได้กระจายไปทั่วเครือข่ายของ bitcoin แล้ว แต่มันยังไม่ได้เป็นส่วนหนึ่งของ _blockchain_ จนกว่ามันจะได้รับการตรวจสอบความถูกต้องและบรรจุเข้าไปใน block ผ่านกระบวนการที่เราเรียกว่า _การขุด_ ดู<<mining>>สำหรับคำอธิบาย 
+
+ระบบความเชื่อถือของ bitcoin นั้น ตั้งอยู่บนพื้นฐานของการประมวลผล (computation) ธุรกรรมจะถูกมัดรวมกันอยู่ใน  _blocks_ ซึ่งต้องใช้กำลังประมวลผลจำนวนมหาศาลในการพิสูจน์ แต่สามารถตรวจสอบยืนยันว่าได้รับการพิสูจน์แล้วได้ด้วยกำลังประมวลผลเพียงนิดเดียว โดยกระบวนการการขุด bitcoin นั้น นั้นมีจุดประสงค์อยู่สองอย่างด้วยกัน:
+
+* ((("mining and consensus", "consensus rules", "security provided by")))((("consensus", see="mining and consensus"))) Mining nodes หรือ node ที่กระทำการขุดนั้น จะตรวจสอบธุรกรรมทั้งหมดโดยอ้างอิงตามเกณฑ์ของ _กฎเกณฑ์ฉันทามติ_ (consensus rules) ของ bitcoin ด้วยเหตุนี้การขุดจึงเป็นการรักษาความปลอดภัยแก่ธุรกรรมของ bitcoin ด้วยการปฏิเสธธุรกรรมที่ไม่ถูกต้อง หรือไม่สมประกอบ
+* การขุดจะสร้าง bitcoin ใหม่ขึ้นในทุกๆ block คล้ายกับการที่ธนาคารกลางพิมพ์เงินเพิ่ม ซึ่งปริมาณ bitcoin ที่ถูกสร้างต่อ block นั้นมีจำนวนจำกัดและจะลดน้อยลงเรื่อยๆ ดมื่อเวลาผ่านไป ตามกำหนดการการผลิตที่ตายตัว
+
+
+การขุดนั้นจะตั้งอยูนสมดุลย์ระหว่างต้นทุนและผลตอบแทน โดยการขุดนั้น เป็นการใช้กำลังไฟฟ้าในการ แก้ไขโจทย์ทางคณิตศาสตร์ นักขุด (minor) ที่ประสปความสำเร็จจะสามารถรับ _รางวัล_ (reward) ที่จะอยู่ในรูปของ bitcoin ที่เกิดขึ้นใหม่ และค่าธรรมเนียมในการทำธุรกรรม อย่างไรก็ตามรางวัลนี้จะถูกมอบให้แก่นักขุดที่ทำการตรวจสอบยืนยันธุรกรรมทั้งหมดอย่างถูกต้องตามกฏฉันทามติเท่านั้น ซึ่งความสมดุลย์นี้สร้างความปลอดภัยให้กับ Bitcoin ได้โดยไม่ต้องอาศัยตัวกลางใดๆ
+
+หนึ่งในวิธีที่สามารถอธิบายหลักการทำงานของการขุดได้ดีนั้น คือการเปรียบเทียบการขุดเป็นเสมือนการแข่งขันเกม Sudoku ที่จะทำการเริ่มใหม่ทุกครั้งเมื่อผู้เล่นคนใดคนหนึ่งสามารถหาคำตอบได้ก่อน และเกมจะทำการปรับระดับความยากโดยอัตโนมัติ เพื่อให้มีผู้เล่นคนใดคนหนึ่งสามารถหาคำตอบได้ภายในเวลาประมาณ 10 นาทีอยู่เสมอ ลองนึกถึงภาพตาราง sudoku ขนาดใหญ่ที่มีแถวและบรรทัดเป็นพันๆ ถ้าผมแสดงตารางที่มีคำตอบทั้งหมดให้คุณดู คุณจะสามารถตรวจสอบความถูกต้องทั้งหมดได้อย่างรวดเร็ว แต่ถ้ามันมีเพียงไม่กี่ช่องที่มีตัวเลข และที่เหลือเป็นช่องว่างๆ การจะหาคำตอบที่ถูกต้องนั้นคงเป็นงานที่หนักมากเลยทีเดียว! ระดับความยากของ sudoku นั้นสามารถปรับได้โดยการลดหรือเพิ่มขนาดตาราง (ปรับจำนวนแถวในแนวตั้งและแนวนอน) แต่ก็ยังสามารถตรวจสอบความถูกต้องได้อย่างง่ายได้ ไม่ว่าตารางจะมีขนาดใหญ่ขนาดไหนก็ตาม โดย "โจทย์" หรือ "puzzle" ที่ใช้ใน bitcoin นั้นอาศัยหลักการของ cryptographic hash ที่มีคุณลักษณะที่คล้ายกัน กล่าวคือมันยากที่จะหาคำตอบ แต่การตรวจสอบนั้นทำได้อย่างง่ายดาย และระดับความยากก็สามารถปรับเปลี่ยนได้
+
+((("mining and consensus", "mining farms and pools")))ใน <<user-stories>>, เราได้แนะนำให้ทุกคนได้รู้จัก ((("use cases", "mining for bitcoin"))) Jing ซึ่งเป็นผู้ประกอบการในเซี่ยงไฮ้ Jing ประกอบธุรกิจการทำ _เหมือง_ (mining farm) ซึ่งเป็นธุรกิจที่นำเครื่องคอมพิวเตอร์ชนิดพิเศษที่ใช้สำหรับขุดเป็นพันๆ ตัวมาแข่งขันกันเพื่อแย่งชิงผลรางวัล ในทุกๆ 10 นาทีโดยประมาณ เครื่องขุดของ Jing จะแข่งขันกับนักขุดที่มีระบบที่คล้ายคลึงกันเป็นพันๆ ระบบทั่วโลกเพื่อค้นหาคำตอบของ Block ธุรกรรม ((("Proof-of-Work algorithm")))((("mining and consensus", "Proof-of-Work algorithm"))) การหาคำตอบ หรือที่เรียกว่า _Proof-of-Work_ (PoW) นั้น จำเป็นต้องอาศัยการ hash เป็นจำนวนหลายแสนล้านครั้งต่อวินาทีจากทั่วทั้งระบบเครือข่าย bitcoin ซึ่งอัลกอริทึ่มสำหรับการทำ Proof-of-Work นั้นจะทำการ hash ข้อมูลในส่วนของ block header และเลขที่สุ่มขึ้นมา ด้วยอัลกอริทึ่มการ hash ที่เรียกว่า SHA256 ซ้ำๆ เป็นจำนวนหลายๆ ครั้ง จนกว่าจะปรากฏคำตอบที่มีลักษณะตรงกับรูปแบบที่กำหนดเอาไว้ก่อนล่วงหน้า โดยนักขุดที่พบคำตอบคนแรกจะเป็นผู้ชนะการแข่งขัน และเผยแพร่ block นั้นไปยัง Blockchain
+
+Jing started mining in 2010 using a very fast desktop computer to find a suitable Proof-of-Work for new blocks. As more miners started joining the bitcoin network, the difficulty of the problem increased rapidly. Soon, Jing and other miners upgraded to more specialized hardware, with high-end dedicated graphical processing units (GPUs), often used in gaming desktops or consoles. At the time of this writing, the difficulty is so high that it is profitable only to mine with ((("application-specific integrated circuits (ASIC)")))application-specific integrated circuits (ASIC), essentially hundreds of mining algorithms printed in hardware, running in parallel on a single silicon chip. ((("mining pools", "defined")))Jing's company also participates in a _mining pool_, which much like a lottery pool allows several participants to share their efforts and rewards. Jing's company now runs a warehouse containing thousands of  ASIC miners to mine for bitcoin 24 hours a day. The company pays its electricity costs by selling the bitcoin it is able to generate from mining, creating some income from the profits.
+
+=== การขุด (บรรจุ) ธุรกรรมลงใน block
+
+((("blocks", "mining transactions in"))) เครื่อข่าย bitcoin มีธุรกรรมใหม่ ที่กำเนิดจาก wallet ของผู้ใช้งานหรือ application อื่นๆ หลั่งไหลเข้ามาอยู่ตลอดเวลา ทันทีที่ node เห็นธุรกรรมเหล่านี้ พวกมันจะถูกนำไปรวมอยู่ในกองของธุรกรรมที่ยังไม่ได้รับการตรวจสอบที่เก็บไว้ในแต่ละ node จากนั้น เมื่อนักขุดทำการสร้าง Block ขึ้นมาใหม่ พวกเขาจะนำเอาธุรกรรมที่ยังไม่ได้รับการตรวจสอบเหล่านี้ บรรจุเข้าไปใน Block ใหม่ แล้วจึงพยายามทำการยืนยันความถูกต้องของ block ใหม่นั้นโดยอาศัยอัลกอริทึ่มในการขุด (Proof-of-Work) ซึ่งกระบวนการขุดนี้จะถูกอธิบายอย่างละเอียดใน <<mining>>
+
+ธุรกรรมจะถูกเพิ่มเข้าไปใน block ใหม่ โดยเรียงลำดับตามจำนวนค่าธรรมเนียม และเกณฑ์อื่นๆอีกเล็กน้อย นักขุดแต่ละคนจะเริ่มกระบวนการขุด block ธุรกรรมใหม่ทันทีที่พวกเขาได้รับ block ก่อนหน้าจากเครือข่าย ซึ่งเป็นสัญญาณบ่งบอกว่าเขาได้พ่ายแพ้การแข่งขันในรอบก่อนหน้า โดยเขาจะสร้าง block ใหม่ขึ้นทันที พร้อมกับใส่ธุรกรรมและข้อมูลที่อ้างอิงถึง block ที่แล้วลงไป และเริ่มทำการคำนวณ Proof_of_Work สำหรับ block ใหม่ที่สร้างขึ้นมา นักขุดแต่ละคนจะใส่ธุรกรรมพิเศษเข้าไปใน block ของเขา ซึ่งเป็นธุรกรรมที่จะทำการจ่ายเงินรางวัลในการขุด (ปัจจุบันคือ bitcoin ที่เกิดขึ้นใหม่ จำนวน 12.5 bitcoin) รวมกับผลรวมของค่าธรรมเนียมการทำธุรกรรม ของธุรกรรมทั้งหมดที่ถูกนำมารวมอยู่ภายใน block ไปยัง address ของเขา ถ้าเขาสามารถหาคำตอบที่ทำให้ block มีความสมบูรณ์ได้ เขาก็จะ "ชนะ" การแข่งขันและได้รับผลรางวัล เนื่องจาก Block ของเขาได้ถูกนำไปต่อเป็นส่วนหนึ่งของ blockchain ของโลกและธุรกรรมพิเศษที่เข้าสร้างไว้จึงสามารถถูกนำมาใช้ได้ (spendable) ((("mining pools", "operation of")))ส่วน Jing ซึ่งได้เข้าร่วมกับ mining pool ได้ทำการตั้งค่า software ของเขาให้สร้างธุรกรรมพิเศษ ที่จะจ่ายผลรางวัลที่ได้จากการขุดไปยัง address ของ pool ซึ่งรางวัลที่ได้นั้นจะถูกแบ่งให้กับ Jing และนักขุดคนอื่นๆตามอัตราส่วนที่พวกเขามีส่วนร่วมในการขุดรอบที่ผ่านมา
+
+((("candidate blocks")))((("blocks", "candidate blocks"))) ธุรกรรมของ Alice จะถูกใส่ลงไปในกองของธุรกรรมที่ยังไม่ได้รับการตรวจสอบยืนยัน เมื่อมันถูกตรวจสอบโดย software สำหรับขุดมันจะถูกใส่ลงไปใน block ใหม่ที่เรียกว่า _candidate block_ ที่ถูกสร้างโดย mining pool ของ Jing จากนั้นนักขุดทุกคนที่มีส่วนร่วมใน pool นี้จะเริ่มประมวลผล Proof_of_work สำหรับ candidate block นั้นร่วมกัน เมื่อเวลาผ่านไปประมาณ 5 นาทีหลังจากธุรกรรมถูกส่งออกเป็นครั้งแรกจาก wallet ของ Alice เครื่องขุด ASIC เครื่องหนึ่งของ Jing ก็สามารถหาคำตอบให้แก่ candidate block และประกาศมันเข้าไปสู่เครือข่าย และเมื่อนักขุดคนอื่นๆ ได้ทำการตรวจสอบความถูกต้องของ block ของผู้ชนะแล้ว พวกเขาก็จะเริ่มแข่งขันกันอีกครั้งสำหรับ block ถัดไป
+
+block ของ jing ที่ชนะการแข่งขัน ได้กลายเป็นส่วนหนึ่งของ blockchain ในฐานะ Block ที่ #277316 โดยมีธุรกรรมอยู่ 419 ธุรกรรมรวมถึงธุรกรรมของ Alice โดย block ที่มีธุรกรรมของ Alice จะนับเป็นการยืนยัน (confirmation) ธุรกรรมนั้น 1 ครั้ง 
+
+[TIP]
+====
+You can see the block that includes https://blockchain.info/btc/block/277316[Alice's transaction].
+====
+
+((("confirmations", "role in transactions"))) ประมาณ 19 นาทีหลังจากนั้น ได้มี block ใหม่ที่ #277317 ถูกขุดโดยนักขุดคนอื่น และเนื่องจาก block นี้ใหม่นั้นถูกสร้างขึ้นบน block #277316 ที่มีธุรกรรมของ Alice อยู่ มันจึงเป็นการเพิ่มกำลังประมวลผลเข้าไปใน blockchain ซึ่งทำให้ธุรกรรมเหล่านั้นเชื่อถือได้มากขึ้น โดย block แต่ละ block ที่ถูกขุดขึ้นทับบน block ที่มีธุรกรรมของ Alice อยู่ จะนับเป็นเพิ่มการยืนยัน (confirmation) จำนวน 1 ครั้ง และเมื่อ block ทับถมกันสูงขึ้นเรื่อยๆ ก็จะทำให้การย้อนธุรกรรมนั้น ทำได้ยากขึ้นอย่างทวีคูณ เส่งผลให้มันได้รับความเชื่อถือจากเครือข่ายสูงขึ้นเรื่อยๆ
+
+((("genesis block")))((("blocks", "genesis block")))((("blockchain (the)", "genesis block"))) ในไดอแกรม <<block-alice1>> เราจะสามารถเห็น block #277316 ที่มีธุรกรรมของ Alice และมองลงไปจะมีอีก 277,316 blocks (รวมถึง block #0) ที่เชื่อมกันอยู่ในรูปห่วงโซ่ของ block (blockchain) ไปจนถึง block #0 ซึ่งรู้จักกันในชื่อ _genesis block_ เมื่อเวลาผ่านไป ความสูงของ block ก็จะเพิ่มขึ้น เช่นกันกับระดับความยากในการคำนวณหาคำตอบของแต่ละ block และ blockchain โดยรวม ซึ่ง block ที่ขุดขึ้นหลังจาก block ที่มีธุรกรรมของ Alice นั้นจะทำหน้าที่เป็นหลักประกันความเชื่อถือให้กับ Block ก่อนหน้าเนื่องจากมันเป็นการเพิ่มกำลังในการประมวลผลในห่วงโซ่ที่ยาวขึ้นเรื่อยๆ โดยทั่วไปแล้ว block ที่มีการยืนยัน (confirmation) มากกว่า 6 ครั้งขึ้นไป จะถือว่าไม่สามารถแก้ไขหรือถอดถอนย้อนหลังได้อีกต่อไป เนื่องจากมันต้องใช้กำลังการประมวลผลจพนวนมหาศาล ที่จะย้อนไปคำนวณ block ขึ้นมาใหม่ 6 block เราจะมากล่าวถึงกระบวนการขุดและวิธีที่มันสร้างความเชื่อถือในรายละเอียดใน <<mining>> ((("", startref="BToverview02")))((("", startref="MACover02")))
+
+[[block-alice1]]
+.ธุรกรรมของ Alice ถูกบัรรจุลงใน block ที่ #277316
+image::images/mbc2_0209.png["Alice's transaction included in a block"]
+
+=== การนำธุรกรรมไปใช้
+
+(("spending bitcoin", "simple-payment-verification (SPV)")))((("simple-payment-verification (SPV)"))) ในตอนนี้ เมื่อธุรกรรมของ Alice ถูกเพิ่มเข้าไปเป็นส่วนหนึ่งของ blockchain เรียบร้อยแล้ว มันจะกลายเป็นส่วนหนึ่งของ distributed ledger ของ bitcoin และสามารถถูกมองเห็นได้โดย application ของ bitcoin ทั้งหมด bitcoin client แต่ละตัวจะสามารถตรวจสอบอย่างอิสระได้ว่าธุรกรรมนั้นถูกต้องและสามารถนำไปใช้ได้ โดย client ประเภท full-node จะสามารถมองเห็นที่มาของเงินได้ตั้งแต่ block ที่ bitcoin เหล่านั้นถูกสร้างขึ้น ไล่มาทีละธุรกรรมจนมาถึง address ของ Bob ในขณะที่ client ประเภท lightweight สามารถทำสิ่งที่เรียกว่า simplified payment verification (ดูที่<<spv_nodes>>) โดยเป็นการตรวจสอบยืนยันว่าธุรกรรมนั้น อยู่ใน blockchain จริง และมีการขุด block หลังจากนั้นมาแล้วจำนวนหนึ่ง ทำให้เกิดความมั่นใจได้ว่าเหล่านักขุดก็มองว่าธุรกรรมนี้นั้นมีความสมบูรณ์
+
+ตอนนี้ Bob ก็สามารถนำ output จากธุรกรรมของ Alice และธุรกรรมอื่นๆไปใช้ได้ ตัวอย่างเช่น Bob สามารถจ่ายเงินผู้รับเหมาหรือซัพพลายเออร์ ได้โดยการถ่ายโอนมูลค่าที่ Alice จ่ายค่ากาแฟไปให้แก่เจ้าของใหม่ เราพอจะเดาได้ว่า bitcoin software ของ Bob จะทำการรวบรวมเงินจากการชำระเงินเล็กๆ จำนวนมาก เพื่อประกอบกันเป็นการชำระเงินที่ใหญ่ขึ้น หรืออาจจะรวม bitcoin ที่ได้มาทั้งหมดในวันนั้นมาเป็นธุรกรรมเดียว ซึ่งจะเป็นการรวบรวมเงินจากการชำระเงินต่างๆ เข้ามาเป็น output เดียว (และ address เดียว) สำหรับไดอะแกรมแสดงการรวมธุรกรรม ดูได้ที่ <<transaction-aggregating>>
+
+As Bob spends the payments received from Alice and other customers, he extends the chain of transactions. Let's assume that Bob pays his web designer Gopesh((("use cases", "offshore contract services"))) in Bangalore for a new web page. Now the chain of transactions will look like <<block-alice2>>.
+
+[[block-alice2]]
+.ธุรกรรมของ Alice ที่เป็นส่วนหนึ่งของห่วงโซ่ธุรกรรมจาก Joe ถึง Gopesh
+image::images/mbc2_0210.png["Alice's transaction as part of a transaction chain"]
+
+ในบทนี้เราได้เห็นว่าธุรกรรมนั้นสร้างห่วงโซ่ในการที่ย้ายมูลค่าจากเจ้าของคนหนึ่งไปสู่อีกคนหนึ่งได้อย่างไร เรายังได้ติดตามธุรกรรมของ Alice ตั้งแต่เวลาที่มันถูกสร้างขึ้นใน wallet ของเธอ ผ่านไปในเครือข่าย bitcoin จนไปถึงนักขุดที่ทำการบันทึกมันลงไปใน blockchain ในส่วนที่เหลทอของหนังสือเล่มนี้ เราจะพิจารณาถึงเทคโนโลยีที่สำคัญที่ทำงานอยู่เบื้องหลัง ธุรกรรม, โครงข่าย bitcoin, wallet, address, signature และท้ายที่สุด การขุด((("", startref="BCover02")))((("", startref="DCSover02"))) ((("", startref="UCcoffee02")))

@@ -1,0 +1,490 @@
+[[ch05_wallets]]
+== Pénztárcák
+
+((("pénztárcák", "definíciója")))A bitcoin világában a "pénztárca" kifejezés különböző dolgokat jelenthet.
+
+Madártávlatból nézve, a pénztárca egy alkalmazás, ami az elsődleges felhasználói felület szerepét tölti be. A pénztárca hozzáférést biztosít a felhasználó pénzéhez, kulcsokat és címeket kezel, nyomon követi az egyenleget, valamint tranzakciókat hoz létre és ír alá.
+
+Közelebbről, egy programozó szemszögéből nézve, a "pénztárca" arra az adatstruktúrára utal, ami tárolja és kezeli a felhasználó kulcsait. 
+
+Ebben a fejezetben a második jelentést vizsgáljuk meg. Itt tehát a pénztárcák titkos kulcsok tárolására szolgáló, általában strukturált adatállományokkal vagy egyszerű adatbázisokkal megvalósított tárolók.
+
+=== Pénztárcák technológiai áttekintése
+
+Ebben a részben összefoglaljuk azokat a technológiákat, amelyek segítségével felhasználóbarát, biztonságos és rugalmas pénztárcák építhetők.
+
+((("pénztárcák", "tartalma")))Gyakori tévhit a bitcoinnal kapcsolatban, hogy a bitcoin pénztárcák bitcoint tartalmaznak. Valójában a pénztárca csak kulcsokat tartalmaz. Az "érméket" a bitcoin hálózat a blokkláncban rögzíti. A felhasználók a hálózaton lévő érméket olyan tranzakciókkal irányíthatják, amelyeket a pénztárcájukban lévő kulcsokkal írnak alá. ((("kulcskarikák")))Bizonyos értelemben a bitcoin pénztárca egy _kulcskarika_.
+
+[TIP]
+====
+A pénztárcában kulcsok vannak, nem pedig érmék. Mindegyik felhasználónak van egy kulcsokat tartalmazó pénztárcája. A pénztárcák valójában kulcskarikák, melyeken nyilvános/titkos kulcspárok vannak (lásd a <<private_public_keys>> részt). A felhasználók a kulcsokkal írják alá a tranzakciókat, így bizonyítva, hogy a birtokukban vannak az aláírt tranzakció kimenetek (az érmék). Az érméket a blokklánc tárolja, tranzakció kimenetek formájában (ezeket gyakran úgy jelölik, hogy vout vagy txout).
+====
+
+((("pénztárcák", "típusai", "fő megkülönböztetés")))A tárolt kulcsok egymáshoz képesti viszonya szerint két fő pénztárca típust különböztetünk meg.
+
+((("CSEHAK pénztárcák", seealso="pénztárcák")))((("pénztárcák", "típusai", "CSEHAK pénztárcák")))((("nemdeterminisztikus pénztárcák", seealso="pénztárcák")))Az első típus olyan _nemdeterminisztikus pénztárca_, amelyben mindegyik kulcs egymástól függetlenül, véletlenszámból generálódik. A kulcsok között nincs semmilyen összefüggés. Az ilyen pénztárcát úgy is hívják, hogy „csak egy halom kulcs” (CSEHAK).
+
+((("determinisztikus pénztárcák", seealso="pénztárcák")))A második típusú pénztárca olyan _determinisztikus pénztárca_, ahol minden kulcs egy mesterkulcsból, más néven magból generálódik. Az ilyen pénztárcában lévő kulcsok a mag birtokában bármikor újra generálhatók. ((("kulcs származtatási módszer"))))Számos _kulcs származtatási_ módszer létezik. A leggyakrabban használt módszer egy fa-szerű struktúrát használ. Az ilyen pénztárcát _hierarchikus determinisztikus_ vagy _HD_ pénztárcának nevezzük.
+
+((("mnemonik")))A determinisztikus pénztárcák kiindulópontja a mag. A könnyebb kezelhetőség kedvéért a magot angol szavakkal, más néven_mnemonikkal_ kódoljuk.
+
+A következő néhány részben ezeket a technológiákat mutatjuk be.
+
+[[random_wallet]]
+==== Nem-determinisztikus (véletlen) pénztárcák
+
+((("pénztárcák", típusai", "nemdeterminisztikus (véletlenszerű) pénztárcák")))Az első bitcoin pénztárca (mai nevén Bitcoin Core) egyszerűen egy halom véletlenszerűen generált titkos kulcs volt. Például az eredeti Bitcoin Core kliens az első indításakor előre 100 véletlenszerű titkos kulcsot, és szükség esetén további kulcsokat generál. Mindegyik kulcsot csak egyszer használja. A determinisztikus pénztárcák váltják föl őket, mert nagyon nehézkes a kezelésük, és nehézkes a kulcsok mentése és beimportálása. A véletlenszerűen generált kulcsoknak az a hátránya, hogy ha sok ilyet állítunk elő, akkor mindegyikről másolatot kell készítenünk, ami azt jelenti, hogy a pénztárcát gyakran kell mentenünk. Mindegyik kulcsról biztonsági másolatot kell készítenünk, mert ha a pénztárca hozzáférhetetlenné válik, akkor a kulcs által kontrollált pénz örökre elvész. Ez közvetlenül ellentmond annak az alapelvnek, hogy a címeket ne használjuk föl újra, vagyis hogy mindegyik bitcoin címet csak egy tranzakcióra használjunk. A cím újbóli felhasználása csökkenti a titkosságot, mivel kapcsolatba hozza egymással a tranzakciókat és a címeket. A 0. típusú pénztárca emiatt gyenge választás, különösen akkor, ha szeretnénk elkerülni a címek újrafelhasználását, ami azt jelenti, hogy sok kulcs kezelésére és emiatt gyakori mentésre van szükség. A Bitcoin Core kliensben lévő pénztárca 0. típusú, de ennek a használatát a Bitcoin Core fejlesztők aktívan ellenjavallják. A <<Type0_wallet>> egy nemdeterminisztikus pénztárcát ábrázol, amely véletlenszerűen generált kulcsok gyűjteménye.
+
+[TIP]
+====
+A nemdeterminisztikus pénztárcák használata egyszerűbb tesztelésen kívül ellenjavallt. Egész egyszerűen túl körülményes a mentésük és használatuk. Ehelyett használjunk szabványos, _mnemonik_ maggal menthető _HD pénztárcát_.
+====
+
+[[Type0_wallet]]
+[role="smallersixty"]
+.0. típusú, nem determinisztikus (véletlen) pénztárca: véletlenszerűen generált kulcsok gyűjteménye
+image::images/mbc2_0501.png["Nemdeterminisztikus pénztárca"]
+
+==== Determinisztikus (magot használó) pénztárcák
+
+((("pénztárcák", "típusai", "determinisztikus (magot használó) pénztárcák")))A determinisztikus, vagy másképpen „magot használó” pénztárcák olyan pénztárcák, melyekben a titkos kulcsokat egy egyirányú hash függvénnyel egy közös magból állítják elő. A mag egy véletlenszerűen generált szám, melyből más adatokkal, például egy index számmal vagy „lánc kóddal” kombinálva állítják elő a titkos kulcsokat (lásd <<hd_wallets>>). Egy determinisztikus pénztárca esetén a mag ismeretében az össze származtatott kulcs visszanyerhető, emiatt csupán egyetlen egy biztonsági másolat készítésére van szükség. A mag a pénztárca exportjához vagy importjához is elégséges, ezért a felhasználó összes kulcsa könnyen átköltöztethető egy tetszőleges másik pénztárcába. Az <<Type1_wallet>> egy determinisztikus pénztárca logikai diagramját ábrázolja.
+
+[[Type1_wallet]]
+[role="smallersixty"]
+.1. típusú determinisztikus (magot használó) pénztárca: egyetlen magból kulcsok sorozata áll elő
+image::images/mbc2_0502.png["Determinisztikus pézntárca"]
+
+[[hd_wallets]]
+==== HD pénztárcák (BIP-32/BIP-44)
+
+((("pénztárcák", "típusai", "hierarchikus determinisztikus pénztárcák (HD pénztárcák")))((("hierarchikus determinisztikus pénztárcák (HD pénztárcák")))((("bitcoin továbbfejlesztési javaslatok", hierarchikus determinisztikus pénztárcák (BIP-32/BIP-44)")))A determinisztikus pénztárcákat azért fejlesztették ki, hogy könnyű legyen egy "magból" sok kulcsot előállítani. A determinisztikus pénztárcák legfejlettebb fajtája a _HD pénztárca_, melyet a BIP-32 szabvány definiál. A hierarchikus determinisztikus pénztárcákban a kulcsok fa szerkezetet alkotnak, ahol egy szülő kulcsból számos gyermek kulcs állítható elő. A gyermek kulcsok mindegyikéből "unoka" kulcsok, és így tovább, a végtelenségig. Ez a fa szerkezet látható a <<Type2_wallet>> ábrán.
+
+[[Type2_wallet]]
+.2. típusú HD pénztárca: egyetlen magból kulcsok fája áll elő
+image::images/mbc2_0503.png["HD pénztárca"]
+
+A HD pénztárcáknak két nagy előnyük van a véletlenszerű (nem determinisztikus) kulcsokkal szemben. Az első az, hogy a fa szerkezethez további jelentés rendelhető hozzá, pl. az egyik ágon lévő kulcsok használhatók a bejövő fizetségekhez, míg egy másik a kimenő fizetségekhez tartozó visszajáró pénz kezelésére. A kulcscsoportok egy vállalaton belül különféle osztályoknak, részlegeknek vagy könyvelési kategóriáknak feleltethetők meg,
+
+A HD pénztárcák másik előnye az, hogy a felhasználó anélkül tud nyilvános kulcsokat létrehozni, hogy ehhez szükség lenne a hozzájuk tartozó titkos kulcsokra. Ez lehetővé teszi, hogy a HD pénztárcákat nem biztonságos szervereken is használhassuk pénz fogadásra, és minden egyes tranzakcióhoz egy saját nyilvános kulcsot hozzunk létre. A nyilvános kulcsot nem kell előre betölteni vagy kiszámítani, ugyanakkor a szerveren nem kell, hogy ott legyen a pénz elköltésére szolgáló titkos kulcs.
+
+==== Magok és mnemonikok (BIP-39)
+
+((("pénztárcák", "technológiája", "magok és mnemonikok")))((("mnemonik kódszavak")))((("bitcoin továbbfejlesztési javaslatok", "mnemonik kódszavak (BIP-39)")))A HD pénztárcák hatékony megoldást nyújtanak kulcsok és címek kezelésére. Még hasznosabbak, ha kombinálják őket magok létrehozásának angol szavak sorozatából való szabványos módjával, amik könnyen leírhatók, exportálhatók és importálhatók különböző pénztárcákba. Ez a megoldás_mnemonikként_ ismert, és a szabványt a BIP-39 definiálja. Manapság a legtöbb bitcoin pénztárca (és más kriptopénz pénztárca) használja ezt a szabványt, és képes magok mentés és helyreállítás céljából való importálására és exportálására, átjárható mnemonikokat használva.
+
+Nézzük meg ezt praktikus szempontból. A következő magok közül melyik könnyebben leírható, rögzíthető papíron, olvasható hiba nélkül, exportálható és importálható egy másik pénztárcába?
+
+.Determinisztikus pénztárcához való mag hexában
+----
+0C1E24E5917779D297E14D45F14E1A1A
+----
+
+.Determinisztikus pénztárcához való mag 12 szavas mnemonikból
+----
+army van defense carry jealous true
+garbage claim echo media make crunch
+----
+
+==== Pénztárca kezelésre vonatkozó bevált gyakorlatok
+
+((("pénztárcák", "bevált gyakorlatai")))((("bitcoin továbbfejlesztési javaslatok", "Sokcélú HD pénztárca szerkezet (BIP-43)")))Ahogy a bitcoin pénztárcák technológiája kiforrottabbá vált, bizonyos ipari szabványok születtek, amelyek lehetővé teszik a bitcoin pénztárcák széles körű átjárhatóságát, könnyű használatát, biztonságát és rugalmasságát. Ezek a szabványok a következők:
+
+* BIP-39 alapú mnemonikok 
+* BIP-32 alapú HD pénztárcák
+* BIP-43 szabványon alapuló sokcélú HD pénztárca szerkezet
+* BIP-44 szabványon alapuló, többféle kriptopénzt és fiókot támogató pénztárcák
+
+Ezek a szabványok jövőbeli fejlesztések révén elavulttá válhatnak, de jelenleg olyan egymásba fonódó technológiákat alkotnak, amik de facto bitcoin pénztárca szabvánnyá váltak.
+
+A szabványokat a szoftver és hardver bitcoin pénztárcák széles köre fogadta el, biztosítva az átjárhatóságot közöttük. A felhasználó exportálhatja ezen pénztárcák által generált mnemonikot, és importálhatja azt egy másik pénztárcába, visszaállítva az összes tranzakciót, kulcsot és címet.
+
+((("hardver pénztárcák")))((("hardver pénztárcák", see="also pénztárcák")))Ezen szabványokat támogató szoftver pénztárcák közé tartozik például (betűrendben felsorolva) a Breadwallet, a Copay, a Multibit HD és a Mycelium. Az ezen szabványokat támogató hardver pénztárcák például a (betűrendben felsorolt) Keepkey, Ledger és Trezor.
+
+A következő részekben ezeket a technológiákat mutatjuk be részletesebben.
+
+[TIP]
+====
+Ha bitcoin pénztárca szoftvert fejleszt, akkor azt HD pénztárcaként implementálja, és a biztonsági mentéshez mnemonikként kódolt magot készítsen, a BIP-32, BIP-39, BIP-43 és BIP-44 szabványoknak megfelelően, a következő részekben leírtak szerint.
+====
+
+==== Bitcoin pénztárca használata
+
+((("pénztárcák", "bitcoin pénztárcák használata")))A <<user-stories>> részben bemutattuk Gábrielt, egy Rio de Janeiró-i vállalkozó tinédzsert, aki egy kisebb webáruházat üzemeltet, amely bitcoin logós pólókat, kávébögréket és matricákat ad el.
+
+((("pénztárcák", "típusú", "hardver pénztárcák")))Gábriel Trezor bitcoin hardver pénztárcát használ (<<a_trezor_device>>) a bitcoinjának biztonságos kezelése érdekében. A Trezor egy egyszerű USB eszköz, két gombbal, amely tárolja a kulcsokat (HD pénztárca formájában) és tranzakciókat ír alá. A Trezor pénztárcák az ebben a fejezetben tárgyalt összes szabványt implementálják, így Gábriel nem támaszkodik semmilyen gyártófüggő technológiára vagy megoldására.
+
+[[a_trezor_device]]
+.Egy Trezor eszköz: bitcoin HD pénztárca hardverben
+image::images/mbc2_0504.png[alt]
+
+Amikor Gábriel először használt a Trezort, a készülék mnemonikot és magot generált egy beépített hardver véletlenszám generátor segítségével. Az inicializálási szakasz során a pénztárca számozott szavak sorozatát jelenítette meg egyesével a képernyőn (lásd <<trezor_mnemonic_display>>).
+
+[[trezor_mnemonic_display]]
+.A Trezor az egyik mnemonikus szót megjeleníti
+image::images/mbc2_0505.png["Trezor pénztárca mnemonik megjelenítés"]
+
+A mnemonik leírásával Gábriel biztonsági másolatot készített (lásd <<mnemonic_paper_backup>>), amely helyreállításhoz használható a Trezor eszköz elvesztése vagy megsérülése esetén. Ez a mnemonik felhasználható új Trezorban, vagy a számos kompatibilis szoftver vagy hardver pénztárca bármelyikében. Vegye figyelembe, hogy a szavak sorozata fontos, ezért a mnemonik biztonsági papírmásolatai számozott helyeket tartalmaznak minden szóhoz. Gábrielnek gondosan fel kellett jegyeznie minden szót a számozott helyre, hogy megőrizze a helyes sorrendet.
+
+[[mnemonic_paper_backup]]
+.Gabriel papírmásolata a mnemonikról
+[cols="<,^,<,^", width="80%"]
+|===
+|*1.*| _army_ |*7.*| _garbage_
+|*2.*| _van_ |*8.*| _claim_
+|*3.*| _defense_ |*9.*| _echo_
+|*4.*| _carry_ |*10.*| _media_
+|*5.*| _jealous_ |*11.*| _make_
+|*6.*| _true_ |*12.*| _crunch_
+|===
+
+[NOTE]
+====
+Az egyszerűség kedvéért az <<mnemonic_paper_backup>> rész 12 szót tartalmazó mnemonikot mutat. Valójában a legtöbb hardver pénztárca biztonságosabb 24 szót tartalmazó memóriát generál. A mnemonik használata hosszától független.
+====
+
+Webáruházának első megvalósításához Gábriel egyetlen bitcoin címet használ, amelyet a Trezor eszközén generált. Ezt az egyetlen címet használja az összes vásárló minden megrendeléshez. Mint látni fogjuk, ennek a megközelítésnek van néhány hátránya, és továbbfejleszthető egy HD pénztárcával.((("", startref="gabrielfive")))
+
+=== Pénztárcák technológiai részletei
+
+Most vizsgáljuk meg részletesen az egyes ipari szabványokat, amelyeket sok bitcoin pénztárca használ.
+
+[[mnemonic_code_words]]
+==== Mnemonikok (BIP-39)
+
+((("pénztárcák", "technológiája", "mnemonikok")))((("mnemonikok", id="mnemonic05")))((("bitcoin továbbfejlesztési javaslatok", "Mnemonikok (BIP-39)", id="BIP3905")))A mnemonikok olyan szóláncok, melyek egy determinisztikus pénztárca magját alkotó véletlen számnak felelnek meg. A szólánc elégséges a mag újbóli előállítására, ezáltal a pénztárca és a származtatott kulcsok újbóli létrehozására. Az olyan pénztárca program, amely mnemonikokat használ, a pénztárca létrehozásakor 12–24 szót jelenít meg a felhasználónak. Ezek a szavak jelentik a pénztárca mentését, és segítségükkel egy azonos típusú vagy egy kompatibilis pénztárca programban az összes kulcs visszaállítható. A mnemonikok megkönnyítik a pénztárcák mentését, mert egy véletlen számnál sokkal könnyebben olvashatók és rögzíthetők.
+
+[TIP]
+====
+((("agypénztárcák")))A mnemonikus szavakat gyakran összekeverik az "agypénztárcákkal". Nem ugyanazok. Az elsődleges különbség az, hogy egy agypénztárca a felhasználó által választott szavakból áll, míg a mnemonikus szavakat véletlenszerűen hozza létre a pénztárca, és mutatja be a felhasználónak. Ez a fontos különbség sokkal biztonságosabbá teszi a mnemonos szavakat, mivel az emberek nagyon gyenge forrásai a véletlenszerűségnek.
+====
+
+A mnemonikus kódokat a BIP-39 határozza meg (lásd <<appdxbitcoinimpproposals>>). Vegye figyelembe, hogy a BIP-39 egy mnemonikus kódolási szabvány egyik megvalósítása. ((("Electrum pénztárca", seealso="pénztárca")))Létezik egy másik szabvány, más szavak gyűjteményével, amelyet az Electrum pénztárca használ, és amely megelőzte a BIP-39-et. A BIP-39-et a Trezor hardver pénztárca mögött álló cég javasolta, és nem kompatibilis az Electrum megvalósításával. A BIP-39 azonban széles körű ipari támogatást ért el több tucat interoperábilis megvalósításban, és azt tényleges ipari szabványnak kell tekinteni.
+
+A BIP-39 meghatározza a nmemonik és a mag létrehozását, amelyet kilenc lépésben írunk le. Az érthetőség kedvéért a folyamat két részre oszlik: az 1–6. lépéseket az <<generating_mnemonic_words>> rész, a 7–9. lépéseket a <<mnemonic_to_seed>> rész mutatja be.
+
+[[generating_mnemonic_words]]
+===== Mnemonikok generálása
+
+A mnemonik szavakat a pénztárca automatikusan generálja a BIP-39-ben meghatározott szabványosított eljárás alkalmazásával. A pénztárca az entrópia forrásából indul, hozzáad egy ellenőrző összeget, majd leképezi az entrópiát szavak egy listájához:
+
+1 Hozzunk létre egy 128 .. 256 bites véletlen sorozatot (entrópiát)
+2. Készítsük el a véletlen sorozat ellenőrző összegét oly módon, hogy vesszük az SHA256 hashének első (entrópia hossz/32) bitjét
+3. Adjuk hozzá ezt az ellenőrző összeget a véletlen sorozat végéhez
+4.  Az eredményt osszuk fel 11 bites szegmensekre.
+5. Feleltessük meg mindegyik 11 bites értéket az előre meghatározott 2048 szavas szótár egy szavának.
+6. A mnemonik ezen szavak sorozata
+
+<<generating_entropy_and_encoding>> leírja, hogyan használjuk az entrópiát mnemonikus szavak generálására.
+
+[[generating_entropy_and_encoding]]
+[role="smallerseventy"]
+.Entrópia generálása és mnemonikus szavakként való kódolása
+image::images/mbc2_0506.png["Entrópia generálása és mnemonikus szavakként való kódolása"]
+
+<<table_4-5>> a mnemonikok hossza és az entrópia mérete közötti összefüggést szemlélteti
+
+[[table_4-5]]
+.Mnemonikok: Entrópia és szóhossz 
+[options="header"]
+|=======
+|Entrópia (bitek) | Ellenőrző összeg (bitek) | Entrópia "+" Ellenőrző összeg (bitek) | Mnemonik szóhossz
+| 128 | 4 | 132 | 12
+| 160 | 5 | 165 | 15
+| 192 | 6 | 198 | 18
+| 224 | 7 | 231 | 21
+| 256 | 8 | 264 | 24
+|=======
+
+[[mnemonic_to_seed]]
+===== Mnemonikból mag létrehozása
+
+((("kulcs-kiszélesítő függvény")))((("PBKDF2 függvény")))A mnemonikok 128–256 bit entrópiának felelnek meg. Az entrópiából egy PBKDF2 kulcs-kiszélesítő függvénnyel egy hosszabb (512 bites) magot állítanak elő. Az így kapott magot használják a determinisztikus pénztárca és az összes származtatott kulcs létrehozására.
+
+((("sók")))((("jelmondatok")))A kulcs-kiszélesítő függvénynek két paramétere van: a mnemonik és a _só_. Egy kulcs-kiszélesítő függvényben a só szerepe az, hogy megnehezítse egy olyan keresőtábla felépítését, amely brute force-támadást tesz lehetővé. A BIP-39 szabványban a sónak más szerepe van. Lehetővé teszi egy olyan jelmondat bevezetését, amely kiegészítő biztonsági faktorként szolgál a mag védelme érdekében, ahogy azt a <<mnemonic_passphrase>> részben részletesebben tárgyaljuk.
+
+A 7–9. lépésekben leírt eljárás a korábbi <<generating_mnemonic_words>> részben tárgyalt eljárást folytatja:
+
+++++
+<ol start="7">
+	<li>A PBKDF2 kulcs-kiszélesítő függvény első paramétere a 6. lépésben létrehozott <em>mnemonik</em>.</li>
+	<li>A PBKDF2 kulcs-kiszélesítő függvény második paramétere a só. A só a "<code>mnemonic</code>" string konstans és egy felhasználó által megadott jelmondat string összefűzésével keletkezik.</li>
+	<li>A PBKDF2 kiszélesíti a mnemonik és a só paramétereket 2048-szoros hashelés segítségével, a HMAC-SHA512 algoritmust használva. Végső kimenetként egy 512 bites értéket állít elő. Ez az 512 bites érték a mag.</li>
+</ol>
+++++
+
+<<fig_5_7>> leírja, hogyan használjuk a mnemonikot mag generálására.
+
+[[fig_5_7]]
+.Mnemonikból mag létrehozása
+image::images/mbc2_0507.png["Mnemonikból mag létrehozása"]
+
+[TIP]
+====
+A 2048-szoros hashelést használó kulcs-kiszélesítő függvény nagyon hatásos védelmet nyújt a mnemonik vagy a jelmondat brute force-támadása ellen. Rendkívül költségessé teszi (számítási szempontból) néhány ezernél több jelmondat és mnemonik kombinációjának kipróbálását, miközben a lehetséges magok száma hatalmas (2^512^).
+====
+
+Tables <<mnemonic_128_no_pass>>, and <<mnemonic_256_no_pass>> show some examples of mnemonic codes and the seeds they produce (either with or without a passphrase).
+
+[[mnemonic_128_no_pass]]
+.128 bites entrópiájú jelmondat nélküli mnemonik és a belőle kapott mag 
+[cols="h,"]
+|=======
+| *Entrópia (128 bit)*| +0c1e24e5917779d297e14d45f14e1a1a+
+| *Mnemonik (12 szó)* | +army van defense carry jealous true garbage claim echo media make crunch+
+| *Jelmondat* | (nincs)
+| *Mag (512 bit)* | +5b56c417303faa3fcba7e57400e120a0ca83ec5a4fc9ffba757fbe63fbd77a89a1a3be4c67196f57c39+
++a88b76373733891bfaba16ed27a813ceed498804c0570+
+|=======
+
+[[mnemonic_128_w_pass]]
+.128 bites entrópiájú mnemonik jelmondattal és a belőle kapott mag 
+[cols="h,"]
+|=======
+| *Entrópia (128 bit)*| +0c1e24e5917779d297e14d45f14e1a1a+
+| *Mnemonik (12 szó)* | +army van defense carry jealous true garbage claim echo media make crunch+
+| *Jelmondat* | SuperDuperSecret
+| *Mag (512 bit)* | +3b5df16df2157104cfdd22830162a5e170c0161653e3afe6c88defeefb0818c793dbb28ab3ab091897d0+
++715861dc8a18358f80b79d49acf64142ae57037d1d54+
+|=======
+
+
+[[mnemonic_256_no_pass]]
+.256 bites entrópiájú jelmondat nélküli mnemonik és a belőle kapott mag 
+[cols="h,"]
+|=======
+| *Entrópia (256 bit)* | +2041546864449caff939d32d574753fe684d3c947c3346713dd8423e74abcf8c+
+| *Mnemonik (24 szó)* | +cake apple borrow silk endorse fitness top denial coil riot stay wolf
+luggage oxygen faint major edit measure invite love trap field dilemma oblige+
+| *Jelmondat* | (nincs)
+| *Mag (512 bit)* | +3269bce2674acbd188d4f120072b13b088a0ecf87c6e4cae41657a0bb78f5315b33b3a04356e53d062e5+
++5f1e0deaa082df8d487381379df848a6ad7e98798404+
+|=======
+
+[[mnemonic_passphrase]]
+===== Opcionális jelmondat a BIP-39-ben
+
+((("jelmondatok")))A BIP-39 szabvány lehetővé teszi egy opcionális jelmondat használatát a mag előállításához. Ha nem használunk jelmondatot, akkor a mnemonikot egy +"mnemonic"+ string konstanssal kiszélesítjük, bármely mnemonikból egy specifikus 512 bites magot állítva elő. Jelmondat használata esetén a kiszélesítési függvény ugyanabból a mnemonikból egy _másik_ magot állít elő. Valójában, adott mnemonik esetén minden lehetséges jelmondat más maghoz vezet. Lényegében nem létezik "helytelen" jelmondat. Az összes jelmondat érvényes, és mindegyik különböző maghoz vezet, lehetséges nem inicializált pénztárcák hatalmas készletét képezve. A lehetséges pénztárcák halmaza olyan nagy (2^512^), hogy a gyakorlatban nincs lehetőség egy használatban lévő pénztárca brute force-támadására vagy véletlen kitalálására.
+
+[TIP]
+====
+A BIP-39-ben nincsenek "helytelen" jelmondatok. Minden jelmondat valamilyen pénztárcához vezet, és amennyiben korábban nem használták, üres.
+====
+
+Az opcionális jelmondat két fontos funkciót teremt:
+
+* Egy második (memorizált) faktor, amely önmagában használhatatlanná tesz egy mnemonikot, védi a mnemonikus biztonsági mentéseket egy tolvaj kompromittációjától.
+
+* A hihető tagadhatóság egy formája vagy "kényszerpénztárca", ahol egy választott jelszó egy kis pénzösszegű tárcához vezet, amelyet arra használnak, hogy elvonja a támadót a "valódi" pénztárcáról, amely a pénz többségét tartalmazza.
+
+Fontos azonban megjegyezni, hogy a jelmondat használata a veszteség kockázatát is hordozza:
+
+* Ha a pénztárca tulajdonosa cselekvőképtelen vagy halott, és senki más nem ismeri a jelmondatot, akkor a mag használhatatlan, és a pénztárcában tárolt összes pénz örökre elvész.
+
+* Ezzel szemben, ha a tulajdonos a jelmondat mentését a mag mentésével azonos helyre teszi, akkor az a második faktor jellegét elveszíti.
+
+Noha a jelmondatok nagyon hasznosak, azokat csak egy gondosan megtervezett biztonsági mentési és helyreállítási eljárással kombinálva szabad használni, figyelembe véve a tulajdonos elhalálozásának lehetőségét, és lehetővé téve családjának, hogy visszaszerezze a kriptopénz tulajdont.
+
+===== Mnemonikok kezelése
+
+A BIP-39 sokféle programozási nyelven érhető el könyvtárként:
+
+https://github.com/trezor/python-mnemonic[python-mnemonic]:: A szabvány Python nyelvű referencia implementációja, a BIP-39-et beterjesztő SatoshiLabs csapat által
+
+https://github.com/bitcoinjs/bip39[bitcoinjs/bip39]:: A BIP-39 megvalósítása a népszerű bitcoinJS keretrendszer részeként, JavaScriptben
+
+https://github.com/libbitcoin/libbitcoin/blob/master/src/wallet/mnemonic.cpp[libbitcoin/mnemonic]:: A BIP-39 megvalósítása a népszerű Libbitcoin keretrendszer részeként, pass:[<span class="keep-together">C++</span>]-ban
+
+Létezik egy BIP-39 generátor önálló weboldalon implementálva, amely rendkívül hasznos teszteléshez és kísérletezéshez. <<a_bip39_generator_as_a_standalone_web_page>> egy önálló weboldalt jelenít meg, amely mnemonikokat, magokat és kiterjesztett titkos kulcsokat generál.
+
+[[a_bip39_generator_as_a_standalone_web_page]]
+.Önálló weboldalként működő BIP-39 generátor
+image::images/mbc2_0508.png["BIP-39 generátor weboldal"]
+
+((("", startref="mnemonic05")))((("", startref="BIP3905")))Az oldal (https://iancoleman.github.io/bip39/) offline használható böngészőből, vagy online is elérhető.
+
+==== HD pénztárcák magból történő előállítása
+
+((("pénztárcák", "technológiája", "hierarchikus determinisztikus pénztárcák (HD pénztárcák) kiinduló magból történő előállítása")))((("kiinduló magok")))((("hierarchikus determinisztikus (HD) pénztárcák")))A HD pénztárcák egyetlen egy _kiinduló magból_ állíthatók elő. Ez a mag egy 128, 256 vagy 512 bites véletlenszám. Leggyakrabban ezt a magot egy _mnemonikból_ állítják elő, amint azt az előző szakaszban részleteztük.
+
+A HD pénztárcában lévő összes kulcs ebből a kiinduló magból, determinisztikusan származik, ami lehetővé teszi, hogy bármelyik másik kompatibilis HD pénztárca programban az egész HD pénztárcát újraépítsük. Ez megkönnyíti a kulcsok ezreit vagy millióit tartalmazó HD pénztárcák exportját és importját, mivel egyszerűen csak a kiinduló magot kell exportálni ill. importálni.
+
+Egy HD pénztárca mesterkulcsainak és lánc kódjainak előállítási folyamatát a <<HDWalletFromSeed>> mutatja.
+
+[[HDWalletFromSeed]]
+.Mesterkódok és lánc kód előállítása a kiinduló magból
+image::images/mbc2_0509.png["HDWalletFromRootSeed"]
+
+A kiinduló magot a HMAC-SHA512 algoritmus bemeneteként használják, és az eredményként kapott hasht használják a _titkos mesterkulcs_ (m) és a _fő lánckód_ (c) előállítására.
+
+A nyilvános mesterkulcsot (M) a titkos mesterkulcs (m) segítségével, hagyományos elliptikus szorzással áll elő: +m * G+, ahogyan azt a <<pubkey>> részben láttuk.
+
+A lánc kód (c) arra a célra szolgál, hogy entrópiát vigyen be abba a függvénybe, amely a szülő kulcsokból a gyermek kulcsokat állítja elő, amint azt a következő részben látni fogjuk.
+
+===== Titkos gyermek kulcsok előállítása
+
+((("gyermek kulcsok előállítása (CKD)")))((("nyilvános és titkos kulcsok", "gyermek kulcsok előállítása (CKD)")))A HD pénztárcák egy _gyermek kulcsok előállítására szolgáló CKD (child key derivation)_ függvényt használnak a leszármaztatott kulcsok szülő kulcsokból történő előállítására.
+
+A gyermek kulcsok előállítására szolgáló függvény egy egyirányú hashen alapul, amelyben a következők kombinálása történik:
+
+* A szülő titkos vagy nyilvános kulcsa (ECDSA tömörített kulcs)
+* Egy lánckódnak nevezett mag (256 bites)
+* Egy index szám (32 bites)
+
+A lánckód célja, hogy az eljárásba determinisztikus véletlen adatot vigyen bele, vagyis hogy az index és egy gyermek kulcs ne legyen elégséges a többi gyermek kulcs előállításához. Egy gyermek kulcsból csak akkor tudjuk a további leszármazottakat előállítani, ha a lánckóddal is rendelkezünk. A lánckód kezdeti magja (a fa gyökerénél) a magból származik, míg az egyes további leszármazott lánckódok a szülő lánckódjából származnak.
+
+A fenti három tétel (szülő kulcs, lánckód és index) összekapcsolása és hashelése a következőképpen történik:
+
+A szülő nyilvános kulcsának, lánckódjának és indexszámának összefűzése után a HMAC-SHA512 algoritmussal egy 512 bites hasht állítanak elő. Ezt az 512 bites hash értéket két 256 bites részre vágják. A hash jobb oldali 256 bitje lesz a leszármazott lánckódja. A hash bal oldali 256 bitjét hozzáadják a szülő titkos kulcsához, és így létrejön a gyermek titkos kulcsa. Az <<CKDpriv>> bemutatja, hogy az index 0-ra állításával hogyan lehet a szülő 0-ik (index szerint első) gyermek kulcsát előállítani.
+
+[[CKDpriv]]
+.A szülő titkos kulcsának kiterjesztésével a gyermek titkos kulcsának előállítása
+image::images/mbc2_0510.png["ChildPrivateDerivation"]
+
+Az index megváltoztatása lehetővé teszi a szülő kiterjesztését, és további gyermek kulcsok előállítását, pl. Gyermek 0, Gyermek 1, Gyermek 2 stb. Mindegyik szülő kulcshoz 2 147 483 647 (2^31^) gyermek kulcs tartozik (a 2^31^ a teljes 2^32^ tartomány fele, a másik felét speciális típusú leszármaztatásra tartják fent, amelyről a fejezet későbbi részében lesz szó).
+
+Ha a folyamatot a fában egy szinttel lejjebb megismételjük, akkor minden egyes gyermekből szülő lesz, és saját gyermekeket hoz létre, végtelen sok generációban.
+
+===== A leszármaztatott kulcsok használata
+
+A származtatott titkos kulcsokat nem lehet megkülönböztetni a nem determinisztikus (véletlen) kulcsoktól. Mivel a származtató függvény egyirányú, a származtatott kulcsból a szülő kulcs nem állapítható meg. A származtatott kulccsal a további leszármazottak sem kereshetők meg. Ha van egy n-ik kulcsunk, akkor ennek ismeretében sem az n-1-ik, sem az n+1-ik testvérét sem lehet megtalálni, sőt, a sorozat egyik elemét sem. Csak a szülő kulccsal és a lánckóddal lehet a gyermekeket leszármaztatni. A gyermek lánckódja nélkül a a gyermek kulcsokból nem lehetséges az unokák levezetése sem. A gyermek titkos kulcsa és a gyermek lánckódja egyaránt szükséges egy új ág megkezdéséhez és az unoka kulcsok leszármaztatásához.
+
+De akkor mire használhatók önmagukban a gyermek titkos kulcsok? Arra, hogy egy nyilvános kulcsot és egy bitcoin címet állítsunk elő velük. Ezt követően pedig arra, hogy a titkos kulcshoz tartozó bitcoin címre küldött tranzakciókat aláírjuk velük, és ily módon elköltsük.
+
+[TIP]
+====
+A gyermek kulcs, a hozzá tartozó nyilvános kulcs és a bitcoin cím megkülönböztethetetlen a véletlenszerűen előállított kulcsoktól és címektől. Nem látható rajtuk, hogy egy lánc részei, vagy hogy egy HD pénztárca függvény állította őket elő. A létrejöttük után már pontosan olyanok, mint egy "normális" kulcs.
+====
+
+===== Kiterjesztett kulcsok
+
+((("nyilvános és titkos kulcsok", "kiterjesztett kulcsok")))((("kiterjesztett kulcsok")))Mint azt már korábban láttuk, a kulcs származtatást végző függvényekkel a fa bármelyik szintjén új leszármazottak (gyermekek) állítható elő. Ehhez három bemenetre van szükség: a kulcsra, a lánckódra, és a kívánt leszármazott indexére. Ezek közül a két legfontosabb a kulcs és a lánckód, és ezeket egy _kiterjesztett kulcsba_ szokták összevonni. A "kiterjesztett kulcs" elnevezés "kibővíthető kulcsot" is jelent, mivel az ilyen kulcsokkal gyermekek állíthatók elő.
+
+A kiterjesztett kulcsok a 256 bites kulcs és a 256 bites lánckód összefűzése révén, egy 512 bites értékkel ábrázolhatók. Kétféle kiterjesztett kulcs van. A kiterjesztett titkos kulcs a titkos kulcs és a lánckód összefűzéséből áll, és a leszármazottak titkos kulcsainak (ezekből pedig a nyilvános kulcsainak) az előállítására használható. A kiterjesztett nyilvános kulcs a nyilvános kulcsból és a lánckódból áll, és a leszármazottak nyilvános (_csak nyilvános_) kulcsai állíthatók elő vele, amint azt a <<public_key_derivation>> részben leírtuk.
+
+A kiterjesztett titkos kulcsot úgy képzelhetjük el, mint a HD pénztárca fa szerkezetének a gyökerét. A gyökér ismeretében a többi ág levezethető. A kiterjesztett titkos kulccsal egy teljes ág előállítható, míg a kiterjesztett nyilvános kulccsal egy teljes ág nyilvános kulcsai.
+
+[TIP]
+====
+A kiterjesztett kulcs egy titkos vagy nyilvános kulcsból és egy lánckódból áll. A kiterjesztett kulccsal leszármazottak állíthatók elő, vagyis a fa szerkezetben a saját ága. Egy kiterjeszett kulcs megosztása az egész ághoz hozzáférést biztosít.
+====
+
+A kiterjesztett kulcsokat Base58Check kódolással kódolják, hogy könnyű legyen a különféle BIP-32-kompatibilis pénztárcák közötti exportjuk és importjuk. A Base58Check kódolás a kiterjesztett kulcsok esetén egy különleges verziószámot használ, amelyből az "xprv" vagy "xpub" Base58 karakterek jönnek létre a kódolás során. Ezáltal a kiterjesztett kulcsok könnyen felismerhetők. Mivel egy kiterjesztett kulcs 512 vagy 513 bites, emiatt sokkal hosszabb, mint a korábban látott Base58Check kódolású stringek.
+
+Íme, egy példa egy Base58Check kódolású kiterjesztett _titkos_ kulcsra:
+
+----
+xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c
+----
+
+És itt a neki megfelelő kiterjesztett _nyilvános_ kulcs, szintén Base58Check kódolásban:
+
+----
+xpub67xpozcx8pe95XVuZLHXZeG6XWXHpGq6Qv5cmNfi7cS5mtjJ2tgypeQbBs2UAR6KECeeMVKZBPLrtJunSDMstweyLXhRgPxdp14sk9tJPW9
+----
+
+[[public__child_key_derivation]]
+===== Gyermekek nyilvános kulcsainak leszármaztatása
+
+((("nyilvános és titkos kulcsok", "gyermekek nyilvános kulcsának leszármaztatása")))Mint azt előzőleg említettük, a HD pénztárcák nagyon hasznos jellemzője, hogy a gyermekek nyilvános kulcsai _anélkül_ is előállíthatók a szülők nyilvános kulcsaiból, hogy ehhez titkos kulcsokra lenne szükség. Ezért aztán a gyermekek nyilvános kulcsai kétféleképpen is előállíthatók: egyrészt a gyermek titkos kulcsából, másrészt közvetlenül a szülő nyilvános kulcsából.
+
+A kiterjesztett nyilvános kulcsból tehát a HD pénztárca egy ágának az összes _nyilvános kulcsa_ (és csak a nyilvános kulcsok) leszármaztathatók.
+
+Ezzel a trükkel nagyon biztonságos csak-nyilvános-kulcsokat tartalmazó rendszerek hozhatók létre, ahol a szerver alkalmazásban csak a kiterjesztett nyilvános kulcs másolata van meg, és semmilyen titkos kulcsot sem tartalmaz. Az ilyen rendszerekben végtelen sok nyilvános kulcs és bitcoin cím hozható létre, de ezekről a címekről nem lehetséges pénzt költeni. A kiterjesztett titkos kulccsal egy másik, biztonságosabb szerveren a nyilvános kulcsoknak megfelelő összes titkos kulcs levezethető, a tranzakciók aláírhatók és a pénz elkölthető.
+
+Ennek a megoldásnak az egyik gyakori alkalmazása az, hogy a kiterjesztett nyilvános kulcsot egy webszerveren telepítik, amely egy e-kereskedelmi alkalmazást szolgál ki. A webszerver a leszármaztató függvénnyel képes minden tranzakció számára (pl. egy ügyfél bevásárló kosara számára) új bitcoin cím előállítására. A web szerveren nem lesz egyetlen egy titkos kulcs sem, mert azt ellophatják. A HD pénztárcák nélkül csak úgy lehetne bitcoin címek ezreit előállítani, hogy a címeket egy másik, biztonságos szerveren állítják elő, majd betöltik őket az e-kereskedelmi alkalmazásba. Ez sok bonyodalommal járna, és állandó karbantartást igényelne, mert biztosítani kellene, hogy az e-kereskedelmi alkalmazás soha "ne fusson ki" a kulcsokból.
+
+((("hideg pénztárcák","leszármazottak nyilvános kulcsai és")))((("hardver pénztárcák","a gyermek kulcsok leszármaztatására szolgáló függvények és")))A megoldás egy másik gyakori alkalmazását a hideg tárolók vagy a hardver pénztárcák jelentik. Ebben az esetben a kiterjesztett titkos kulcsot egy papír pénztárca vagy egy hardver pénztárca (pl. a Trezor hardver pénztárca) tárolja, míg a kiterjesztett nyilvános kulcsot online tartják. A felhasználó tetszés szerint tud "fogadó" címeket létrehozni, míg a titkos kulcsok biztonságos módon, offline vannak tárolva. Az összegek elköltéséhez az szükséges, hogy a felhasználó a kiterjesztett titkos kulccsal egy offline bitcoin kliensben vagy egy hardver eszközzel (pl. a Trezorral) aláírja a tranzakciót. Az <<CKDpub>> szemlélteti, hogyan lehetséges a szülő nyilvános kulcs kiterjesztésével a gyermek kulcsok levezetése.
+
+[[CKDpub]]
+.A szülő nyilvános kulcs kiterjesztése gyermek kulcsok levezetése céljából
+image::images/mbc2_0511.png["ChildPublicDerivation"]
+
+==== Kiterjesztett nyilvános kulcs használata webáruházban
+
+((("pénztárcák", "technológiája", "kiterjesztett nyilvános kulcsok használata webáruházakban")))Gábriel webáruház történetét folytatva, nézzük meg, hogyan használhatók a HD pénztárcák.((("felhasználási esetek", "webáruház", id="gabrielfivetwo")))
+
+Gábriel első webáruházát hobbiként hozta létre egy egyszerű hosztolt Wordpress oldalra alapozva. Webáruháza eléggé minimális volt, mindössze néhány oldallal, és egy egyetlen bitcoin címet tartalmazó megrendelő űrlappal.
+
+Gábriel a Trezor eszköze által generált első bitcoin címet használta webáruháza elsődleges bitcoin címeként. Ilyen módon minden bejövő fizetés egy a Trezor hardver pénztárca által kontrollált címre érkezett be.
+
+A vásárlók leadták megrendelésüket az űrlapon keresztül, és elküldték a pénzt Gábriel közzétett bitcoin címére. A rendszer emailben értesítette Gábrielt a megrendelés részleteiről, amit ezután feldolgozott. Mivel hetente csak néhány megrendelés érkezett, a rendszer elég jól működött.
+
+A kis webáruház azonban elég sikeres lett, és számos megrendelőt vonzott a helyi közösségből. Nemsokára Gábrielt elárasztották a megrendelések. Mivel az összes megrendelés ugyanarra a címre utalt, nehézkessé vált a megrendelések és a tranzakciók összepárosítása, különösen, ha ugyanazon összegért több megrendelés egymáshoz közeli időpontban érkezett be.
+
+Gábriel HD pénztárcája sokkal jobb megoldást kínál azáltal, hogy nyilvános gyermek kulcsokat származtathat a titkos kulcsok ismerete nélkül. Gábriel betölthet egy kibővített nyilvános kulcsot (xpub) a saját webhelyére, amellyel minden ügyfél megrendeléshez egyedi címet tud származtatni. Gábriel a Trezor eszközével elköltheti a pénzt, de a weboldalra feltöltött xpub csak fogadni tud pénzt a belőle generált címeken. A HD pénztárcák ezen tulajdonsága nagyszerű biztonsági funkciót jelent. Gábriel weboldala nem tartalmaz titkos kulcsokat, ezért nem igényel magas szintű biztonságot.
+
+Az xpub exportálásához Gábriel a Trezor hardver pénztárcájával együtt a webalapú szoftvert használja. A Trezor eszközt csatlakoztatni kell a nyilvános kulcsok exportálásához. Vegye figyelembe, hogy a hardver pénztárcák soha nem exportálnak titkos kulcsokat – ezek mindig az eszközön maradnak. <<export_xpub>>  azt a webes felületet mutatja, amelyet Gábriel használ az xpub exportálásához.
+
+[[export_xpub]]
+.Egy xpub exportálása Trezor hardver pénztárcából
+image::images/mbc2_0512.png["Egy xpub exportálása Trezor hardver pénztárcából"]
+
+Gábriel átmásolja az xpubot webáruházának bitcoin bolt szoftverébe. A _Mycelium Gear_-t használja, ami egy nyílt forráskódú webáruház bővítmény különféle webtárhely és tartalomszolgáltató platformokhoz. A Mycelium Gear az xpub segítségével egyedi címet generál minden vásárláshoz. ((("", startref="gabrielfivetwo")))
+
+===== Megerősített gyermek kulcsok előállítása
+
+((("nyilvános és titkos kulcsok", "gyermek kulcsok megerősített levezetése")))((("megerősített levezetés")))Az, hogy egy ág összes nyilvános kulcsa az xpubból levezethető, nagyon hasznos, de potenciális veszéllyel is jár. Az xpub alapján a gyermekek titkos kulcsa nem állítható elő. Mivel azonban az xpub tartalmazza a lánckódot, ezért ha kiszivárog vagy az egyik gyermek titkos kulcsa, akkor ebből a lánc kód ismeretében az összes többi gyermek titkos kulcsa is előállítható. Egyetlen egy kiszivárgott titkos kulcs és a szülő lánckódja az összes gyermek titkos kódját felfedi. Ami még ennél is rosszabb, a gyermek titkos kulcsából és a szülő lánckódjából a szülő titkos kulcsa is megállapítható.
+
+Ennek a veszélynek a kivédése érdekében a HD pénztárcák egy alternatív kulcs előállító függvényt használnak, az ún. _megerősített kulcs előállítást_, amely "megszakítja" a szülő nyilvános kulcsa és a gyermek lánckódja közötti összefüggést. A megerősített kulcs előállító függvény a szülő nyilvános kulcsa helyett a szülő titkos kulcsát használja a gyermek lánckódjának a levezetésére. Ez "tűzfalat" hoz létre a szülő/gyermek sorozatban, és a lánckód a szülő vagy a gyermek titkos kódját már nem tudja kompromittálni. A megerősített kulcs levezető függvény majdnem megegyezik a gyermekek szokásos titkos kulcs levezetési függvényével, kivéve, hogy a hash függvény a szülő nyilvános kulcsa helyett a szülő titkos kulcsát használja, amint azt a <<CKDprime>> részben szereplő ábra mutatja.
+
+[[CKDprime]]
+.Gyermek kulcsok megerősített levezetése, a szülő nyilvános kulcs nem szerepel benne
+image::images/mbc2_0513.png["ChildHardPrivateDerivation"]
+
+[role="pagebreak-before"]
+Mikor megerősített titkos kulcs származtatás történik, az eredményként kapott titkos kulcs és a lánckód teljesen különbözik a szokásos származtató függvény eredményétől. Az így kapott "ágon" a kulcsokból olyan kiterjesztett nyilvános kulcsok állítható elő, melyek nem támadhatóak, mivel az általuk tartalmazott lánckód alapján semmilyen privát kulcsot sem lehet előállítani. Ennek megfelelően a megerősített származtatást használják arra, hogy a fát "elszigeteljék" a kiterjesztett nyilvános kulcsok szintje fölötti résztől.
+
+Egyszerűen arról van szó, hogy ha az xpub kínálta kényelmet szeretnénk használni az ágak nyilvános kulcsainak levezetése során, de nem szeretnénk kitenni magunkat a lánckód kiszivárgása által okozott veszélynek, akkor az xpubot egy megerősített szülőből kell létrehoznunk, nem pedig egy szokásos szülőből. A legjobb, ha a mesterkulcs 1. szintű gyermekeit mindig megerősített levezetéssel állítjuk elő, mert így meg tudjuk akadályozni a mesterkulcsok kompromittálódását.
+
+===== A szokásos és a megerősített kulcsképzés indexszámai
+
+A kulcsképző függvényben az indexszám egy 32 bites egész. Annak érdekében, hogy könnyű legyen megkülönböztetni a szokásos kulcsképzést a megerősített kulcsképzéstől, az indexszámot két tartományra osztották. A 0 és 2^31^–1 (0x0 és 0x7FFFFFFF) közötti indexszámokat _kizárólag_ a szokásos normál kulcsképzésre használják. A 2^31^ és 2^32^–1 (0x80000000 és 0xFFFFFFFF) közötti indexszámokat pedig _kizárólag_ a megerősített kulcsképzésre. Ezért, ha az indexszám 2^31^-nél kisebb, akkor a gyermek normál módon lett képezve, míg ha az indexszám 2^31^-nél nagyobb vagy egyenlő, akkor a gyermek megerősített módon lett képezve.
+
+Az indexszám könnyebb megjelenítése érdekében a megerősített gyermekek esetén az indexszám kijelzése 0-tól kezdődik, de egy vessző áll mögötte. A szokásos gyermek kulcs kijelzése a 0-tól kezdődik, míg az első megerősített gyermek (melynek indexe 0x80000000) megjelenítése a következő: 0++&#x27;++. A sorban a következő megerősített kulcs indexe 0x80000001, melynek megjelenítése 1++&#x27;++ stb. A HD pénztárcáknál az i++&#x27;++ index az jelenti, hogy 2^31^+i.
+
+===== A HD pénztárca kulcs azonosítója (útvonal)
+
+((("hierarchikus determinisztikus pénztárcák (HD pénztárcák)")))A HD pénztárcák kulcsait egy "útvonal" azonosítja, amelyben mindegyik szintet egy perjel (/) választja el egymástól (lásd a <<table_4-8>> táblázatot). A titkos mesterkulcsból levezetett titkos kulcsok az "m" betűvel kezdődnek. A nyilvános mesterkulcsból levezetett nyilvános kulcsok az "M" betűvel kezdődnek. Ennek megfelelően a titkos mesterkulcs első gyermeke az m/0. A nyilvános kulcs első gyermeke az M/0. Az első gyermek második unokája az m/0/1, és így tovább.
+
+Egy kulcs "ősei" jobbról balra olvashatók ki, amíg el nem jutunk ahhoz a mesterkulcshoz, amelyből a kulcs származik. Például az m/x/y/z azonosító azt a kulcsot jelenti, amely az m/x/y kulcs z-ik gyermeke, ahol az y az m/x y-ik gyermeke, ahol az x az m x-ik gyermeke.
+
+[[table_4-8]]
+.Példák HD pénztárca útvonalakra
+[options="header"]
+|=======
+|HD útvonal | Kulcs leírása
+| m/0 | A titkos mesterkulcsból (m) származó első (0) leszármazott titkos kulcsa.
+| m/0/0 | The first (0) child private key from the first child (m/0)
+| m/0'/0 | The first (0) normal child from the first _hardened_ child (m/0')
+| m/1/0 | The first (0) child private key from the second child (m/1)
+| M/23/17/0/0 | The first (0) child public key from the first child (M/23/17/0) from the 18th child (M/23/17) from the 24th child (M/23)
+|=======
+
+===== Navigálás a HD pénztárca fa struktúrájában
+
+A HD pénztárcák fa szerkezete hihetetlenül rugalmas. Mindegyik szülő kulcsnak 4 milliárd gyermeke lehet: 2 milliárd normális gyermeke és 2 milliárd megerősített gyermeke. Ezen gyermekek mindegyikének szintén 4 milliárd gyermeke lehet, és így tovább. A fa olyan mély lehet, amilyen mélyet szeretnénk, és végtelen sok generációt tartalmazhat. A rugalmassággal azonban együtt jár az is, hogy egészen nehéz ebben a végtelen fában a navigálás. Különösen nehéz a HD pénztárcák különféle implementációk közötti átmozgatása, mivel az ágak belső felépítésére végtelen sok lehetőség van.
+
+A Bitcoin Javítására tett Javaslatok (Bitcoin Improvement Proposals (BIP-ek) megoldást nyújtanak erre a problémára: szabványos fa szerkezeteket javasolnak a HD pénztárcák felépítésére. A BIP-43 azt javasolja, hogy az első megerősített gyermek indexét különleges azonosító gyanánt használják, amely a fa szerkezet "célját" adja meg. A BIP-43 alapján a HD pénztárcáknak csak a fa 1-szintű ágait szabad használnia, ahol a cél definiálása révén az index szám azonosítja a fa további részének névterét és szerkezetét. Például egy HD pénztárca, amely csak az m/i++'++/ ágat használja, egy adott célra szolgál, és ezt a célt az "i" index szám adja meg.
+
+A BIP-44 ennek a specifikációnak a kiterjesztésével egy többszörös számla szerkezetet javasol, melynek "célját" a BIP-43 alatt a +44'+ adja meg. Az összes, BIP-44 szerkezetnek megfelelő pénztárcát az azonosítja, hogy a fának csak egyetlen ágát használja: m/44'/.
+
+A BIP-44 definíciója szerint a fa szerkezet öt, előre definiált szintből áll:
+
+-----
+m / cél' / érme_típus' / számla' / visszajáró / cím_index
+-----
+
+The first-level "purpose" is always set to +44'+. The second-level "coin_type" specifies the type of cryptocurrency coin, allowing for multicurrency HD wallets where each currency has its own subtree under the second level. There are three currencies defined for now: Bitcoin is m/44'/0', Bitcoin Testnet is m/44'/1', and Litecoin is m/44'/2'.
+
+The third level of the tree is "account," which allows users to subdivide their wallets into separate logical subaccounts, for accounting or organizational purposes. For example, an HD wallet might contain two bitcoin "accounts": m/44'/0'/0' and m/44'/0'/1'. Each account is the root of its own subtree.
+
+((("keys and addresses", see="also public and private keys")))On the fourth level, "change," an HD wallet has two subtrees, one for creating receiving addresses and one for creating change addresses. Note that whereas the previous levels used hardened derivation, this level uses normal derivation. This is to allow this level of the tree to export extended public keys for use in a nonsecured environment. Usable addresses are derived by the HD wallet as children of the fourth level, making the fifth level of the tree the "address_index." For example, the third receiving address for bitcoin payments in the primary account would be M/44'/0'/0'/0/2. <<table_4-9>> shows a few more examples.
+
+[[table_4-9]]
+.Példák a BIP-44 HD pénztárca szerkezetre
+[options="header"]
+|=======
+|HD útvonal | Kulcs leírása
+| M/44'/0'/0'/0/2 | A fő bitcoin számla harmadik nyilvános fogadó kulcsa
+| M/44'/0'/3'/1/14 | A negyedik bitcoin számla visszajáró pénz kezelésre szolgáló 15-ik nyilvános kulcsa
+| m/44'/2'/0'/0/1 | Egy Litecoin főszámla tranzakciók aláírására szolgáló második titkos kulcsa
+|=======

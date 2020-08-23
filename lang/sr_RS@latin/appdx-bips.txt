@@ -1,0 +1,117 @@
+[[appdxbitcoinimpproposals]]
+[dodatak]
+== Predlozi za poboljšanje bitkoina
+
+((("bitcoin improvement proposals", "types of")))Predlozi za poboljšanje bitkoina (Bitkoin Improvement Proposals) su dizajnerski dokumenti koji pružaju informacije bitkoin zajednici, ili za opis nove funkcije za bitkoin, ili za opis njegovih procesa ili okruženja.
+
+Prema BIP-01 _Svrha i smernice BIP-a (BIP Purpose and Guidelines)_, postoje tri vrste BIP-ova:
+
+_Standard_ BIP:: Opisuje svaku promenu koja utiče na većinu ili sve implementacije bitkoina, kao što je promena mrežnog protokola, promena pravila validnosti bloka ili transakcije, ili bilo kakva promena ili dodatak koji utiče na interoperabilnost aplikacija koje koriste bitkoin.
+_Informational_ BIP:: Opisuje problem dizajna bitkoina ili pruža opšte smernice ili informacije bitkoin zajednici, ali ne predlaže novu funkciju. Informativni BIP-ovi ne predstavljaju nužno konsenzus ili preporuku bitkoin zajednice, tako da korisnici i programeri mogu ignorisati informativne BIP-ove ili slediti njihove savete.
+_Process_ BIP:: Opisuje bitkoin proces ili predlaže promenu (ili događaj u) procesu. Procesni BIP-ovi su kao standardni BIP-ovi, ali se odnose na područja koja su van bitkoin protokola. Oni mogu da predlože implementaciju, ali ne i za bitkoinovu bazu koda; često im je potreban konsenzus zajednice; a za razliku od informativnih BIP-ova, oni su više od preporuka, a korisnici obično ne mogu da ih ignorišu. Primeri uključuju procedure, smernice, promene u procesu donošenja odluka i promene alata ili okruženja koje se koriste u razvoju bitkoina. Bilo koji meta-BIP takođe se smatra procesnim BIP-om.
+
+((("bitcoin improvement proposals", "repository of")))BIP-ovi se beleže u verzioniranom skladištu na GitHub-u: https://github.com/bitcoin/bips[https://github.com/bitcoin/bips]. <<table_d-1>> prikazuje stanje BIP-ova u aprilu 2017. Potražite autoritativno skladište za najnovije informacije o postojećim BIP-ovima i njihovom sadržaju.((("bitcoin improvement proposals", "snapshot of", id="BIPsnap15")))
+
+[[table_d-1]]
+.Lista BIP-ova u aprilu 2017.
+[options="header"]
+|=======================================================================
+|BIP#| Naslov |Vlasnik |Vrsta |Status
+|[[bip-1]]https://github.com/bitcoin/bips/blob/master/bip-0001.mediawiki[BIP-1] |Svrha i smernice za BIP |Amir Taaki |Proces |Zamenjen
+|[[bip-2]]https://github.com/bitcoin/bips/blob/master/bip-0002.mediawiki[BIP-2] |BIP proces, revidiran |Luke Dashjr |Proces |Aktivan
+|[[bip-8]]https://github.com/bitcoin/bips/blob/master/bip-0008.mediawiki[BIP-8] |Bitovi verzije sa garantovanim uključivanje |Shaolin Fri |Informativno |Prva verzija
+|[[bip-9]]https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki[BIP-9] |Verzije bita sa vremenskim ograničenjem i kašnjenjem |Pieter Vuille, Peter Todd, Greg Makvell , Rusti Russell |Informativno |Finalan
+|[[bip-10]]https://github.com/bitcoin/bips/blob/master/bip-0010.mediawiki[BIP-10] |Distribucija multisig transakcija |Alan Reiner |Informativno | Povučen
+|[[bip-11]]https://github.com/bitcoin/bips/blob/master/bip-0011.mediawiki[BIP-11] |M-od-N standardne transakcije |Gavin Andresen |Standard |Finalan
+|[[bip-12]]https://github.com/bitcoin/bips/blob/master/bip-0012.mediawiki[BIP-12] |OP_EVAL | Gavin Andresen | Standard | Povučen
+|[[bip-13]]https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki[BIP-13] |Format adrese za pay-to-script-hash | Gavin Andresen | Standard | Finalan
+|[[bip-14]]https://github.com/bitcoin/bips/blob/master/bip-0014.mediawiki[BIP-14] |Verzija protokola i korisnički agent |Amir Taaki, Patrick Strateman |Standard |Finalan
+|[[bip-15]]https://github.com/bitcoin/bips/blob/master/bip-0015.mediawiki[BIP-15] |Aliasi |Amir Taaki |Standard |Odložen
+|[[bip-16]]https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki[BIP-16] |Pay to Script Hash |Gavin Andresen |Standard |Finalan
+|[[bip-17]]https://github.com/bitcoin/bips/blob/master/bip-0017.mediawiki[BIP-17] |OP_CHECKHASHVERIFY (CHV) |Luke Dashjr |Standard |Povučen
+|[[bip-18]]https://github.com/bitcoin/bips/blob/master/bip-0018.mediawiki[BIP-18] |hashScriptCheck |Luke Dashjr |Standard |Predložen
+|[[bip-19]]https://github.com/bitcoin/bips/blob/master/bip-0019.mediawiki[BIP-19] |M-od-N standardne transakcije (Low SigOp) |Luke Dashjr |Standard |Prva verzija
+|[[bip-20]]https://github.com/bitcoin/bips/blob/master/bip-0020.mediawiki[BIP-20] |URI šeme |Luke Dashjr |Standard |Zamenjen
+|[[bip-21]]https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki[BIP-21] |URI šeme |Nils Schneider, Matt Corallo |Standard |Finalan
+|[[bip-22]]https://github.com/bitcoin/bips/blob/master/bip-0022.mediawiki[BIP-22] |getblocktemplate - osnove |Luke Dashjr |Standard |Finalan
+|[[bip-23]]https://github.com/bitcoin/bips/blob/master/bip-0023.mediawiki[BIP-23] |getblocktemplate - rudarenje u pulu |Luke Dashjr |Standard |Finalan
+|[[bip-30]]https://github.com/bitcoin/bips/blob/master/bip-0030.mediawiki[BIP-30] |Duple transakcije |Pieter Wuille |Standard |Finalan
+|[[bip-31]]https://github.com/bitcoin/bips/blob/master/bip-0031.mediawiki[BIP-31] |Pong poruke |Mike Hearn |Standard |Finalan
+|[[bip-32]]https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki[BIP-32] |Hijerarhijski determinisani novčanici |Pieter Wuille |Informativno |Finalan
+|[[bip-33]]https://github.com/bitcoin/bips/blob/master/bip-0033.mediawiki[BIP-33] |Stratized Nodes |Amir Taaki |Standard |Prva verzija
+|[[bip-34]]https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki[BIP-34] |Block v2, Visina u Coinbase-u |Gavin Andresen |Standard |Finalan
+|[[bip-35]]https://github.com/bitcoin/bips/blob/master/bip-0035.mediawiki[BIP-35] |mempool poruke |Jeff Garzik |Standard |Finalan
+|[[bip-36]]https://github.com/bitcoin/bips/blob/master/bip-0036.mediawiki[BIP-36] |Prilagođene usluge |Stefan Thomas |Standard |Prva verzija
+|[[bip-37]]https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki[BIP-37] |Veza Blumovo filtriranje |Mike Hearn, Matt Corallo |Standard |Finalan
+|[[bip-38]]https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki[BIP-38] |Privatni ključ zaštićen lozinkom |Mike Caldwell, Aaron Voisine |Standard |Prva verzija
+|[[bip-39]]https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki[BIP-39] |Mnemonički kod za generisanje determinističkih ključeva |Marek Palatinus, Pavol Rusnak, Aaron Voisine, Sean Bowe |Standard |Predlog
+|[[bip-40]]https://github.com/bitcoin/bips/blob/master/bip-0040.mediawiki[BIP-40] |Stratum mrežni protokol |Marek Palatinus |Standard |BIP broj dodeljen
+|[[bip-41]]https://github.com/bitcoin/bips/blob/master/bip-0041.mediawiki[BIP-41] |Stratum protokol rudarenja |Marek Palatinus |Standard |BIP broj dodeljen
+|[[bip-42]]https://github.com/bitcoin/bips/blob/master/bip-0042.mediawiki[BIP-42] |Finitno monetarno snabdevanje za bitkoin |Pieter Wuille |Standard |Prva verzija
+|[[bip-43]]https://github.com/bitcoin/bips/blob/master/bip-0043.mediawiki[BIP-43] |Namensko polje za determinističke novčanike |Marek Palatinus, Pavol Rusnak |Informativno |Prva verzija
+|[[bip-44]]https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki[BIP-44] |Hijerarhija od više računa za determinističke novčanike |Marek Palatinus, Pavol Rusnak |Standard |Predlog
+|[[bip-45]]https://github.com/bitcoin/bips/blob/master/bip-0045.mediawiki[BIP-45] |Struktura za determinističke P2SH multisignature novčanike |Manuel Araoz, Ryan X. Charles, Matias Alejo Garcia |Standard |Predlog
+|[[bip-47]]https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki[BIP-47] |Kodovi plaćanja za višekratnu upotrebu za hijerarhijski determinističke novčanike |Justus Ranvier |Informativno |Prva verzija
+|[[bip-49]]https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki[BIP-49] |Šema derivacije za račune bazirane na P2WPKH-nested-in-P2SH |Daniel Weigl |Informativno |Prva verzija
+|[[bip-50]]https://github.com/bitcoin/bips/blob/master/bip-0050.mediawiki[BIP-50] |Mart 2013. blokčejn fork post-mortem |Gavin Andresen |Informativno |Finalan
+|[[bip-60]]https://github.com/bitcoin/bips/blob/master/bip-0060.mediawiki[BIP-60] |Poruka "verzija" fiksne dužine (polje prenosa transakcija) |Amir Taaki |Standard |Prva verzija
+|[[bip-61]]https://github.com/bitcoin/bips/blob/master/bip-0061.mediawiki[BIP-61] |Odbaciti P2P poruke |Gavin Andresen |Standard |Finalan
+|[[bip-62]]https://github.com/bitcoin/bips/blob/master/bip-0062.mediawiki[BIP-62] |Izlaženje na kraj sa zlonamerom |Pieter Wuille |Standard |Povučen
+|[[bip-63]]https://github.com/bitcoin/bips/blob/master/bip-0063.mediawiki[BIP-63] |Nevidljive adrese |Peter Todd |Standard |BIP broj dodeljen
+|[[bip-64]]https://github.com/bitcoin/bips/blob/master/bip-0064.mediawiki[BIP-64] |getutxo poruke |Mike Hearn |Standard |Prva verzija
+|[[bip-65]]https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki[BIP-65] |OP_CHECKLOCKTIMEVERIFY |Peter Todd |Standard |Finalan
+|[[bip-66]]https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki[BIP-66] |Striktni DER potpisi |Pieter Wuille |Standard |Finalan
+|[[bip-67]]https://github.com/bitcoin/bips/blob/master/bip-0067.mediawiki[BIP-67] |Determinističke Pay-to-script-hash multisignature adrese putem sortiranja javnih ključeva |Thomas Kerin, Jean-Pierre Rupp, Ruben de Vries |Standard |Predložen
+|[[bip-68]]https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki[BIP-68] |Relativno vreme zaključavanja korišćenjem redosleda prisiljen konsenzusom |Mark Friedenbach, BtcDrak, Nicolas Dorier, kinoshitajona |Standard |Finalan
+|[[bip-69]]https://github.com/bitcoin/bips/blob/master/bip-0069.mediawiki[BIP-69] |Leksikografsko indeksiranje ulaza i izlaza transakcija |Kristov Atlas |Informativno |Predložen
+|[[bip-70]]https://github.com/bitcoin/bips/blob/master/bip-0070.mediawiki[BIP-70] |Protokol plaćanja |Gavin Andresen, Mike Hearn |Standard |Finalan
+|[[bip-71]]https://github.com/bitcoin/bips/blob/master/bip-0071.mediawiki[BIP-71] |Protokol plaćanja MIME tipovi |Gavin Andresen |Standard |Finalan
+|[[bip-72]]https://github.com/bitcoin/bips/blob/master/bip-0072.mediawiki[BIP-72] |bitcoin: uri ekstenzije za protokol plaćanja |Gavin Andresen |Standard |Finalan
+|[[bip-73]]https://github.com/bitcoin/bips/blob/master/bip-0073.mediawiki[BIP-73] |Koristiti zaglavlje "Accept" za pregovaranje o vrsti odgovora sa URL-ovim zahtevima za plaćanje |Stephen Pair |Standard |Finalan
+|[[bip-74]]https://github.com/bitcoin/bips/blob/master/bip-0074.mediawiki[BIP-74] |Dozvoliti nula vrednost OP_RETURN u protokolu plaćanja |Toby Padilla |Standard |Prva verzija
+|[[bip-75]]https://github.com/bitcoin/bips/blob/master/bip-0075.mediawiki[BIP-75] |Vanmrežne razmene adresa pomoću šifrovanja protokola plaćanja |Justin Newton, Matt David, Aaron Voisine, James MacWhyte |Standard |Prva verzija
+|[[bip-80]]https://github.com/bitcoin/bips/blob/master/bip-0080.mediawiki[BIP-80] |Hijerarhija za glasanje neobojenih pulova determinističkim multisig novčanicima |Justus Ranvier, Jimmy Song |Informativno |Odložen
+|[[bip-81]]https://github.com/bitcoin/bips/blob/master/bip-0081.mediawiki[BIP-81] |Hijerarhija za glasanje obojenih pulova determinističkih multisig novčanika |Justus Ranvier, Jimmy Song |Informativno |Odbačen
+|[[bip-83]]https://github.com/bitcoin/bips/blob/master/bip-0083.mediawiki[BIP-83] |Dinamična hijerarhijska deterministička stabla ključeva |Eric Lombrozo |Standard |Prva verzija
+|[[bip-90]]https://github.com/bitcoin/bips/blob/master/bip-0090.mediawiki[BIP-90] |Buried Deployments |Suhas Daftuar |Informativno |Prva verzija
+|[[bip-99]]https://github.com/bitcoin/bips/blob/master/bip-0099.mediawiki[BIP-99] |Motivacija i primena promena pravila konsenzusa ([soft/hard] fork-ovi)  |Jorge Timón |Informativno |Prva verzija
+|[[bip-101]]https://github.com/bitcoin/bips/blob/master/bip-0101.mediawiki[BIP-101] |Povećavanje maksimalne veličine bloka|Gavin Andresen |Standard |Povučen
+|[[bip-102]]https://github.com/bitcoin/bips/blob/master/bip-0102.mediawiki[BIP-102] |Povećanje veličine bloka na 2MB |Jeff Garzik |Standard |Prva verzija
+|[[bip-103]]https://github.com/bitcoin/bips/blob/master/bip-0103.mediawiki[BIP-103] |Veličina bloka prateći tehnološki rast |Pieter Wuille |Standard |Prva verzija
+|[[bip-104]]https://github.com/bitcoin/bips/blob/master/bip-0104.mediawiki[BIP-104] |'Block75' - Maksimalna veličina bloka ista kao težina | t.khan | Standard | Prva verzija
+|[[bip-105]]https://github.com/bitcoin/bips/blob/master/bip-0105.mediawiki[BIP-105] |Algoritam konsenzusa za ponovno postavljanje cilja na osnovu veličine bloka |BtcDrak |Standard |Prva verzija
+|[[bip-106]]https://github.com/bitcoin/bips/blob/master/bip-0106.mediawiki[BIP-106] |Dinamično kontrolisana maksimalna veličina bitkoin bloka  |Upal Chakraborty |Standard |Prva verzija
+|[[bip-107]]https://github.com/bitcoin/bips/blob/master/bip-0107.mediawiki[BIP-107] |Dinamično ograničenje veličine bloka |Washington Y. Sanchez |Standard |Prva verzija
+|[[bip-109]]https://github.com/bitcoin/bips/blob/master/bip-0109.mediawiki[BIP-109] |Ograničenje veličine na dva miliona bajta sa ograničenjem sigop-a i sighash-a |Gavin Andresen |Standard |Odbijen
+|[[bip-111]]https://github.com/bitcoin/bips/blob/master/bip-0111.mediawiki[BIP-111] |NODE_BLOOM servisni bit |Matt Corallo, Peter Todd |Standard |Predložen
+|[[bip-112]]https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki[BIP-112] |CHECKSEQUENCEVERIFY |BtcDrak, Mark Friedenbach, Eric Lombrozo |Standard |Finalan
+|[[bip-113]]https://github.com/bitcoin/bips/blob/master/bip-0113.mediawiki[BIP-113] |Srednji vremenski period kao krajnja tačka za računanje vremena zaključavanja |Thomas Kerin, Mark Friedenbach |Standard |Finalan
+|[[bip-114]]https://github.com/bitcoin/bips/blob/master/bip-0114.mediawiki[BIP-114] |Merkelizovano apstraktno sintaksno stablo |Johnson Lau |Standard |Prva verzija
+|[[bip-120]]https://github.com/bitcoin/bips/blob/master/bip-0120.mediawiki[BIP-120] |Dokaz plaćanja |Kalle Rosenbaum |Standard |Prva verzija
+|[[bip-121]]https://github.com/bitcoin/bips/blob/master/bip-0121.mediawiki[BIP-121] |URI šema dokaza plaćanja |Kalle Rosenbaum |Standard |Prva verzija
+|[[bip-122]]https://github.com/bitcoin/bips/blob/master/bip-0122.mediawiki[BIP-122] |URI šema za blokčejn reference / exploration |Marco Pontello |Standard |Prva verzija
+|[[bip-123]]https://github.com/bitcoin/bips/blob/master/bip-0123.mediawiki[BIP-123] |BIP klasifikacija |Eric Lombrozo |Proces |Aktivan
+|[[bip-124]]https://github.com/bitcoin/bips/blob/master/bip-0124.mediawiki[BIP-124] |Hijerarhijski determinisani šabloni skripti |Eric Lombrozo, William Swanson |Informational |Prva verzija
+|[[bip-125]]https://github.com/bitcoin/bips/blob/master/bip-0125.mediawiki[BIP-125] |Opt-in Full Replace-by-Fee Signaling |David A. Harding, Peter Todd |Standard |Predložen
+|[[bip-126]]https://github.com/bitcoin/bips/blob/master/bip-0126.mediawiki[BIP-126] |Najbolje prakse za heterogene ulazne skripte |Kristov Atlas |Informativno |Prva verzija
+|[[bip-130]]https://github.com/bitcoin/bips/blob/master/bip-0130.mediawiki[BIP-130] |sendheaders poruke |Suhas Daftuar |Standard |Predložen
+|[[bip-131]]https://github.com/bitcoin/bips/blob/master/bip-0131.mediawiki[BIP-131] |"Coalescing Transaction" specifikacija (wildcard ulazi) |Chris Priest |Standard |Prva verzija
+|[[bip-132]]https://github.com/bitcoin/bips/blob/master/bip-0132.mediawiki[BIP-132] |Komitet-bazirani proces prihvatanja BIP-a  |Andy Chase |Proces |Povučen
+|[[bip-133]]https://github.com/bitcoin/bips/blob/master/bip-0133.mediawiki[BIP-133] |feefilter poruke |Alex Morcos |Standard |Prva verzija
+|[[bip-134]]https://github.com/bitcoin/bips/blob/master/bip-0134.mediawiki[BIP-134] |Fleksibilne transakcije |Tom Zander |Standard |Prva verzija
+|[[bip-140]]https://github.com/bitcoin/bips/blob/master/bip-0140.mediawiki[BIP-140] |Normalizovani TXID |Christian Decker |Standard |Prva verzija
+|[[bip-141]]https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki[BIP-141] |Odvojeni svedok (konsenzus sloj) |Eric Lombrozo, Johnson Lau, Pieter Wuille |Standard |Prva verzija
+|[[bip-142]]https://github.com/bitcoin/bips/blob/master/bip-0142.mediawiki[BIP-142] |Format adrese za odvojenog svedoka |Johnson Lau |Standard |Odložen
+|[[bip-143]]https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki[BIP-143] | Verifikacija potpisa transakcija za verziju 0 programa svedoka |Johnson Lau, Pieter Wuille |Standard |Prva verzija
+|[[bip-144]]https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki[BIP-144] |Odvojeni svedok (peer servisi) |Eric Lombrozo, Pieter Wuille |Standard |Prva verzija
+|[[bip-145]]https://github.com/bitcoin/bips/blob/master/bip-0145.mediawiki[BIP-145] |getblocktemplate ažuriranje za odvojene svedoke |Luke Dashjr |Standard |Prva verzija
+|[[bip-146]]https://github.com/bitcoin/bips/blob/master/bip-0146.mediawiki[BIP-146] |Izlaženje na kraj sa zlonamerom kodiranja potpisa |Johnson Lau, Pieter Wuille |Standard |Prva verzija
+|[[bip-147]]https://github.com/bitcoin/bips/blob/master/bip-0147.mediawiki[BIP-147] |Izlaženje na kraj sa zlonamernim korišćenjem lažnih (dummy) stek elemenata |Johnson Lau |Standard |Prva verzija
+|[[bip-148]]https://github.com/bitcoin/bips/blob/master/bip-0148.mediawiki[BIP-148] |Obavezna aktivacija segwit deployment-a |Shaolin Fry |Standard |Prva verzija
+|[[bip-150]]https://github.com/bitcoin/bips/blob/master/bip-0150.mediawiki[BIP-150] |Peer autentifikacija |Jonas Schnelli |Standard |Prva verzija
+|[[bip-151]]https://github.com/bitcoin/bips/blob/master/bip-0151.mediawiki[BIP-151] |Peer-to-Peer šifrovanje komunikacije |Jonas Schnelli |Standard |Prva verzija
+|[[bip-152]]https://github.com/bitcoin/bips/blob/master/bip-0152.mediawiki[BIP-152] |Kompaktni blok relej |Matt Corallo |Standard |Prva verzija
+|[[bip-171]]https://github.com/bitcoin/bips/blob/master/bip-0171.mediawiki[BIP-171] |API za razmenu informacija o deviznom kursu |Luke Dashjr |Standard |Prva verzija
+|[[bip-180]]https://github.com/bitcoin/bips/blob/master/bip-0180.mediawiki[BIP-180] |Dokaz prevare o veličini/težini bloka |Luke Dashjr |Standard |Prva verzija
+|[[bip-199]]https://github.com/bitcoin/bips/blob/master/bip-0199.mediawiki[BIP-199] |Izbrisani vremenski zaključani ugovor transakcije |Sean Bowe, Daira Hopwood |Standard |Prva verzija((("", startref="BIPsnap15"))) 
+|=======================================================================

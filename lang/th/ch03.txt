@@ -1,0 +1,800 @@
+[[ch03_bitcoin_client]]
+== Bitcoin Core: ซอฟต์แวร์อ้างอิงสำหรับพัฒนา
+
+((("open source licenses")))((("Nakamoto, Satoshi")))Bitcoin เป็นโครงการ _open source_ โดยที่ source code ถูกเผยภายใต้ด้วย MIT open license ซึ่งหมายความว่าสามารถที่จะดาวน์โหลดและนำไปใช้ได้ฟรีในทุกกรณี คำว่า open source นั้นมีความหมายมากกว่าเพียงแค่ของฟรี แต่มันหมายความว่า bitcoin นั้นถูกพัฒนาด้วยชุมชนอาสาสมัครที่ใครก็สามารถเข้าร่วมได้ ใช่ตอนแรก ชุมชนนั้นมีเพียง Satoshi Nakamoto เพียงผู้เดียว แต่ในปี 2016 source code ของ Bitcoin มีผู้ร่วมพัฒนามากกว่า 400 คน และมีประมาณ 10 กว่าคนที่ทำงานเกือบเต็มเวลา รวมถึงอีกหลายสิบคนที่ช่วยทำแบบพาร์ทไทม์ ใครก็สามารถเข้าร่วมพัฒนาได้รวมถึง &#x2014 คุณก็ด้วย!
+
+
+(("bitcoin whitepaper")))((("Satoshi client")))((("reference implementation", see="Bitcoin Core")))((("Bitcoin Core", "reference implementation")))ตอนที่ Bitcoin ถูกสร้างขึ้นโดย Satoshi Nakamoto ตัว software ถูกพัฒนาขึ้นจนเสร็จก่อนที่ white paper ที่ได้นำเสนอไปใน <<satoshi_whitepaper>> จะถูกเขียนขึ้นเสียอีก Satoshi ต้องการให้มั่นใจว่าทุกอย่างจะใช้งานได้จริงก่อนที่จะเริ่มเขียนอะไรเกี่ยวกับมัน ในตอนแรก software version แรกนี้ เป็นที่รู้จักกันง่ายๆในนาม "Bitcoin" หรือ "Satoshi client" ซึ่งเมื่อเวลาผ่านมา มันได้ถูกดัดแปลง แก้ไข และพัฒนาขึ้นอย่างมากจนกลายเป็น _Bitcoin Core_ ในปัจจุบัน เพื่อที่จะได้ไม่สับสนกับ software bitcoin ตัวอื่น Bitcoin Core เป็น _reference implementation_ ของระบบ bitcoin ซึ่งหมายความว่ามันทำหน้าที่เป็นรูปแบบอ้างอิงหลักสำหรับการใช้งานส่วนต่างๆ ของ technology ตามที่มันควรจะเป็น Bitcoin Core ครอบคลุมถึงทุกส่วนของระบบ bitcoin ตั้งแต่ wallet, ระบบยืนยันความถูกต้องของ block และธุรกรรม, รวมถึง full node ในครือข่าย peer-to-peer ของ bitcoin
+
+[WARNING]
+====
+((("wallets", "best practices for")))((("bitcoin improvement proposals", "Mnemonic Code Words (BIP-39)")))((("bitcoin improvement proposals", "Hierarchical Deterministic Wallets (BIP-32/BIP-44)")))ถึงแม้ว่า Bitcoin Core จะมาพร้อมกับ software อ้างอิงสำหรับ wallet แต่มันไม่ได้มีเจตนาที่จะให้ผู้ใช้งานทั่วไป หรือ application ต่างๆ นำมาใช้งานจริง โดยผู้พัฒนา application ต่างๆควรจะสร้าง wallet ขึ้นมาใหม่โดยใช้มาตรฐานที่ทันสมัยขึ้นอย่างเช่น BIP-39 หรือ BIP-32 (ดูเพิ่มเติม <<mnemonic_code_words>> และ <<hd_wallets>>) ซึ่งคำว่า BIP นั้นย่อมาจาก _Bitcoin Improvement Proposal_
+====
+
+<<bitcoin_core_architecture>> แสดงให้เห็นถึงโครงสร้างของ Bitcoin Core ((("Bitcoin Core", "architecture")))
+
+[[bitcoin_core_architecture]]
+.โครงสร้างของ Bitcoin Core (ที่มา: Eric Lombrozo)
+image::images/mbc2_0301.png["Bitcoin Core Architecture"]
+
+
+=== Bitcoin Development Environment
+
+((("development environment", "setup", see="Bitcoin Core"))) ถ้าคุณเป็น developer คุณจะต้องติดตั้ง development environment อย่าง tool, libraries, และ software ช่วยเหลือสำหรับการเขียน bitcoin application ซึ่งบทนี้เราจะลงลึกขึ้นในด้านเทคนิค โดยเราจะอธิบายทีละขั้นตอน ถ้าคุณรู้สึกว่าเนื้อหาหนักหน่วงเกินไป (หรือคุณไม่ได้วางแผนที่จะติดตั้ง development environment อยู่แล้ว) คุณสามารถข้ามไปยังบทถัดไป ที่จะมีเนื้อหาเชิงเทคนิคน้อยกว่านี้ได้เลยโดยไม่ต้องกังวล
+
+[[compiling_core]]
+=== การ compile Bitcoin Core จาก Source Code
+
+((("Bitcoin Core", "compiling from source code", id="BCsource03")))((("Bitcoin Core", "compiling from source code", "downloading")))((("code examples, obtaining and using")))คุณสามารถ download source code ของ Bitcoin Core ในรูปแบบไฟล์หรือจะ clone มาทั้ง repository จาก Github((("Bitcoin Core downloads")))เลยก็สามารถทำได้ โดยใน  https://bitcoincore.org/bin/[Bitcoin Core download page] ให้เลือกเวอร์ชั่นที่ใหม่ที่สุดและ download ไฟล์ของ Source code อย่างเช่น +bitcoin-0.15.0.2.tar.gz+ ((("GitHub bitcoin page"))) หรือคุณสามารถใช้ git command line เพื่อสร้างสำเนาของ source code จาก https://github.com/bitcoin/bitcoin[GitHub bitcoin page].
+
+[TIP]
+====
+((("$ symbol")))((("shell commands")))((("terminal applications"))) หลายๆตัวอย่างในบทนี้เราจะใช้ command line ของ operating system' (ทีรู้จักกันในนามของ Shell) ที่เข้าถึงได้โดย terminal โดย shell จะแสดง prompt ที่คุณสามารถใส่คำสั่งลงไปได้ และ Shell จะตอบกลับเป็นข้อความบางอย่างพร้อมทั้งแสดง prompt ใหม่ขึ้นมาเพื่อรับคำสั่งต่อไปของคุณ หน้าตาของ Prompt นั้นอาจจะต่างกันไปในแต่ละระบบ แต่ในตัวอย่างจะใช้สัญลักษณ์ +$+ เป็นตัวบ่งบอก โดยในตัวอย่างเมื่อคุณเห็นข้อความหลังสัญลักษณ์ +$+ คุณไม่ต้องพิมพ์ +$+ แต่ให้พิมพ์คำสั่งที่อยู่ข้างหลังสัญลักษณ์ แล้วกด Enter จะเป็นการสั่งให้คำสั่งทำงาน ในตัวอย่าง ข้อความบรรทัดต่อจากคำสั่ง แสดงถึงการโต้ตอบจากระบบปฏิบัติการต่อคำสั่งนั้นๆ เมื่อคุณเห็นสัญลักษณ์ +$+ ตัวต่อไป คุณจะรู้ว่ามันเป็นการเริ่มคำสั่งใหม่ และให้คุณทำกระบวนการข้างต้นซ้ำอีกครั้ง
+====
+
+((("cloning source code")))((("source code, cloning", seealso="Bitcoin Core"))) ในตัวอย่างเราจะใช้คำสั่ง +git+ ในการสร้างสำเนาของ source code บนคอมพิวเตอร์ของเรา ("clone"):
+
+----
+$ git clone https://github.com/bitcoin/bitcoin.git
+Cloning into 'bitcoin'...
+remote: Counting objects: 102071, done.
+remote: Compressing objects: 100% (10/10), done.
+Receiving objects: 100% (102071/102071), 86.38 MiB | 730.00 KiB/s, done.
+remote: Total 102071 (delta 4), reused 5 (delta 1), pack-reused 102060
+Resolving deltas: 100% (76168/76168), done.
+Checking connectivity... done.
+$
+----
+
+[TIP]
+====
+((("distributed version control systems"))) git นั้นเป็น distributed version control system ที่นิยมมาก มันเป็นอุปกรณ์สำคัญสำหรับ software developer และถ้าคุณยังไม่มีมัน คุณอาจต้องทำการติดตั้ง +git+ command หรือ graphical user interface สำหรับ git ลงบนระบบปฎิบัติการของคุณ
+====
+
+เมื่อคุณกระทำการ clone ด้วย git เสร็จสิ้นแล้ว คุณจะมีสำเนาที่สมบูรณ์ของ source code repository ภายใต้ directory _bitcoin_ โดยคุณสามารถเข้าสู่ directory นี้ได้ด้วยการพิมพ์คำสั่ง ++**cd bitcoin**++ ลงไปใน prompt:
+
+----
+$ cd bitcoin
+----
+
+==== การเลือก Release ของ Bitcoin Core 
+((("Bitcoin Core", "compiling from source code", "version selection"))) โดยปกติแล้วสำเนาที่อยู่บนคอมพิวเตอร์ของเรา (local copy) นั้นจะเป็น code เวอร์ชั่นล่าสุดเสมอ ซึ่งอาจเป็น bitcoin version เบต้าหรือ version ที่ยังไม่เสถียร โดยผู้พัฒนาจะใช้ release _tag_ ในการระบุ version number ของ code  ดังนั้นก่อนที่เราจะทำการ compile code เราสามารถที่จะเลือก version ที่เราต้องการโดยการเลือก release tag ซึ่งจะเป็นการกำหนดให้สำเนา local ของเราปรับเปลี่ยนให้ตรงกับ snapshot (version) ของ code repository ที่เราต้องการ โดยแต่ละ snapshot จะถูกกำกับด้วย keyword tag สิ่งแรกที่เราต้องทำคือการตรวจสอบว่ามี tag อะไรบ้างโดยคำสั่ง +git tag+
+
+----
+$ git tag
+v0.1.5
+v0.1.6test1
+v0.10.0
+...
+v0.11.2
+v0.11.2rc1
+v0.12.0rc1
+v0.12.0rc2
+...
+----
+
+รายชื่อ tag ที่เห็น แสดงเวอร์ชั่นทั้งหมดของ bitcoin โดยปกติแล้ว _release candidates_ ซึ่งหมายถึง version ที่ทำขึ้นเพื่อการทดสอบ จะมีตัวอักษร "rc" ต่อท้ายอยู่ ส่วน version ที่เสถียรแล้วซึ่งสามารถนำไปใช้งานจริงได้ จะไม่มีอักษรต่อท้ายแต่อย่างใด จากรายชื่อเวอร์ชั่นที่มีให้เราเลือก version ล่าสุด ซึ่งในขณะที่กำลังเขียนหนังสือเล่มนี้คือ 0.15.0. โดยการดึง code จาก version นี้ลงมาให้ใช้คำสั่ง +git checkout+:
+
+----
+$ git checkout v0.15.0
+HEAD is now at 3751912... Merge #11295: doc: Old fee_estimates.dat are discarded by 0.15.0
+----
+
+คุณสามารถตรวจสอบได้ว่าคุณได้ "checked out" เวอร์ชั่นที่คุณต้องการ ด้วยคำสั่ง +git status+:
+
+----
+$ git status
+HEAD detached at v0.15.0
+nothing to commit, working directory clean
+----
+
+==== Configuring the Bitcoin Core Build
+
+((("Bitcoin Core", "compiling from source code", "build configuration")))((("documentation")))((("build documentation", seealso="Bitcoin Core")))Source code นั้น จะมาพร้อมเอกสารประกอบอธิบายการใช้งาน (documentation) ซึ่งจะพบอยู่ได้ในหลายๆ file ด้วยกัน เราสามารถตรวจสอบเอกสารประกอบหลัก _README.md_ ที่อยู่ใน directory _bitcoin_ ได้โดยพิมพ์ ++**more README.md**++ ลงใน prompt แล้วกด spacebar เพื่อเลื่อนไปยังหน้าต่อไป โดยในบทนี้เราจะทำการ build bitcoin client แบบ command-line ที่รู้จักกันในชื่อ +bitcoind+ บน Linux ซึ่งเราสามารถศึกษาขั้นตอนการ compile +bitcoind+ command-line client บน Linux โดยพิมพ์ว่า ++**more doc/build-unix.md**++ สำหรับคู่มือแสดงขั้นตอนการ compile สำหรับ macOS และ Windows สามารถศึกษาได้ใน directory _doc_ ในชื่อ _build-osx.md_ และ _build-windows.md_ ตามลำดับ
+
+ตรวจสอบสิ่งต่างๆที่จำเป็นต้องติดตั้งก่อนจะ build ให้ดี ซึ่งข้อมูลนี้จะอยู่ในตอนต้นของ build documentation โดยสิ่งที่จำเป็นนั้นรวมถึง libraries ที่คุณต้องมีอยู่บนเครื่องของคุณก่อนที่จะเริ่มทำการ compile bitcoin ได้ ถ้ามีบางอย่างหายไปกระบวนการ build จะล้มเหลวเพราะเกิด error ขึ้น ซึ่งถ้าเป็นเช่นนั้น คุณสามารถดำเนินการติดตั้งส่วนที่ขาดหาย แล้วจึงกลับไปทำการ build ต่อจากจุดที่คุณหยุดไว้ได้ สมมติว่าคุณติดตั้งทุกอย่างไว้ครบถ้วนแล้ว คุณสามารถเริ่มกระบวนการ build ได้โดยทำการสร้างชุดของ script สำหรับการ build โดยใช้ script _autogen.sh_ 
+
+----
+$ ./autogen.sh
+...
+glibtoolize: copying file 'build-aux/m4/libtool.m4'
+glibtoolize: copying file 'build-aux/m4/ltoptions.m4'
+glibtoolize: copying file 'build-aux/m4/ltsugar.m4'
+glibtoolize: copying file 'build-aux/m4/ltversion.m4'
+...
+configure.ac:10: installing 'build-aux/compile'
+configure.ac:5: installing 'build-aux/config.guess'
+configure.ac:5: installing 'build-aux/config.sub'
+configure.ac:9: installing 'build-aux/install-sh'
+configure.ac:9: installing 'build-aux/missing'
+Makefile.am: installing 'build-aux/depcomp'
+...
+----
+
+สคริปท์ที่ชื่อ _autogen.sh_ จะสร้างชุดของสคริปท์ตั้งค่าอัตโนมัติ ที่จะทำการสอบถามระบบของคุณเพื่อทำการตั้งค่าการทำงานให้ถูกต้อง และตรวจสอบความพร้อมของ libraries ที่จำเป็นต่อการ compile code ซึ่งสิ่งที่สำคัญที่สุดคือสคริปท์ +configure+ ที่จะมีตัวเลือกจำนวนมากสำหรับการปรับแต่งกระบวนการ build คุณสามารถพิมพ์คำสั่ง ++**./configure --help**++ เพื่อดูตัวเลือกทั้งหลาย
+
+----
+$ ./configure --help
+`configure' configures Bitcoin Core 0.15.0 to adapt to many kinds of systems.
+
+Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+...
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+
+  --enable-wallet         enable wallet (default is yes)
+
+  --with-gui[=no|qt4|qt5|auto]
+...
+----
+
+สคริปท์ configure ทำให้คุณสามารถเปิดหรือปิดการใช้งาน feature ต่างๆ ใน +bitcoind+ โดยใชั่ flag +--enable-FEATURE+ และ +--disable-FEATURE+ โดยแทนที่ pass:[<span class="keep-together"><code>FEATURE</code></span>] ด้วย ชื่อของ feature ตามที่ลิสอยู่ใน help โดยในบทนี้เราจะ buld +bitcoind+ client ด้วย feature ตั้งต้นทั้งหมด เราจะไม่ปรับแต่งอะไรเพิ่มเติม แต่คุณควรทำการทบทวนพวกมันเพื่อทำความเช้าใจว่า feature เพิ่มเติมใดเป็นส่วนหนึ่งของ client และคุณอาจจำเป็นต้องทำการติดตั้ง application ใน home directory ของคุณ ถ้าคุณอยู่ในสถานศึกษา เป็นต้น (ตัวอย่าง: +--prefix=$HOME+)
+
+ต่อไปนี้เป็นตัวอย่างของตัวเลือกที่มีประโยชน์ ที่จะทำการเปลี่ยนแปลงพฤติกรรมโดยปกติ (default behavior) ของสคริปท์ configure:
+
+++++
+<dl>
+<dt><code>--prefix=$HOME</code></dt>
+<dd><p>เปลี่ยนแปลงตำแหน่งติดตั้ง default (จากเดิมอยู่ที่ <em>/usr/local/</em>) โดยคุณสามารถใช้ <code>$HOME</code> เพื่อตั้งค่าให้ทุกอย่างอยู่ใน home directory ของคุณ หรือจะเปลี่ยนเป็นที่อื่นก็ได้ </p></dd>
+
+<dt><code>--disable-wallet</code></dt>
+<dd><p>คำสั่งนี้ใช้ในกรณีที่คุณไม่ต้องการติดตั้ง wallet อ้างอิง</p></dd>
+
+<dt><code>--with-incompatible-bdb</code></dt>
+<dd><p>ในกรณีที่คุณต้องการ build wallet ด้วย คำสั่งนี้ทำให้คุณสามารถใช้  library ของ Berkeley DB version ที่ไม่รองรับได้</p></dd>
+
+<dt><code>--with-gui=no</code></dt>
+<dd><p>Build เฉพาะ server และ command-line client ของ bitcoin เท่านั้น โดยจะไม่ทำการ build ในส่วนของ graphical user interface</p></dd>
+</dl>
+++++
+
+ขั้นตอนต่อไป ให้คุณ run สคริปท์ +configure+ เพื่อทำการหาร libraries ที่จำเป็นโดยอัตโนมัติ และทำการสร้างสคริปท์สำหรับ build ขึ้นมาตามบริบทของระบบของคุณ:
+
+----
+$ ./configure
+checking build system type... x86_64-unknown-linux-gnu
+checking host system type... x86_64-unknown-linux-gnu
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+checking for gawk... gawk
+checking whether make sets $(MAKE)... yes
+...
+[ตามมาด้วยผลทดสอบการตั้งค่าอีกหลายหน้ากระดาษ]
+...
+$
+----
+
+
+ถ้าไม่มีอะไรผิดพลาดชุดคำสั่ง +configure+ จะสร้าง build script ที่ทำให้เราสามารถ compile +bitcoind+ ได้ ถ้ามี libraries บางตัวหายไป หรือเกิด error ขึ้นคำสั่ง +configure+ จะหยุดการทำงานและแสดง error แทนที่จะสร้าง build script ในกรณีที่มี error ส่วนใหญ่แล้วเกิดจากมี library บางตัวหายไปหรือเวอร์ชั่นผิดพลาด ให้ทบทวนเอกสารคู่มือประกอบการ build อีกครั้ง และตรวจสอบให้แน่ใจว่าคุณได้ติดตั้งส่วนจำเป็นที่ขาดไปแล้วเรียบร้อย จากนั้นจึงใช้คำสั่ง +configure+ อีกครั้งแล้วดูว่า error ถูกแก้ไขได้หรือไม่
+
+===== การ Executables ของ Build Bitcoin Core
+
+((("Bitcoin Core", "compiling from source code", "core executables")))((("core executables", seealso="Bitcoin Core"))) ต่อไปคุณจะต้อง compile source code โดยกระบวนการนี้อาจจะต้องใช้เวลาเป็นชั่วโมงกว่าจะสำเร็จ ขึ้นอยู่กับความเร็ว CPU และจำนวน RAM ของคุณ ซึ่งในระหว่างนั้นคุณจะเห็นขั้นตอนของกระบวนการที่แสดงผลออกมาทุกๆไม่กี่วินาที หรือถึง error ในกรณีที่มีสิ่งผิดพลาดเกิดขึ้น ซึ่งถ้ามี error เกิดขึ้นกระบวนการ complie จะหยุดลง โดยเราสามารถสั่งให้กระบวนการทำงานต่อได้ด้วยการพิมพ์คำสั่ง +make+ อีกครั้ง ในจุดนี้ ให้พิมพ์ ++**make**++ เพื่อเริ่ม complie ในส่วนของ executable application:
+
+----
+$ make
+Making all in src
+  CXX      crypto/libbitcoinconsensus_la-hmac_sha512.lo
+  CXX      crypto/libbitcoinconsensus_la-ripemd160.lo
+  CXX      crypto/libbitcoinconsensus_la-sha1.lo
+  CXX      crypto/libbitcoinconsensus_la-sha256.lo
+  CXX      crypto/libbitcoinconsensus_la-sha512.lo
+  CXX      libbitcoinconsensus_la-hash.lo
+  CXX      primitives/libbitcoinconsensus_la-transaction.lo
+  CXX      libbitcoinconsensus_la-pubkey.lo
+  CXX      script/libbitcoinconsensus_la-bitcoinconsensus.lo
+  CXX      script/libbitcoinconsensus_la-interpreter.lo
+
+[... ตามมาด้วยข้อความที่เกี่ยวข้องกับกระบวนการ compile อีกมากมาย ...]
+
+$
+----
+
+บนระบบที่มี cpu มากกว่า 1 ตัว คุณสามารถตั้งค่าจำนวนงาน compile ที่จะทำงานแบบคู่ขนานกันไปได้ ยกตัวอย่างเช่น คำสั่ง +make -j 2+ จะใช้งาน cpu จำนวน 2 core ถ้าสามารถทำได้ ถึงขั้นตอนนี้ ถ้าทุกสิ่งเป็นไปอย่างราบรื่นคุณก็จะได้ทำการ compile Bitcoin Core เสร็จสมบูรณ์ จากนั้น คุณควรจะใช้ชุด software unit test ด้วยคำสั่ง +make check+ เพื่อตรวจสอบว่า labraries ที่เชื่อมต่ออยู่นั้นปราศจากความบกพร่องเสียหาย ขั้นตอนสุดท้าย คือการติดตั้ง executables ต่างๆลงในระบบของคุณด้วยคำสั่ง +make install+ ซึ่งขั้นตอนอาจมีการแสดง prompt เพื่อถาม password ของคุณ เนื่องจากขั้นตอนนี้ต้องการสิทธิ์ในระดับ administrative
+
+----
+$ make check && sudo make install
+Password:
+Making install in src
+ ../build-aux/install-sh -c -d '/usr/local/lib'
+libtool: install: /usr/bin/install -c bitcoind /usr/local/bin/bitcoind
+libtool: install: /usr/bin/install -c bitcoin-cli /usr/local/bin/bitcoin-cli
+libtool: install: /usr/bin/install -c bitcoin-tx /usr/local/bin/bitcoin-tx
+...
+$
+----
+
+((("", startref="BCsource03"))) โดยปกติแล้ว +bitcoind+ จะถูกติดตั้งใน _/usr/local/bin_ โดยคุณสามารถที่จะตรวจสอบว่า Bitcoin Core ได้รับการติดตั้งอย่างถูกต้องโดยการใช้คำสั่งเพื่อถามถึงที่จัดเก็บตัวโปรแกรมดังต่อไปนี้:
+
+----
+$ which bitcoind
+/usr/local/bin/bitcoind
+
+$ which bitcoin-cli
+/usr/local/bin/bitcoin-cli
+----
+
+=== Running a Bitcoin Core Node
+
+((("Bitcoin Core", "running core nodes", id="BCnode03")))((("bitcoin nodes", "running core nodes", id="BNcore03")))ระบบเครือข่ายแบบ Peer to Peer ของ Bitcoin นั้นจะถูกร้อยเรียงจากสิ่งที่เรียกว่า node ซึ่งส่วนใหญ่แล้วจะเป็นของอาสาสมัครหรือธุรกิจที่ใช้งาน application ของ bitcoin ผู้ที่เปิดใช้งาน bitcoin node นั้น จะมีสำเนาของธุรกรรมทั้งหมดที่เกิดขึ้นอยู่บนระบบของตนเอง และจะสามารถทำการตรวจสอบความถูกต้องของธุรกรรมได้ด้วยระบบคอมพิวเตอร์ของตนเองอย่างอิสระ จึงทำให้มองเห็นและมีอำนาจควบคุม Blockchain ได้โดยตรง การเปิด node นั้นจะทำให้ไม่จำเป็นต้องพึ่งพาบุคคลที่สามในการตรวจสอบธุรกรรม และยิ่งไปกว่านั้นการเปิด bitcoin node ยังหมายความว่าคุณได้เข้าร่วมเสริมกำลังให้กับเครือข่ายของ bitcoin ซึ่งจะทำให้มันแข็งแกร่งขึ้น
+
+อย่างไรก็ตาม การเปิด node จำเป็นที่จะต้องมีระบบที่เชื่อมต่อกับอินเตอร์เน็ตตลอดเวลา และมีทรัพยากรเพียงพอที่จะประมวลผลธุรกรรมของ bitcoin ทั้งหมด ซึ่งมันก็ขึ้นอยู่กับว่าคุณต้องการที่จะทำ Index ธุรกรรมทั้งหมดและเก็บสำเนาของ blockchain ทั้งหมดหรือเปล่า คุณอาจจะต้องใช้พื้นที่ในการจัดเก็บข้อมูลและ RAM จำนวนมาก โดยในต้นปีค.ศ. 2018 full index node (node ที่เก็บสำเนาของธุรกรรมทั้งหมด) นั้นต้องใช้ RAM ขนาด 2GB และพื้นที่เก็บข้อมูลอีกอย่างน้อย 160 GB (ดูได้ที่ https://blockchain.info/charts/blocks-size[])  bitcoin node นั้นยังต้องทำการรับส่งธุรกรรมของ bitcoin รวมถึง block ซึ่งจำเป็นต้องใช้ Internet bandwith ถ้าความเร็ว internet ของคุณนั้นมีจำกัด, มีการกำหนดจำนวนข้อมูลที่สามารถรับ-ส่งได้, หรือถูกคิดค่าใช้จ่ายตามข้อมูลที่ใช้ไป คุณอาจไม่ควรเปิด bitcoin node บนระบบของคุณ หรือ หรือต้องเปิด node ในลักษณะที่มีการจำกัด bandwidth ?ี่ใช้ได้ (ดูได้ที่<<constrained_resources>>)
+
+[TIP]
+====
+((("warnings and cautions", "core node resource requirements")))((("resource requirements")))โดยปกติแล้ว Bitcoin Core จะเก็บสำเนาฉบับเต็มของ blockchain ซึ่งหมายถึงทุกๆธุรกรรมที่เกิดขึ้นตั้งแต่วันที่ bitcoin ถือกำเนิดขึ้นในปี 2009 ซึ่งชุดข้อมูลนี้มีขนาดหลาย gigabyte และต้องใช้เวลาหลายวัน หรืออาจถึงสัปดาห์ในการค่อยๆ download ขึ้นอยู่กับความเร็วของ CPU และ อินเตอร์เน็ตของคุณ Bitcoin Core จะไม่สามารถประมวลผลธุรกรรมหรืออัพเดทยอดบัญชีใดๆได้จนกว่าข้อมูล blockchain ทั้งหมดจะ download เสร็จสิ้น ฉะนั้นอย่าลืมว่าคุณต้องมีพื้นที่เก็บข้อมูล ,ความเร็วอินเทอร์เน็ต, และเวลาที่พอเพียงสำหรับการทำ download ข้อมูลในครั้งแรก คุณอาจจะตั้งค่าให้ Bitcoin Core ลดขนาดข้อมูลของ blockchain โดนการลบ block เก่าๆทิ้ง (ดู <<constrained_resources>>) แต่ไม่ว่าอย่างไรมันก็จะ download ข้อมูลทั้งหมดก่อนที่จะลบมันทิ้งทีหลัง
+====
+
+ถึงแม้การเปิด node จะต้องการทรัพยากรจำนวนหนึ่ง แต่ก็มีอาสาสมัครจำนวนมากที่เปิด node ของ bitcoin โดยบางคนนั้นเปิด node โดยใช้ระบบที่เรียบง่ายอย่าง Rasberry PI (คอมพิวเตอร์ขนาดเล็กที่มีมูลค่าประมาณ $35 USD) มีอาสาสมัครจำนวนมากที่เปิด node ด้วยการเช่า server ซึ่งส่วนใหญ่จะใช้ระบบปฏิบัติการ Linux  สำหรับ _Virtual Private Server_ (VPS) หรือ _Cloud Computing Server_ ก็สามารถใช้เปิด bitcoin node ได้ โดยค่าเช่านั้นอยู่ที่ประมาณ  $25 - $50 USD ขึ้นกับผู้ให้บริการ
+
+แล้วเพราะเหตุใดคุณถึงต้องการที่จะเปิด node เป็นของตัวเอง? ด้านล่างนี้คือเหตุผลหลักๆ:
+
+* ในกรณีที่คุณพัฒนา software ของ bitcoin และมีความจำเป็นต้องใช้ bitcoin node เพื่อที่จะเข้าถึงระบบเครือข่าย bitcoin และ blockchain ผ่านทาง API
+
+* ในกรณีที่คุณต้องการสร้าง application ที่ต้องยืนยันธุรกรรมผ่านระบบ consensus ของ bitcoin โดยทั่วไปแล้ว บริษัทพัฒนา software สำหรับ Bitcoin จะเปิดใช้งาน node ไว้จำนวนหลาย node
+
+* ในกรณีที่คุณต้องการสนับสนุน bitcoin เนื่องจากการเปิด node จะทำให้เครือข่ายนั้นแข็งแกร่งยิ่งขึ้นและสามารถรองรับ wallet, ผู้ใช้งาน และ ธุรกรรม ได้มากขึ้น
+
+* ในกรณีที่คุณไม่ต้องการที่จะอาศัยบุคคลที่สาม ในการประมวลผล และตรวจสอบยืนยันธุรกรรมของคุณ
+
+ท้ายที่สุด ถ้าคุณกำลังอ่านหนังสือเล่มนี้ และมีความสนใจที่จะพัฒนา software สำหรับ bitcoin คุณควรที่จะเปิด node เป็นของตัวเอง
+
+==== การตั้งค่าให้กับ Bitcoin Core node
+
+((("Bitcoin Core", "running core nodes", "configuring")))((("warnings and cautions", "password creation")))((("passwords", "creating")))((("security", "passwords")))Bitcoin Core จะมองหาไฟล์บันทึการตั้งค่า (configuration file) ใน data directory ของมันทุกครั้งที่เริ่มทำงาน ในส่วนนี้เราจะศึกษาตัวเลือกต่างๆ ในการตั้งค่า และทำการตั้งค่า configuration file ในการที่จะดู configuration file ให้ป้อนคำสั่ง +bitcoind -printtoconsole+ ลงใน terminal ของคุณ แล้วดูที่สองสามบรรทัดแรก
+
+----
+$ bitcoind -printtoconsole
+Bitcoin version v0.15.0
+Using the 'standard' SHA256 implementation
+Using data directory /home/ubuntu/.bitcoin/
+Using config file /home/ubuntu/.bitcoin/bitcoin.conf
+...
+[ตามด้วยข้อความ debug อีกจำนวนมาก]
+...
+----
+
+You can hit Ctrl-C to shut down the node once you determine the location of the config file. Usually the configuration file is inside the _.bitcoin_ data directory under your user's home directory. It is not created automatically, but you can create a starter config file by copying and pasting from the <<#full_index_node>> example, below. You can create or modify the configuration file in your preferred editor.
+
+Bitcoin Core นั้นมีตัวเลือกการตั้งค่ามากกว่า 100 ตัวเลือกที่สามารถปรับเปลี่ยนพฤติกรรมของ node, การเก็บบันทึก blockchain, และรูปแบบการทำงานในอีกหลายแง่มุม ถ้าต้องการดูรายการตัวเลือกทั้งหมด สามารถใช้คำสั่ง +bitcoind --help+:
+
+----
+$ bitcoind --help
+Bitcoin Core Daemon version v0.15.0
+
+Usage:
+  bitcoind [options]                     Start Bitcoin Core Daemon
+
+Options:
+
+  -?
+       Print this help message and exit
+
+  -version
+       Print version and exit
+
+  -alertnotify=<cmd>
+       Execute command when a relevant alert is received or we see a really
+       long fork (%s in cmd is replaced by message)
+...
+[และตัวเลือกอื่นๆ อีกมากมาย]
+...
+
+  -rpcthreads=<n>
+       Set the number of threads to service RPC calls (default: 4)
+----
+
+((("configuration options", seealso="Bitcoin Core"))) นี่เป็นตัวเลือกสำคัญๆที่คุณสามารถปรับได้ในไฟล์ configure หรือสามารถกำหนดเป็น parameter ได้ใน command-line หลังคำสั่ง bitcoind+:
+
+alertnotify:: เป็นคำสั่งที่หรือ Script ที่จะส่งการแจ้งเตือนเมื่อมีเหตุฉุกเฉินไปยังเจ้าของ node ซึ่งส่วนมากจะเป็นทางอีเมล์
+
+conf:: สั่งให้ใช้งานไฟล์ configuration จากตำแหน่งอื่น ซึ่งคำสั่งนี้จะสามารถทำงานได้ในลักษณะ command-line parameter ต่อจาก +bitcoind+ เท่านั้น เนื่องจากมันไม่สามารถไปอยู่ในไฟล์ configuration ที่มันกำลังอ้างถึงได้
+
+datadir:: เลือก directory และ filesystem ที่จะใช้เก็บข้อมูล Blockchain ทั้งหมด ซึ่งโดยปกติแล้วจะเก็บอยู่ที่ subdirectory _.bitcoin_ ซึ่งจะอยู่ภายใต้ home directory ของคุณ ตรวจสอบให้แน่ใจว่าคุณมีพื้นที่จัดเก็บไฟล์ที่เพียงพอ
+
+prune:: ลดขนาดพื้นที่เก็บข้อมูลลงเหลือเท่ากับจำนวน megabytes ที่กำหนด โดยลบ block เก่าๆ ทิ้งไป ใช้สำหรับ node ที่มีปัญหาเรื่องเนื้อที่ในการเก็บข้อมูลที่ไม่สามารถเก็บข้อมูลทั้ง blockchain ได้
+
+txindex:: เป็นการทำทำดรรชนี (index) ของธุรกรรมทั้งหมด ซึ่งหมายถึงว่าคุณจะมีสำเนา blockchain แบบสมบูรณ์ที่คุณสามารถโปรแกรมให้ดึงธุรกรรมใดๆ ก็ได้ด้วย ID
+
+dbcache:: ขนาด cache ของ UTXO โดยปกติแล้วจะมีขนาด 300 MiB สามารถเพิ่มได้บน Hardware ประสิทธิภาพสูง และสามารถลดได้บน Hardware ประสิทธิภาพต่ำ เพื่อเป็นการประหยัด memory แลกกับความช้าในการอ่านข้อมูลจาก disk 
+
+maxconnections::ตั้งจำนวนจำกัดของ node ที่สามารถเชื่อมต่อได้ การลดค่านี้จะทำให้คุณประหยัด brandwidth ในกรณีที่คุณมีอินเทอร์เนตที่ใช้ได้จำกัดหรือจ่ายตามจำนวนการใช้งาน
+
+maxmempool:: จำกัดขนาดของธุรกรรมใน memory pool การปรับค่านี้จะช่วยลดปัญหาเรื่อง memory ใน node ไม่เพียงพอได้
+
+maxreceivebuffer/maxsendbuffer::จำกัด memory buffer จากเดิม 1000 bytes ต่อการเชื่อมต่อการปรับค่านี้จะช่วยลดปัญหาเรื่อง memory ใน node ไม่เพียงพอได้
+
+minrelaytxfee::ตั้งค่าธรรมเนียมขั้นต่ำที่ node จะจ่าย ถ้าตั้งค่ากว่าที่กำหนดไว้ ธุรกรรมอาจมีโอกาสถูกปฏิเสธจาก pool ธุรกรรมได้
+
+
+[[txindex]]
+.ดรรชนีฐานข้อมูลธุรกรรม (transaction database index) และ ตัวเลือก txindex
+****
+((("Bitcoin Core", "running core nodes", "database options")))((("transactions", "database configuration options")))((("txindex option")))((("full indexing option"))) โดยปกติแล้ว Bitcoin core จะสร้าง database ที่มีธุรกรรมที่เกี่ยวข้องกับ wallet ของ user _เท่านั้น_ ถ้าคุณต้องการที่จะเข้าถึงธุรกรรมอื่นๆ โดยใช้คำสั่ง getrawtransaction (ดู <<exploring_and_decoding_transanctions>>) คุณต้องตั้งค่า Bitcoin Core ให้สร้าง index ของธุรกรรมแบบสมบูรณ์ ซึ่งสามารถตั้งค่าได้ผ่านตัวเลือก txindex โดยตั้งค่าเป็น txindex=1 ในไฟล์ configuration ของ Bitcoin Core ถ้าหากคุณไม่ได้ตั้งค่านี้ตั้งแต่แรกและตัดสินใจที่จะเปิดใช้งานการทำ index แบบสมบูรณ์ในภายหลัง คุณจะต้องทำการ restart +bitcoind+ ด้วยตัวเลือก +-reindex+ แล้วรอจนกว่าการสร้าง index จะเสร็จสิ้น
+****
+
+<<full_index_node>>แสดงให้เห็นตัวอย่างการใช้งานตัวเลือก txindex ร่วมกับตัวเลือกอื่นๆที่ได้กล่าวถึงก่อนหน้านี้ เพื่อให้ทำงานเป็น API backend ของ bitcoin application
+
+[[full_index_node]]
+.ตัวอย่างการตั้งค่า full-index node
+====
+----
+alertnotify=myemailscript.sh "Alert: %s"
+datadir=/lotsofspace/bitcoin
+txindex=1
+----
+====
+
+<<constrained_resources>>แสดงให้เห็นถึงการ run node แบบจำกัดทรัพยากร เพื่อการทำงานบน server ขนาดเล็ก
+
+[[constrained_resources]]
+ตัวอย่างการตั้งค่าสำหรับระบบที่มีทรัพยากรจำกัด
+====
+----
+alertnotify=myemailscript.sh "Alert: %s"
+maxconnections=15
+prune=5000
+dbcache=150
+maxmempool=150
+maxreceivebuffer=2500
+maxsendbuffer=500
+----
+====
+
+เมื่อคุณแก้ไขไฟล์ configuration และตั้งค่าตัวเลือกต่างๆตามที่คุณต้องการแล้ว คุณสามารถทดสอบการตั้งค่า +bitcoind+ โดยเรียกใช้งาน Bitcoin Core พร้อมตัวเลือก +printtoconsole+ เพื่อสั่งให้มันทำงานใน foreground และแสดง output ให้เห็นใน console:
+
+----
+$ bitcoind -printtoconsole
+
+Bitcoin version v0.15.0
+InitParameterInteraction: parameter interaction: -whitelistforcerelay=1 -> setting -whitelistrelay=1
+Assuming ancestors of block 0000000000000000003b9ce759c2a087d52abc4266f8f4ebd6d768b89defa50a have valid signatures.
+Using the 'standard' SHA256 implementation
+Default data directory /home/ubuntu/.bitcoin
+Using data directory /lotsofspace/.bitcoin
+Using config file /home/ubuntu/.bitcoin/bitcoin.conf
+Using at most 125 automatic connections (1048576 file descriptors available)
+Using 16 MiB out of 32/2 requested for signature cache, able to store 524288 elements
+Using 16 MiB out of 32/2 requested for script execution cache, able to store 524288 elements
+Using 2 threads for script verification
+HTTP: creating work queue of depth 16
+No rpcpassword set - using random cookie authentication
+Generated RPC authentication cookie /lotsofspace/.bitcoin/.cookie
+HTTP: starting 4 worker threads
+init message: Verifying wallet(s)...
+Using BerkeleyDB version Berkeley DB 4.8.30: (April  9, 2010)
+Using wallet wallet.dat
+CDBEnv::Open: LogDir=/lotsofspace/.bitcoin/database ErrorFile=/lotsofspace/.bitcoin/db.log
+scheduler thread start
+Cache configuration:
+* Using 250.0MiB for block index database
+* Using 8.0MiB for chain state database
+* Using 1742.0MiB for in-memory UTXO set (plus up to 286.1MiB of unused mempool space)
+init message: Loading block index...
+Opening LevelDB in /lotsofspace/.bitcoin/blocks/index
+Opened LevelDB successfully
+
+[... more startup messages ...]
+----
+
+เมื่อคุณเห็นว่าโปรแกรม load ค่า settings ที่ถูกต้อง และสามารถทำงานได้อย่างไม่มีปัญหาแล้ว คุณสามารถกด Ctrl-C เพื่อหยุดการทำงานได้
+
+ในการสั่งให้ Bitcoin Core ทำงานในเบื้องหลัง ให้ใช้ตัวเลือก +deamon+ ในตอนเรียกใช้งานโดยใช้คำสั่ง +bitcoind -daemon+ 
+
+การตรวจสอบสถานะการทำงานของ bitcoin node สามารถทำได้ด้วยคำสั่ง +bitcoin-cli getblockchaininfo+:
+
+----
+$ bitcoin-cli getblockchaininfo
+----
+
+[source,json]
+----
+{
+  "chain": "main",
+  "blocks": 0,
+  "headers": 83999,
+  "bestblockhash": "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+  "difficulty": 1,
+  "mediantime": 1231006505,
+  "verificationprogress": 3.783041623201835e-09,
+  "chainwork": "0000000000000000000000000000000000000000000000000000000100010001",
+  "pruned": false,
+  [...]
+}
+----
+
+output ข้างบนแสดงให้เห็นถึง node ที่มีความสูง (height) ของ blockchain จำนวน 0 blocks และมี header 83999 headers ซึ่ง node นี้กำลังทำการดึง block header จาก chain ที่ดีที่สุด แล้วจึงทำการ download blocks ทั้งหมดหลังจากนั้น
+
+เมื่อคุณพอใจกับการตั้งค่าตัวเลือกแล้ว คุณควรที่จะเพิ่ม bitcoin เข้าไปเป็นใน startup script ของระบบการปฏิบัติการของคุณเพื่อให้มันทำงานอย่างต่อเนื่อง และเริ่มทำงานใหม่เมื่อระบบทำการ restart โดยคุฯจะพบตัวอย่าง startup scripts สำหรับระบบปฏิบัติการต่างๆได้ในโฟลเดอร์ source ของ bitcoin ภายใต้ _contrib/init_ และ _README.md_ ที่แสดงว่า script ใดเป็นของระบบใด((("", startref="BCnode03")))((("", startref="BNcore03")))
+
+=== API (Application Programming Interface) ของ Bitcoin Core
+
+((("Bitcoin Core", "Bitcoin Core API", id="BCapi03"))) Bitcoin core client จะมี JSON-RPC interface ที่สามารถเข้าถึงได้โดยใช้คำสั่ง bitcoin-cli ผ่าน command-line โดยมันจะทำให้เราสามารถรู้ได้ว่ามีอะไรที่สามารถทำได้ผ่าน API บ้าง (("Bitcoin Core", "Bitcoin Core API", "RPC commands"))) สามารถดูได้โดยใช้คำสั่ง help เพื่อดูว่ามีคำสั่ง bitcoin RPC อะไรบ้าง
+
+[[bitcoind_commands]]
+
+----
+$ bitcoin-cli help
+addmultisigaddress nrequired ["key",...] ( "account" )
+addnode "node" "add|remove|onetry"
+backupwallet "destination"
+createmultisig nrequired ["key",...]
+createrawtransaction [{"txid":"id","vout":n},...] {"address":amount,...}
+decoderawtransaction "hexstring"
+...
+...
+verifymessage "bitcoinaddress" "signature" "message"
+walletlock
+walletpassphrase "passphrase" timeout
+walletpassphrasechange "oldpassphrase" "newpassphrase"
+----
+
+แต่ละคำสั่งนั้นจะต้องมีการใช้ parameter ต่างๆ สำหรับข้อมูลเพิ่มเติมสำหรับ parameter ต่างๆให้ลองใส่คำสั่งนั้นตามหลังคำสั่ง help เช่นการดูรายละเอียดของคำสั่ง getblockhash
+
+----
+$ bitcoin-cli help getblockhash
+getblockhash height
+
+คืนค่า hash ของ block จาก blockchain height ที่ดีที่สุด
+
+Arguments:
+1. height         (numeric, required) The height index
+
+ผลลัพท์
+"hash" (string) The block hash
+
+ตัวอย่าง:
+> bitcoin-cli getblockhash 1000
+> curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockhash", "params": [1000] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+----
+
+ในส่วนสุดท้ายของ help คุณจะเห็นตัวอย่างสองชุดของคำสั่ง RPC ที่ใช้คำสั่ง bitcoin-cli หรือคำสั่งของ HTTP client อย่าง curl ตัวอย่างเหล่านี้จะบอกคุณว่าคุณจะเรียกคำสั่งยังไง ลองคัดลอกตัวอย่างแรกแล้วดูผลของมัน 
+
+----
+$ bitcoin-cli getblockhash 1000
+00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09
+----
+
+ผลลัพท์ที่ได้คือ block hash โดยเราจะอธิบายเกี่ยวกับมันในบทที่ต่อๆไป แต่สำหรับตอนนี้คำสั่งควรจะคือค่าเดียวกันกับผลลัพท์บนระบบของคุณ เช่นถ้าตอนนี้ Bitcoin Core node ของคุณทำงานอยู่ แล้วรับคำสั่งไป คุณจะได้ผลลัพท์เป็นข้อมูลของ block 1000
+
+ในส่วนถัดไปเราจะสาธิตคำสั่ง RPC ที่มีประโยชน์แล้วดูว่าจะได้ผลลัพท์อย่างไร
+
+==== การเรียกข้องมูลจาก Bitcoin Core Client Status
+
+((("Bitcoin Core", "Bitcoin Core API", "status information")))Bitcoin Core provides status reports on different modules through the JSON-RPC interface. The most important commands include +getblockchaininfo+, +getmempoolinfo+, +getnetworkinfo+ and +getwalletinfo+.
+
+คำสั่ง RPC getblockchaininfo ของ Bitcoin ได้กล่าวไปก่อนหน้านี้ส่วนคำสั่ง getnetworkinfo จะแสดงถึงข้อมูลทั่วไปเดี่ยวกับสถานะของเครือข่าย bitcoin node ลองใช้ bitcoin-cli ในการเรียก
+
+----
+$ bitcoin-cli getnetworkinfo
+----
+[source,json]
+----
+  "version": 150000,
+  "subversion": "/Satoshi:0.15.0/",
+  "protocolversion": 70015,
+  "localservices": "000000000000000d",
+  "localrelay": true,
+  "timeoffset": 0,
+  "networkactive": true,
+  "connections": 8,
+  "networks": [
+    ...
+    ข้อมูลเกี่ยวกับเครือข่ายต่องๆ (ipv4, ipv6 or onion)
+    ...
+  ],
+  "relayfee": 0.00001000,
+  "incrementalfee": 0.00001000,
+  "localaddresses": [
+  ],
+  "warnings": ""
+}
+
+----
+
+ข้อมู,จะถูกคืนค่ามาในรูปแบบของ JSON ซึ่งเป็นรูปแบบที่ง่ายต่อการนำไปใช้โโย programming language ต่างๆและมันยังเป็นรูปแบบที่คนทั่วไปสามารถเข้าใจได้ง่าย ในข้อมูลนี้เราจะเห็นเลข version ของ bitcoin software client (150000)และ bitcoin protocol (70015)เราจะเห็นตัวเลขของการเชื่อมต่อ(8)และข้อมูลอื่นๆอีกที่เกี่ยวกับเครือข่ายของ bitcoin และการตั้งค่าต่างๆที่เกี่ยวกับ client
+
+[TIP]
+====
+มันอาจจะต้องใช้เวลาซักพักหนึ่งอาจจะเป็นวัน จนกว่า bitcoind จะ download blockchain ที่มีขนาดเท่ากับ bitcoin client อื่นๆ คุณสามารถตรวจสอบกระบวนการได้โดยใช้ getblockchaininfo ว่าปัจจุบันมี block เท่าไหร่แล้ว
+====
+
+[[exploring_and_decoding_transanctions]]
+==== Exploring and Decoding Transactions
+
+((("Bitcoin Core", "Bitcoin Core API", "exploring and decoding transactions")))((("transactions", "exploring with Bitcoin Core API")คำสั่ง getrawtransaction decoderawtransaction
+
+
+
+<<cup_of_coffee>>, ((("use cases", "buying coffee", id="alicethree"))) Alice ซื้อกาแฟจากร้านกาแฟของ Bob ธุรกรรมของเธอถูกบันทึกเก็บลงไปบน blockchain ที่มีตัวเลขของธุรกรรมอยู่ (+txid+)  +0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2+ ลองใช้ API ในการดึงข้อมูลและดูธุรกรรมโดยส่งเลขธุรกรรมลงใน parameter
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getrawtransaction 0627052b6f28912f2703066a912ea577f2ce4da4caa5a↵
+5fbd8a57286c345c2f2
+
+0100000001186f9f998a5aa6f048e51dd8419a14d8a0f1a8a2836dd734d2804fe65fa35779000↵
+000008b483045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4↵
+ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813014↵
+10484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc54123363767↵
+89d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adfffffffff0260e3160000000↵
+0001976a914ab68025513c3dbd2f7b92a94e0581f5d50f654e788acd0ef8000000000001976a9↵
+147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac00000000
+</pre>
+++++
+
+
+[TIP]
+====
+((("transaction IDs (txd)")))((("malleability"))) เลขธุรกรรมนั้นจะยังไม่ถูกยืนยันจนกว่ามันจะถูก confirm ถ้าเลข hash ของธุรกรรมไม่อยู่ใน blockchain ไม่ได้หมายความว่าธุรกรรมนั้นไม่ถูกดำเนินการ สิ่งนี้ถูกเรียกว่า "transaction malleability" เนื่องจาก hash ของธุรกรรมสามารถแก้ไขก่อนที่จะยืนยัน block หลังจากยืนยัน txid จะคงอยู่อย่างถาวร
+====
+
+คำสั่ง getrawtransaction จะคืนค่าธุรกรรมกรรมในรูปแบบ hexadecimal ในการที่จะถอดรหัสเราจะต้องใช้คำสั่ง decoderawtransactionโดยส่งค่า hex ไปเป็น parameter คุณสามารถคัดลอกค่า hex โดยใช้คำสั่ง getrawtransaction และวางมันเป็น parameter ของ decoderawtransaction
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli decoderawtransaction 0100000001186f9f998a5aa6f048e51dd8419a14d8↵
+a0f1a8a2836dd734d2804fe65fa35779000000008b483045022100884d142d86652a3f47ba474↵
+6ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298↵
+cad530a863ea8f53982c09db8f6e381301410484ecc0d46f1918b30928fa0e4ed99f16a0fb4fd↵
+e0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa↵
+336a8d752adfffffffff0260e31600000000001976a914ab68025513c3dbd2f7b92a94e0581f5↵
+d50f654e788acd0ef8000000000001976a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8↵
+88ac00000000
+
+</pre>
+++++
+
+++++
+<pre data-type="programlisting" data-code-language="json">
+{
+  "txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+  "size": 258,
+  "version": 1,
+  "locktime": 0,
+  "vin": [
+    {
+      "txid": "7957a35fe64f80d234d76d83a2...8149a41d81de548f0a65a8a999f6f18",
+      "vout": 0,
+      "scriptSig": {
+        "asm":"3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1decc...",
+        "hex":"483045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1de..."
+      },
+      "sequence": 4294967295
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.01500000,
+      "n": 0,
+      "scriptPubKey": {
+        "asm": "OP_DUP OP_HASH160 ab68...5f654e7 OP_EQUALVERIFY OP_CHECKSIG",
+        "hex": "76a914ab68025513c3dbd2f7b92a94e0581f5d50f654e788ac",
+        "reqSigs": 1,
+        "type": "pubkeyhash",
+        "addresses": [
+          "1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA"
+        ]
+      }
+    },
+    {
+      "value": 0.08450000,
+      "n": 1,
+      "scriptPubKey": {
+        "asm": "OP_DUP OP_HASH160 7f9b1a...025a8 OP_EQUALVERIFY OP_CHECKSIG",
+        "hex": "76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac",
+        "reqSigs": 1,
+        "type": "pubkeyhash",
+        "addresses": [
+          "1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK"
+        ]
+      }
+    }
+  ]
+}
+
+</pre>
+++++
+
+ธุรกรรมที่ถูกถอดรหัสแล้วจะแสดงให้เห็นถึงองประกอบต่างไของธุรกรรมทั้งหมด รวมถึง input และ output ของธุรกรรม ในกรณีนี้เราจะเห็นธุรกรรมที่ credit ใน address ใหม่ด้วยขนาด 15 millibits โดยถูกใช้เป็น 1 input ที่จะสร้าง 2 output ในส่วนของ input ของธุรกรรมนี้นั้นเป็น output จากธุรกรรมที่ถูกยืนยันก่อนหน้านี้  (ดูที่ +txid+ ที่เริ่มด้วย +7957a35fe+) 2 output จะตรงกับเงิน 15 millibit และ output ที่มีเงินทอนกลับไปให้ sender
+
+เราสามารถตรวจสอบ blockchain เพิ่มเติมได้โดยดูจาก txid ของธุรกรรมที่ผ่านมาโดยใช้คำสั่งเดียวกัน (เช่น getrawtransaction) เมื่อเราดูแต่ละธุรกรรมไปเรื่อยๆเราจะสามารถตรวจสอบห่วงโซ่ของธุรกรรมไปยังที่มาของเหรียญที่ถูกส่งจาก address หนึ่งไปอีก address หนึ่ง
+
+
+
+==== Exploring Blocks
+
+((("Bitcoin Core", "Bitcoin Core API", "exploring blocks")))((("blocks", "exploring with Bitcoin Core API")))Commands: +getblock+, +getblockhash+
+
+((("blocks", "block height")))((("blocks", "block hash"))) การตรวจสอบ block ก็คล้ายๆกับการตรวจสอบธุรกรรม อย่างไรก็ตาม block สามารถถูกอ้างอิงได้จาก block height หรือ block hash ลองหา block ากค่า height ใน  <<cup_of_coffee>> เราจะเห็นว่าธุรกรรมของ Alice จะถูกเก็บอยู่ใน block 277316
+
+เราใช้คำสั่ง getblockhash ที่ใช้ block height เป็น parameter และคืนค่า block hash ของ block 
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getblockhash 277316
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+</pre>
+++++
+
+ตอนนี้เราก็รู้แล้วว่า block ไหนที่มีธุรกรรมของ Alice เราสามารถดึงค่าของ block นั้นออกมาได้โดยใช้คำสั่ง getblock โดยใส่ blockhash เป็น parameter
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getblock 0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b3↵
+1b2cc7bdc4
+</pre>
+++++
+
+++++
+<pre data-type="programlisting" data-code-language="json">
+{
+  "hash": "0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4",
+  "confirmations": 37371,
+  "size": 218629,
+  "height": 277316,
+  "version": 2,
+  "merkleroot": "c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e",
+  "tx": [
+    "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+    "b268b45c59b39d759614757718b9918caf0ba9d97c56f3b91956ff877c503fbe",
+    "04905ff987ddd4cfe603b03cfb7ca50ee81d89d1f8f5f265c38f763eea4a21fd",
+    "32467aab5d04f51940075055c2f20bbd1195727c961431bf0aff8443f9710f81",
+    "561c5216944e21fa29dd12aaa1a45e3397f9c0d888359cb05e1f79fe73da37bd",
+[... hundreds of transactions ...]
+    "78b300b2a1d2d9449b58db7bc71c3884d6e0579617e0da4991b9734cef7ab23a",
+    "6c87130ec283ab4c2c493b190c20de4b28ff3caf72d16ffa1ce3e96f2069aca9",
+    "6f423dbc3636ef193fd8898dfdf7621dcade1bbe509e963ffbff91f696d81a62",
+    "802ba8b2adabc5796a9471f25b02ae6aeee2439c679a5c33c4bbcee97e081196",
+    "eaaf6a048588d9ad4d1c092539bd571dd8af30635c152a3b0e8b611e67d1a1af",
+    "e67abc6bd5e2cac169821afc51b207127f42b92a841e976f9b752157879ba8bd",
+    "d38985a6a1bfd35037cb7776b2dc86797abbb7a06630f5d03df2785d50d5a2ac",
+    "45ea0a3f6016d2bb90ab92c34a7aac9767671a8a84b9bcce6c019e60197c134b",
+    "c098445d748ced5f178ef2ff96f2758cbec9eb32cb0fc65db313bcac1d3bc98f"
+  ],
+  "time": 1388185914,
+  "mediantime": 1388183675,
+  "nonce": 924591752,
+  "bits": "1903a30c",
+  "difficulty": 1180923195.258026,
+  "chainwork": "000000000000000000000000000000000000000000000934695e92aaf53afa1a",
+  "previousblockhash": "0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569",
+  "nextblockhash": "000000000000000010236c269dd6ed714dd5db39d36b33959079d78dfd431ba7"
+}
+</pre>
+++++
+
+ฺblock นี้มีธุรกรรมอยู่ 419 ธุรกรรมและธุรรรมที่ 64 ในลิสคือ (+0627052b...+) คือธุรกรรมของ Alice ที่จ่ายเงินค่ากาแฟโดยค่า height บอกว่ามันเป็น block ที่ 277316 ของ blockchain
+
+==== การใช้ Bitcoin Core's Programmatic Interface
+
+((("Bitcoin Core", "Bitcoin Core API", "using programmatic interface")))((("programmatic interface", id="progint03")))คำสั่ง bitcoin-cli นั้นสามารถช่วยในการตรวจสอบ Bitcoin core API รวมถึงทดสอบฟังชั่นต่างๆ แต่จุดสำคัญของ API นี้คือการเข้าถึงฟังชั่นต่างๆเพื่อนำไปพัฒนาได้ ในส่วนนี้เราจะมาลองเข้าถึง Bitcoin core จากโปรแกรมอื่นกัน
+
+Bitcoin Core API นั้นเป็น interface แบบ JSON-RPC คำว่า JSON นั้นย่อมาจาก JavaScript Object Notation ซึ่งมันเป็นรูปแบบที่เข้าใจง่ายสำหรับคนทั่วไปและคอมพิวเตอร์ RPC นั้นย่อมาจาก Remote Procedure Call ซึ่งหมายถึงเรากำลังเรียกฟังชั่นที่ remote อยู่ (บน Bitcoin Core node) ผ่าน protocal ของเครือข่ายซึ่งก็คือ HTTP และ HTTPS
+
+เมื่อเราใช้คำสั่ง bitcoin-cli เพื่อดูว่าคำสั่งนั้นสามารถทำอะไรได้บ้าง ผลลัพท์จะแสดงให้เห็นถึงตัวอย่างการใช้งานของ curl ซึ่งเป็นคำสั่งเอนกประสงค์ของ HTTP client ในการเรียก JSON-RPC
+
+----
+$ curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockchaininfo", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+----
+
+คำสั่งนี้จะแสดงให้เห็นถึงว่า curl จะส่ง HTTP request ไปยัง local host (127.0.0.1) โดยเชื่อมต่อกัน port ตั้งต้นของ bitcoin ซึ่งก็คือ 8332 และส่ง  jsonrpc request สำหรับคำสั่ง getblockchaininfo โดยใช้ text/plain ในการถอดรหัส 
+
+You might notice that curl will ask for credentials to be sent along with the request. Bitcoin Core will create a random password on each start and place it in the data directory under the name +.cookie+. The +bitcoin-cli+ helper can read this password file given the data directory. Similarly, you can copy the password and pass it to curl (or any higher level Bitcoin Core RPC wrappers). Alternatively, you can create a static password with the helper script provided in _./share/rpcauth/rpcauth.py_ in Bitcoin Core's source directory.
+
+ถ้าคุณจะเรียกใช้ใช้ JSON-RPC จากโปรแกรมของคุณ คุณสามารถใช้ generic HTTP library ในการเรียกใช้ได้ คล้ายกับตัวอย่างการใช้งาน curl
+
+อย่างไรก็ตาม libraries ของ programming language ส่วนใหญ่จะถูก "wrap" จาก Bitcoin Core API ทำให้มันง่ายขึ้น โดยเราจะใช้ library ของ python-bitcoinlib ในการเพื่อทำให้การใช้งาน API ง่ายขึ้น อย่าลืมว่าคุณจะต้องเปิดใช้งาน Bitcoin Core instance เพื่อใช้ในการเรียก JSON-RPC 
+
+The Python script in <<rpc_example>> makes a simple +getblockchaininfo+ call and prints the +blocks+ parameter from the data returned by Bitcoin Core.
+
+[[rpc_example]]
+เรียกใช้ getblockchaininfo ผ่าน getblockchaininfo
+====
+[source,python]
+----
+include::code/rpc_example.py[]
+----
+====
+
+การเรียกใช้จะได้ผลลัพท์ดังนี้
+
+----
+$ python rpc_example.py
+394075
+----
+
+มันบอกเราว่า Bitcoin Core node ของเรานั้นมี 394075 block ใน blockchain แม้มันอาจจะไม่ใช่อะไรที่น่าตื่นตาตื่นใจ แต่มันก็เป็นการสาธิตวิธีใช้ library ในการเรียก interface ผ่าน Bitcoin Core's JSON-RPC API
+
+ต่อไปเราจะมาลองใช้ getrawtransaction และ decodetransaction ในการเรียกรายละเอียดของการจ่ายเงินค่ากาแฟของ Alice ใน <<rpc_transaction>> เราจะได้ธุรกรรมของ Alice ละรายการ output ของธุรกรรม ในแต่ละ output จะแสดงถึง address ของผู้รับและเงินที่ส่ง อย่าลืมว่าธุรกรรมของ Alice มี 1 output ที่จ่ายให้กับร้านกาแฟของ Bob และอีก output หนึ่งจ่ายเป็นเงินทอนให้ตัวเอง
+
+[[rpc_transaction]]
+รับธุรกรรมและแสดงมันออกมาเป็น output
+====
+[source,python]
+----
+include::code/rpc_transaction.py[]
+----
+====
+
+หลังจากสั่งให้ code ทำงานเราจะได้
+
+----
+$ python rpc_transaction.py
+([u'1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA'], Decimal('0.01500000'))
+([u'1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK'], Decimal('0.08450000'))
+----
+
+ตัวอย่างที่ยกมาสองอย่างก่อนหน้านี้ค่อนข้างง่าย คุณไม่ต้องใช้โปรแกรมใดๆเลยในการเรียกใช้มัน คุณแค่ใช้อะไรง่ายๆอย่าง bitcoin-cli เท่านั้น ในตัวอย่างถัดไปน้ันเราจะใช้การเรียก RPC กว่า 100 ครั้งในการใช้งาน interface
+
+ใน <<rpc_block>> เราจะได้รับ block ที่ 277316 หลังจากนั้นก็ได่รับธุรกรรมจำนวน 419 ธุรกรรมที่สามารถอ้างอิงได้จาก transaction ID ต่อไปเราจะมาดู output แต่ละธุรกรรมและดูมูลค่ารวมของมัน ((("", startref="alicethree")))
+
+[[rpc_block]]
+รับ block และเพิ่ม output ของธุรกรรมทั้งหมด
+====
+[source,python]
+----
+include::code/rpc_block.py[]
+----
+====
+
+หลังจากสั่งให้ code ทำงานเราจะได้
+
+----
+$ python rpc_block.py
+
+('Total value in block: ', Decimal('10322.07722534'))
+----
+
+code ตัวอย่างจะคำนวณมูลค่าเงินทั้งหมดที่ถูกส่งใน block ซึ่งก็คือ BTC 10,322.07722534 (รวมถึง 25 BTC ที่เป็นรางวัลและ 0.0909 BTC ที่เป็นค่าธรรมเนียม) โดยสามารถเทียบค่าที่ตอบมากับ blockexplorer ได้โดยการค้นหาด้วย block hash หรือ height มี blockexplorer บางแห่งที่บอกถึงจำนวนเงินทั้งหมดที่ไม่รวมถึงรางวัลและค่าธรรมเนียมทำให้คุณสามารถสังเกตุความแตกต่างได้((("", startref="BCapi03")))((("", startref="progint03")))
+
+[[alt_libraries]]
+=== Alternative Clients, Libraries, and Toolkits
+
+((("Bitcoin Core", "alternatives to", id="BCalt03")))((("clients, libraries, and toolkits", id="clients03")))((("libraries, clients, and toolkits", id="librar03")))((("toolkits, libraries, and clients", id="toolkit03")))((("third-party API clients", id="thirdpart03"))) มีตัวเลือก client อื่นๆมากมายรวมถึง  libraries, toolkits แม้แต่การพัฒนา full-node ต่างๆในสภาพแว้ดล้อมของ bitcoin มีการพัฒนามากมายด้วย programming language ต่างๆ ทำให้ programmer สามารถพัฒนาสิ่งต่างๆได้ในภาษาที่เขาต้องการ
+
+ในส่วนต่อไปนี้คือรายการของ libraries, clients, และ toolkits ใน programming languages ต่างๆ
+
+==== C/C++
+https://github.com/bitcoin/bitcoin[Bitcoin Core] :: แหล่งอ้างอิงในการพัฒนา bitcoin
+https://github.com/libbitcoin/libbitcoin[libbitcoin]:: toolkit, node, consensus library สำหรับ C++
+https://github.com/libbitcoin/libbitcoin-explorer[bitcoin explorer]:: Libbitcoin command-line tool
+https://github.com/jgarzik/picocoin[picocoin]:: ภาษา C สำหรับ lightweight client library ของ bitcoin โดย Jeff Garzik
+
+==== JavaScript
+http://bcoin.io/[bcoin]:: modular และ scalable full-node สำหรับเชื่อมต่อกับ API
+https://bitcore.io/[Bitcore] :: Full node, API และ library โดย Bitpay
+https://github.com/bitcoinjs/bitcoinjs-lib[BitcoinJS] :: JavaScript Bitcoin library สำหรับ node.js และ browsers
+
+==== Java
+https://bitcoinj.github.io[bitcoinj]: Java full-node client library
+https://bitsofproof.com[Bits of Proof (BOP)]:: Java enterprise-class สำหรับพัฒนา bitcoin
+
+==== PHP
+https://github.com/bit-wasp/bitcoin-php[bitwasp/bitcoin]:: PHP bitcoin library และโปรเจคที่เกี่ยวข้อง
+
+==== Python
+https://github.com/petertodd/python-bitcoinlib[python-bitcoinlib]::  Python bitcoin library, consensus library,  node โดย Peter Todd
+https://github.com/richardkiss/pycoin[pycoin]:: Python bitcoin library โดย Richard Kiss
+https://github.com/vbuterin/pybitcointools[pybitcointools]:: Python bitcoin library โดย Vitalik Buterin
+
+==== Ruby
+https://github.com/sinisterchipmunk/bitcoin-client[bitcoin-client]:: A Ruby library wrapper สำหรับ JSON-RPC API
+
+==== Go
+https://github.com/btcsuite/btcd[btcd]:: ภาษ Go สำหรับ full-node bitcoin client
+
+==== Rust
+https://github.com/apoelstra/rust-bitcoin[rust-bitcoin]:: Rust bitcoin library สำหรับ serialization, parsing, API 
+
+==== C#
+https://github.com/MetacoSA/NBitcoin[NBitcoin]::  bitcoin library สำหรับ .NET framework
+
+==== Objective-C
+https://github.com/oleganza/CoreBitcoin[CoreBitcoin]:: Bitcoin toolkit สำหรับ ObjC และ Swift
+
+ยังมี libraries อีกมากสำหรับ programming language อื่นๆและถูกสร้างขึ้นเพิ่มเรื่อยๆ ((("", startref="BCalt03")))((("", startref="clients03")))((("", startref="thirdpart03")))((("", startref="toolkit03")))((("", startref="librar03")))

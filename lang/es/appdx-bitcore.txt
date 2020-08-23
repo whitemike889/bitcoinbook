@@ -1,0 +1,117 @@
+[[appdx_bitcore]]
+[apéndice]
+
+== Bitcore
+
+
+((("Bitcore", id = "bitcore16")))Bitcore es un conjunto de herramientas proporcionadas por BitPay. Su objetivo es proporcionar herramientas fáciles de usar para los desarrolladores de Bitcoin. Casi todo el código de Bitcore está escrito en JavaScript. Hay algunos módulos escritos específicamente para NodeJS. Finalmente, el módulo "node" de Bitcore incluye el código C++ de Bitcoin Core. Por favor vea https://bitcore.io para más información.
+
+=== Lista de características de Bitcore
+
+* Nodo completo de Bitcoin (bitcore-nodo)
+* Explorador de bloques (insight)
+* Funcionalidades de cartera, para bloques y para transacciones (bitcore-lib)
+* Comunicación directa con la red de pares P2P de Bitcoin (bitcore-p2p)
+* Generación entrópica de semilla mnemonica (bitcore-mnemonic)
+* Protocolo de pago (bitcore-payment-protocol)
+* Verificación y firma de mensajes (bitcore-message)
+* Esquema Integrado de Cifrado por curva elíptica (bitcore-ecies)
+* Servicio de Cartera (bitcore-wallet-service)
+* Aplicación Cliente de Cartera (bitcore-wallet-client)
+* Servicio de Herramientas "Playground" (bitcore-playground)
+* Integración directa de servicios con la aplicación principal Bitcoin Core (bitcore-node)
+
+=== Ejemplos de Bibliotecas Bitcore
+
+==== Prerequisitos
+
+* Versión de NodeJS >= 4.x o úsese https://bitcore.io/playground[hosted online playground] 
+
+Si ha de usarse NodeJS y el nodo REPL:
+
+[source,bash]
+----
+$ npm install -g bitcore-lib bitcore-p2p
+----
+
+==== Ejemplos de billetera usando bitcore-lib
+
+Creando una nueva dirección bitcoin con llave privada asociada:
+
+----
+> bitcore = require('bitcore-lib')
+> privateKey = new bitcore.PrivateKey()
+> address = privateKey.toAddress().toString()
+----
+
+Creando una llave privada jerárquico determinista y su dirección:
+
+----
+> hdPrivateKey = bitcore.HDPrivateKey()
+> hdPublicKey = bitcore.HDPublicKey(hdPrivateKey)
+> hdAddress = new bitcore.Address(hdPublicKey.publicKey).toString()
+----
+
+Creando y firmando una transacción desde una UTXO:
+
+----
+> utxo = {
+  txId: la id de una transacción contentiva de una salida sin gastar,
+  outputIndex: el índice de la referida salida, por ejemplo 0,
+  address: addressOfUtxo,
+  script: bitcore.Script.buildPublicKeyHashOut(addressOfUtxo).toString(),
+  satoshis: cantidad enviada a la address ó dirección
+}
+> fee = 3000 //calculado adecuadamente según las condiciones de la red
+> tx = new bitcore.Transaction()
+        .from(utxo)
+        .to(address, 35000)
+        .fee(fee)
+        .enableRBF()
+        .sign(privateKeyOfUtxo)
+----
+
+Reemplazo de la última transacción en el tanque de memoria (replace-by-fee):
+
+----
+> rbfTx = new Transaction()
+           .from(utxo)
+           .to(address, 35000)
+           .fee(fee*2)
+           .enableRBF()
+           .sign(privateKeyOfUtxo);
+> tx.serialize();
+> rbfTx.serialize();
+----
+
+Transmisión de una transacción a la red Bitcoin
+(observación: únicamente difúndanse transacciones válidas; hacer referencia a https://bitnodes.21.co/nodes[] para un listado de pares o "peers"):
+
+1. Cópiese el siguiente código en un archivo llamado _broadcast.js_.
+2. Las variables +tx+ y +rbfTx+ son las salidas de +tx.serialize()+ y +rbfTx.serialize()+, respectivamente.
+3. Con el fin de realizar un reemplazo-por-comisiones, el nodo peer debe reconocer la opción bitcoind:  +mempoolreplace+ y tenerla ajustada con el valor +1+.
+4. Ejecútese mediante comando node, el archivo _broadcast.js_((("", startref="bitcore16"))):
+
+----
+var p2p = require('bitcore-p2p');
+var bitcore = require('bitcore-lib');
+var tx = new bitcore.Transaction('la salida que se obtuvo de la función de serialización');
+var rbfTx = new bitcore.Transaction('la salida que se obtuvo de la función de serialización');
+var host = 'dirección ip'; //úsese un nodo "peer" válido y activo en el puerto tcp 8333
+var peer = new p2p.Peer({host: host});
+var messages = new p2p.Messages();
+peer.on('ready', function() {
+  var txs = [messages.Transaction(tx), messages.Transaction(rbfTx)];
+  var index = 0;
+  var interval = setInterval(function() {
+    peer.sendMessage(txs[index++]);
+    console.log('tx: ' + index + ' sent');
+    if (index === txs.length) {
+      clearInterval(interval);
+      console.log('disconnecting from peer: ' + host);
+      peer.disconnect();
+    }
+  }, 2000);
+});
+peer.connect();
+----

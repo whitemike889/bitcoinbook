@@ -1,0 +1,210 @@
+[Role = "pagenumrestart"]
+[[Ch01_intro_what_is_bitcoin]]
+== Introductie
+
+=== Wat is Bitcoin?
+
+((("bitcoin", "defined", id="GSdefine01")))Bitcoin is a collection of concepts and technologies that form the basis of a digital money ecosystem. Units of currency called bitcoin are used to store and transmit value among participants in the bitcoin network. Bitcoin users communicate with each other using the bitcoin protocol primarily via the internet, although other transport networks can also be used. The bitcoin protocol stack, available as open source software, can be run on a wide range of computing devices, including laptops and smartphones, making the technology easily accessible.
+
+Gebruikers kunnen bitcoin over het netwerk versturen om zo ongeveer alles te doen wat met conventionele valuta kan worden gedaan, inclusief het kopen en verkopen van goederen, het sturen van geld naar mensen of organisaties, of het verstrekken van krediet. Bitcoin kan gekocht, verkocht en geruild worden voor andere valuta bij gespecialiseerde beurzen. Bitcoin is in zekere zin de perfecte vorm van geld voor het internet omdat het snel, veilig en grenzeloos is.
+
+In tegenstelling tot traditionele valuta, zijn bitcoin geheel virtueel. Er zijn geen fysieke munten of zelfs digitale munten als zodanig. De munten zijn geïmpliceerd in transacties die de waarde overdragen van afzender naar ontvanger. Gebruikers van bitcoin bezitten sleutels waarmee ze het eigendom van bitcoin in het bitcoin netwerk kunnen bewijzen. Met deze sleutels kunnen ze transacties ondertekenen om de waarde te ontgrendelen en deze uit te geven door deze over te dragen aan een nieuwe eigenaar. Sleutels worden meestal bewaard in een digitale portefeuille op de computer of smartphone van de gebruikers. Het bezit van de sleutel die een transactie kan ontgrendelen, is de enige vereiste om bitcoin uit te geven, waardoor elke gebruiker de volledige controle in eigen handen heeft.
+
+Bitcoin is een gedistribueerd peer-to-peer-systeem. Als zodanig is er geen "centrale" server of controlepunt. Bitcoin wordt gecreëerd via een proces dat 'mijnen' heet en waarbij in een onderlinge competitie gezocht wordt naar oplossingen voor een wiskundige formule in samenhang met het verwerken van transacties. Elke deelnemer in het bitcoin netwerk (d.w.z. iedereen die een apparaat met het volledige bitcoin-protocol stack heeft draaien) kan werken als een 'mijner', met behulp van de rekenkracht van zijn computer om transacties te verifiëren en te registreren. Elke 10 minuten, gemiddeld, kan iemand de transacties van de afgelopen 10 minuten valideren en wordt hij beloond met gloednieuwe bitcoins. In essentie zorgt bitcoin mijnen voor het decentraliseren voor de geldcreatie en clearing functies van een centrale bank en vervangt de noodzaak van een centrale bank.
+
+The bitcoin protocol includes built-in algorithms that regulate the mining function across the network. The difficulty of the processing task that miners must perform is adjusted dynamically so that, on average, someone succeeds every 10 minutes regardless of how many miners (and how much processing) are competing at any moment. The protocol also halves the rate at which new bitcoin are created every 4 years, and limits the total number of bitcoin that will be created to a fixed total just below 21 million coins. The result is that the number of bitcoin in circulation closely follows an easily predictable curve that approaches 21 million by the year 2140. Due to bitcoin's diminishing rate of issuance, over the long term, the bitcoin currency is deflationary. Furthermore, bitcoin cannot be inflated by "printing" new money above and beyond the expected issuance rate.
+
+Achter de schermen is bitcoin ook de naam van het protocol, een peer-to-peer-netwerk en een gedistribueerde computer innovatie. De bitcoin valuta is eigenlijk alleen de eerste toepassing van deze uitvinding. Bitcoin vertegenwoordigt het hoogtepunt van tientallen jaren van onderzoek in cryptografie en gedistribueerde systemen en omvat vier belangrijke innovaties die zijn samengebracht in een unieke en krachtige combinatie. Bitcoin bestaat uit:
+
+* Een gedecentraliseerd peer-to-peer netwerk (het bitcoin protocol)
+* Een publieke transactie grootboek (de blockchain)
+* Een verzameling regels voor onafhankelijke validatie van transacties en valuta uitgifte.
+* Een mechanisme om de wereldwijde gedecentraliseerde consensus te verkrijgen over de geldige blockchain (Proof-of-Work algoritme)
+
+Als ontwikkelaar ik zie bitcoin als verwant aan het internet van geld, een netwerk voor het omloop brengen van waarde en het veiligstellen van het eigendom van digitale middelen via gedistribueerde berekeningen. Er is nog veel meer over bitcoin te zeggen dan je op het eerste gezicht lijkt.
+
+In dit hoofdstuk zullen we aan de slag gaan met het uitleggen van enkele van de belangrijkste begrippen en termen, om de benodigde software te krijgen en het gebruiken van bitcoin voor eenvoudige transacties. In de volgende hoofdstukken beginnen we met het uitpakken de lagen van de technologie die bitcoin mogelijk maken en bestuderen we de innerlijke werking van het  bitcoin netwerk en protocol.
+
+[role="pagebreak-before less_space"]
+Digitale munteenheden voor Bitcoin
+****
+
+De opkomst van levensvatbaar digitaal geld is nauw verbonden met de ontwikkeling van de cryptografie. Dit is niet verwonderlijk als men de fundamentele uitdagingen bedenkt om met behulp van bits waarde te vertegenwoordigen die ingewisseld kan worden voor goederen en diensten. Drie kernvragen voor iedereen voor het accepteren digitaal geld zijn:
+
+1. Kan ik erop vertrouwen dat het geld authentiek is en geen namaak?
+2. Kan ik erop vertrouwen dat het digitaal geld slechts eenmaal kan worden uitgegeven (bekend als het probleem van "dubbel uitgeven")?
+3. Kan ik er zeker van zijn dat niemand dit geld kan claimen en niet van mij is?
+
+Issuers of paper money are constantly battling the counterfeiting problem by using increasingly sophisticated papers and printing technology. Physical money addresses the double-spend issue easily because the same paper note cannot be in two places at once. Of course, conventional money is also often stored and transmitted digitally. In these cases, the counterfeiting and double-spend issues are handled by clearing all electronic transactions through central authorities that have a global view of the currency in circulation. For digital money, which cannot take advantage of esoteric inks or holographic strips, cryptography provides the basis for trusting the legitimacy of a user’s claim to value. Specifically, cryptographic digital signatures enable a user to sign a digital asset or transaction proving the ownership of that asset. With the appropriate architecture, digital signatures also can be used to address the double-spend issue.
+
+Toen cryptografie eind jaren '80 steeds breder beschikbaar en geaccepteerd werd, hebben veel onderzoekers geprobeerd cryptografie te gebruiken om digitale valuta's te maken. Deze vroege digitale valuta projecten gaven digitaal geld uit, meestal ondersteund door een nationale valuta of edele metalen, zoals goud.
+
+Hoewel deze eerdere digitale valuta werkten, waren ze gecentraliseerd en daardoor gemakkelijk aan te vallen door overheden en hackers. Vroege digitale valuta's gebruikten een centrale clearinginstelling om alle transacties op regelmatige tijdstippen af te wikkelen, net als bij een traditioneel banksysteem. Helaas waren deze ontluikende digitale valuta in de meeste gevallen het doelwit van bezorgde overheden en werden ze uiteindelijk  geprocedeerd tot ze niet meer bestonden. Sommige faalden in spectaculaire crashes toen het moederbedrijf abrupt liquideerde. Om robuust te zijn tegen interventie door antagonisten, of het nu legitieme regeringen of criminele elementen waren, was een gedecentraliseerde digitale valuta nodig om een enkel aanvalspunt te vermijden. Bitcoin is een dergelijk systeem, vanuit het ontwerp gedecentraliseerd en vrij van centrale autoriteit of controle die kan worden aangevallen of beschadigd.
+
+****
+
+=== Geschiedenis van Bitcoin
+
+Bitcoin is in 2008 uitgevonden met de publicatie van een paper getiteld "Bitcoin: een peer-to-peer elektronisch cash-systeem", voetnoot: ["Bitcoin: een Peer-to-Peer elektronisch cashsysteem", Satoshi Nakamoto (https://bitcoin.org/bitcoin.pdf).] geschreven onder het alias van Satoshi Nakamoto (zie <>). Nakamoto combineerde verschillende eerdere uitvindingen zoals b-money en HashCash om een ​​volledig gedecentraliseerd elektronisch cash-systeem te creëren dat niet afhankelijk is van een centrale autoriteit voor het uitgeven van valuta's of voor verrekening en validatie van transacties. ((("Proof-of-Work-algoritme"))) ((("gedecentraliseerde systemen", "consensus in"))) (((mijnen en consensus "," Proof-of-Work-algoritme "))) De belangrijkste vernieuwing was om een ​​gedistribueerd berekeningssysteem (een zogenaamd "Proof-of-Work" -algoritme) te gebruiken dat elke 10 minuten een wereldwijde "verkiezing" uitvoert, zodat het gedecentraliseerde netwerk tot_consensus_ kan komen over de toestand van transacties. (((probleem met dubbele uitgaven "))) (((uitgaven voor bitcoin," probleem met dubbele uitgaven "))) Hiermee wordt elegant het probleem van dubbele-uitgaven opgelost waarbij een valuta eenheid tweemaal kan worden uitgegeven. Eerder was het probleem van dubbele-uitgaven een zwakte van digitale valuta en werd dit opgelost door alle transacties te verrekenen via een centraal clearing instituut.
+
+Het Bitcoin netwerk is in 2009 gestart, gebaseerd op een referentie implementatie gepubliceerd door Nakamoto en sindsdien gereviseerd door vele andere programmeurs. De implementatie van het Proof-of-Work algoritme (mijnen) dat beveiliging en veerkracht biedt voor bitcoin is exponentieel toegenomen en streeft nu de gecombineerde verwerkingskracht voorbij van 's werelds beste supercomputers. De totale marktwaarde van Bitcoin heeft soms meer dan $ 135 miljard US dollar overschreden, afhankelijk van de bitcoin-dollar wisselkoers. De grootste transactie die tot nu toe door het netwerk is verwerkt, was $ 400 miljoen US dollar, direct overgedragen en verwerkt voor een bedrag van $ 1.
+
+Satoshi Nakamoto trok zich in april 2011 uit het publiek terug en liet de verantwoordelijkheid om de code en het netwerk te ontwikkelen over aan een bloeiende groep vrijwilligers. De identiteit van de persoon of personen achter bitcoin is nog onbekend. ((("open source licenties"))) Noch Satoshi Nakamoto, noch iemand anders, oefent echter individuele controle uit over het bitcoin systeem, dat volledig werkt op basis van transparante wiskundige principes, open source code en consensus tussen deelnemers. De uitvinding zelf is baanbrekend en heeft reeds nieuwe wetenschap voortgebracht in de gebieden van gedistibueerde systemen, economie en econometrie.
+
+
+Een oplossing voor een Gedistribueerd Computerprobleem
+****
+(("Byzantijnse generaals & # x27; probleem"))) De uitvinding van Satoshi Nakamoto is ook een praktische en nieuwe oplossing voor een probleem bij gedistribueerd computergebruik, bekend als het "Byzantijnse generaals-probleem". In het kort bestaat het probleem uit het proberen overeenstemming te bereiken over een handelswijze of de toestand van een systeem via de uitwisseling van informatie over een onbetrouwbaar en mogelijk aangetast netwerk. ((("centrale vertrouwde autoriteit"))) De oplossing van Satoshi Nakamoto, die het concept van Proof-of-Work gebruikt om consensus te bereiken _ zonder een centrale en vertrouwde autoriteit_, betekent een doorbraak in gedistribueerde systemen en heeft een brede toepasbaarheid die verder gaat dan de valuta. Het kan gebruikt worden om consensus te bereiken over gedecentraliseerde netwerken als bewijs voor eerlijke verkiezingen, loterijen, activa registers, digitale notariele acten en meer.
+****
+
+
+[[user-stories]]
+=== Bitcoin gebruik, de gebruikers en hun verhalen
+
+((("bitcoin", "use cases", id="GSuses01")))Bitcoin is een innovatie in de oude technologie van geld. In de kern vergemakkelijkt geld eenvoudig de uitwisseling van waarde tussen mensen. Om Bitcoin en het gebruik ervan volledig te begrijpen, zullen we het daarom onderzoeken vanuit het perspectief van mensen die het gebruiken. Elk van de mensen en hun verhalen, zoals hier weergegeven, illustreert een of meer specifieke use-cases. We zullen ze in het hele boek zien:
+
+Noord-Amerikaanse low-value detailhandel:
+Alice woont in Bay Area in Noord-Californië. Ze heeft over bitcoin van haar technische vrienden gehoord en wil deze gaan gebruiken. We zullen haar verhaal volgen als ze iets leert over bitcoin, wat koopt en vervolgens wat van haar bitcoin uitgeeft om een kop koffie te kopen in Bob's Cafe in Palo Alto. Dit verhaal zal ons kennis laten maken met de software, de uitwisseling en basis transacties vanuit het perspectief van een retail consument.
+
+Noord-Amerikaanse high-value detailhandel:
+Carol is een eigenaar van een kunstgalerie in San Francisco. Ze verkoopt dure schilderijen voor bitcoin. Dit verhaal introduceert de risico's van een "51%" consensus aanval voor retailers van high-value items.
+
+Offshore contractdiensten:
+Bob, de café-eigenaar in Palo Alto, bouwt een nieuwe website. Hij heeft een overeenkomst gesloten met een Indiase webontwikkelaar, Gopesh, die in Bangalore, India woont. Gopesh heeft ingestemd om te worden betaald in bitcoin. Dit verhaal gaat in op het gebruik van bitcoin voor outsourcing, contractdiensten en internationale overschrijvingen.
+
+Webwinkel:
+(((use cases "," web store "))) Gabriel is een ondernemende jonge tiener in Rio de Janeiro, waar hij een kleine webwinkel runt die t-shirts, mokken en stickers met bitcoin merk verkoopt. Gabriel is te jong om een bankrekening te hebben, maar zijn ouders moedigen zijn ondernemersgeest aan.
+
+Donaties aan goede doelen:
+(((liefdadige schenkingen)))) (((use cases "," charitable donations "))) Eugenia is de directeur van een kinderhulporganisatie in de Filippijnen. Onlangs heeft ze Bitcoin ontdekt en wil een hele nieuwe groep buitenlandse en binnenlandse donoren bereiken om geld in te zamelen voor haar goede doel. Ze onderzoekt ook manieren om bitcoin te gebruiken om snel geld te verdelen naar noodgebieden. Dit verhaal toont het gebruik van bitcoin voor wereldwijde fondsenwerving via verschillende valuta's en grenzen en het gebruik van een open grootboek voor transparantie in liefdadigheidsorganisaties.
+
+Import/export:
+(((use cases "," import / export "))) Mohammed is een elektronica-importeur in Dubai. Hij probeert bitcoin te gebruiken om elektronica uit de Verenigde Staten en China te kopen voor de import naar de VAE om het proces van betalingen voor import te versnellen. Dit verhaal laat zien hoe bitcoin kan worden gebruikt voor grote internationale transacties tussen bedrijven, gekoppeld aan fysieke goederen.
+
+Bitcoin mijnen ('mining')::
+(((use cases "," mining for bitcoin "))) Jing is een student computer engineering in Shanghai. Hij heeft een "mijn" uitrusting gebouwd om met bitcoin te mijnen met zijn technische vaardigheden om zijn inkomen aan te vullen. Dit verhaal onderzoekt de "industriële" basis van bitcoin: de gespecialiseerde apparatuur die wordt gebruikt om het bitcoin netwerk te beveiligen en nieuwe valuta uit te geven.
+
+Elk van deze verhalen is gebaseerd op de echte mensen en echte industrieën die bitcoin gebruiken om nieuwe markten, nieuwe industrieën en innovatieve oplossingen voor wereldwijde economische problemen te creëren. ((("", Startref = "GSuses01")))
+
+=== Aan de slag
+
+bitcoin((("aan de slag", "selectie van portefeuilles", id = "GSwallet01"))) (((portefeuilles "," selecteren ", id =" Wselect01 "))) (((" bitcoin "," aan de slag gaan ", id =" BCbasic01 "))) Bitcoin is een protocol dat toegankelijk is via een client toepassing die het protocol spreekt. Een "bitcoin-portemonnee" is de meest gebruikelijke gebruikersinterface voor het bitcoinsysteem, net zoals een webbrowser de meest gebruikelijke gebruikersinterface voor het HTTP-protocol is. Er zijn veel implementaties en merken van bitcoin-wallets, net zoals er vele merken webbrowsers zijn (bijv. Chrome, Safari, Firefox en Internet Explorer). En net zoals we allemaal onze favoriete browsers (Mozilla Firefox, Yay!) En onze schurken (Internet Explorer, Yuck!) Hebben, variëren bitcoin-wallets in kwaliteit, prestaties, beveiliging, privacy en betrouwbaarheid. Er is ook een referentie-implementatie van het bitcoin-protocol met een portefeuille, bekend als de "Satoshi Client" of "Bitcoin Core", die is afgeleid van de originele implementatie geschreven door Satoshi Nakamoto.
+
+==== Een Bitcoin Portemonnee Kiezen
+
+(((&quot;beveiliging&quot;, &quot;portemonnee selectie&quot;))) Bitcoin portemonnees zijn één van de meest actief ontwikkelde toepassingen in het bitcoin ecosysteem. Er is intense concurrentie en terwijl er nu waarschijnlijk een nieuwe portemonnee wordt ontwikkeld, worden de verschillende portemonnees van vorig jaar niet langer actief onderhouden. Veel portemonnees richten zich op specifieke platforms of specifieke toepassingen en sommige zijn meer geschikt voor beginners, terwijl andere vol zitten met functies voor geavanceerde gebruikers. Het kiezen van een portemonnee is zeer subjectief en hangt af van het gebruik en de gebruikerservaring. Het is daarom onmogelijk om een specifiek merk of specifieke portemonnee aan te bevelen. We kunnen bitcoin portemonnees echter indelen op basis van hun platform en functie en enige duidelijkheid bieden over alle verschillende soorten portemonnees die bestaan. Het is zelfs beter en ook relatief eenvoudig om sleutels of seeds te tussen bitcoin portemonnees over te brengen, dus loont het zeker de moeite om verschillende portemonnees uit te proberen totdat je er een vindt die bij je past.
+
+[role="pagebreak-before"]
+Bitcoin portemonnees kunnen naar platform als volgt worden gecategoriseerd:
+
+Desktop portemonnee :: Een desktop portemonnee was het eerste type bitcoin portemonnee dat gemaakt werd als een referentie implementatie en veel gebruikers hebben desktop portemonnees vanwege de functies, autonomie en controle die ze bieden. Ze laten draaien op een besturingssystemen voor algemeen gebruik, zoals Windows en Mac OS, heeft echter bepaalde beveiligingsnadelen, omdat deze platforms vaak onveilig en slecht geconfigureerd zijn.
+
+Mobiele portemonnee :: Een mobiele portemonnee is het meest voorkomende type bitcoin portemonnee. Deze portemonnees worden uitgevoerd op smartphone besturingssystemen zoals Apple iOS en Android en zijn vaak een goede keuze voor nieuwe gebruikers. Vele zijn ontworpen voor eenvoud en gebruiksgemak, maar er zijn ook volledig uitgeruste mobiele portemonnees voor ervaren gebruikers.
+
+Web portemonnee: internet portemonnees worden via een webbrowser geopend en bewaren de portemonnee van de gebruiker op een server die eigendom is van een derde partij. Dit lijkt op webmail omdat het volledig afhankelijk is van een server van een derde partij. Sommige van deze services werken met behulp van client-side code die in de browser van de gebruiker wordt uitgevoerd en die de controle over de bitcoin sleutels in de handen van de gebruiker houdt. De meesten presenteren echter een compromis door de bitcoin sleutels van gebruikers over te nemen in ruil voor gebruiksgemak. Het is niet raadzaam grote hoeveelheden bitcoin op systemen van derden op te slaan.
+
+Hardware portemonnee :: Hardware portemonnees zijn apparaten die een veilige, op zichzelf staande bitcoin portemonnee gebruiken op speciale hardware. Ze worden bediend via USB met een desktop webbrowser of via near-field-communication (NFC) op een mobiel apparaat. Door alle bitcoin gerelateerde bewerkingen op de gespecialiseerde hardware af te handelen, worden deze portemonnees als zeer veilig beschouwd en zijn ze geschikt voor het opslaan van grote hoeveelheden bitcoin.
+
+Papieren portemonnee :: (((&quot;koude opslag&quot;, zie ook = &quot;opslag&quot;))) (((opslag, &quot;koude opslag&quot;))) De sleutels die bitcoin beveiligen, kunnen ook worden afgedrukt voor langdurige opslag. Deze staan bekend als papieren portemonnees, hoewel andere materialen (hout, metaal, enz.) kunnen worden gebruikt. Papieren portemonnees bieden een low-tech maar zeer veilige manier om bitcoin op lange termijn op te slaan. Offline opslag wordt ook vaak "koude opslag" genoemd.
+
+Een andere manier om bitcoin portemonnees te categoriseren is op basis van hun niveau van autonomie en de manier van interactie met het bitcoin-netwerk:
+
+Full-node-client :: (((&quot;volledige knooppuntclients&quot;))) Een volledige cliënt of &quot;volledig knooppunt&quot; is een cliënt die de volledige geschiedenis van bitcoin transacties opslaat (elke transactie door elke gebruiker ooit), portemonnees van gebruikers beheert, en transacties direct op het bitcoin netwerk kunnen initiëren. Een volledig knooppunt  behandelt alle aspecten van het protocol en kan onafhankelijk de volledige blockchain en elke transactie valideren. Een cliënt met een volledig knooppunt verbruikt aanzienlijke computerbronnen (bijv. Meer dan 125 GB schijf, 2 GB RAM) maar biedt volledige autonomie en onafhankelijke transactie verificatie.
+
+Lichtgewicht client :: (((lichtgewicht clienten)))) (((simple-payment-verification (SPV) &quot;))) Een lichtgewicht client, ook bekend als een SPV cliënt (simple payment verification), maakt verbinding met volledige bitcoin knooppunten (eerder genoemd) voor toegang tot de bitcoin transactie informatie, maar slaat de gebruikersportemonnee lokaal op en maakt zelfstandig transacties aan, valideert en verzendt deze. Lichtgewicht cliënten communiceren rechtstreeks met het bitcoin netwerk zonder tussenpersoon.
+
+API van derden: (((&quot;API&#39;s van derden&quot;))) Een API van derden is een API die met Bitcoin communiceert via een extern systeem van APIs (Application Programming Interfaces), in plaats van via een verbinding rechtstreeks naar het bitcoin-netwerk. De portefeuille kan worden opgeslagen door de gebruiker of door servers van derden, maar alle transacties gaan via een derde partij.
+
+Door deze categorisaties te combineren, vallen veel bitcoin portemonnees in een paar groepen, met de drie meest voorkomende: volledige desktop cliënt, mobiel, lichtgewicht portemonnee en externe portemonnee voor het web. De scheidslijnen tussen de verschillende categorieën zijn vaak vaag, omdat veel portemonnees op meerdere platforms worden uitgevoerd en op verschillende manieren met het netwerk kunnen communiceren.
+
+Voor de doeleinden van dit boek zullen we het gebruik van verschillende downloadbare bitcoin cliënten demonstreren, van de referentie implementatie (Bitcoin Core) tot mobiele en web portemonees. Sommige voorbeelden vereisen het gebruik van Bitcoin Core, dat naast een volledige cliënt ook APIs aan de portemonnee-, netwerk- en transactieservices bloot stelt. Als u van plan bent de programmatische interfaces in het bitcoin systeem te verkennen, moet u Bitcoin Core of een van de alternatieve cliënten uitvoeren (zie &lt; <alt_libraries> &gt;). (((&quot;&quot;, startref = &quot;GSwallet01&quot;))) (((&quot;&quot;, startref = &quot;Wselect01&quot;)))
+
+==== Snel aan de slag
+
+(((&quot;aan de slag&quot;, &quot;quick start voorbeeld&quot;, id = &quot;GSquick01&quot;))) (((portemonees &quot;,&quot; quick start voorbeeld &quot;, id =&quot; Wquick01 &quot;))) (((use cases) , &quot;koffie kopen&quot;, id = &quot;aliceone&quot;))) Alice, die we hebben geïntroduceerd in &lt; <user-stories> &gt;, is geen technische gebruiker en heeft pas onlangs gehoord van bitcoin van haar vriend Joe. Tijdens een feestje legt Joe enthousiast bitcoin uit aan iedereen om hem heen en biedt hij een demonstratie aan. Geïntrigeerd vraagt Alice hoe ze aan de slag kan gaan met bitcoin. Joe zegt dat een mobiele portemonnee het beste is voor nieuwe gebruikers en hij beveelt enkele van zijn favoriete portefeuilles aan. Alice downloadt &quot;Mycelium&quot; voor Android en installeert deze op haar telefoon.
+
+Wanneer Alice  voor de eerste keer Mycelium gebruikt, net als bij veel bitcoin portemonnees, maakt de applicatie automatisch een nieuwe portemonnee voor haar. Alice ziet de portemonnee op haar scherm, zoals weergegeven in &lt; <mycelium-welcome> &gt; (opmerking: stuur geen bitcoin naar dit voorbeeldadres, het zal voor altijd verloren gaan).
+
+[[Mycelium-welkom]]
+De Mycelium mobiele portemonnee
+image :: images / mbc2_0101.png [ &quot;MyceliumWelcome&quot;]
+
+(((&quot;adressen&quot;, &quot;bitcoin wallet snelstartvoorbeeld&quot;))) (((QR-codes &quot;,&quot; bitcoin wallet quick start voorbeeld &quot;))) (((&quot; adressen &quot;, zie =&quot; ook sleutels en adressen &quot; ))) Het belangrijkste onderdeel van dit scherm is Alice&#39;s _bitcoin address_. Op het scherm verschijnt het als een lange reeks letters en cijfers: + 1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK +. Naast het Bitcoin adres van de wallet staat een QR-code, een vorm van barcode die dezelfde informatie bevat in een formaat dat kan worden gescand door een camera van een smartphone. De QR-code is het vierkant met een patroon van zwarte en witte stippen. Alice kan het bitcoin-adres of de QR-code naar haar klembord kopiëren door op de QR-code te tikken of op de knop Receive. In de meeste portefeuilles zal het tikken op de QR-code het ook vergroten, zodat het gemakkelijker kan worden gescand door een camera van een smartphone.
+
+[TIP]
+====
+((("addresses", "security of")))((("security", "bitcoin addresses")))Bitcoin addresses start with a 1 or 3. Like email addresses, they can be shared with other bitcoin users who can use them to send bitcoin directly to your wallet. There is nothing sensitive, from a security perspective, about the bitcoin address. It can be posted anywhere without risking the security of the account. Unlike email addresses, you can create new addresses as often as you like, all of which will direct funds to your wallet. In fact, many modern wallets automatically create a new address for every transaction to maximize privacy. A wallet is simply a collection of addresses and the keys that unlock the funds within.
+====
+
+Alice is nu klaar om geld te ontvangen. Haar portefeuille-applicatie genereerde willekeurig een private sleutel (meer in detail beschreven in &lt; <private_keys> &gt;) samen met het bijbehorende bitcoin-adres. Op dit moment is haar bitcoin-adres niet bekend bij het bitcoin-netwerk of &quot;geregistreerd&quot; bij een willekeurig deel van het bitcoin-systeem. Haar Bitcoin-adres is gewoon een nummer dat overeenkomt met een sleutel die ze kan gebruiken om de toegang tot het geld te controleren. Het werd onafhankelijk gegenereerd door haar portemonnee zonder verwijzing of registratie bij een dienst. In feite is er in de meeste wallets geen verband tussen het bitcoin-adres en enige extern identificeerbare informatie, inclusief de identiteit van de gebruiker. Tot het moment dat naar dit adres verwezen wordt als de ontvanger van waarde in een transactie gepost op het bitcoin-grootboek, is het bitcoin-adres eenvoudigweg een deel van het enorme aantal mogelijke adressen die geldig zijn in bitcoin. Alleen als het eenmaal aan een transactie is gekoppeld, wordt het onderdeel van de bekende adressen in het netwerk.
+
+Alice is nu klaar om haar nieuwe bitcoin-portemonnee te gaan gebruiken. (((&quot;&quot;, Startref = &quot;GSquick01&quot;))) (((&quot;&quot;, startref = &quot;Wquick01&quot;)))
+
+[[Getting_first_bitcoin]]
+==== Getting Your First Bitcoin
+
+(((&quot;aan de slag&quot;, &quot;bitcoin verwerven&quot;))) De eerste en vaak moeilijkste taak voor nieuwe gebruikers is het verkrijgen van wat bitcoin. In tegenstelling tot andere buitenlandse valuta, kunt u Bitcoin nog niet bij een bank of wisselkiosk kopen.
+
+Bitcoin-transacties zijn onomkeerbaar. De meeste elektronische betalingsnetwerken zoals creditcards, debetkaarten, PayPal en overschrijvingen op bankrekeningen zijn omkeerbaar. Voor iemand die bitcoin verkoopt, brengt dit verschil een zeer hoog risico met zich mee dat de koper de elektronische betaling zal terugdraaien nadat ze bitcoin hebben ontvangen, in feite de verkoper bedriegend. Om dit risico te beperken, vereisen bedrijven die traditionele elektronische betalingen accepteren in ruil voor bitcoin, meestal dat kopers verificatie van de identiteit en kredietwaardigheidscontroles ondergaan, wat enkele dagen of weken kan duren. Als nieuwe gebruiker betekent dit dat je geen bitcoin kunt kopen met een creditcard. Met een beetje geduld en creatief denken hoef je dat echter niet te doen.
+
+[role="pagebreak-before"]
+Hier zijn enkele methoden om bitcoin als een nieuwe gebruiker te krijgen:
+
+* Find a friend who has bitcoin and buy some from him or her directly. Many bitcoin users start this way. This method is the least complicated. One way to meet people with bitcoin is to attend a local bitcoin meetup listed at https://bitcoin.meetup.com/[Meetup.com].
+* Gebruik een gerubriceerde service, zoals pass: [ <a class="orm:hideurl" href="https://localbitcoins.com/">localbitcoins.com</a> ] om een verkoper bij u in de buurt te vinden om bitcoin te kopen voor geld in een persoonlijke transactie.
+* Verdien bitcoin door een product of dienst voor bitcoin te verkopen. Als je een programmeur bent, verkoop je programmeervaardigheden. Als je een kapper bent, knip je het haar voor bitcoin.
+* ((("Coin ATM Radar")))((("ATMs, locating")))Use a bitcoin ATM in your city. A bitcoin ATM is a machine that accepts cash and sends bitcoin to your smartphone bitcoin wallet. Find a bitcoin ATM close to you using an online map from https://coinatmradar.com/[Coin ATM Radar].
+* ((("exchange rates", "listing services")))Use a bitcoin currency exchange linked to your bank account. Many countries now have currency exchanges that offer a market for buyers and sellers to swap bitcoin with local currency. Exchange-rate listing services, such as https://bitcoinaverage.com/[BitcoinAverage], often show a list of bitcoin exchanges for each currency.
+
+[TIP]
+====
+(((privacy, onderhoud &quot;))) (((&quot; veiligheid &quot;,&quot; handhaven van privacy &quot;))) (((&quot; digitale valuta&#39;s &quot;,&quot; valutaomwisseling &quot;))) (((&quot; valutaomwisseling &quot;))) (((&quot;digitale valuta&#39;s&quot;, &quot;voordelen van bitcoin&quot;))) (((&quot;bitcoin&quot;, &quot;voordelen van&quot;))) Een van de voordelen van bitcoin ten opzichte van andere betalingssystemen is dat het, indien correct gebruikt, gebruikers het voordeel biedt veel meer privacy. Het verkrijgen, houden en uitgeven van bitcoin vereist niet dat u gevoelige en persoonlijk identificeerbare informatie bekend maakt aan derden. Waar Bitcoin echter traditionele systemen, zoals valuta-uitwisselingen, raakt, zijn nationale en internationale voorschriften vaak van toepassing. Om bitcoin in te ruilen voor uw nationale valuta, moet u vaak een identiteitsbewijs en bankgegevens overleggen. Gebruikers moeten zich ervan bewust zijn dat zodra een bitcoin-adres aan een identiteit is gekoppeld, alle bijbehorende bitcoin-transacties ook gemakkelijk te identificeren en te volgen zijn. Dit is een reden waarom veel gebruikers ervoor kiezen om speciale exchange-accounts te behouden die niet zijn gekoppeld aan hun portemonnee.
+====
+
+Alice heeft door een vriend kennis gemaakt met bitcoin, dus heeft ze een gemakkelijke manier om haar eerste bitcoin te verkrijgen. Vervolgens gaan we kijken hoe ze bitcoin koopt van haar vriend Joe en hoe Joe de bitcoin naar haar portemonnee stuurt.
+
+[[Bitcoin_prijs]]
+==== De huidige prijs van Bitcoin vinden
+
+(((&quot;aan de slag&quot;, &quot;wisselkoersen&quot;))) (((wisselkoersen), &quot;bepalen&quot;))) Voordat Alice bitcoin van Joe kan kopen, moeten ze het eerst eens zijn over de wisselkoersen tussen bitcoin en US dollars . Dit roept een veelgestelde vraag op voor degenen die nieuw zijn bij bitcoin: &quot;Wie stelt de bitcoin prijs vast?&quot; Het korte antwoord is dat de prijs wordt bepaald door markt.
+
+(((&quot;wisselkoersen&quot;, &quot;zwevend&quot;))) (((&quot;zwevende wisselkoers&quot;))) Bitcoin heeft, net als de meeste andere valuta, een variabele wisselkoers. Dat betekent dat de waarde van bitcoin ten opzichte van andere valuta fluctueert op basis van vraag en aanbod in de verschillende markten waar het wordt verhandeld. Bijvoorbeeld, de &quot;prijs&quot; van bitcoin in Amerikaanse dollars wordt berekend in iedere markt op basis van de meest recente handel in bitcoin en Amerikaanse dollars. Als zodanig heeft de prijs de neiging meerdere malen per seconde nauwkeurig te fluctueren. Een prijsstelling service verzamelt de prijzen van verschillende markten en berekent een naar volume gewogen gemiddelde dat de brede wisselkoers van een valutapaar in de markt vertegenwoordigt (bijv. BTC / USD).
+
+Er zijn honderden applicaties en websites die de huidige marktrente kunnen bieden. Hier zijn enkele van de meest populaire:
+
+https://bitcoinaverage.com/[Bitcoin Average]:: ((("BitcoinAverage")))A site that provides a simple view of the volume-weighted-average for each currency.
+https://coincap.io/[CoinCap]:: A service listing the market capitalization and exchange rates of hundreds of crypto-currencies, including bitcoin.
+https://bit.ly/cmebrr[Chicago Mercantile Exchange Bitcoin Reference Rate]:: A reference rate that can be used for institutional and contractual reference, provided as part of investment data feeds by the CME.
+
+Naast deze verschillende sites en applicaties, zullen de meeste bitcoin portemonnees automatisch bedragen omzetten tussen bitcoin en andere valuta. Joe zal zijn portemonnee gebruiken om de prijs automatisch te converteren voordat bitcoin naar Alice wordt gestuurd.
+
+[[Verzenden_ontvangen]]
+==== Bitcoin verzenden en ontvangen
+
+
+(((&quot;aan de slag gaan&quot;, &quot;verzenden en ontvangen van bitcoin&quot;, id = &quot;GSsend01&quot;))) (((uitgavenbitcoin &quot;,&quot; bitcoin wallet quick start voorbeeld &quot;))) (((besteding van bitcoin&quot;, zie = &quot;ook transacties&quot;))) Alice heeft besloten om $ 10 Amerikaanse dollars om te wisselen voor bitcoin, om niet te veel geld te riskeren voor deze nieuwe technologie. Ze geeft Joe $ 10 in contanten, opent haar Mycelium portemonnee en selecteert Ontvangen. Deze toont een QR-code met het eerste bitcoin adres van Alice.
+
+Joe kiest vervolgens Verzenden op zijn smartphone-portemonnee en krijgt een scherm met twee ingangen te zien:
+
+* Een Bitcoin adres van bestemming
+* Het te verzenden bedrag, in bitcoin (BTC) of zijn lokale valuta (USD)
+
+In het invoerveld voor het bitcoin adres is een klein pictogram dat op een QR code lijkt. Hierdoor kan Joe de barcode scannen met zijn smartphone-camera, zodat hij het bitcoin-adres van Alice niet hoeft in te typen dat vrij lang en moeilijk te typen is. Joe tikt op het pictogram met de QR code en activeert de smartphone camera en scant de QR code die op de smartphone van Alice wordt weergegeven.
+
+Joe heeft nu het Bitcoin adres van Alice ingesteld als de ontvanger. Joe voert het bedrag in als $ 10 US dollars en zijn portemonnee converteert het door toegang te krijgen tot de meest recente wisselkoers van een online dienst. De wisselkoers op dat moment is $ 100 Amerikaanse dollars per bitcoin, dus $ 10 Amerikaanse dollars is 0,10 bitcoin (BTC) of 100 millibitcoin (mBTC) zoals weergegeven in de schermafbeelding van Joe&#39;s portemonnee (zie &lt; <airbitz-mobile-send> &gt;).
+
+[[Airbitz-mobile-send]]
+[Role = &quot;smallereighty&quot;]
+.Airbitz mobiel bitcoin wallet send scherm
+afbeelding :: images / mbc2_0102.png [&quot;airbitz mobiel verzendscherm&quot;]
+
+Joe controleert vervolgens zorgvuldig of hij het juiste bedrag heeft ingevoerd, omdat hij op het punt staat geld over te maken en fouten onomkeerbaar zijn. Nadat hij het adres en het bedrag heeft gecontroleerd, drukt hij op Verzenden om de transactie te verzenden. De mobiele bitcoin portemonnee van Joe stelt een transactie samen die 0.10 BTC toewijst aan het adres dat door Alice wordt aangeleverd, het geld uit Joe&#39;s portemonnee haalt en de transactie ondertekent met de privésleutels van Joe. Dit vertelt het bitcoin netwerk dat Joe toestemming heeft gegeven voor een overdracht van waarde naar het nieuwe adres van Alice. Omdat de transactie wordt verzonden via het peer-to-peer protocol, wordt deze snel verspreid over het bitcoin-netwerk. In minder dan een seconde ontvangen de meeste van de goed verbonden knooppunten in het netwerk de transactie en zien het adres van Alice voor de eerste keer.
+
+Ondertussen blijft de portefeuille van Alice voortdurend &quot;luisteren&quot; naar gepubliceerde transacties op het bitcoin netwerk, op zoek naar een die overeenkomt met de adressen in haar portemonnee. Een paar seconden nadat de portemonnee van Joe de transactie heeft verzonden, geeft de portemonnee van Alice aan dat hij 0.10 BTC ontvangt.
+
+.Confirmaties
+****
+(((&quot;aan de slag gaan&quot;, &quot;bevestigingen&quot;))) (((bevestigingen, &quot;bitcoin wallet snelstartvoorbeeld&quot;))) (((bevestigingen, zie = &quot;ook mining en consensus; transacties&quot;)) ) (((&quot;clearing&quot;, zie ook = &quot;bevestigingen&quot;))) Aanvankelijk zal het adres van Alice de transactie van Joe als &quot;onbevestigd&quot; tonen. Dit betekent dat de transactie is doorgegeven aan het netwerk, maar nog niet is vastgelegd in het bitcoin-grootboek, de zogenaamde blockchain. Om te worden bevestigd, moet een transactie worden opgenomen in een blok en worden toegevoegd aan de blockchain, die gemiddeld om de tien minuten plaatsvindt. In traditionele financiële termen staat dit bekend als "clearing". Zie &lt;voor meer informatie over propagatie, validatie en verevening (bevestiging) van bitcoin transacties <mining> &gt;.
+****
+
+Alice is nu de trotse bezitter van 0.10 BTC die ze kan uitgeven. In het volgende hoofdstuk zullen we haar eerste aankoop met bitcoin bekijken en de onderliggende transactie- en propagatie technologieën in meer detail bekijken. (((&quot;&quot;, Startref = &quot;BCbasic01&quot;))) (((use cases), &quot;buying coffee &quot;, startref =&quot; aliceone &quot;)))

@@ -1,0 +1,117 @@
+[[appdx_bitcore]]
+[appendix]
+
+== Bitcore
+
+
+((("Bitcore", id="bitcore16")))A Bitcore egy eszközkészlet, amelyet a BitPay bocsát rendelkezésre. Célja, hogy könnyen használható eszközöket biztosítson bitcoin fejlesztők számára. A Bitcore szinte teljes kódja JavaScriptben íródott. Vannak olyan modulok, amelyek kifejezetten a NodeJS-hez készültek. Végül, a Bitcore "csomópont" modulja tartalmazza a Bitcoin Core C++ kódját. További információt a https://bitcore.io oldalon talál.
+
+=== A Bitcore funkciói
+
+* Bitcoin teljes csomópont (bitcore-node)
+* Blokkfelfedező (insight)
+* Blokk, tranzakció és pénztárca eszközök (bitcore-lib)
+* Közvetlen kommunikáció a Bitcoin P2P hálózatával (bitcore-p2p)
+* Mag entrópia mnemonik generálása (bitcore-mnemonic)
+* Fizetési protokoll (bitcore-payment-protocol)
+* Üzenet ellenőrzés és aláírás (bitcore-message)
+* Elliptikus görbe integrált titkosítási rendszer (bitcore-ecies)
+* Pénztárca szolgáltatás (bitcore-wallet-service)
+* Pénztárca kliens (bitcore-wallet-client)
+* Homokozó (bitcore-playground)
+* A szolgáltatások integrálása közvetlenül a Bitcoin Core-ral (bitcore-node)
+
+=== Bitcore könyvtár példák
+
+==== Előfeltételek
+
+* NodeJS >= 4.x, vagy használja a https://bitcore.io/playground[hosztolt online homokozónkat]
+
+NodeJS és a REPL csomópont használata esetén:
+
+[source,bash]
+----
+$ npm install -g bitcore-lib bitcore-p2p
+----
+
+==== Példák bitcore-libet használó pénztárca funkciókra
+
+Új bitcoin cím létrehozása titkos kulccsal:
+
+----
+> bitcore = require('bitcore-lib')
+> privateKey = new bitcore.PrivateKey()
+> address = privateKey.toAddress().toString()
+----
+
+Hierarchikus determinisztikus titkos kulcs és cím létrehozása:
+
+----
+> hdPrivateKey = bitcore.HDPrivateKey()
+> hdPublicKey = bitcore.HDPublicKey(hdPrivateKey)
+> hdAddress = new bitcore.Address(hdPublicKey.publicKey).toString()
+----
+
+Tranzakció létrehozása és aláírása UTXO-ból:
+
+----
+> utxo = {
+  txid: el nem költött kimenetet tartalmazó tranzakció azonosítója,
+  outputIndex: kimeneti index, pl. 0,
+  cím: addressOfUtxo,
+  script: bitcore.Script.buildPublicKeyHashOut(addressOfUtxo).toString(),
+  satoshis: címre küldött összeg
+}
+> fee = 3000 //a hálózat állapotától függően kell beállítani
+> tx = new bitcore.Transaction()
+        .from(utxo)
+        .to(address, 35000)
+        .fee(fee)
+        .enableRBF()
+        .sign(privateKeyOfUtxo)
+----
+
+Cserélje ki a mempool utolsó tranzakcióját (replace-by-fee):
+
+----
+> rbfTx = new Transaction()
+           .from(utxo)
+           .to(address, 35000)
+           .fee(fee*2)
+           .enableRBF()
+           .sign(privateKeyOfUtxo);
+> tx.serialize();
+> rbfTx.serialize();
+----
+
+Tranzakció elküldése a bitcoin hálózatnak
+(megjegyzés: csak érvényes tranzakciókat küldjön el; peer hosztokhoz nézze meg a https://bitnodes.21.co/nodes[] oldalt):
+
+1. Másolja az alábbi kódot egy _broadcast.js_ nevű fájlba.
+2. A +tx+ és +rbfTx+ változók rendre a +tx.serialize()+ és +rbfTx.serialize()+ kimenetei.
+3. A replace-by-fee használatához, a peernek támogatnia kell a +mempoolreplace+ bitcoind opciót, és annak értéke +1+ kell hogy legyen.
+4. Futassa a _broadcast.js_ fájl csomópontot((("", startref="bitcore16"))):
+
+----
+var p2p = require('bitcore-p2p');
+var bitcore = require('bitcore-lib');
+var tx = new bitcore.Transaction('sorosító függvény kimenete');
+var rbfTx = new bitcore.Transaction('sorosító függvény kimenete');
+var host = 'ip cím'; //használjon érvényes peert, amely a 8333 tcp porton figyel
+var peer = new p2p.Peer({host: host});
+var messages = new p2p.Messages();
+peer.on('ready', function() {
+  var txs = [messages.Transaction(tx), messages.Transaction(rbfTx)];
+  var index = 0;
+  var interval = setInterval(function() {
+    peer.sendMessage(txs[index++]);
+    console.log('tx: ' + index + ' elküldve');
+    if (index === txs.length) {
+      clearInterval(interval);
+      console.log('lecsatlakozás peerről: ' + host);
+      peer.disconnect();
+    }
+  }, 2000);
+});
+peer.connect();
+----

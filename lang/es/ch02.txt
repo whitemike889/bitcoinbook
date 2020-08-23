@@ -1,0 +1,288 @@
+[[ch02_bitcoin_overview]]
+== ¿Cómo funciona Bitcoin?
+
+=== Transacciones, Bloques, Minería, y la Cadena de Bloques
+
+((("bitcoin", "descripción general de", id="BCover02")))((("autoridad central de confianza")))((("sistemas descentralizados", "descripción general de bitcoin", id="DCSover02")))El sistema bitcoin, a diferencia de los sistemas bancarios y de pago tradicionales, se basa en la confianza descentralizada. En lugar de una autoridad central de confianza, en bitcoin, la confianza se logra como una propiedad emergente de las interacciones de diferentes participantes en el sistema bitcoin. En este capítulo, examinaremos bitcoin desde un nivel alto al rastrear una sola transacción a través del sistema bitcoin y veremos cómo se hace "confiable" y aceptada por el mecanismo de consenso distribuido de bitcoin y finalmente se registra en la cadena de bloques, el libro de contabilidad distribuido de todas las transacciones. Los capítulos subsiguientes ahondarán en la tecnología detrás de las transacciones, la red y la minería.
+
+==== Descripción General de Bitcoin
+
+En el diagrama de resumen que se muestra en <<bitcoin-overview>>, vemos que el sistema bitcoin consiste en usuarios con carteras que contienen llaves, transacciones que se propagan a través de la red y mineros que producen (a través de cómputo competitivo) la cadena de bloques de consenso, que es el libro de contabilidad autorizado de todas las transacciones.
+
+
+((("páginas como explorador de la cadena de bloques")))Cada ejemplo en este capítulo se basa en una transacción real realizada en la red bitcoin, simulando las interacciones entre los usuarios (Joe, Alice, Bob y Gopesh) al enviar fondos de una cartera a otra. Mientras rastreamos una transacción a través de la red bitcoin hasta la cadena de bloques, usaremos un _explorador de la cadena de bloques_ para visualizar cada paso. Un explorador de la cadena de bloques es una aplicación web que funciona como un motor de búsqueda de bitcoin, ya que permite buscar direcciones, transacciones y bloques, y ver las relaciones y los flujos entre ellos.
+
+[[bitcoin-overview]]
+.Descripción general de Bitcoin
+image::images/mbc2_0201.png["Bitcoin Overview"]
+
+((("Bitcoin Block Explorer")))((("BlockCypher Explorer")))((("blockchain.info")))((("BitPay Insight")))Algunos exploradores populares de la cadena de bloques son:
+
+* https://live.blockcypher.com[BlockCypher Explorer]
+* https://blockchain.info[blockchain.info]
+* https://insight.bitpay.com[BitPay Insight]
+* https://blockstream.info[Blockstream Explorer]
+
+Cada uno de estos tiene una función de búsqueda que puede tomar una dirección bitcoin, un hash de transacción, un número de bloque o un hash de bloque y recuperar la información correspondiente de la red bitcoin. Con cada ejemplo de transacción o bloque, te proporcionaremos una URL para que puedas buscarla y estudiarla en detalle.
+
+
+[[cup_of_coffee]]
+==== Comprando una Taza de Café
+
+((("casos de uso", "comprando café", id="UCcoffee02")))Alice, presentada en el capítulo anterior, es una nueva usuaria que acaba de adquirir su primer bitcoin. En <<getting_first_bitcoin>>, Alice se reunió con su amigo Joe para intercambiar algo de dinero por bitcoin. La transacción creada por Joe financió la billetera de Alice con 0.10 BTC. Ahora Alice realizará su primera transacción, comprando una taza de café en la cafetería Bob's en Palo Alto, California.
+
+((("tipos de cambio", "fijando")))Bob's Cafe recientemente comenzó a aceptar pagos de bitcoin al agregar una opción de bitcoin a su sistema de punto de venta. Los precios en Bob's Cafe están listados en la moneda local (dólares estadounidenses), pero en la caja, los clientes tienen la opción de pagar en dólares o bitcoins. Alice hace su pedido de una taza de café y Bob la introduce en máquina registradora, como lo hace para todas las transacciones. El punto de venta convierte automáticamente el precio total de dólares estadounidenses a bitcoin al tipo de cambio vigente y muestra el precio en ambas monedas:
+
+----
+Total:
+$1.50 USD
+0.015 BTC
+----
+
+
+((("millibits")))Bob dice, "Son 1.50 dólares, o 15 milibits".
+
+((("solicitudes de pago")))((("QR, códigos", "solicitudes de pago")))El sistema de punto de venta de Bob también creará automáticamente un código QR especial que contiene una _solicitud de pago_ (ver <<payment-request-QR>>).
+
+A diferencia del código QR que solo contiene una dirección bitcoin de destino, una solicitud de pago es una URL codificada en QR que contiene una dirección de destino, la cantidad a pagar y una descripción genérica como "Bob's Cafe". Esto permite a la aplicación de cartera bitcoin rellenar la información usada para enviar el pago mientras muestra una descripción legible para el usuario. Puedes escanear el código QR con una aplicación de cartera bitcoin para ver lo que vería Alice.
+
+
+[[payment-request-QR]]
+.Código QR de solicitud de pago
+image::images/mbc2_0202.png["payment-request"]
+
+[TIP]
+====
+((("QR, códigos", "advertencias y precauciones")))((("transacciones", "advertencias y precauciones")))((("advertencias y precauciones", "evita enviar dinero a las direcciones que aparecen en el libro")))Trata de escanear esto con tu cartera para ver la dirección y la cantidad, pero NO ENVÍES DINERO.
+====
+[[payment-request-URL]]
+.El código QR de la solicitud de pago codifica la siguiente URL, definida en BIP-21:
+----
+bitcoin:1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA?
+cantidad=0.015&
+label=Bob%27s%20Cafe&
+message=Purchase%20at%20Bob%27s%20Cafe
+
+Componentes de la URL
+
+Una dirección bitcoin: "1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA"
+La cantidad a pagar: "0.015"
+Una etiqueta para la dirección del receptor: "Bob's Cafe"
+Una descripción del pago: "Compra en Bob's Cafe"
+----
+
+Alice usa su teléfono inteligente para escanear el código de barras en la pantalla. Su teléfono inteligente muestra un pago de +0.0150 BTC+ a +Bob's Cafe+ y selecciona Enviar para autorizar el pago. En unos pocos segundos (aproximadamente la misma cantidad de tiempo que una autorización de tarjeta de crédito), Bob ve la transacción en el caja registradora, completando la transacción.
+
+En las siguientes secciones, examinaremos esta transacción con más detalle. Veremos cómo lo construyó la cartera de Alice, cómo se propagó a través de la red, cómo se verificó y, finalmente, cómo Bob puede gastar esa cantidad en transacciones posteriores.
+
+[NOTE]
+====
+bitcoin((("valores fraccionarios")))((("milli-bitcoin")))((("satoshis")))La red bitcoin puede realizar transacciones en valores fraccionarios, por ejemplo, desde milibitcoin (1/1000 de un bitcoin) hasta 1/100,000.000 de un bitcoin, que se conoce como satoshi. A lo largo de este libro, usaremos el término "bitcoin" para referirnos a cualquier cantidad de moneda bitcoin, desde la unidad más pequeña (1 satoshi) hasta el número máximo (21,000,000) de todos los bitcoin que serán minados.
+====
+
+Puedes examinar la transacción de Alice a Bob's Cafe en la cadena de bloques usando un explorador de bloques (<<view_alice_transaction>>):
+
+[[view_alice_transaction]]
+.Examina la transacción de Alice en https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[blockchain.info]
+====
+----
+https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2
+----
+====
+
+=== Transacciones Bitcoin
+
+((("transacciones", "definición")))En términos simples, una transacción comunica a la red que el propietario de algún valor de bitcoin ha autorizado la transferencia de ese valor a otro propietario. El nuevo propietario ahora puede gastar el bitcoin creando otra transacción que autorice la transferencia a otro propietario, y así sucesivamente, en una cadena de propiedad.
+
+==== Entradas y Salidas de Transacción
+
+((("transacciones", "su descripción general", id="Tover02")))((("salidas y entradas", "conceptos básicos")))Las transacciones son como filas en un libro de contabilidad de doble entrada. Cada transacción contiene una o más "entradas", que son como débitos contra una cuenta de bitcoin. En el otro lado de la transacción, hay una o más "salidas", que son como créditos agregados a una cuenta de bitcoin. (((("comisiones", "transacción, comisiones de")))Las entradas y salidas (débitos y créditos) no necesariamente suman la misma cantidad. En cambio, las salidas suman un poco menos que las entradas y la diferencia representa una _comisión de transacción_ implícita, que es un pequeño pago que cobra el minero que incluye la transacción en el libro de contabilidad. Una transacción bitcoin se muestra como una entrada del libro de contabilidad en <<transaction-double-entry>>.
+
+La transacción también contiene la prueba de propiedad para cada cantidad de bitcoin (entradas) cuyo valor se está gastando, en forma de una firma digital del propietario, que puede ser validada independientemente por cualquier persona. ((("gastando bitcoin", "definición")))En términos de bitcoin, "gastar" es firmar una transacción que transfiere el valor de una transacción anterior a un nuevo propietario identificado por una dirección bitcoin.
+
+[[transaction-double-entry]]
+.Transacciones como contabilidad de doble entrada
+image::images/mbc2_0203.png["Transaction Double-Entry"]
+
+==== Cadenas de Transacciones
+
+((("cadenas de transacciones")))El pago de Alice a Bob's Cafe utiliza la salida de una transacción anterior como entrada. En el capítulo anterior, Alice recibió bitcoin de su amigo Joe a cambio de dinero en efectivo. Esa transacción creó un valor de bitcoin bloqueado por la llave de Alice. Su nueva transacción a Bob's Cafe hace referencia a la transacción anterior como entrada y crea nuevas salidas para pagar la taza de café y recibir el cambio. Las transacciones forman una cadena, donde las entradas de la última transacción corresponden a las salidas de transacciones anteriores. La llave de Alice proporciona la firma que desbloquea esas salidas de la transacción anterior, lo que demuestra a la red bitcoin que es la propietaria de los fondos. Ella registra el pago por el café a la dirección de Bob, por lo que "obstruye" esa salida con el requisito de que Bob produzca una firma para gastar esa cantidad. Esto representa una transferencia de valor entre Alice y Bob. Esta cadena de transacciones, desde Joe a Alice a Bob, se ilustra en <<blockchain-mnemonic>>.
+
+[[blockchain-mnemonic]]
+.Una cadena de transacciones, donde la salida de una transacción es la entrada de la siguiente transacción
+image::images/mbc2_0204.png["Transaction chain"]
+
+==== Creando el Cambio
+
+((("creando el cambio")))((("direcciones del cambio")))((("direcciones", "direcciones de cambio")))Muchas transacciones bitcoin incluirán salidas que hacen referencia tanto a una dirección del nuevo propietario como a una dirección del propietario actual, llamada la dirección _de cambio_. Esto se debe a que las entradas de transacciones, como los billetes, no se pueden dividir. Si compras un artículo de 5 dólares en una tienda pero usas un billete de 20 dólares para pagar el artículo, esperarás recibir un cambio de 15 dólares. El mismo concepto se aplica a las entradas de transacción de bitcoin. Si compraste un artículo que cuesta 5 bitcoin, pero solo tenías una entrada de 20 bitcoin, enviarías una salida de 5 bitcoin al propietario de la tienda y una salida de 15 bitcoin a ti mismo como cambio (menos cualquier comisión de transacción aplicable). Es importante destacar que la dirección de cambio no tiene por qué ser la misma dirección que la de la entrada y, de hecho, por razones de privacidad, suele ser una dirección nueva de la cartera del propietario.
+
+Diferentes carteras pueden usar diferentes estrategias al agregar entradas para realizar un pago solicitado por el usuario. Podrían agregar muchas entradas pequeñas, o usar una que sea igual o mayor que el pago deseado. A menos que la cartera pueda agregar entradas de tal manera que coincida exactamente con el pago deseado más las comisiones de transacción, la cartera deberá generar algún cambio. Esto es muy similar a cómo las personas manejan el efectivo. Si siempre usas el billete más grande en tu bolsillo, terminarás con un bolsillo lleno de cambio suelto. Si solo usas el cambio suelto, siempre tendrás solo billetes grandes. La gente subconscientemente encuentra un equilibrio entre estos dos extremos, y los desarrolladores de carteras bitcoin se esfuerzan por programar este equilibrio.
+
+((("transacciones", "definición")))((("salidas y entradas", "definición")))((("entradas", see="salidas y entradas")))En resumen, las _transaccciones_ mueven el valor de las _entradas de transacción_ a las _salidas de transacción_. Una entrada es una referencia a la salida de una transacción anterior, que muestra de dónde proviene el valor. Una salida de transacción dirige un valor específico a la dirección bitcoin de un nuevo propietario y puede incluir una salida de cambio de vuelta al propietario original. Las salidas de una transacción pueden usarse como entradas en una nueva transacción, creando así una cadena de propiedad a medida que el valor se mueve de propietario a propietario (ver <<blockchain-mnemonic>>).
+
+==== Formas Comunes de Transacción
+
+La forma más común de transacción es un pago simple de una dirección a otra, que a menudo incluye algún "cambio" devuelto al propietario original. Este tipo de transacción tiene una entrada y dos salidas y se muestra en <<transaction-common>>.
+
+[[transaction-common]]
+.Transacción más común
+image::images/mbc2_0205.png["Common Transaction"
+
+Otra forma común de transacción es una que agrega muchas entradas en una sola salida (ver <<transaction-aggregating>>). Esto representa el equivalente en el mundo real a intercambiar un montón de monedas y billetes en un único billete más grande. Las transacciones como esas a veces se generan por las aplicaciones de monedero para limpiar muchas cantidades pequeñas recibidas como cambio por pagos.
+
+[[transaction-aggregating]]
+.Transacciones de agregación de fondos
+image::images/mbc2_0206.png["Aggregating Transaction"]
+
+Finalmente, otra forma de transacción que se ve a menudo en el libro de contabilidad de bitcoin es una transacción que distribuye una entrada a múltiples salidas que representan múltiples destinatarios (ver <<transaction-distributing>>). Este tipo de transacción a veces es utilizada por entidades comerciales para distribuir fondos, como cuando se procesan pagos de nómina a varios empleados.((("", startref="Tover02")))
+
+[[transaction-distributing]]
+.Distribución de fondos de transacción
+image::images/mbc2_0207.png["Distributing Transaction"
+
+=== Construyendo una Transacción
+
+((("transacciones", "construyendo", id="Tconstruct02")))((("carteras", "construyendo transacciones")))La aplicación de cartera de Alice contiene toda la lógica necesaria para seleccionar entradas y salidas apropiadas al construir una transacción de acuerdo con las especificaciones de Alice. Alice solo necesita especificar un destino y una cantidad, y el resto sucede en la aplicación de cartera sin que ella vea los detalles. Es importante destacar que una aplicación de cartera puede construir transacciones aun cuando esté completamente sin conexión. De la misma forma que se puede escribir un cheque en casa y luego enviarlo al banco en un sobre, la transacción no necesita ser construida y firmada mientras se está conectado a la red bitcoin.
+
+==== Consiguiendo las Entradas Correctas
+
+((("salidas y entradas", "localizando y registrando entradas")))La aplicación de cartera de Alice primero tendrá que encontrar entradas con las que poder pagar la cantidad que quiere enviar a Bob. La mayoría de las carteras mantienen un registro de todas las salidas disponibles que pertenecen a las direcciones en la cartera. Por lo tanto, la cartera de Alice guardaría una copia de la salida de transacción que se creó con la transacción de Joe, que se creó a cambio de dinero en efectivo (ver <<getting_first_bitcoin>>). Una aplicación de cartera bitcoin que se ejecuta en un nodo completo en realidad contiene una copia de cada salida no gastada de cada transacción en la cadena de bloques. Esto permite a una cartera construir entradas de transacción, así como verificar rápidamente que las transacciones entrantes usan entradas correctas. Sin embargo, debido a que un nodo completo ocupa una gran cantidad de espacio en disco, la mayoría de las carteras se ejecutan como clientes "ligeros" que rastrean únicamente las salidas no gastadas propias de ese usuario.
+
+Si la aplicación de la cartera no mantiene una copia de las salidas de transacción no gastadas, puede consultar a la red bitcoin para que le proporcione esta información utilizando una variedad de APIs disponibles a través de diferentes proveedores o solicitándoselo a un nodo completo mediante una llamada de interfaz de programación de aplicaciones (API). <<example_2-2>> muestra una petición API, construida a partir de un comando HTTP GET a una URL específica. Esta URL devolverá todas las salidas de transacciones no gastadas para una dirección, proporcionando a cualquier aplicación la información que necesita para construir las entradas de transacción para ser gastadas. Usamos el cliente HTTP simple de línea de comandos _cURL_ para obtener la respuesta.
+
+[[example_2-2]]
+.Observa todas las salidas no gastadas de  la dirección bitcoin de Alice.
+====
+[source,bash]
+----
+$ curl https://blockchain.info/unspent?active=1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK
+----
+====
+
+[source,json]
+----
+{
+
+	"unspent_outputs":[
+
+		{
+			"tx_hash":"186f9f998a5...2836dd734d2804fe65fa35779",
+			"tx_index":104810202,
+			"tx_output_n": 0,
+			"script":"76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac",
+			"value": 10000000,
+			"value_hex": "00989680",
+			"confirmations":0
+		}
+
+	]
+}
+----
+
+
+La respuesta en <<example_2-2>> muestra una salida no gastada (una que aún no ha sido gastada) bajo la propiedad de la dirección de Alice +1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK+. La respuesta incluye la referencia a la transacción en la que esta salida no gastada está contenida (el pago de Joe) y su valor en satoshis, a 10 millones, equivalente a 0.10 bitcoin. Con esta información, la cartera de Alice puede construir una transacción para transferir esa cantidad a la dirección del nuevo propietario.
+
+[TIP]
+====
+Ver https://www.blockchain.com/btc/tx/7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18[transacción de Joe a Alice].
+====
+
+Como se puede ver, la cartera de Alice contiene suficiente bitcoin en una sola salida no gastada para pagar la taza de café. Si este no hubiera sido el caso, la cartera de Alice podría tener que "hurgar" a través de un montón de salidas más pequeñas no gastadas, como eligiendo monedas del bolsillo hasta que se encuentren las suficientes para pagar el café. En ambos casos, puede ser necesario que devuelvan el cambio, como veremos en la siguiente sección, donde la cartera crea las salidas de la transacción (pagos).
+
+
+==== Creando las Salidas
+
+((("salidas y entradas", "creando salidas")))Una salida de una transacción se crea en utilizando lenguaje script de comandos que crea un desafío protector del valor y solo puede redimirse mediante la introducción de una solución a la secuencia script de comandos. En términos más simples, el resultado de la transacción de Alice contendrá un script que dice algo así como "Esta salida es pagadera a quien quiera que pueda presentar una firma de la llave correspondiente a la dirección de Bob". Debido a que solo Bob tiene la billetera con las llaves correspondientes a esa dirección, solo la billetera de Bob puede presentar dicha firma para redimir esta salida. Por lo tanto, Alice "blinda" el valor de la salida con una solicitud de una firma de Bob.
+
+Esta transacción también incluirá una segunda salida, porque los fondos de Alice están en la forma de una salida de 0.10 BTC, demasiado dinero para la taza de café de 0.015 BTC. Alice necesitará 0.085 BTC como cambio. El pago del cambio de Alice se crea por la cartera de Alice como una salida en la misma transacción que el pago a Bob. En definitiva, la cartera de Alice divide sus fondos en dos pagos: uno para Bob y otro de vuelta para ella misma. Después podrá usar (gastar) la salida del cambio en una transacción posterior.
+
+Finalmente, para que la transacción sea procesada por la red de manera oportuna, la aplicación de cartera de Alice añadirá una pequeña comisión. Esta no está explícita en la transacción; se obtiene de la diferencia entre entradas y salidas. Si en vez de llevarse 0.085 de cambio, Alice crea solo 0.0845 como segunda salida, habrá perdido 0.0005 BTC (medio milibitcoín). La entrada de 0.10 BTC no se gasta completamente con las dos salidas, ya que sumarán menos de 0.10. La diferencia resultante es la comisión de transacción que cobra el minero como tasa por validar e incluir la transacción en un bloque y registrarlo en la cadena de bloques.
+
+La transacción resultante puede verse usando un explorador web de la cadena de bloques, tal como se muestra en <<transaction-alice>>.
+
+[[transaction-alice]]
+[role="smallerseventyfive"]
+.Transacción de Alice a la Cafetería de Bob
+image::images/mbc2_0208.png["Alice Coffee Transaction"]
+
+[[transaction-alice-url]]
+[TIP]
+====
+Vea la https://www.blockchain.com/btc/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[transacción de Alice a la cafetería de Bob].
+====
+
+==== Añadiendo la Transacción al Libro de Contabilidad
+
+La transacción creada por la aplicación de cartera de Alice tiene una longitud de 258 bytes y contiene todo lo necesario para confirmar la propiedad de los fondos y asignar nuevos propietarios. Ahora, la transacción debe ser transmitida a la red bitcoin donde se convertirá en parte de la cadena de bloques. En la siguiente sección veremos cómo una transacción se convierte en parte de un nuevo bloque y cómo se "mina" el bloque. Finalmente, veremos cómo el nuevo bloque, una vez añadido a la cadena de bloques, es cada vez más confiable por la red cuantos más bloques se añadan.
+
+==== Transmitiendo la Transacción
+
+((("propagación", "el proceso de propagación")))Debido a que la transacción contiene toda la información necesaria para ser procesada, no importa cómo o desde dónde se transmita a la red bitcoin. La red bitcoin es una red de igual a igual (P2P), en la que cada cliente bitcoin participa conectándose a otros muchos clientes bitcoin. El propósito de la red bitcoin es propagar transacciones y bloques a todos los participantes.
+
+==== Cómo se propaga
+
+((("nodos bitcoin", "definición")))((("nodos", see="nodos bitcoin")))Cualquier sistema, como un servidor, una aplicación de escritorio, o una cartera, que participa en la red bitcoin "hablando", el protocolo bitcoin se denomina _nodo bitcoin_. La aplicación de cartera de Alice puede enviar la nueva transacción a cualquier nodo bitcoin al que esté conectada a través de cualquier tipo de conexión: por cable, WiFi, móvil, etc. Su cartera bitcoin no tiene por qué estar conectada a la cartera bitcoin de Bob directamente y no tiene por qué usar la conexión a internet que ofrece la cafetería, aunque ambas opciones también son posibles. ((("propagación", "técnica de inundación")))((("técnica de inundación")))Cualquier nodo bitcoin que reciba una transacción válida que no haya visto anteriormente, la reenviará inmediatamente a todos los demás nodos a los que está conectado, en una técnica de propagación conocida como _inundación_. Por lo tanto, la transacción se propaga rápidamente a través de la red de igual a igual, alcanzando un gran porcentaje de los nodos en unos pocos segundos.
+
+==== El Punto de Vista de Bob
+
+Si la aplicación de billetera de bitcoin de Bob está directamente conectada a la aplicación de la billetera de Alice, la aplicación de billetera de Bob podría ser el primer nodo en recibir la transacción. Sin embargo, incluso si la billetera de Alice envía la transacción a través de otros nodos, llegará a la billetera de Bob en unos pocos segundos. La billetera de Bob identificará inmediatamente la transacción de Alice como un pago entrante porque contiene salidas canjeables por las llaves de Bob. La aplicación de la billetera de Bob también puede verificar de forma independiente que la transacción está bien formada, y que utiliza salidas aún sin gastar y que contiene comisiones de transacción suficientes para ser incluidas en el siguiente bloque. En este punto, Bob puede asumir, con poco riesgo, que la transacción se incluirá en breve en un bloque y que se confirmará.
+
+[TIP]
+====
+((("confirmaciones de transacciones de pequeño valor", secondary-sortas="pequeño valor, transacciones")))Una concepción errónea común sobre las transacciones de bitcoin es que deben ser "confirmadas" esperando 10 minutos a un nuevo bloque, o hasta 60 minutos para un total de seis confirmaciones. Aunque las confirmaciones aseguran que la transacción ha sido aceptada por toda la red, este retraso es innecesario para artículos de poco valor como una taza de café. Un vendedor puede aceptar una transacción válida de pequeño valor sin confirmaciones, sin más riesgo que un pago con tarjeta de crédito sin una identificación o firma, tal como ya lo hacen normalmente.((("", startref="Tconstruct02")))
+====
+
+=== Minería de Bitcoin
+
+((("minería y consenso", "descripción general de", id="MACover02")))((("cadena de bloques (la)", "descripción general de la minería", id="BToverview02")))La transacción de Alice ya se ha propagado en la red bitcoin. No se convierte en parte de la _cadena de bloques_ hasta que se verifique y se incluya en un bloque mediante un proceso llamado _minería_. Ver <<mining>> para una explicación detallada.
+
+El sistema de confianza de bitcoin se basa en la computación. Las transacciones son empaquetadas en _bloques_, que requieren una enorme capacidad de computación para ser válidos, pero solo una pequeña cantidad de computación para ser validados. El proceso de minería sirve dos propósitos en bitcoin:
+
+* ((("minería y consenso", "reglas de consenso", "seguridad que proporciona")))((("consenso", see="minería y consenso")))Los nodos de minería validan todas las transacciones mediante referencia a las _reglas de consenso_ de bitcoin. Por lo tanto, la minería proporciona seguridad para las transacciones de bitcoin al rechazar transacciones inválidas o con formato incorrecto.
+* La minería crea nuevo bitcoin en cada bloque, casi como un banco central que imprime dinero nuevo. La cantidad de bitcoin creada por bloque es limitada y disminuye con el tiempo, siguiendo un programa de emisión fijo.
+
+
+La minería logra un buen equilibrio entre coste y recompensa. La minería usa electricidad para resolver un problema matemático. Un minero exitoso cobrará una _recompensa_ en la forma de nuevo bitcoin y de comisiones de transacción. Sin embargo, la recompensa solo se cobrará si el minero ha validado correctamente todas las transacciones, a satisfacción de las reglas de _consenso_. Este delicado equilibrio proporciona seguridad para bitcoin sin una autoridad central.
+
+Una buena manera de describir la minería es como un juego competitivo de sudoku que se reinicia cada vez que alguien encuentra la solución y cuya dificultad automáticamente se ajusta para que lleve aproximadamente 10 minutos encontrar una solución. Imagina un sudoku gigante, de muchos miles de filas y columnas. Si te lo muestro completado puedes verificarlo rápidamente. Sin embargo, si el puzzle tiene unas pocas casillas completadas y el resto está vacío, ¡lleva mucho trabajo resolverlo! La dificultad del sudoku puede ajustarse cambiando su tamaño (más o menos filas y columnas), pero puede seguir siendo verificado fácilmente aunque sea enorme. El puzzle usado en bitcoin está basado en hashes criptográficos y tienen similares características: es asimétricamente dificil de resolver pero fácil de verificar, y su dificultad se puede ajustar.
+
+((("minería y consenso", "granjas de minería y pools")))En <<user-stories>>, presentamos ((("casos de uso", "minería de bitcoin")))a Jing, un emprendedor en Shanghai. Jing gestiona una _granja de minería_, que es una empresa que controla miles de plataformas de minería especializadas, compitiendo por la recompensa. Cada 10 minutos aproximadamente, las plataformas de minería de Jing se enfrentan contra miles de sistemas similares en una competición global para encontrar una solución a un bloque de transacciones. ((("algoritmo de Prueba-de-Trabajo")))((("minería y consenso", "algoritmo de Prueba-de-Trabajo")))Encontrar esa solución, la denominada _Prueba-de-Trabajo_ (del inglés, PoW, Proof of Work), requiere ejecutar trillones de hashes por segundo en toda la red bitcoin. El algoritmo de Prueba-de-Trabajo se basa en hacer hash repetidamente de las cabeceras de bloque y un número aleatorio con el algoritmo criptográfico SHA256 hasta que una solución encaje con un patrón predeterminado. El primer minero que encuentra esa solución gana la ronda de competición y publica ese bloque en la cadena de bloques.
+
+Jing comenzó a minar en 2010 usando una computadora de escritorio muy rápida para encontrar una Prueba-de-Trabajo adecuada para los nuevos bloques. A medida que más mineros comenzaron a unirse a la red bitcoin, la dificultad del problema aumentó rápidamente. Pronto, Jing y otros mineros actualizaron su dotación a un hardware más especializado, con unidades de procesamiento gráfico (GPU) dedicadas de alta gama, a menudo utilizadas en computadoras de escritorio o consolas de juegos. En el momento de escribirse este libro, la dificultad es tan alta que solo es rentable la minería con ((("circuitos integrados de aplicación específica (ASIC)")))circuitos integrados de aplicación específica (ASIC), esencialmente cientos de algoritmos de minería impresos en hardware, ejecutándose en paralelo en un solo chip de silicio. ((("grupos de minería", "definido")))La compañía de Jing también participa en una _agrupación de minería_, que de forma muy similar a un grupo que juega a la lotería, permite a varios participantes compartir sus esfuerzos y recompensas. La compañía de Jing ahora maneja un almacén que contiene miles de mineros ASIC para minar bitcoins las 24 horas del día. La compañía paga sus costos de electricidad al vender el bitcoin que puede generar de la minería, creando algunos ingresos de las ganancias.
+
+==== Minando Transacciones en Bloques
+
+((("bloques", "minería de transacciones en bloques")))Las nuevas transacciones fluyen constantemente hacia la red desde las carteras de los usuarios y otras aplicaciones. Cuando son vistas por los nodos de la red bitcoin, se añaden a un conjunto temporal de transacciones no verificadas que es mantenido por cada nodo. A medida que los mineros están construyendo un nuevo bloque, añaden transacciones no verificadas de este conjunto al nuevo bloque y luego intentan probar la validez de ese nuevo bloque, con el algoritmo de minería (Prueba-de-Trabajo). El proceso de minería se explica en detalle en <<mining>>.
+
+Las transacciones se añaden al nuevo bloque, priorizadas por las de mayor comisión y algunos otros criterios. Cada minero empieza el proceso de minería de un nuevo bloque de transacciones tan pronto como recibe el bloque anterior desde la red, sabiendo que ha perdido la anterior ronda de competición. Inmediatamente crea un nuevo bloque, y lo rellena con transacciones y la huella digital del bloque anterior, y comienza a calcular la Prueba-de-Trabajo del nuevo bloque. Cada minero incluye una transacción especial en su bloque, una que paga a su propia dirección bitcoin la recompensa del bloque (actualmente 12.5 bitcoin recién creados) más la suma de las comisiones de transacción de todas las transacciones incluidas en el bloque. Si encuentra una solución que hace que ese bloque sea válido, "gana" esta recompensa porque su bloque exitoso se añade a la cadena de bloques global y la transacción de recompensa que ha incluido se puede gastar. (((("pools de minería", "operación de")))Jing, que participa en un pool de minería, ha configurado su software para crear nuevos bloques que asignan la recompensa a una dirección de pool. Desde ahí, una parte de la recompensa se distribuye a Jing y a otros mineros en proporción a la cantidad de trabajo que aportaron en la última ronda.
+
+((("bloques candidatos")))((("candidatos, "bloques candidatos")))La transacción de Alice fue recogida por la red e incluida en el conjunto de transacciones no verificadas. Una vez validada por el software de minería, se incluyó en un nuevo bloque, llamado _bloque candidato_, generado por el pool de minería de Jing. Todos los mineros que participan en ese pool de minería comienzan inmediatamente a calcular la Prueba-de-Trabajo para el bloque candidato. Aproximadamente cinco minutos después de que la cartera de Alice transmitiera la transacción por primera vez, uno de los mineros ASIC de Jing encontró una solución para el bloque candidato y la anunció a la red. Una vez que otros mineros validaron el bloque ganador, comenzaron la competición para generar el siguiente bloque.
+
+El bloque ganador de Jing se convirtió en parte de la cadena de bloques como bloque #277316, que contiene 419 transacciones, incluida la transacción de Alice. El bloque que contiene la transacción de Alice se cuenta como una "confirmación" de esa transacción.
+
+[TIP]
+====
+Aquí puede verse el bloque que incluye https://blockchain.info/btc/block/277316[la transacción de Alice].
+====
+
+((("confirmaciones", "propósito en transacciones")))Aproximadamente 19 minutos más tarde, otro minero minó un nuevo bloque, #277317. Debido a que este nuevo bloque está construido sobre el bloque #277316 que contenía la transacción de Alice, añadió aún más computación a la cadena de bloques, fortaleciendo la confianza en esas transacciones. Cada bloque minado sobre el que contiene la transacción se considera como una confirmación adicional de la transacción de Alice. A medida que los bloques se acumulan unos sobre otros, se vuelve exponencialmente más difícil revertir la transacción, lo que hace sea cada vez más confiable por la red.
+
+transacción((("bloque génesis")))((("bloques", "bloque génesis")))((("(la) cadena de bloques", "bloque génesis")))En el diagrama en <<block-alice1>>, podemos ver el bloque #277316, que contiene la transacción de Alice. Debajo de ella hay 277.316 bloques (incluido el bloque #0), vinculados entre sí en una cadena de bloques (blockchain) todo el camino atrás hasta el bloque #0, conocido como _bloque génesis_. Con el tiempo, a medida que aumenta la "altura" de los bloques, también lo hace la dificultad de cómputo para cada bloque y la cadena en su conjunto. Los bloques minados después del que contiene la transacción de Alice actúan como una garantía adicional, a medida que acumulan más computación en una cadena más y más larga. Por convención, cualquier bloque con más de seis confirmaciones se considera irrevocable, ya que se requeriría una inmensa cantidad de cálculo computacional para invalidar y recalcular seis bloques. Examinaremos el proceso de minería y la manera en que genera confianza con más detalle en <<mining>>.((("", startref="MACover02")))
+
+[[block-alice1]]
+.Transacción de Alice incluida en el bloque #277316
+image::images/mbc2_0209.png["Alice's transaction included in a block"]
+
+=== Gastando la Transacción
+
+((("gastando bitcoin", "verificación de pago simplificado (SPV)")))((("verificación de pago simplificado (SPV)")))Ahora que la transacción de Alice ha sido incluida en la cadena de bloques como parte de un bloque, forma parte del libro de contabilidad distribuido de bitcoin y es visible para todas las aplicaciones de bitcoin. Cada cliente bitcoin puede verificar de forma independiente la transacción como válida y utilizable. Los clientes de nodo completo pueden rastrear el origen de los fondos desde el momento en que se generaron los bitcoin por primera vez en un bloque, progresivamente de transacción a transacción, hasta llegar a la dirección de Bob. Los clientes ligeros pueden hacer lo que se llama una verificación de pago simplificada (ver <<spv_nodes>>) confirmando que la transacción está en la cadena de bloques y que tiene unos cuantos bloques minados después de ella, y por tanto asegurando que los mineros la aceptaron como válida.
+
+Bob puede ahora gastar la salida de esta y de otras transacciones. Por ejemplo, Bob puede pagar a un contratista o proveedor transfiriendo valor del pago de la taza de café de Alice a estos nuevos propietarios. Seguramente, el software bitcoin de Bob agregará muchos pequeños pagos en un pago mayor, tal vez concentrando todos los ingresos de bitcoin del día en una sola transacción. Esto agregaría los diversos pagos en una sola salida (y una sola dirección). Para un diagrama de una transacción de agregación, consulte <<transaction-aggregating>>.
+
+A medida que Bob gasta los pagos recibidos de Alice y otros clientes, extiende la cadena de transacciones. Supongamos que Bob le paga a su diseñador web Gopesh((("casos de uso", "servicios contractuales offshore"))) en Bangalore por una nueva página web. Ahora la cadena de transacciones se lucirá como <<block-alice2>>.
+
+[[block-alice2]]
+.La transacción de Alice como parte de una cadena de transacciones desde Joe a Gopesh
+image::images/mbc2_0210.png["Alice's transaction as part of a transaction chain"]
+
+En este capítulo, vimos cómo las transacciones crean una cadena que mueve valor de un propietario a otro. También rastreamos la transacción de Alice, desde el momento en que se creó en su cartera, a través de la red bitcoin y hasta los mineros que la registraron en la cadena de bloques. En el resto de este libro, examinaremos las tecnologías específicas detrás de carteras, direcciones, firmas, transacciones, la red y, finalmente, la minería.((("", startref="BCover02")))((("", startref="DCSover02"))) ((("", startref="UCcoffee02")))

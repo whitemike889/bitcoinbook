@@ -1,0 +1,740 @@
+[[ch06]]
+[[transactions]]
+== Tranzakciók
+
+[[ch06_intro]]
+=== Bevezetés
+
+((("tranzakciók", "definíciója")))((("figyelmeztetések és óvatosság", see="also biztonság")))A tranzakciók a bitcoin rendszer legfontosabb részei. A bitcoinban minden más úgy lett megtervezve, hogy biztosítsa a tranzakciók létrehozását, hálózaton keresztüli továbbítását, ellenőrzését és végül a tranzakciók hozzáadását a rendszer globális főkönyvéhez, a blokklánchoz. A tranzakciók olyan adatstruktúrák, melyek az érték átruházását kódolják a bitcoin rendszer résztvevői között. Mindegyik tranzakció egy nyilvános bejegyzés a bitcoin kettős könyvelésében, a blokkláncban.
+
+Ebben a fejezetben a tranzakciók különféle fajtáit vizsgáljuk: mit tartalmaznak, hogyan hozhatók létre, hogyan ellenőrizhetők és hogyan válnak az összes tranzakciót megörökítő maradandó feljegyzés részévé. Amikor ebben a fejezetben a "pénztárca" kifejezést használjuk, nem egyszerűen kulcsok adatbázisára utalunk, hanem a tranzakciók összeállítását végző szoftverre.
+
+[[tx_structure]]
+=== Tranzakciók részletei
+
+((("felhasználási esetek", "kávé vásárlás", id="alicesix")))<<ch02_bitcoin_overview>>-ben, egy blokk vizsgálóval megnéztük a tranzakciót, amellyel Alice kifizette a kávét Bob kávézójában (<<alices_transactions_to_bobs_cafe>>-).
+
+A blokkfelfedező alkalmazás egy tranzakciót mutat Alice "címe" és Bob "címe" között. Ez egy nagyban leegyszerűsített nézet arra vonatkozóan, hogy mi szerepel egy tranzakcióban. Amint azt ebben a fejezetben látni fogjuk, a bemutatott információk nagy részét a blokkfelfedező állítja elő, és valójában nincs benne a tranzakcióban.
+
+[[alices_transactions_to_bobs_cafe]]
+.Alice Bob kávézójával kapcsolatos tranzakciója
+image::images/mbc2_0208.png["Alice kávé tranzakció"]
+
+[[transactions_behind_the_scenes]]
+==== Tranzakciók – a színfalak mögött
+
+((("tranzakciók", "a színfalak mögött rejlő részletek")))A színfalak mögött egy tényleges tranzakció nagyban különbözik a tipikus blokkfelfedező által mutatott tranzakcióktól. A magas szintű fogalmak többsége, amelyeket a különféle bitcoin alkalmazások felhasználói felületein látunk, _valójában nem léteznek_ a bitcoin rendszerben.
+
+A Bitcoin Core parancssori felületének (+getrawtransaction+ és +decoderawtransaction+) segítségével kinyerhetjük és dekódolhatjuk Alice "nyers" tranzakcióját, és megnézhetjük, hogy mit tartalmaz. Az eredmény így néz ki:
+
+[[alice_tx]]
+.Alice dekódolt tranzakciója
+[source,json]
+----
+{
+  "version": 1,
+  "locktime": 0,
+  "vin": [
+    {
+      "txid": "7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18",
+      "vout": 0,
+      "scriptSig" : "3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813[ALL] 0484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adf",
+      "sequence": 4294967295
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.01500000,
+      "scriptPubKey": "OP_DUP OP_HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 OP_EQUALVERIFY OP_CHECKSIG"
+    },
+    {
+      "value": 0.08450000,
+      "scriptPubKey": "OP_DUP OP_HASH160 7f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8 OP_EQUALVERIFY OP_CHECKSIG",
+    }
+  ]
+}
+----
+
+Néhány dolgot észrevehetünk a tranzakcióval kapcsolatban. Főként azt, hogy mennyi minden hiányzik! Hol van Alice címe? Hol van Bob címe? Hol van a 0,1 bemenet, amit Alice "küldött"? A bitcoinban nincsenek érmék, küldők, címzettek, nincs egyenleg, nincs számla és nincs cím. Mindezeket a dolgokat magasabb szinten építik fel a felhasználó számára, hogy könnyebben érthetők legyenek.
+
+Ezenkívül sok furcsa és értelmezhetetlen mezőt és hexadecimális karakterláncot is észrevehetünk. Ne aggódjon, az itt bemutatott mezőket részletesen elmagyarázzuk ebben a fejezetben.
+
+[[tx_inputs_outputs]]
+=== Tranzakció kimenetek és bemenetek
+
+((("tranzakciók", "kimenetek és bemenetek", id = "Tout06")))((("kimenetek és bemenetek", "kimenetek definiálva")))((("el nem költött tranzakciós kimenetek (UTXO)")))((("UTXO készletek")))((("tranzakciók", "kimenetek és bemenetek", "kimenetek jellemzői")))((("kimenetek és bemenetek", "kimenetek jellemzői")))A bitcoin tranzakciók alapvető építőeleme egy _tranzakció kimenet_. A tranzakció kimenetek olyan oszthatatlan bitcoin darabok, amelyeket a blokkláncban rögzítenek, és amelyeket a teljes hálózat érvényesnek tekint. A bitcoin teljes csomópontjai nyomon követik az összes elérhető és elkölthető kimenetet, más néven az _elköltetlen tranzakciós kimeneteket_ vagy _UTXO-kat_. Az összes UTXO _UTXO készlet_ néven ismert, és jelenleg sok millió UTXO-t tartalmaz. Az UTXO készlet növekszik új UTXO létrehozásakor, és UTXO fogyasztásával csökken. Minden tranzakció változást (állapotátmenetet) jelent az UTXO készlet számára.
+
+((("egyenlegek")))Amikor azt mondjuk, hogy egy felhasználó pénztárcája "fogadta" a bitcoint, ezt úgy értjük, hogy a pénztárca detektált egy UTXO-t, amelyet egy általa kezelt kulccsal elkölthet. Így a felhasználó bitcoin "egyenlege" az összes olyan UTXO összege, amelyet a felhasználó pénztárcája el tud költeni, és amely szétszórva lehet tranzakciók százai és blokkok százai között. Az egyenleg fogalmát a pénztárca alkalmazás hozza létre. A pénztárca kiszámítja a felhasználó egyenlegét a blokklánc beolvasásával és az összes olyan UTXO értékének összesítésével, amelyet a pénztárca el tud költeni az általa kezelt kulcsokkal. A legtöbb pénztárca adatbázist tart fenn, vagy adatbázis-szolgáltatást használ az összes UTXO gyors referenciakészletének tárolására, amelyeket az általa kezelt kulcsokkal költhet el.
+
+((("satoshik")))A tranzakciókimenet tetszőleges (egész) értékkel rendelkezhet, amelyet satoshik többszöröseként írunk le. Ahogyan a dollár centre osztva két tizedesjegyre osztható, a bitcoin satoshiként nyolc tizedesjegyre osztható. Bár a kimenetnek bármilyen tetszőleges értéke lehet, létrehozása után oszthatatlan. Ez a kimenetek fontos jellemzője, amelyet hangsúlyozni kell: a kimenetek _diszkrét_ és _oszthatatlan_ érték egységek, satoshik egész számában kifejezve. Az el nem költött kimenetet egy tranzakció csak teljes egészében használhatja fel.
+
+((("visszajáró pénz, képzése")))Ha az UTXO nagyobb, mint a tranzakció kívánt értéke, akkor is teljes mértékben el kell költeni, és a tranzakcióban visszajáró pénzt kell generálni. Más szóval, ha van egy 20 bitcoinos UTXO-nk, és 1 bitcoint szeretnénk kifizetni, akkor a tranzakciónknak az egész 20 bitcoinos UTXO-t el kell költenie, és két kimenetet kell létrehoznia: az első kimenet 1 bitcoint fizet a kívánt címzettnek, a második a visszajáró 19 bitcoint utalja a saját pénztárcánkba. A tranzakció kimenetek oszthatatlansága miatt, a bitcoin tranzakcióknak legtöbbször visszajáró pénzt is kell generálniuk.
+
+Képzeljünk el egy vásárlót, aki 1,50 $-ért vesz valamilyen italt, benyúl a pénztárcájába, és megpróbálja érmékkel és bankjegyekkel kifizetni az 1,50 $-os összeget. Fizethet egy egy dolláros bankjeggyel és két negyeddolláros érmével, vagy aprópénzzel (6 db negyeddollárossal), vagy akár egy nagyobb címletű bankjeggyel is (pl. egy 5 dolláros bankjeggyel). Ha a vásárló egy nagyobb címletű bankjeggyel, pl. egy 5 dollárossal fizet, akkor 3,50 $ visszajár, ezt elteszi a pénztárcájába, és jövőbeli tranzakciókban tudja felhasználni.
+
+Hasonlóképpen, egy bitcoin tranzakció is a felhasználónál rendelkezésre álló, különféle címletű UTXO-kból jön létre. A tranzakció nem tudja az UTXO-kat félbe vágni, mint ahogy egy egy dolláros bankjegy sem vágható félbe. A felhasználó pénztárca alkalmazása a felhasználó számára rendelkezésre álló UTXO-k közül általában úgy válogat, hogy azok a kívánt tranzakció összegénél nagyobb vagy egyenlő összeget eredményezzenek.
+
+A valós élethez hasonlóan a bitcoin alkalmazás is különféle módszereket használhat a vásárlás összegének kifizetéséhez: használhat több kisebb egységet, és a segítségükkel pontosan megadhatja a kívánt összeget, vagy használhat egy, a tranzakció összegénél nagyobb egységet, és ilyenkor pénzt kap vissza. Az UTXO-k kezelésének bonyolult műveletét a pénztárca automatikusan végzi, a felhasználók ezt észre sem veszik. Csak akkor van ennek jelentősége, ha az UTXO-kból egy programmal állítunk elő egy tranzakciót.
+
+Egy tranzakció felhasználja a korábban rögzített elköltetlen tranzakció kimeneteket, és új tranzakció kimeneteket hoz létre, amelyeket egy jövőbeli tranzakció felhasználhat. Ily módon bitcoin darabok lépnek tovább tulajdonostól tulajdonosig az UTXO-t fogyasztó és létrehozó tranzakciók láncában.
+
+((("tranzakciók", "coinbase tranzakciók")))((("coinbase tranzakciók")))((("bányászat és konszenzus", "coinbase tranzakciók")))A bemeneti és kimeneti láncból kilóg egy speciális tranzakciótípus, az ún. _coinbase_ tranzakció, amely mindegyik blokkban az első tranzakció. Ezt a tranzakciót a „nyertes” bányász helyezi el a blokkban. Ez a tranzakció vadonatúj bitcoinokat hoz létre, melyek a nyertes bányásznak fizetendők ki, jutalmul a bányászatért. Ez a speciális tranzakció nem fogyaszt UTXO-t, hanem egy speciális, ún. „coinbase” bemenettel rendelkezik. A bitcoinban így jön létre az új pénz a bányászat során, amint azt a <<mining>> című részben látni fogjuk.
+
+[TIP]
+====
+Mi volt előbb? A bemenetek vagy a kimenetek, a tyúk vagy a tojás? Tulajdonképpen a kimenetek voltak előbb, mert a coinbase tranzakcióknak, melyek új bitcoinokat állítanak elő, nincsenek bemenetei és kimeneteket hoznak létre a semmiből.
+====
+
+[[tx_outs]]
+==== A tranzakció kimenetei
+
+((("tranzakciók", "kimenetek és bemenetek", "kimeneti komponensek")))((("kimenetek és bemenetek", "kimeneti darabok")))Minden bitcoin tranzakció kimeneteket hoz létre, ezeket a bitcoin főkönyv örökíti meg. Ezen kimenetek szinte mindegyike, egy típus kivételével (lásd <<op_return>>) elkölthető bitcoin darabokat hoz létre, melyeket UTXO-nak hívunk. Az UTXO-kat az egész hálózat általánosan elfogadja, és a tulajdonos egy jövőbeli tranzakcióban elköltheti.
+
+Az UTXO-kat mindegyik teljes bitcoin kliens a memóriában tartja, az UTXO adatbázisban. Az új tranzakciók az UTXO poolból fogyasztanak (költenek) el egy vagy több kimenetet.
+
+A tranzakció kimenetek két részből állnak:
+
+* egy bitcoin összegből, amely a legkisebb bitcoin mértékegységben, _satoshi_-ban van megadva
+* Egy kriptográfiai feladvány, amely a kimenet elköltéséhez szükséges feltételeket definiálja
+
+((("zároló szkriptek")))((("szkriptek", "zároló szkriptek")))((("tanúk")))((("scriptPubKey")))A kriptográfiai feladvány _zároló script_, _tanú script_ vagy +scriptPubKey+ néven is ismert.
+
+A tranzakció script nyelvét, melyet a feljebb említett zároló script használ, részletesen a <<tx_script>> rész tárgyalja.
+
+Most nézzük meg Alice tranzakcióját (korábban a <<transactions_behind_the_scenes>> részben) és nézzük meg, hogy azonosítani tudjuk-e a kimeneteket. A JSON kódolásban a kimenetek egy +vout+ nevű tömbben (listában) vannak:
+
+[source,json]
+----
+"vout": [
+  {
+    "value": 0.01500000,
+    "scriptPubKey": "OP_DUP OP_HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 OP_EQUALVERIFY
+    OP_CHECKSIG"
+  },
+  {
+    "value": 0.08450000,
+    "scriptPubKey": "OP_DUP OP_HASH160 7f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8 OP_EQUALVERIFY OP_CHECKSIG",
+  }
+]
+----
+
+Mint láthatja, a tranzakció két kimenetet tartalmaz. Minden kimenetet egy érték és egy kriptográfiai feladvány határoz meg. A Bitcoin Core által mutatott kódolásban az érték bitcoinban van feltüntetve, de magában a tranzakcióban egész számú satoshiban van rögzítve. Az egyes kimenetek második része a kriptográfiai feladvány, amely megszabja az elköltés feltételeit. A Bitcoin Core ezt +scriptPubKey+ néven mutatja, és a szkript ember számára olvasható formáját mutatja.
+
+Az UTXO zárolósásnak és feloldásának témáját később, <<tx_lock_unlock>>-ben tárgyaljuk. A +scriptPubKey+ szkripthez használt szkriptnyelvet a <<tx_script>> tárgyalja. De mielőtt belemerülnénk ezekbe a témákba, meg kell értenünk a tranzakciós bemenetek és kimenetek általános szerkezetét.
+
+===== Tranzakció sorosítása - kimenetek
+
+((("tranzakciók", "kimenetek és bemenetek", "felépítése")))((("kimenetek és bemenetek", "felépítése")))((("sorosítás", "kimenetek")))Amikor a tranzakciókat a hálózaton továbbítják, vagy az alkalmazások között cserélik őket, _sorosításra_ kerülnek. A sorosítás az az eljárás, amely során az adatszerkezet belső ábrázolását olyan formátumra alakítják át, amely bájtonként továbbítható, más néven bájtfolyamként is ismert. A sorosítást leggyakrabban az adatszerkezetek kódolására használják hálózaton keresztüli továbbításhoz vagy fájlban történő tároláshoz. A tranzakciókimenet sorosítási formátuma a <<tx_out_structure>> táblázatban látható.
+
+[[tx_out_structure]]
+.Tranzakció kimenet sorosítása
+[options="header"]
+|=======
+|Méret | Mező | Leírás
+| 8 bájt (little-endian) | Összeg | Bitcoin érték satoshiban (10^-8^ bitcoinban)
+| 11&#x2013;9 bájt (VarInt) | Zároló script mérete | A zároló script hossza bájtokban, e nélkül a szám nélkül
+| Változó | Zároló scipt | Egy script, amely a kimenet elköltéséhez szükséges feltételeket definiálja
+|=======
+
+A legtöbb bitcoin könyvtár és keretrendszer nem tárolja a tranzakciókat belsőleg bájtfolyamként, mivel ebben az esetben a mezők hozzáféréshez minden alkalommal összetett elemzést kellene végezni. A kényelem és az olvashatóság érdekében a bitcoin könyvtárak a tranzakciókat adatstruktúrában (általában objektum-orientált struktúrában) tárolják.
+
+((("helyreállítás")))((("értelmezés")))((("tranzakciók", "értelmezés")))A bájtfolyamból a tranzakciós könyvtár belső adatreprezentációs struktúrájába való konvertálás folyamatát _helyreállításnak_ vagy _tranzakció értelmezésnek_ hívjuk. A hálózaton keresztüli továbbításhoz, hasheléshez vagy a lemezen történő tároláshoz bájtfolyamba visszaalakító konvertálási folyamatot _sorosításnak_ nevezzük. A legtöbb bitcoin könyvtár beépített tranzakció sorosítási és helyreállítási függvényekkel rendelkezik.
+
+Nézze meg, hogy manuálisan dekódolni tudja-e Alice tranzakcióját a sorosított hexadecimális alakból, megtalálva néhány elemet, amelyeket korábban láttunk. A két kimenetet tartalmazó szakasz segítségképpen ki van emelve az <<example_6_1>> példában:
+
+[[example_6_1]]
+.Alice tranzakciója sorosítva, hexadecimális jelöléssel
+====
++0100000001186f9f998a5aa6f048e51dd8419a14d8a0f1a8a2836dd73+
++4d2804fe65fa35779000000008b483045022100884d142d86652a3f47+
++ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039+
++ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813+
++01410484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade84+
++16ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc1+
++7b4a10fa336a8d752adfffffffff02+*+60e31600000000001976a914ab6+*
+*+8025513c3dbd2f7b92a94e0581f5d50f654e788acd0ef800000000000+*
+*+1976a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac+*
++00000000+
+====
+
+Íme néhány tipp:
+
+* Két kiemelés található a kiemelt szakaszban, mindegyik sorosítva <<tx_out_structure>> szerint.
+* 0,015 bitcoin értéke 1 500 000 satoshi. Ez hexadecimálisan +16 e3 60+.
+* A sorosított tranzakciók során a +16 e3 60+ érték little-endian (legkisebb helyiértékű bájt elől) bájt sorrendben van kódolva, tehát +60 e3 16+.
+* A +scriptPubKey+ hossza 25 bájt, ami hexadecimálisan +19+.
+
+[[tx_inputs]]
+==== A tranzakció bemenetei
+
+((("tranzakciók", "kimenetek és bemenetek", "bemeneti komponensek")))((("kimenetek és bemenetek", "bemeneti komponensek")))((("elköltetlen tranzakciós kimenetek (UTXO)")))((("UTXO készletek")))A tranzakció bemenetek azonosítják (hivatkozással), melyik UTXO-t fogják felhasználni, és feloldó szkript segítségével igazolják a tulajdonjogot.
+
+Tranzakció építéséhez a pénztárca az általa kezelt UTXO-kból választja azt az UTXO-t, amely elegendő értékkel rendelkezik a kért fizetés végrehajtásához. Időnként egy UTXO elegendő, máskor egynél többre van szükség. Minden egyes UTXO-hoz, amelyet a fizetéshez felhasznál, a pénztárca létrehoz egy bemenetet, amely az UTXO-ra mutat, és feloldja egy feloldó szkripttel.
+
+Nézzük meg részletesebben a bemenetek összetevőit. A bemenet első része egy UTXO mutatója tranzakciós hash alapján, és egy kimeneti index, amely azonosítja az adott tranzakció UTXO-ját. A második rész egy feloldó szkript, amelyet a pénztárca az UTXO-ban meghatározott elköltési feltételek teljesítése érdekében készít. Leggyakrabban a feloldó szkript egy digitális aláírás és nyilvános kulcs, amely igazolja a bitcoin tulajdonjogát. Ugyanakkor nem minden feloldó szkript tartalmaz aláírást. A harmadik rész egy sorszám, amelyet később tárgyalunk.
+
+Fontolja meg példánkat a <<transactions_behind_the_scenes>> részben. A tranzakció bemenetek egy tömböt (listát) alkotnak, amelynek neve +vin+:
+
+[[vin]]
+.Alice tranzakciójának bemenetei
+[source,json]
+----
+"vin": [
+  {
+    "txid": "7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18",
+    "vout": 0,
+    "scriptSig" : "3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813[ALL] 0484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adf",
+    "sequence": 4294967295
+  }
+]
+----
+
+Mint láthatja, csak egy bemenet található a listában (mert egy UTXO elegendő értéket tartalmazott a fizetéshez). A bemenet négy elemet tartalmaz:
+
+* ((("tranzakció-azonosítók (txd)")))Tranzakció-azonosító, arra a tranzakcióra hivatkozva, amely tartalmazza az elköltött UTXO-t
+* Kimeneti index (+vout+), amely azonosítja, hogy a tranzakció melyik UTXO-ra hivatkozik (az első nulla)
+* +scriptSig+, amely kielégíti az UTXO-ra vonatkozó feltételeket, fizetésre feloldva azt
+* Sorszám (később tárgyaljuk)
+
+Alice tranzakciójában a bemenet a tranzakció azonosítójára mutat:
+
+----
+7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18
+----
+
+és a kimeneti index +0+ (vagyis az első tranzakció által létrehozott UTXO). A feloldó szkriptet Alice pénztárcája készíti úgy, hogy először lehívja a hivatkozott UTXO-t, megvizsgálja a zároló szkriptet, majd ennek alapján felépíti a szükséges feloldó szkriptet.
+
+Ha csak a bemenetet nézi, akkor észrevehette, hogy semmit sem tudunk erről az UTXO-ról, kivéve egy hivatkozást az azt tartalmazó tranzakcióra. Nem ismerjük annak értékét (satoshiban), és nem ismerjük a zároló szkriptet, amely megszabja az elköltés feltételeit. Ezen információk megtalálásához le kell hívnunk a hivatkozott UTXO-t az annak alapjául szolgáló tranzakció lekérésével. Vegyük észre, hogy mivel a bemenet értéke nincs explicit módon megadva, a hivatkozott UTXO-t is használnunk kell az ebben a tranzakcióban fizetendő díjak kiszámításához (lásd <<tx_fees>>).
+
+Nem csak Alice pénztárcájának kell lehívnia a bemenetekben hivatkozott UTXO-t. Miután ezt a tranzakciót továbbították a hálózatra, minden ellenőrző csomópontnak le kell töltenie a tranzakció bemeneteiben hivatkozott UTXO-t is a tranzakció ellenőrzése érdekében.
+
+A tranzakciók önmagukban nem tűnnek teljesnek, mivel hiányzik a kontextus. Bemeneteikben utalnak az UTXO-ra, de anélkül, hogy megkeresnénk az UTXO-t, nem tudhatjuk a bemenetek értékét vagy azok zároló feltételeit. Ha ön bitcoin szoftvert fejleszt, és dekódol egy tranzakciót azzal a szándékkal, hogy ellenőrizze azt, vagy kiszámolja a díjakat, vagy megnézze a feloldó szkriptet, a kódjának először le kell töltenie a hivatkozott UTXO-t a blokkláncból annak érdekében, hogy felépítse az implicit, de a bemenetek UTXO hivatkozásaiban nem szereplő kontextust. Például a díjakban fizetett összeg kiszámításához tudnia kell a bemenetek és a kimenetek értékeinek összegét, de a bemenetekben hivatkozott UTXO letöltése nélkül nem tudja azok értékét. Tehát egy látszólag egyszerű művelet, mint például egyetlen tranzakció díjainak kiszámítása, valójában több lépést, és több tranzakció adatait igényli.
+
+Ugyanazt a parancs-sorozatot használhatjuk a Bitcoin Core-ral, mint amit Alice tranzakciójának lekérdezéséhez használtunk (+getrawtransaction+ és +decoderawtransaction+). Ezzel megkaphatjuk az UTXO-t, amelyre hivatkoztunk az előző bemenetben, és vethetünk rá egy pillantást:
+
+[[alice_input_tx]]
+.Alice UTXO-ja az előző tranzakcióból, a bemenetben hivatkozva
+[source,json]
+----
+"vout": [
+   {
+     "value": 0.10000000,
+     "scriptPubKey": "OP_DUP OP_HASH160 7f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8 OP_EQUALVERIFY OP_CHECKSIG"
+   }
+ ]
+----
+
+Látjuk, hogy ennek az UTXO-nak az értéke 0,1 BTC, és van egy zároló szkript (+scriptPubKey+), amely tartalmazza az "OP_DUP OP_HASH160..."-t.
+
+[TIP]
+====
+Alice tranzakciójának teljes megértése érdekében le kellett hívnunk az előző tranzakció(ka)t, amelyekre a bemenetekben hivatkozunk. A korábbi tranzakciókat és az elköltetlen tranzakciók kimeneteit lekérdező függvény nagyon gyakori, és szinte minden bitcoin könyvtárban és API-ban létezik.
+====
+
+==== Tranzakció sorosítás – bemenetek
+
+((("sorosítás", "bemenetek")))((("tranzakciók", "kimenetek és bemenetek", "bemenet sorosítása")))((("kimenetek és bemenetek", "bemenet sorosítása")))Amikor a tranzakciókat sorosítják a hálózaton történő továbbításhoz, bemeneteiket egy bájtfolyamba kódolják a <<tx_in_structure>> szerint.
+
+[[tx_in_structure]]
+.Tranzakció bemenet sorosítása
+[options="header"]
+|=======
+|Méret | Mező | Leírás
+| 32 bájt | Tranzakció hash | Mutató arra a tranzakcióra, amely az elköltendő UTXO-t tartalmazza
+| 4 bájt | Output Index | Az elköltendő UTXO indexe, az első 0
+| 11&#x2013;9 bájt (VarInt) | A zárolást feloldó script mérete | A zárolást feloldó script mérete bájtokban
+| Változó | A zárolást feloldó script | Az UTXO-t zároló script feltételeit kielégítő script
+| 4 bájt | Sorszám | Zárolási időhöz használt vagy letiltva (0xFFFFFFFF)
+|=======
+
+A kimenetekhez hasonlóan nézzük meg, hogy megtaláljuk-e Alice tranzakciójának bemeneteit sorosított formátumban. Először a dekódolt bemenetek:
+
+[source,json]
+----
+"vin": [
+  {
+    "txid": "7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18",
+    "vout": 0,
+    "scriptSig" : "3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813[ALL] 0484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adf",
+    "sequence": 4294967295
+  }
+],
+----
+
+Most nézzük meg, hogy azonosítani tudjuk-e ezeket a mezőket az <<example_6_2>> példabeli sorosított hexadecimális kódolásban:
+
+[[example_6_2]]
+.Alice tranzakciója sorosítva, hexadecimális jelöléssel
+====
++0100000001+*+186f9f998a5aa6f048e51dd8419a14d8a0f1a8a2836dd73+*
+*+4d2804fe65fa35779000000008b483045022100884d142d86652a3f47+*
+*+ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039+*
+*+ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813+*
+*+01410484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade84+*
+*+16ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc1+*
+*+7b4a10fa336a8d752adfffffffff+*+0260e31600000000001976a914ab6+
++8025513c3dbd2f7b92a94e0581f5d50f654e788acd0ef800000000000+
++1976a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac00000+
++000+
+====
+
+Tippek:
+
+* A tranzakció azonosítója fordított bájt sorrendben van sorosítva, tehát (hex) +18+cal kezdődik és +79+-cel ér véget.
+* A kimeneti index egy 4 bájtos nullákból álló csoport, amely könnyen azonosítható
+* A +scriptSig+ hossza 139 bájt, vagy +8b+ bájt hexadecimálisan
+* A sorszám +FFFFFFFF+ értékre van állítva, amely ismét könnyen azonosítható((("", startref="alicesix")))
+
+[[tx_fees]]
+==== Tranzakciós díjak
+
+((("tranzakciók", "kimenetek és bemenetek", "tranzakciós díjak")))((("díjak", "tranzakciós díjak")))((("bányászat és konszenzus", "jutalmak és díjak")))A legtöbb tranzakció tranzakciós díjat tartalmaz, amely a bitcoin bányászokat jutalmazza a hálózati biztonság megteremtéséért. A díjak maguk is biztonsági mechanizmusként szolgálnak, azáltal, hogy gazdaságilag gyakorlatilag lehetetlenné teszik a hálózat tranzakciókkal való elárasztását. A bányászat, a tranzakciós díjak és a bányászok által kapott jutalmak a <<mining>> részben vannak részletesebben tárgyalva.
+
+Ebben a részben azt vizsgáljuk meg, hogyan kerül tranzakciós díj egy tipikus tranzakcióba. A legtöbb pénztárca automatikusan kiszámítja és befoglalja a tranzakciós díjakat. Ha azonban programból állítjuk elő a tranzakciókat, vagy egy parancssori felületet használunk, akkor kézzel kell kiszámítani és alkalmazni ezeket a díjakat.
+
+A tranzakciós díj – azáltal, hogy minden tranzakcióra egy kis költséget ró ki – ösztönzésül szolgál ahhoz, hogy a tranzakció befoglalásra kerüljön a következő blokkba, és visszaélésektől védi a rendszert. A tranzakciós díjat az a bányász kapja meg, aki kibányássza a tranzakciót tartalmazó blokkot, melynek révén a tranzakció bekerül a blokkláncba.
+
+A tranzakciós díj nem a tranzakció bitcoinban mért nagyságától, hanem a tranzakció kilobájtokban mért méretétől függ. Összefoglalva, a tranzakciós díjak a bitcoin hálózaton belüli piaci hatások alapján határozhatók meg. A bányászok különféle szempontok alapján állítják sorba a tranzakciókat, pl. a tranzakciós díj alapján, de bizonyos körülmények között akár ingyen is feldolgozzák őket. A tranzakciós díj a feldolgozási prioritást befolyásolja, vagyis egy megfelelő tranzakciós díjjal rendelkező tranzakció nagyobb valószínűséggel kerül be a következőnek kibányászott blokkba, míg egy kevesebb vagy nulla tranzakciós díjjal rendelkező tranzakció késedelmet szenvedhet, és csak pár blokkal később történik meg a feldolgozása, vagy egyáltalán nem kerül feldolgozásra. A tranzakciós díj nem kötelező, és tranzakciós díj nélküli tranzakciók is feldolgozásra kerülhetnek végső soron, de a tranzakciós díj megadása elősegíti a gyors feldolgozást.
+
+Az idő múlásával fejlődött a tranzakciós díjak kiszámításának módja, és változott az általuk a tranzakciók rangsorolására gyakorolt hatás. Eleinte a tranzakciós díjak rögzítettek és állandóak voltak az egész hálózaton. Fokozatosan lazítottak a díjstruktúrán, hogy a díjat a hálózati kapacitás és a tranzakciók száma alapján a piaci erők is befolyásolhassák. 2016 eleje óta a bitcoin korlátozott kapacitása versenyt hozott létre a tranzakciók között, ami magasabb díjakat eredményez, és az ingyenes tranzakciókat szinte lehetetlenné teszi. A nulla vagy nagyon alacsony díjú tranzakciókat ritkán bányásszák ki, és néha nem is terjesztik szét a hálózaton.
+
+((("díjak", "továbbítási irányelvek")))((("minrelaytxfee opció")))A Bitcoin Core esetében a továbbítási irányelveket a +minrelaytxfee+ opció állítja be. A jelenlegi alapértelmezett +minrelaytxfee+ 0,00001 bitcoin vagy egy század millibitcoin / kilobájt. Ezért alapértelmezés szerint a 0,00001 bitcoinnál alacsonyabb díjú tranzakciókat ingyenesnek tekintik, és csak akkor továbbítják, ha van hely a mempoolban, egyébként eldobják őket. A Bitcoin csomópontok felülbírálhatják az alapértelmezett továbbítási irányelvet a +minrelaytxfee+ értékének módosításával.
+
+((("dinamikus díjak")))((("díjak", "dinamikus díjak")))Bármely bitcoin szolgáltatásnak, amely tranzakciókat hoz létre, beleértve pénztárcákat, tőzsdéket, kiskereskedelmi alkalmazásokat stb., _muszáj_ dinamikus díjakat implementálnia. A dinamikus díjakat harmadik féltől származó díjbecslési szolgáltatással, vagy egy beépített díjbecslési algoritmussal lehet megvalósítani. Ha nem biztos benne, kezdje el egy harmadik féltől származó szolgáltatással, és amint tapasztalatot szerez, tervezzen és implementáljon saját algoritmust, ha meg akarja szüntetni a harmadik féltől való függőséget.
+
+A díjbecslési algoritmusok kiszámítják a megfelelő díjat, a kapacitás és a "versengő" tranzakciók által kínált díjak alapján. Ezek az algoritmusok az egyszerűtől (átlagos vagy medián díj az utolsó blokkban) a kifinomultig (statisztikai elemzés) terjednek. Megbecsülik a szükséges díjat (satoshi / bájtban), amely nagy valószínűséggel biztosítja az tranzakció kiválasztását, és bizonyos számú blokkon belül történő feldolgozását. A legtöbb szolgáltatás lehetőséget kínál a felhasználók számára magas, közepes vagy alacsony prioritású díjak választására. A magas prioritás azt jelenti, hogy a felhasználók magasabb díjakat fizetnek, de az ügylet valószínűleg bekerül a következő blokkba. Közepes és alacsony prioritás azt jelenti, hogy a felhasználók alacsonyabb tranzakciós díjakat fizetnek, de a tranzakciók megerősítése sokkal tovább tarthat.
+
+((("bitcoinfees (harmadik fél által nyújtott szolgáltatás)")))Sok pénztárca alkalmazás harmadik fél szolgáltatásait használja a díj kiszámításához. Az egyik népszerű szolgáltatás a https://bitcoinfees.earn.com/[_https://bitcoinfees.earn.com/_], amely egy API-t és egy vizuális ábrát kínál, amely bemutatja a különféle prioritások satoshi / bájtban kifejezett díját.
+
+[TIP]
+====
+((("statikus díjak")))((("díjak", "statikus díjak")))A statikus díjak már nem életképesek a bitcoin hálózaton. A statikus díjakat használó pénztárcák gyenge felhasználói élményt nyújtanak, mivel a tranzakciók gyakran "elakadnak" és megerősítés nélkül maradnak. Azokat a felhasználókat, akik nem értik a bitcoin tranzakciókat és díjakat, megrémítik a „beragadt” tranzakciók, mert úgy gondolják, hogy elveszítették a pénzüket.
+====
+
+A <<bitcoinfeesearncom>> diagram a valós idejű díjak becslését mutatja 10 satoshi/bájt lépésekben, és a várható megerősítési időt (percben és blokkok számában) az egyes díjtartományokban lévő tranzakciókhoz. Minden egyes díjtartományban (pl. 61–70 satoshi/bájt) két vízszintes sáv jelzi a megerősítetlen tranzakciók számát (1405) és az elmúlt 24 órában végrehajtott tranzakciók teljes számát (102 975), amelyek ebbe a díjtartományba esnek. A grafikon alapján az ajánlott magas prioritású díj ebben az időben 80 satoshi/bájt volt. Ez a díj azt eredményezi, hogy a tranzakciót valószínűleg a következő blokkban bányásszák ki (nulla blokk késés). Miheztartás végett, a medián tranzakció méret 226 bájt, tehát a tranzakció méretének ajánlott díja 18 080 satoshi (0,00018080 BTC).
+
+A díjbecslési adatok egyszerű HTTP REST API-n keresztül érhetők el a következő címen: https://bitcoinfees.earn.com/api/v1/fees/recommended[https://bitcoinfees.earn.com/api/v1/fees/recommended]. Például a parancssorban a következő +curl+ paranccsal:
+
+.A díjbecslő API használata
+----
+$ curl https://bitcoinfees.earn.com/api/v1/fees/recommended
+
+{"fastestFee":80,"halfHourFee":80,"hourFee":60}
+----
+
+Az API egy JSON objektumot ad vissza, amely tartalmazza a jelenlegi díjbecsléseket a leggyorsabb megerősítéshez (+fastestFee+), három blokkon belüli (+halfHourFee+) és hat blokkon belüli (+hourFee+) megerősítéshez, satoshi per bájtban.
+
+[[bitcoinfeesearncom]]
+.A bitcoinfees.earn.com díjbecslő szolgáltatás
+image::images/mbc2_0602.png[A bitcoinfees.earn.com díjbecslő szolgáltatás]
+
+==== A tranzakciós díj megadása
+
+A tranzakciók adatstruktúrájában nincs díj mező. A díjak hallgatólagosan a bemenetek összegének és a kimenetek összegének különbségével egyenlők. Az összes kimenetnek az összes bemenetből történő levonása után maradó összeg a bányászoké lesz:
+
+[[tx_fee_equation]]
+.A tranzakciós díj hallgatólagos, a bemenetek és a kimenetek különbsége utáni maradék
+----
+Díj = Összeg(Bemenetek) - Összeg(Kimenetek)
+----
+
+Ez a tranzakciók kissé zavarba ejtő jellemzője, de fontos megérteni, mert ha mi magunk állítjuk elő a tranzakcióinkat, akkor vigyáznunk kell arra, nehogy nagyon nagy legyen a díj, mert a bemenetekből nem költünk eleget. Ez azt jelenti, hogy figyelembe kell vennünk az összes bemenetet, és ha szükséges, akkor a visszajáró pénzt is kezelnünk kell, különben a bányászok nagyon nagy borravalót kapnak a végén!
+
+Például, ha egy 20 bitcoin értékű UTXO-t használunk egy 1 bitcoinos fizetséghez, akkor egy 19 bitcoin értékű kimenetet kell létrehoznunk a visszajáró pénznek. Ha nem így teszünk, akkor a „maradék” tranzakciós díjnak lesz tekintve, és azé a bányászé lesz, aki a tranzakciót blokkba foglalta. Igaz ugyan, hogy sürgősségi feldolgozásban lesz részünk, és egy bányászt nagyon boldoggá teszünk, de nem biztos, hogy ezt szerettük volna.
+
+[WARNING]
+====
+((("figyelmeztetések és óvatosság", "visszajáró kimenetek")))Ha egy kézzel előállított tranzakcióban elfelejtünk a visszajáró pénznek egy kimenetet létrehozni, akkor a visszajáró pénz teljes egészében a tranzakciós díjat fogja növelni. „Tartsa meg a visszajáró pénzt!” – nem biztos, hogy ez volt a szándékunk.
+====
+
+((("felhasználási esetek", "kávé vásárlás")))Nézzük meg, hogyan működik mindez a gyakorlatban, ismét Alice kávé vásárlását vizsgálva. Alice 0,015 bitcoint szeretne elkölteni, hogy kifizesse a kávéját. Szeretné, ha a tranzakciója gyorsan feldolgozásra kerülne, ezért tranzakciós díjat is megad, mondjuk 0,001 bitcoint. Ez azt jelenti, hogy a tranzakció teljes költsége 0,016 bitcoin. A pénztárcájában lévő UTXO készlet összegének ezért 0,016 bitcoinnak vagy nagyobbnak kell lennie, és ha szükséges, kezelni kell a visszajáró pénzt. Mondjuk, legyen a pénztárcában 0,2 bitcoin UTXO. Ennek az UTXO-nak a felhasználásával  létre kell hozni egy 0,015 BTC-s kimenetet Bob kávéháza számára, és egy második kimenetet 0.184 bitcoinnal, amely a visszajáró pénzt Alice saját pénztárcájába utalja vissza. Ily módon 0,001 bitcoin marad, vagyis ez lesz a tranzakció implicit díja.
+
+((("felhasználási esetek", "jótékonysági adományok")))((("jótékonysági adományok")))Most vizsgáljunk meg egy ettől eltérő helyzetet. Eugénia, a gyermekvédelmi alap igazgatója gyűjtést szervezett, hogy a Fülöp-szigeti gyerekeknek tankönyveket vásárolhasson. Sok ezer kicsiny adományt kapott szerte a nagyvilágból, összesen 50 bitcoint. Most szeretne pár száz tankönyvet venni a helyi kiadótól, és bitcoinnal szeretne fizetni.
+
+Eugénia pénztárca programja a sok ezer piciny adományból kell egy nagyobb kifizetést létrehoznia, vagyis a piciny összegeket tartalmazó UTXO-kból kell a fedezetet biztosítania. Ez azt jelenti, hogy az eredményként létrejövő tranzakciónak száznál is több kis értékű UTXO-t tartalmazó bemenete lesz, de csak egyetlen egy kimenete, amellyel a könyvkiadónak fizet. Az ilyen sok bemenetet tartalmazó tranzakció nagyobb lesz egy kilobájtnál, akár 2-3 kilobájt is lehet. Emiatt az átlagos méretű tranzakció hálózati díjánál jóval nagyobb díjra lesz szükség.
+
+Eugénia pénztárca alkalmazása úgy számítja ki a megfelelő díjat, hogy összeszorozza a a tranzakció méretét a kilobájtonkénti díjjal. Sok pénztárca a nagyobb méretű tranzakciók esetén túlfizeti a díjat, hogy biztosítsa a tranzakció gyors feldolgozását. A nagyobb díjat nem azért kell megfizetni, mert Eugénia több pénzt költ, hanem azért, mert a tranzakció bonyolultabb és nagyobb méretű – a díj független attól, hogy a tranzakcióban mekkora érték szerepel.((("", startref="Tout06")))
+
+[[tx_script]]
+[role="pagebreak-before less_space_h1"]
+=== A tranzakciós scriptek és a script nyelv
+
+((("tranzakciók", "scriptek és a Script nyelv", id="Tsript06")))((("scriptelés", "tranzakciók és", id="Stransact06")))A bitcoin tranzakciós script nyelve, melyet eléggé zavaró módon szintén _Script_-nek hívnak, egy Forth-szerű, fordított lengyel jelölésnek megfelelő, verem alapú végrehajtási nyelv. Ha ez blablának hangzik, akkor önök valószínűleg nem tanulmányozták az 1960-as évek programozási nyelveit. Semmi gond, ebben a fejezetben mindezeket elmagyarázzuk. Mind az UTXO-ra helyezett zároló script, mind a zárolást feloldó, aláírt script ezen a nyelven van megírva. A tranzakció ellenőrzésekor az egyes bemenetekben szereplő, zárolást feloldó scriptet és a hozzá tartozó zároló scripttel együtt futtatják, hogy megállapítsák, vajon kielégíti-e a pénz elköltésének a feltételeit.
+
+A Script egy nagyon egyszerű, pehelysúlyú nyelv, amely korlátozott célokra szolgál, és számos hardver típuson végrehajtható, még olyan egyszerű hardvereken is, mint egy beágyazott eszköz. Minimális feldolgozási igénye van, és sok olyan feladat nem végezhető el vele, ami modern programozási nyelvekkel igen. A programozható pénz esetében ez egy tudatos biztonsági megoldás.
+
+((("Fizetés nyilvános kulcs hashnek (P2PKH)")))A bitcoin hálózaton keresztül feldolgozott legtöbb tranzakció "Fizetés Bob bitcoin címére" formában van, és egy "Fizetés nyilvános kulcs hashnek" nevezett szkriptre épül. A bitcoin tranzakciók azonban nem korlátozódnak a "Fizetés Bob bitcoin címére" szkriptre. Valójában sokféle komplex feltételt kifejező zároló szkript írható. E bonyolultabb szkriptek megértése érdekében először meg kell értenünk a tranzakciós szkriptek alapjait és a szkriptek nyelvét.
+
+Ebben a részben a bitcoin tranzakciós nyelvének elemeit szemléltetjük, és bemutatjuk, hogyan lehet őket egyszerű elköltési feltételek kifejezésére használni, és hogyan lehet ezeket a feltételeket a zárolást feloldó scriptekben kielégíteni.
+
+[TIP]
+====
+((("programozható pénz")))A bitcoin tranzakciókban az ellenőrzés nem statikus, hanem egy script nyelv végrehajtásával valósul meg. Ez a nyelv szinte végtelen számú feltétel kifejezését teszi lehetővé. A bitcoin ezáltal lesz „programozható pénz”.
+====
+
+
+==== Turing nem teljesség
+
+((("Turing nem teljesség")))A bitcoin tranzakciós script nyelve sok műveletet tartalmaz, de egy fontos tekintetben tudatosan korlátozott – nincsenek benne ciklusok vagy a feltételes kifejezéseken kívül más, bonyolultabb vezérlésátadó lehetőségek. Emiatt a nyelv nem _Turing-teljes_, azaz a scriptek bonyolultsága korlátozott, és végrehajtási idejük megjósolható. ((("szolgáltatás megtagadási támadások")))((("szolgáltatás megtagadási támadások", see="also biztonság")))((("biztonság", "szolgáltatás megtagadási támadások")))Ezek a korlátozások biztosítják, hogy a nyelvben a tranzakción belül ne lehessen végtelen ciklust vagy más efféle „logikai bombát” létrehozni, ami a bitcoin rendszer elleni Denial-of-Service (szolgáltatás megtagadási) támadást tenne lehetővé. Emlékeztetünk rá, hogy a bitcoin hálózat mindegyik teljes csomópontja az összes tranzakciót ellenőrzi. A nyelvi korlát megakadályozza, hogy ezt az ellenőrzési mechanizmust használja valaki támadásra.
+
+==== Állapotmentes ellenőrzés
+
+((("állapotmentes ellenőrzés")))A bitcoin tranzakciós script nyelve állapotmentes, mivel a scriptnek a végrehajtás előtt nincs állapota, és a végrehajtása után nem kerül semmilyen állapot sem elmentésre. Emiatt a végrehajtáshoz szükséges összes információ a scriptben van tárolva. A script megjósolható módon, ugyanúgy hajtódik végre bármelyik rendszerben. Ha a rendszerünk az ellenőrzés során helyesnek találja a scriptet, akkor biztosak lehetünk benne, hogy a bitcoin hálózat bármelyik másik tagja szintén helyesnek fogja találni a scriptet, ami azt jelenti, hogy a tranzakció mindenki számára érvényes, és mindenki tudja ezt. Az eredménynek ez a megjósolhatósága a bitcoin rendszer egyik legfontosabb előnye.
+
+[[tx_lock_unlock]]
+==== Script létrehozása (zárolás + zárolás feloldás)
+
+A bitcoinban a tranzakciók ellenőrzése kétféle script vizsgálatával történik – a zárolást végző és a zárolás feloldó scriptével.
+
+((("zároló szkriptek")))((("feloldó szkriptek")))((("szkriptek", "zároló szkriptek")))A zároló szkript egy kimenetre helyezett elköltési feltétel: meghatározza a feltételeket, amelyeknek teljesülnie kell a kimenet jövőbeni elköltéséhez. ((("scriptPubKey")))Történetileg a zároló szkriptet _scriptPubKey_-nek hívták, mert általában nyilvános kulcsot vagy bitcoin címet (nyilvános kulcs hasht) tartalmazott. Ebben a könyvben "zároló szkriptnek" nevezzük, hogy kifejezzük a szkriptelési technológia sokkal szélesebb körű lehetőségeit. A legtöbb bitcoin alkalmazásban, amit mi zároló szkriptnek nevezünk, a forráskódban +scriptPubKey+ néven jelenik meg. ((("tanúk")))((("kriptográfiai feladvány")))A zárolási szkriptet _tanú szkriptnek_ (lásd <<segwit>>), vagy általánosabban _kriptográfiai feladványnak_ is nevezik. Ezek a kifejezések mind ugyanazt jelentik, az absztrakció különböző szintjein.
+
+A zárolást feloldó script olyan script, amely „megoldja”, azaz kielégíti azokat a feltételeket, melyeket a zároló script helyez a kimenetre, és lehetővé teszi a kimenet elköltését. A zárolást feloldó scriptek minden egyes tranzakciós bemenetben szerepelnek. Legtöbbször egy digitális aláírást tartalmaznak, amelyet a felhasználó pénztárcája állít elő a titkos kulcsból. ((("scriptSig")))Történetileg a zárolást feloldó scriptet _scriptSig_-nek hívták, mert általában egy digitális aláírást tartalmazott. A legtöbb bitcoin alkalmazásban a forráskód +scriptSig+-ként hivatkozik a zárolást feloldó scriptre. Máshol _tanúként_ is hivatkoznak rá (lásd <<segwit>>). Ebben a könyvben „zárolást feloldó scriptnek” hívjuk, ismét csak azért, hogy jelezzük a script írási módszerben rejlő lehetőségeket, hiszen nem minden zárolást feloldó scriptnek kell aláírást tartalmaznia.
+
+Minden bitcoin ellenőrző csomópont ellenőrzi a tranzakciókat a zárló és feloldó szkriptek együttes végrehajtásával. Minden bemenet tartalmaz egy feloldó szkriptet, és egy korábban létező UTXO-ra hivatkozik. Az ellenőrző szoftver lemásolja a feloldó szkriptet, lekérdezi az UTXO-t, amelyre a bemenet hivatkozik, és lemásolja a zároló szkriptet az adott UTXO-ból. A feloldó és zároló szkript ezután sorrendben kerül végrehajtásra. A bemenet akkor érvényes, ha a feloldó szkript megfelel a zároló szkript feltételeinek (lásd <<script_exec>>). Az összes bemenetet egymástól függetlenül ellenőriz, a tranzakció teljes ellenőrzésének részeként.
+
+Vegye észre, hogy az UTXO végérvényesen rögzítésre kerül a blokkláncban, ezért megváltoztathatatlan, és nem befolyásolják az arra hivatkozó új tranzakciók sikertelen elköltési kísérletei. Csak egy kimeneti feltételeknek megfelelő érvényes tranzakció eredményezheti, hogy a kimenetet "elköltötté" válik, és eltávolításra kerül az elköltetlen tranzakciós kimenetek készletéből (UTXO készlet).
+
+A <<scriptSig_and_scriptPubKey>> ábrán a leggyakrabban előforduló bitcoin tranzakció scriptekre (kifizetés egy nyilvános kulcs hash-nek) látható egy példa, amely a scipt ellenőrzése előtti állapotban bemutatja a zárolást feloldó és zároló script összefűzésével előálló teljes scriptet:
+
+[[scriptSig_and_scriptPubKey]]
+.A scriptSig és scriptPubKey összefűzésével előálló tranzakciós script kiértékelése
+image::images/mbc2_0603.png["scriptSig_és_scriptPubKey"]
+
+===== A script végrehajtási verem
+
+A bitcoin script nyelvét azért hívják verem-alapú nyelvnek, mert egy _verem_-nek nevezett adatstruktúrát használ. A verem egy nagyon egyszerű adatszerkezet, melyet úgy lehet elképzelni, mint egy kártyapaklit. A pakli két műveletet tesz lehetővé: ráhelyezést (push) és levételt (pop). Ráhelyezéskor egy újabb tétel kerül a verem tetejére. A levétel eltávolítja a verem tetején lévő elemet. A verem műveletek csak a verem tetején lévő elemre vannak hatással. A verem adatstruktúrát nevezzük még "Last-In-First-Out", vagy LIFO-sornak is.
+
+A script nyelv úgy hajtja végre a scriptet, hogy balról jobbra minden egyes elemet végrehajt. A számok (adat konstansok) a veremre kerülnek. A műveletek egy vagy több paramétert eltávolítanak a veremről, elvégzik az adott műveletet, majd az eredményt a veremre helyezik vissza. Például az +OP_ADD+ két tételt távolít el a veremről, összeadja őket, és az eredményként kapott összeget visszahelyezi a veremre.
+
+A feltételes műveletek egy feltétel kiértékelése után IGAZ vagy HAMIS eredményt állítanak elő. Például az +OP_EQUAL+ két tételt távolít el a veremről, és IGAZ értéket tesz a veremre (az IGAZ értéknek az 1 felel meg) ha a két szám egyenlő, és HAMIS értéket (amelyet a nulla ábrázol), ha a két szám nem egyenlő. A bitcoin tranzakciós scriptek általában feltételes műveletet tartalmaznak, hogy az érvényes tranzakciót jelző IGAZ eredmény előállítható legyen.
+
+===== Egy egyszerű script
+
+Most pedig nézzük meg, hogyan alkalmazhatók a scriptekről és vermekről tanultak néhány példára.
+
+<<simplemath_script>> a +2 3 OP_ADD 5 OP_EQUAL+ script az +OP_ADD+ összeadási műveletet szemlélteti: összead két számot, az eredményt a veremre helyezi, majd ezt követően egy OP_EQUAL feltételes művelettel megvizsgálja, hogy az eredményül kapott összeg egyenlő-e +5+-tel. A rövidség kedvéért az +OP_+ előtagot a részletes, lépésről-lépésre történő kiértékelésben elhagytuk. A rendelkezésre álló script műveletek és függvények további részleteit lásd <<tx_script_ops>>-ben.
+
+Noha a legtöbb zároló script egy nyilvános kulcsra (lényegében bitcoin címre) hivatkozik, és emiatt megköveteli a tulajdonjog bizonyítását az összeg elköltése előtt, a scriptnek nem kell ennyire bonyolultnak lennie. A zárolást feloldó és zároló scriptek bármely kombinációja, amely IGAZ eredményt ad, érvényes. Az általunk használt egyszerű számtani példa, melyet a fenti script példában használtunk, szintén érvényes zároló scriptet alkot, amellyel zárolható egy tranzakció kimenete.
+
+Használjuk zároló scriptként a számtani példa következő részét:
+
+----
+3 OP_ADD 5 OP_EQUAL
+----
+
+amely egy olyan tranzakcióval elégíthető ki, melynek bemenetén a következő, zárolást feloldó script áll:
+
+----
+2
+----
+
+Az ellenőző szoftver összekapcsolja a zárolást feloldó és zároló scripteket. Az eredményül kapott script a következő:
+
+----
+2 3 OP_ADD 5 OP_EQUAL
+----
+
+Amint azt a fenti, <<simplemath_script>> példa lépésről lépésre történő végrehajtása során láttuk, ennek a scriptnek a végrehajtásakor az eredmény +OP_TRUE+, vagyis a tranzakció érvényes. Egy érvényes zároló scriptet hoztunk létre, amelynél a létrehozott UTXO elköltésére bárki képes, aki ismeri a számtant, és tudja, hogy a 2 kielégíti a scriptet.
+
+[TIP]
+====
+((("tranzakciók", "érvényes és érvénytelen")))Egy tranzakció akkor érvényes, ha verem tetején lévő eredmény +IGAZ+ (++{0x01}++), vagy bármilyen nem nulla érték, vagy a verem üres a script végrehajtása után. A tranzakció érvénytelen, ha a verem tetején lévő érték +HAMIS+ (egy nulla hosszúságú üres érték, melyet úgy jelölünk, hogy ++{}++), vagy a script végrehajtását valamelyik művelet, pl. +OP_VERIFY+, +OP_RETURN+ vagy egy feltételes művelet, pl. +OP_ENDIF+ leállította. Részletesen lásd a <<tx_script_ops>> című résznél.
+====
+
+[[simplemath_script]]
+.A bitcoin script ellenőrző algoritmusa az egyszerű matek példában
+image::images/mbc2_0604.png["TxScriptEgyszerűMatekPélda"]
+
+[role="pagebreak-before"]
+A következő egy kicsit bonyolultabb példa, amely a ++2 + 7 - 3 + 1++ kifejezés értékét számítja ki. Figyeljük meg, hogy ha a script számos egymás utáni műveletet tartalmaz, a verem lehetővé teszi, hogy az eredményt a következő művelet felhasználhassa:
+
+----
+2 7 OP_ADD 3 OP_SUB 1 OP_ADD 7 OP_EQUAL
+----
+
+Próbálják meg papírral és ceruzával kiértékelni a fenti scriptet. A script kiértékelésének a végén a veremnek az +IGAZ+ értéket kell tartalmaznia.
+
+[[script_exec]]
+===== A szkriptek feloldásának és zárolásának külön végrehajtása
+
+((("biztonság", "zároló és feloldó scriptek")))Az eredeti bitcoin kliensben a zárolást feloldó és a zároló scriptet összefűzte a program, és egymás után hajtotta végre. Biztonsági okokból ez 2010-ben megváltozott, mert volt egy támadhatóság, amely egy rosszul formált zárolást feloldó scriptnek megengedte, hogy adatokat tegyen a verembe, és a zároló scriptet tönkretegye. A jelenlegi implementációban a scriptek végrehajtása egymás után történik, és a verem a két végrehajtás között az alábbiaknak megfelelően kerül továbbításra.
+
+Először a zárolást feloldó script kerül végrehajtásra. Ha ez hiba nélkül lefut (pl. nem maradtak "függő" operátorok), akkor a fő veremtár lemásolásra kerül, és zároló script kerül futtatásra. Ha a zárolást végző script eredménye a zárolást feloldó script adataival futtattatva "IGAZ", akkor az zárolást feloldó scriptnek sikerült a zároló script által támasztott feltételeket kielégítenie, vagyis a bemeneten egy érvényes meghatalmazás van az UTXO elkötésére. Ha a kombinált script végrehajtása az "IGAZ"-tól eltérő eredménnyel zárul, akkor a bemenet érvénytelen, mivel nem sikerült kielégítenie az UTXO által támasztott feltételeket.
+
+
+[[p2pkh]]
+==== Fizetés nyilvános kulcs hashnek, (P2PKH, Pay-to-Public-Key-Hash)
+
+((("Fizetés nyilvános kulcs hashnek (Pay-to-Public-Key-Hash (P2PKH))")))A bitcoin hálózatban feldolgozott tranzakciók túlnyomó többsége olyan kimeneteket költ el, amelyek „Fizetés nyilvános kulcs hashnek” (Pay-to-Public-Key-Hash) vagyis "P2PKH" scripttel vannak zárolva. Ezek a kimenetek olyan zároló scriptet tartalmaznak, amely a kimenetet egy nyilvános kulcs hash értékével zárolja. A nyilvános kulcs hashe nem más, mint a bitcoin cím. Egy P2PKH scripttel zárolt kimenet zárolása oly módon szüntethető meg (költhető el), hogy megadjuk a nyilvános kulcsot és a nyilvános kulcshoz tartozó titkos kulccsal egy digitális aláírást (lásd <<digital_sigs>>).
+
+((("felhasználási esetek", "kávé vásárlás")))Például tekintsük ismét Alice fizetségét. Alice 0,015 bitcoint fizetett ki a kávéért Bob kávéházának bitcoin címére. A tranzakció kimenetén lévő zároló script a következő formájú:
+
+----
+OP_DUP OP_HASH160 <Cafe Public Key Hash> OP_EQUALVERIFY OP_CHECKSIG
+----
+
+A +Kávéház nyilvános kulcsának hashe+ egyenértékű a kávéház bitcoin címével, de Base58Check kódolás nélkül. A legtöbb alkalmazás a _nyilvános kulcs hashét_ hexadecimális kódolással jeleníti meg, nem pedig az ismerős Base58Check formátumban, amely egy „1”-sel kezdődik.
+
+A fenti zároló script a következő formájú, zárolást megszüntető scripttel elégíthető ki:
+
+----
+<a kávéházhoz tartozó aláírás> <a kávéház nyilvános kulcsa>
+----
+
+A két script együttesen a következő egyesített ellenőrző scriptet alkotja:
+
+----
+<a kávéházhoz tartozó aláírás> <a kávéház nyilvános kulcsa> OP_DUP OP_HASH160 <a kávéház nyilvános kulcsának hash értéke> OP_EQUAL OP_CHECKSIG
+<Cafe Public Key Hash> OP_EQUALVERIFY OP_CHECKSIG
+----
+
+A végrehajtás során az egyesített script akkor és csak akkor lesz IGAZ, ha a zárolást feloldó script megfelel a zároló script által felállított feltételeknek. Más szóval, az eredmény akkor lesz IGAZ, ha a zárolást feloldó scriptben van egy érvényes aláírás a kávéház titkos kulcsával, ami megfelel az akadályként állított nyilvános kulcs hashnek.
+
+Figures <<P2PubKHash1>> and <<P2PubKHash2>> show (in two parts) a step-by-step execution of the combined script, which will prove this is a valid transaction.((("", startref="Tsript06")))((("", startref="Stransact06")))
+
+[[P2PubKHash1]]
+.Egy P2PKH tranzakció scriptének kiértékelése (1. rész)
+image::images/mbc2_0605.png["Tx_Script_P2PubKeyHash_1"]
+
+[[P2PubKHash2]]
+.Egy P2PKH tranzakció scriptének kiértékelése (2. rész)
+image::images/mbc2_0606.png["Tx_Script_P2PubKeyHash_2"]
+
+[[digital_sigs]]
+=== Digitális aláírások (ECDSA)
+
+((("tranzakciók", "digitális aláírások és", id="Tdigsig06")))A "digitális aláírásokba" eddig még nem merültünk bele részletesebben. Ebben a szakaszban azt vizsgáljuk, hogy a digitális aláírások hogyan működnek, és hogyan tudják igazolni a titkos kulcs tulajdonjogát anélkül, hogy a titkos kulcsot felfednék.
+
+((("digitális aláírások", "használt algoritmus")))((("elliptikus görbén alapuló digitális aláírási algoritmus (ECDSA)")))A bitcoinban használt digitális aláírási algoritmus az _elliptikus görbén alapuló digitális aláírási algoritmus_ vagy _ECDSA_. Az ECDSA azon digitális aláírásokhoz használt algoritmus, amik elliptikus görbét használó titkos/nyilvános kulcspárokon alapulnak, amint azt az <<elliptic_curve>> leírja. Az ECDSA-t a +OP_CHECKSIG+, +OP_CHECKSIGVERIFY+, +OP_CHECKMULTISIG+ és +OP_CHECKMULTISIGVERIFY+ szkriptfüggvények használják. Ha egy zároló szkriptben látja ezeket, a feloldó szkriptnek tartalmaznia kell egy ECDSA aláírást.
+
+((("digitális aláírások", "céljai")))A digitális aláírás három célt szolgál a bitcoinban (lásd a következő oldalsávot). Először, az aláírás bizonyítja, hogy a titkos kulcs tulajdonosa, aki közvetett módon a pénzeszközök tulajdonosa, _engedélyezte_ ezen pénzeszközök felhasználását. Másodszor, az engedély bizonyítása _letagadhatatlan_. Harmadszor, az aláírás bizonyítja, hogy a tranzakciót (vagy a tranzakció bizonyos részeit) az aláírás után senki sem módosította, és _senki sem módosíthatja_.
+
+Vegyük észre, hogy minden tranzakciós bemenetet külön aláírnak. Ez kulcsfontosságú, mivel sem az aláírásoknak, sem a bemeneteknek nem kell ugyanazon "tulajdonosokhoz" tartozniuk, és nem kell, hogy ugyanazon tulajdonosok alkalmazzák őket. Sőt, egy „CoinJoin” nevű tranzakciós módszer ezt a tényt használja ki többszereplős tranzakciók létrehozására az adatvédelem biztosítása érdekében.
+
+[NOTE]
+====
+Minden tranzakciós bemenet és minden aláírás, amelyet az tartalmazhat, teljes egészében független bármely más bemenettől vagy aláírástól. Több fél együttműködhet tranzakciók készítésében, úgy hogy mindegyikük csak egy bemenetet ír alá.
+====
+
+[[digital_signature_definition]]
+.A Wikipedia így határozza meg a "digitális aláírást"
+****
+((("digitális aláírások", "definíciója")))A digitális aláírás matematikai módszer digitális üzenet vagy dokumentumok hitelességének igazolására. Az érvényes digitális aláírás indokot ad a címzettnek arra, hogy úgy gondolja, hogy az üzenetet egy ismert feladó készítette (hitelesítés), hogy a feladó nem tagadhatja le az üzenet elküldését (letagadhatatlanság), és az üzenet nem változott az átvitel során (sértetlenség).
+
+_Forrás: https://en.wikipedia.org/wiki/Digital_signature_
+****
+
+==== Hogyan működnek a digitális aláírások?
+
+((("digitális aláírások", "hogyan működnek")))A digitális aláírás egy _matematikai módszer_, amely két részből áll. Az első rész egy algoritmus, amely egy titkos kulcs (aláíró kulcs) felhasználásával egy üzenetből (tranzakcióból) aláírást hoz létre. A második rész olyan algoritmus, amely az üzenet és a nyilvános kulcs birtokában lehetővé teszi bárki számára az aláírás ellenőrzését.
+
+===== Digitális aláírás létrehozása
+
+A bitcoin ECDSA algoritmus implementációjában, az aláírt "üzenet" a tranzakció, vagy pontosabban a tranzakciós adatok meghatározott részhalmazának hashe (lásd <<sighash_types>>). Az aláíró kulcs a felhasználó titkos kulcsa. Az eredmény a következő aláírás:
+
+latexmath:[\(Sig = F_{sig}(F_{hash}(m), dA)\)]
+
+ahol:
+
+* _dA_ az aláíró titkos kulcs
+* _m_ a tranzakció (vagy annak részei)
+* _F_~_hash_~ a hash függvény
+* _F_~_sig_~ az aláírási algoritmus
+* _Sig_ az eredményül kapott aláírás
+
+Az ECDSA matematikájával kapcsolatos további részletek a <<ecdsa_math>> részben találhatók.
+
+Az _F_~_sig_~ függvény létrehoz egy +Sig+ aláírást, amely két értékből áll, amelyeket általában +R+-nek és +S+-nek neveznek:
+
+----
+Sig = (R, S)
+----
+
+((("Distinguished Encoding Rule (DER)")))Most, hogy a két érték (+R+ és +S+) kiszámításra került, bájtfolyamba sorosítjuk őket a _Distinguished Encoding Rule_, vagy _DER_ nevű nemzetközi szabványos kódolási séma segítségével.
+
+[[seralization_of_signatures_der]]
+===== Aláírások sorosítása (DER)
+
+Nézzük meg az Alice által létrehozott tranzakciót ((("felhasználási esetek", "kávé vásárlás", id="alicesixtwo")))újra. A tranzakció bemenetében van egy feloldó szkript, amely tartalmazza a következő DER-kódolt aláírást Alice pénztárcájából:
+
+----
+3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e381301
+----
+
+Ez az aláírás Alice pénztárcája által előállított +R+ és +S+ értékek sorosított bájtfolyama annak bizonyítására, hogy ő rendelkezik a kimenet elköltésére jogosult titkos kulccsal. A sorosítási formátum kilenc elemből áll, az alábbiak szerint:
+
+* +0x30+ – egy DER szekvencia elejét jelzi
+* +0x45+ – a szekvencia hossza (69 bájt)
+  * +0x02 – ezután egy integer érték következik
+  * +0x21+ – az integer hossza (33 bájt)
+  * +R+ – ++00884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb++
+  * +0x02+ – egy másik integer érték következik
+  * +0x20+ – az integer hossza (32 bájt)
+  * +S+ – ++4b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813++
+* Egy utótag (+0x01+), amely a használt hash típusát jelzi (+SIGHASH_ALL+)
+
+Nézze meg, hogy tudja-e Alice sorosított (DER-kódolt) aláírását ezen lista alapján dekódolni. A fontos számok: +R+ és +S+; az adatok fennmaradó része a DER kódolási séma része.
+
+==== Az aláírás ellenőrzése
+
+((("digitális aláírások", "ellenőrzés")))Az aláírás ellenőrzéséhez az aláírásnak (+R+ és +S+), a sorosított tranzakciónak és a nyilvános kulcsnak (amely megfelel az aláírás létrehozásához használt titkos kulcsnak) rendelkezésre kell állnia. Az aláírás ellenőrzése lényegében azt jelenti, hogy "csak a nyilvános kulcsot előállító titkos kulcs tulajdonosa hozhatta létre ezt az aláírást ezen a tranzakción".
+
+Az aláírás-ellenőrző algoritmus veszi az üzenetet (a tranzakció hashét vagy annak részeit), az aláíró nyilvános kulcsát és az aláírást (+R+ és +S+ értékek), és TRUE-t ad vissza, ha az aláírás érvényes erre az üzenetre és nyilvános kulcsra.
+
+[[sighash_types]]
+==== Aláírási hash típusok (SIGHASH)
+
+((("digitális aláírások", "aláírási hash típusok")))((("kötelezettségvállalás")))A digitális aláírásokat üzenetekre alkalmazzák, amelyek a bitcoin esetében maguk a tranzakciók. Az aláírás azt jelenti, hogy az aláíró _kötelezettséget vállal_ a meghatározott tranzakciós adatokra. A legegyszerűbb formájában az aláírás az egész tranzakcióra vonatkozik, ezáltal minden bemeneti, kimeneti és egyéb tranzakciós mezőre vonatkozó kötelezettségvállalást jelent. Az aláírás kötelezettségvállalása azonban vonatkozhat a tranzakcióban lévő adatok egy részhalmazára is, ami számos forgatókönyv esetén hasznos, amint azt ebben a szakaszban látni fogjuk.
+
+((("SIGHASH jelzők")))A bitcoin aláírásokban a +SIGHASH+ jelző lehetőséget ad arra, hogy jelezzük, hogy a tranzakció adatainak melyik része szerepel a titkos kulcs által aláírt hashben. A +SIGHASH+ jelző egyetlen bájt, amelyet az aláíráshoz csatolnak. Minden aláíráshoz tartozik +SIGHASH+ jelző, és a jelző bemenetről bemenetre különbözhet. Három aláírt bemenettel ellátott tranzakciónak lehet három aláírása, különféle +SIGHASH+ jelzővel. Mindegyik aláírás a tranzakció különböző részeit írja alá (vállal értük kötelezettséget).
+
+Ne feledje, hogy minden bemenet tartalmazhat aláírást a feloldó szkriptjében. Ennek eredményeként egy több bemenetet tartalmazó tranzakciónak lehet aláírása különböző +SIGHASH+ jelzőkkel, amelyek a tranzakció különböző részeire vállalnak kötelezettséget az egyes bemenetekben. Vegye figyelembe azt is, hogy a bitcoin tranzakciók tartalmazhatják különböző „tulajdonosok” bemeneteit, akik csak egy bemenetet írhatnak alá egy részlegesen felépített (és érvénytelen) tranzakcióban, azonban másokkal együttműködve összegyűjthetik az érvényes tranzakcióhoz szükséges összes aláírást. A +SIGHASH+ jelzőtípusok közül sok csak akkor nyer értelmet, ha több résztvevő működik együtt a bitcoin hálózatán kívül, és frissítenek egy részben aláírt tranzakciót.
+
+[role="pagebreak-before"]
+Három +SIGHASH+ jelölő létezik: +ALL+, +NONE+ és SINGLE+, amit a <<sighash_types_and_their>> mutat.
+
+[[sighash_types_and_their]]
+.SIGHASH típusok és jelentéseik
+[options="header"]
+|=======================
+|+SIGHASH+ jelölő| Érték | Leírás
+| +ALL+ | 0x01 | Az aláírás az összes bemenetre és kimenetre vonatkozik
+| +NONE+ | 0x02 | Az aláírás az összes bemenetre, de egyik kimenetre sem vonatkozik
+| +SINGLE+ | 0x03 | Az aláírás az összes bemenetre, de csak arra a kimenetre vonatkozik, amelynek az indexszáma megegyezik az aláírt bemenetével
+|=======================
+
+Ezen felül, van egy +SIGHASH_ANYONECANPAY+ módosító jelző, amely kombinálható az összes előző jelölővel. Az +ANYONECANPAY+ beállításakor csak egy bemenet lesz aláírva, és a többi bemenet (és azok sorozatszáma) módosítható marad. Az +ANYONECANPAY+ értéke +0x80+, melyet bitenkénti VAGY művelettel alkalmaznak, így a <<sighash_types_with_modifiers>> táblázatban szereplő kombinált jelölőket eredményezi.
+
+[[sighash_types_with_modifiers]]
+.SIGHASH típusok módosítókkal és azok jelentése
+[options="header"]
+|=======================
+|SIGHASH jelölő| Érték | Leírás
+| ALL\|ANYONECANPAY | 0x81 | Az aláírás egyetlen bemenetre és az összes kimenetre vonatkozik
+| NONE\|ANYONECANPAY | 0x82 | Az aláírás egyetlen bemenetre, de egyik kimenetre sem vonatkozik
+| SINGLE\|ANYONECANPAY | 0x83 | Az aláírás egyetlen bemenetre, és csak arra a kimenetre vonatkozik, amelynek az indexszáma megegyezik az aláírt bemenetével
+|=======================
+
+A jelzőkombinációkat <<sighash_combinations>> foglalja össze.
+
+[[sighash_combinations]]
+.A különböző sighash kombinációk összefoglalása
+image::images/sighash_combinations.png["A különböző sighash kombinációk összefoglalása"]
+
+A +SIGHASH+ jelölőt olyan módon alkalmazzák az aláírás és ellenőrzés során, hogy a tranzakcióról másolat készül, és az egyes mezők levágásra kerülnek (nulla hosszúra állítják és kiürítik őket). Az így kapott tranzakciót sorosítják. A +SIGHASH+ jelölő hozzáadódik a sorosított tranzakció végéhez, majd az eredményt hashelik. Maga a hash az az "üzenet", amelyet aláírnak. Attól függően, hogy melyik +SIGHASH+ jelölőt használják, a tranzakció különböző részei csonkolódnak. Az eredményül kapott hash a tranzakcióban szereplő adatok különböző részhalmazától függ. Azáltal, hogy a hashelés előtti utolsó lépésként a +SIGHASH+ is felvételre kerül, az aláírás a +SIGHASH+ típusára is kötelezettséget vállal, tehát nem változtatható meg (pl. egy bányász által).
+
+[NOTE]
+====
+Mindegyik +SIGHASH+ típus aláírja a tranzakció +nLocktime+ mezőjét (lásd <<transaction_locktime_nlocktime>>). Ezen felül, aláírás előtt magát a +SIGHASH+ típust hozzáfűzik a tranzakció végéhez, hogy ne legyen módosítható miután aláírták.
+====
+
+Alice tranzakciójának példájában (lásd a <<seralization_of_signatures_der>> részben szereplő listát), láttuk, hogy a DER-kódolt aláírás utolsó része +01+ volt, ami a +SIGHASH_ALL+ jelölő. Ez zárolja a tranzakciós adatokat, így Alice aláírása kötelezettségvállalás az összes bemenetre és kimenetre. Ez a leggyakoribb aláírási forma.
+
+Tekintsünk meg néhány más +SIGHASH+ típust és azok gyakorlati alkalmazhatóságát:
+
++ALL|ANYONECANPAY+ :: ((("jótékonysági adományok")))((("felhasználási esetek", "jótékonysági adományok")))Ez a konstrukció felhasználható "közösségi finanszírozás" stílusú tranzakció végrehajtására. Valaki, aki megpróbál finanszírozást szerezni, létrehozhat egy tranzakciót egyetlen kimenettel. Az egyetlen kimenet a "cél" összeget fizeti az adományozónak. Ez a tranzakció nyilvánvalóan nem érvényes, mivel nincsenek bemenetei. Mások azonban módosíthatják ezt úgy, hogy hozzáadják adományként a saját bemenetüket. Saját bemenetüket +ALL|ANYONECANPAY+-jel írják alá. Amíg nem áll rendelkezésre elegendő, a kimenet értékének megfelelő, összeg a bemenetekben, addig a tranzakció érvénytelen. Minden adomány egy "zálog", amelyet az adománygyűjtő nem gyűjthet be addig, amíg a teljes célösszeget nem érték el.
+
++NONE+ :: Ez az konstrukció felhasználható egy adott összegű "hordozó csekk" vagy "biankó csekk" létrehozására. Kötelezettséget vállal a bemenetre, de lehetővé teszi a kimeneti zároló szkript megváltoztatását. Bárki beírhatja saját bitcoin címét a kimeneti zároló szkriptbe, és beválthatja a tranzakciót. Magát a kimeneti értéket azonban az aláírás zárolja.
+
++NONE|ANYONECANPAY+ :: Ez a konstrukció felhasználható "porgyűjtő" építésére. Azok a felhasználók, akiknek apró UTXO-k vannak a pénztárcájukban, nem tudják elkölteni ezeket a por értékét meghaladó díjak költsége nélkül. Az ilyen típusú aláírással az UTXO port bárkinek adományozhatja, hogy az illető összegyűjtse és elköltse azokat, amikor szeretné.
+
+((("Bitmask Sighash Modes")))There are some proposals to modify or expand the +SIGHASH+ system. One such proposal is _Bitmask Sighash Modes_ by Blockstream's Glenn Willen, as part of the Elements project. This aims to create a flexible replacement for +SIGHASH+ types that allows "arbitrary, miner-rewritable bitmasks of inputs and outputs" that can express "more complex contractual precommitment schemes, such as signed offers with change in a distributed asset exchange."
+
+[NOTE]
+====
+A felhasználói pénztárca alkalmazásokban nem jelennek meg opcióként a +SIGHASH+ jelölők. Néhány kivétellel a pénztárcák P2PKH szkripteket állítanak elő, és +SIGHASH_ALL+ jelölőkkel írnak alá. Egy másik +SIGHASH+ jelölő használatához külön szoftvert kell írnia a tranzakciók felépítéséhez és aláírásához. Ennél fontosabb, hogy a +SIGHASH+ jelölőket speciális célú bitcoin alkalmazások használhatják, amelyek újfajta felhasználást tesznek lehetővé.
+====
+
+[[ecdsa_math]]
+==== ECDSA matematika
+
+((("Elliptikus görbén alapuló digitális aláírási algoritmus (ECDSA)")))Mint korábban említettük, az aláírásokat egy _F_~_sig_~ matematikai függvény hozza létre, amely két _R_ és _S_ értékből álló aláírást hoz létre. Ebben a részben részletesebben megvizsgáljuk az _F_~_sig_~ függvényt.
+
+((("nyilvános és titkos kulcsok", "kulcspárok", "rövid életciklusú")))Az aláírási algoritmus először _rövid életciklusú_ (ideiglenes) titkos és nyilvános kulcspárt hoz létre. Ezt az ideiglenes kulcspárt használják az _R_ és _S_ értékek kiszámításához, az aláíró titkos kulccsal és tranzakciós hash-sel történő átalakítás után.
+
+Az ideiglenes kulcspár egy _k_ véletlen számon alapul, amelyet ideiglenes titkos kulcsként használnak. A _k_-ból előállítjuk a megfelelő ideiglenes _P_ nyilvános kulcsot (ahol _P = k * G_, ugyanúgy, mint a bitcoin nyilvános kulcsok esetén, lásd <<pubkey>>). A digitális aláírás _R_ értéke az ideiglenes _P_ nyilvános kulcs x koordinátája.
+
+Innentől az algoritmus kiszámítja az aláírás _S_ értékét úgy, hogy:
+
+_S_ = __k__^-1^ (__Hash__(__m__) + __dA__ * __R__) _mod n_
+
+ahol:
+
+* _k_ az ideiglenes titkos kulcs
+* _R_ az ideiglenes nyilvános kulcs x koordinátája
+* _dA_ az aláíró titkos kulcs
+* _m_ a tranzakció adatai
+* _n_ az elliptikus görbe prím rendje
+
+A hitelesítés az aláírás generáló függvény inverze, amely az _R_, _S_ értékek és a nyilvános kulcs felhasználásával kiszámítja a _P_ értéket, amely egy pont az elliptikus görbén (az aláírás létrehozásánál használt ideiglenes nyilvános kulcs):
+
+_P_ = __S__^-1^ * __Hash__(__m__) * _G_ + __S__^-1^ * _R_ * _Qa_
+
+ahol:
+
+* _R_ és _S_ az aláírás értékei
+* _Qa_ Alice nyilvános kulcsa
+* _m_ az aláírt tranzakciós adatok
+* _G_ az elliptikus görbe generátorpontja
+
+Ha a kiszámított _P_ pont x koordinátája megegyezik _R_-rel, akkor a hitelesítő arra következtethet, hogy az aláírás érvényes.
+
+Vegye figyelembe, hogy az aláírás ellenőrzésekor a titkos kulcs nem ismert és nem is kerül felfedésre.
+
+[TIP]
+====
+Az ECDSA meglehetősen bonyolult matematikára épül. A teljes magyarázat túlmutat a könyv keretein. Számos nagyszerű online útmutató lépésről lépésre végigvezeti Önt. Keressen az "ECDSA explained" kifejezésre, vagy nézze meg ezt: http://bit.ly/2r0HhGB[].
+====
+
+==== A véletlenszerűség fontossága az aláírásokban
+
+((("digitális aláírások", "véletlenszerűség")))Mint láttuk az <<ecdsa_math>> részben, az aláírás generáló algoritmus egy _k_ véletlenszerű kulcsot használ alapul egy rövid életciklusú titkos/nyilvános kulcspár létrehozásához. A _k_ értéke nem fontos, _csak a véletlenszerűsége_. Ha ugyanazt a _k_ értéket használják két aláírás létrehozására különböző üzeneteken (tranzakciók), akkor az aláíró _titkos kulcsot_ bárki kiszámíthatja. Ugyanazon _k_ érték újrafelhasználása egy aláírási algoritmusban a titkos kulcs felfedéséhez vezet!
+
+[WARNING]
+====
+((("figyelmeztetések és óvatosság", "digitális aláírások")))Ha ugyanazt a _k_ értéket használja az aláírási algoritmusban két különböző tranzakcióhoz, akkor a privát kulcs kiszámíthatóvá és a felfedhetővé válik!
+====
+
+Ez nem csak elméleti lehetőség. Láttuk, ahogy a bitcoinban ez a probléma titkos kulcsok felfedéséhez vezet a tranzakció-aláírási algoritmusok egy néhány implementációjában. Egy _k_ érték nem szándékos újrafelhasználása miatt loptak már el pénzeket. A _k_ érték újrafelhasználásának leggyakoribb oka a nem megfelelően inicializált véletlenszám-generátor.
+
+((("random numbers", "random number generation")))((("entropy", "random number generation")))((("deterministic initialization")))To avoid this vulnerability, the industry best practice is to not generate _k_ with a random-number generator seeded with entropy, but instead to use a deterministic-random process seeded with the transaction data itself. This ensures that each transaction produces a different _k_. The industry-standard algorithm for deterministic initialization of _k_ is defined in https://tools.ietf.org/html/rfc6979[RFC 6979], published by the Internet Engineering Task Force.
+
+Ha ön algoritmust implementál bitcoin tranzakciók aláírására, akkor _muszáj_ az RFC 6979-t vagy hasonlóan determinisztikus-véletlenszerű algoritmust használnia, hogy minden egyes tranzakcióhoz különféle _k_ értéket generáljon.((("", startref="Tdigsig06")))
+
+=== Bitcoin címek, egyenlegek és egyéb absztrakciók
+
+((("tranzakciók", "magasabb szintű absztrakciók", id= "Thigher06")))Ezt a fejezetet azzal a felfedezéssel kezdtük, hogy a tranzakciók egész máshogy néznek ki "a színfalak mögött", mint ahogy azt a pénztárcák, blokklánc felfedezők, és más, végfelhasználói alkalmazások prezentálják. A korábbi fejezetekben szereplő egyszerűbb és ismertebb fogalmak, mint például a bitcoin címek és egyenlegek, látszólag hiányoznak a tranzakciós struktúrából. Láttuk, hogy a tranzakciók valójában nem tartalmaznak bitcoin címeket, hanem szkriptek révén működnek, amelyek zárolják és feloldják a bitcoin értékeket. Az egyenleg nem található sehol a rendszerben, mégis minden pénztárca alkalmazás jól láthatóan megjeleníti a felhasználó pénztárcájának egyenlegét.
+
+Most, hogy feltártuk, mi tartozik bele valójában a bitcoin tranzakcióba, megvizsgálhatjuk, hogy a magasabb szintű absztrakciók a tranzakció látszólag primitív összetevőiből származnak.
+
+Nézzük meg újra, hogyan mutatják be Alice tranzakcióját egy népszerű blokkfelfedezőn (<<alice_transaction_to_bobs_cafe>>).
+
+[[alice_transaction_to_bobs_cafe]]
+.Alice Bob kávézójával kapcsolatos tranzakciója
+image::images/mbc2_0208.png["Alice kávé tranzakció"]
+
+On the left side of the transaction, the blockchain explorer shows Alice's bitcoin address as the "sender." In fact, this information is not in the transaction itself. When the blockchain explorer references the transaction it also references the previous transaction associated with the input and extracted the first output from that older transaction. Within that output is a locking script that locks the UTXO to Alice's public key hash (a P2PKH script). The blockchain explorer extracted the public key hash and encoded it using Base58Check encoding to produce and display the bitcoin address that represents that public key.
+
+Hasonlóképpen, a jobb oldalon a blokklánc felfedező a két kimenetet mutat: az első Bob bitcoin címére, a második pedig Alice bitcoin címére (visszajáróként) küld pénzt. A feladónál látotthoz hasonlóan, ezeknek a bitcoin címeknek a létrehozásához a blokklánc felfedező minden egyes kimenetből kinyerte a zároló szkriptet, felismerte azokat P2PKH szkriptként, és kinyerte a nyilvános kulcs hasht. Végül a blokklánc felfedező újrakódolta ezt a nyilvános kulcs hasht Base58Check használatával a bitcoin címek előállításához és megjelenítéséhez.
+
+Ha rákattint Bob bitcoin címére, a blokklánc felfedező a <<the_balance_of_bobs_bitcoin_address>> nézetet mutaja.
+
+[[the_balance_of_bobs_bitcoin_address]]
+.Bob bitcoin címének egyenlege
+image::images/mbc2_0608.png["Bob bitcoin címének egyenlege"]
+
+A blokklánc felfedező megjeleníti Bob bitcoin címének egyenlegét. De a bitcoin rendszerben nem létezik az "egyenleg" fogalma. Az itt megjelenített értékeket a blokklánc felfedező állítja össze az alábbiak szerint.
+
+A "Total Received" (összes beérkező) összeg felépítéséhez a blokklánc felfedező először dekódolja a bitcoin cím Base58Check kódolását, hogy megkapja a Bob nyilvános kulcsának 160 bites hashét, amelyet a cím kódol. Ezután a blokklánc felfedező átkutatja a tranzakciók adatbázisát, olyan kimeneteket keresve, amelyek P2PKH zároló szkriptje Bob nyilvános kulcs hashét tartalmazzák. Az összes kimenet értékének összegzésével a blokklánc felfedező elő tudja állítani az összes beérkező pénz értékét.
+
+Az aktuális egyenleg (amely "Final Balance" (végleges egyenleg) néven jelenik meg) megszerkesztése valamivel több munkát igényel. A blokklánc felfedező külön adatbázist tárol a jelenleg elköltetlen kimenetekről, amely az UTXO készlet. Az adatbázis karbantartása érdekében a blokklánc felfedezőnek monitoroznia kell a bitcoin hálózatot, az újonnan létrehozott UTXO-t hozzáadva, és az elköltött UTXO-t eltávolítva, amint azok megerősítetlen tranzakciókban megjelennek. Ez egy bonyolult folyamat, amely függ a szétterjedő tranzakciók nyomon követésétől, valamint a bitcoin hálózattal való konszenzus fenntartásától, a megfelelő lánc követésének biztosítása érdekében. Időnként megtörténik, hogy a blokklánc felfedező kiesik a szinkronból, és az UTXO készlet nézete hiányos vagy hibás lesz.
+
+Az UTXO készletből a blokklánc felfedező összegezi az összes elköltetlen kimenet értékét, amely hivatkozik Bob nyilvános kulcs hashére, és elkészíti a felhasználó számára megjelenített "végleges egyenleg" számot.
+
+Annak érdekében, hogy elkészítse ezt az egy képet, e két "egyenleggel", a blokklánc felfedezőnek több tucat, száz vagy akár százezer tranzakciót kell indexelnie és keresnie.
+
+Összegezve: a felhasználóknak a pénztárca alkalmazások, a blokklánc felfedezők és más bitcoin felhasználói felületek révén bemutatott információk gyakran magasabb szintű absztrakciókból állnak, amelyeket sok különböző tranzakció megkeresése, azok tartalmának vizsgálata és az azokban található adatok manipulálása útján nyernek. A bitcoin tranzakciók ezen egyszerűsített, egy küldőtől egy címzetthez tartozó bankcsekkre hasonlító nézetének bemutatásával, ezeknek az alkalmazásoknak sok részletet el kell rejteniük. Leginkább a tranzakciók általános típusaira koncentrálnak: P2PKH SIGHASH_ALL aláírással minden bemeneten. Így, bár a bitcoin alkalmazások az összes tranzakció több mint 80%-át könnyen olvasható módon tudják megmutatni, a normától eltérő tranzakciókon gyakran elhasalnak. A bonyolultabb zároló szkripteket vagy különféle SIGHASH jelzőket, vagy sok bemenetet és kimenetet tartalmazó tranzakciók mutatják ezen absztrakciók egyszerűségét és gyengeségét.
+
+Minden nap P2PKH kimeneteket nem tartalmazó tranzakciók százai nyernek megerősítést a blokkláncon. A blokklánc felfedezők ezeket gyakran piros figyelmeztető üzenetekkel mutatják, jelezvén, hogy nem tudják dekódolni valamelyik címet. A következő link a legutóbbi "furcsa tranzakciókat" tartalmazza, amelyek nem lettek teljesen dekódolva: https://blockchain.info/strange-transactions[].
+
+Amint azt a következő fejezetben látni fogjuk, ezek nem feltétlenül furcsa tranzakciók, hanem olyan tranzakciók, amelyek összetettebb zárolási szkripteket tartalmaznak, mint a gyakori P2PKH. Megtanuljuk, hogyan kell dekódolni és megérteni a bonyolultabb szkripteket és az általuk támogatott alkalmazásokat.((("", startref="Thigher06")))((("", startref="alicesixtwo")))

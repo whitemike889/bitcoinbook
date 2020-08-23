@@ -1,0 +1,210 @@
+[role="pagenumrestart"]
+[[ch01_pengenalan_apa_itu_bitcoin]]
+== Pengenalan
+
+=== Apa Itu Bitcoin?
+
+((("bitcoin", "defined", id="GSdefine01")))Bitcoin adalah sebuah kumpulan konsep dan teknologi yang menjadi dasar dari sebuah ekosistem uang digital. Unit mata uang yang dikenal sebagai bitcoin digunakan untuk menyimpan dan mengirimkan nilai diantara partisipan jaringan bitcoin. Pengguna bitcoin berkomunikasi dengan menggunakan protokol bitcoin melalui internet, walaupun jaringan transportasi lainnya juga dapat digunakan. Protokol bitcoin, yang tersedia secara open source, bisa digunakan dengan berbagai macam alat komputasi, termasuk laptop dan smartphone, yang membuat teknologi ini mudah diakses.
+
+Users can transfer bitcoin over the network to do just about anything that can be done with conventional currencies, including buying and selling goods, sending money to people or organizations, or extending credit. Bitcoin can be purchased, sold, and exchanged for other currencies at specialized currency exchanges. Bitcoin in a sense is the perfect form of money for the internet because it is fast, secure, and borderless.
+
+Tidak seperti mata uang tradisional, bitcoin sepenuhnya bersifat virtual. Tidak ada koin fisik atau bahkan koin digital. Koin tersebut tersirat dalam transaksi yang mentransfer nilai dari pengirim ke penerima. Pengguna bitcoin mempunyai kunci-kunci yang memungkinkan mereka untuk membuktikan kepemilikan transaksi di jaringan bitcoin, membuka nilai untuk membelanjakannya dan mentransfernya ke penerima baru. Kunci-kunci itu sering disimpan dalam dompet digital di komputer masing-masing pengguna. Kepemilikan kunci yang membuka transaksi adalah satu-satunya prasyarat untuk membelanjakan bitcoin, memberikan kontrol sepenuhnya di tangan setiap pengguna.
+
+Bitcoin adalah sistem peer-to-peer terdistribusi. Dengan demikian tidak ada server "sentral" atau titik kontrol. Bitcoin diciptakan melalui proses yang disebut "mining," yang melibatkan persaingan untuk menemukan solusi terhadap masalah matematika saat memproses transaksi bitcoin. Setiap peserta di jaringan bitcoin (yaitu, siapa pun yang menggunakan perangkat yang menjalankan secara penuh aplikasi protokol bitcoin) dapat beroperasi sebagai penambang, menggunakan kekuatan pemrosesan komputer mereka untuk memverifikasi dan mencatat transaksi. Rata-rata setiap 10 menit, seseorang dapat memvalidasi transaksi dalam 10 menit terakhir dan dihargai dengan bitcoin baru. Intinya, penambangan bitcoin mendesentralisasi fungsi penerbitan dan fungsi kliring mata uang dari bank sentral dan menggantikan kebutuhan dari bank sentral melalui persaingan global ini.
+
+The bitcoin protocol includes built-in algorithms that regulate the mining function across the network. The difficulty of the processing task that miners must perform is adjusted dynamically so that, on average, someone succeeds every 10 minutes regardless of how many miners (and how much processing) are competing at any moment. The protocol also halves the rate at which new bitcoin are created every 4 years, and limits the total number of bitcoin that will be created to a fixed total just below 21 million coins. The result is that the number of bitcoin in circulation closely follows an easily predictable curve that approaches 21 million by the year 2140. Due to bitcoin's diminishing rate of issuance, over the long term, the bitcoin currency is deflationary. Furthermore, bitcoin cannot be inflated by "printing" new money above and beyond the expected issuance rate.
+
+Di balik layar, bitcoin juga merupakan nama dari protokol, jaringan peer-to-peer, dan inovasi komputasi terdistribusi. Mata uang bitcoin hanyalah penerapan pertama dari penciptaan ini. Bitcoin mewakili sekumpulan hasil penelitian dalam bidang kriptografi dan sistem terdistribusi dan mencakup empat inovasi utama yang dibawa bersama dalam sebuah kombinasi yang unik dan kuat. Bitcoin terdiri dari:
+
+* Jaringan peer-to-peer terdesentralisasi (protokol Bitcoin)
+* Daftar catatan transaksi publik (blockchain)
+* ((("mining and konsensus", "consensus rules", "satisfying")))Seperangkat aturan untuk validasi transaksi independen dan perilisan mata uang (peraturan konsensus)
+* Sebuah mekanisme untuk mencapai konsensus global terdesentralisasi pada blockchain yang valid (algoritma Proof-of-Work)
+
+Sebagai seorang developer, saya melihat bitcoin mirip dengan internetnya uang, sebuah jaringain untuk menyebarkan nilai dan mengamankan kepemilikan aset digital melalui komputasi terdistribusi. Masih ada banyak hal tentang bitcoin daripada yang terlihat dipermukaan.
+
+Pada bagian ini kita akan memulai dengan menjelaskan beberapa konsep dan kosakata utama, mendapatkan perangkat lunak yang diperlukan dan menggunakan bitcoin untuk transaksi sederhana. Pada bagian berikutnya kita akan memulai membuka lapisan-lapisan teknologi yang membuat bitcoin bisa terwujud dan mengamati kerja jaringan dan protokol bitcoin.((("", startref="GSdefine01")))
+
+[role="pagebreak-before less_space"]
+Mata Uang Digital Sebelum Bitcoin
+****
+
+((("digital currencies", "prior to bitcoin")))Munculnya mata uang digital yang bisa dipakai berhubungan erat dengan perkembangan dalam kriptografi. Hal ini tidak mengejutkan apabila kita memahami bahwa tantangan mendasar untuk menggunakan bit untuk mewakili nilai yang bisa ditukarkan menjadi barang dan jasa. Tiga pertanyaan mendasar bagi smeua orang yang menerima mata uang digital adalah:
+
+1. Bisakah saya percaya bahwa uang itu asli dan tidak dipalsukan?
+2. Bisakah saya yakin bahwa mata uang digtal itu hanya bisa digunakan satu kali (dikenal dengan masalah pembelanjaan ganda)?
+3. Bisakah saya yakin bahwa tidak ada orang lain yang bisa mengklaim bahwa uang itu milik mereka dan bukan punya saya?
+
+Issuers of paper money are constantly battling the counterfeiting problem by using increasingly sophisticated papers and printing technology. Physical money addresses the double-spend issue easily because the same paper note cannot be in two places at once. Of course, conventional money is also often stored and transmitted digitally. In these cases, the counterfeiting and double-spend issues are handled by clearing all electronic transactions through central authorities that have a global view of the currency in circulation. For digital money, which cannot take advantage of esoteric inks or holographic strips, cryptography provides the basis for trusting the legitimacy of a user’s claim to value. Specifically, cryptographic digital signatures enable a user to sign a digital asset or transaction proving the ownership of that asset. With the appropriate architecture, digital signatures also can be used to address the double-spend issue.
+
+Saat kriptografi mulai dipahami dan tersedia secara luas pada akhir 1980an, banyak peneliti yang mulai menggunakan kriptografi untuk membuat mata uang digital. Proyek mata uang digital yang awal ini merilis mata uang digital dengan nilai yang didasarkan pada mata uang nasional atau logam mulia seperti emas.
+
+((("decentralized systems", "vs. centralized", secondary-sortas="centralized")))Walaupun mata uang digital tersebut bekerja, mereka bersifat terpusat, dan sebagai akibatnya, mudah untuk di serang oleh pemerintah dan hacker. Mata uang digtal awal menggunakan tempat kliring terpusat untuk memproses semua transaksi pada waktu-waktu tertentu, sebagaimana sistem bank tradisional. Sayangnya, pada sebagian besar kasus, mata uang digital yang baru muncul ini menjadi target oleh pemerintah yang khawatir dan pada akhirnya tidak bisa bekerja. Beberapa di antaranya gagal dengan kerusakan yang luar biasa ketika perusahaan induknya bangkrut dengan kacau. Agar bisa bertahan dari intervensi oleh pihak antagonis, baik pemerintah ataupun pihak kriminal, mata uang digital yang terdesentralisasi diperlukan untuk menghindari serangan pada satu titik. Bitcoin merupakan sistem seperti itu, terdesentralisasi seutuhnya dari desainnya, dan bebas dari otoritas pusat atau titik kontrol yang bisa diserang atau dirusak.
+
+****
+
+=== Sejarah Bitcoin
+
+((("Nakamoto, Satoshi")))((("distributed computing")))((("bitcoin", "history of")))Bitcoin dibuat pada tahun 2008 dengan publikasi sebuah makalah berjudul "Bitcoin: A Peer-to-Peer Electronic Cash System."footnote:["Bitcoin: A Peer-to-Peer Electronic Cash System," Satoshi Nakamoto (https://bitcoin.org/bitcoin.pdf).]" yang ditulis dibawah nama pena Satoshi Nakamoto. Nakamoto mengombinasikan beberapa penemuan sebelunya seperti ((("b-money")))((("HashCash"))) b-money dan HashCash untuk membuat sebuah sistem mata uang elektronik ayng tidak bergantung pada otoritas terpusat untuk merilis mata uang, validasi atau penyelesaian transaksi. ((("Proof-of-Work algorithm")))((("decentralized systems", "consensus in")))((("mining and consensus", "Proof-of-Work algorithm")))Inovasi utamanya adalah menggunakan sistem komputasi terdistribusi (bernama ((("proof-of-work algorithm"))) "proof-of-work" algorithm) untuk melakukan "pemilihan" global tiap 10 menit, sehingga membuat jaringan terdistribusi tersebut sampai pada sebuah konsensus atas kondisi transaksi-transaksi yang terjadi. ((("double-spend problem")))((("spending bitcoin", "double-spend problem")))Hal ini menyelesaikan masalah pembelanjaan berganda di mana satu unit uang bisa digunakan dua kali dengan elegan. Sebelumnya, masalah pembelanjaan ganda adalah kelemahan mata uang digital dan diatasi dengan melakukan penyelesaian semua transaksi melalui pusat penyelesain transaksi.
+
+Jaringan bitcoin dimulai pada tahun 2009, berdasarkan pada referensi implementasi yang dirilis oleh Nakamoto dan sejak saat itu telah banyak direvisi oleh berbagai programmer. Implementasi dari algoritma Proof-of-Work (penambangan) yang menyediakan keamamanan dan ketahanan bagi bitcoin telah meningkat dengan luar biasa dan saat ini keseluruhan daya komputasi melebihi kemampuan superkomputer terbaik di dunia. Nilai pasar bitcoin saat ini melebihi $135 milyar USD, bergantung pada kurs bitcoin ke dollar pada bursa. Transaksi terbesar yang pernah diproses oleh jaringan bitcoin sejumlah $400 juta USD, yang dikirim secara instan dan diproses dengan biaya transfer $1.
+
+Satoshi Nakamoto tidak lagi aktif di publik sejak April 2011, dengan meninggalkan tanggung jawab pengembangan kode dan jaringan pada beberapa sukarelawan. Identitas dari orang atau kelompok dibelakang bitcoin masih belum diketahui. Akan tetapi, baik Satoshi Nakaomto ataupun orang lain tidak memiliki kontrol individu terhadap sistem bitcoin, yang bekejer sepenuhnya berdasarkan prinsip matematika, kode sumber terbuka dan konsensus di antara para peserta. Penciptaannya sendiri merupakan terobosan besar dan telah melahirkan cabang ilmu baru dalam bidang komputasi terdistribusi, ekonomi dan ekonometri.
+
+
+Sebuah Solusi untuk Masalah Komputasi Terdistribusi
+****
+((("Byzantine Generals&#x27; Problem")))Hasil karya Satoshi Nakamoto juga merupakan solusi yang bisa diterapkan untuk masalah dalam komputasi terdistribusi yang dikenal dengan nama "Byzantine Generals' Problem" (Permasalahan Umum Byzantine). Secara singkat, masalah ini terdiri dari bagaimana mencapai kesekapatan tindakan tertentu melalui pertukaran informasi melalui jaringan yang tidak bisa dipercaya dan bisa jadi telah diretas. ((("central trusted authority"))) Solusi Satoshi Nakamoto, yang menggunakan konsep proof-of-work untuk mencapai konsensus tanpa otoritas pusat terpercaya, mewakili sebuah terobosan dalam ilmu komputasi terdistribusi dan memiliki penerapan yang lebih luas daripada sekedar dunia mata uang. Hal ini bisa dipakai untuk mencapai konsensus dalam jaringan terdesentralisasi untuk membuktikan keadilan atau kejujuran dalam pemilihan, undian, daftar aset, notarisasi digital dan lain sebagainya.
+****
+
+
+[[cerita-pengguna]]
+=== Kegunaan Bitcoin, Penggunanya dan Cerita Mereka
+
+((("bitcoin", "use cases", id="GSuses01")))Bitcoin merupakan sebuah inovasi dalam teknologi uang yang kuno. Pada intinya, uang hanyalah memfasilitasi pertukaran nilai di antara orang-orang. Oleh karena itu, untuk memahami bitcoin dan kegunannya secara utuh, kita akan melihat dari perspektif orang yang menggunakannya. Setiap orang dan cerita mereka yang ada di sini, mengilustrasikan satu atau beberapa kegunaan spesifik. Kita akan melihat mereka disepanjang buku ini:
+
+Toko Retail Low-Value di Amerika Utara
+((("use cases", "retail sales")))Alice tinggal di kawasan Bay Area, California Utara. Dia telah mendengar bitcoin dari salah satu temannya dan ingin menggunakannya. Kita akan mengikuti ceritanya ketika ia belajar tentang bitcoin, mendapatkan beberapa bitcoin, dan kemudian menggunakannya untuk membeli secangkir kopi di kafe milik Bob di Palo Alto. Cerita ini akan mengantarkan kita untuk mengenali perangkat lunak, pertukaran, dan transaksi dasar dari perspektif konsumen retail.
+
+Toko retail high-value Amerika Utara
+Carol merupakan pemilik galeri seni di San Fransisco. Dia menjual lukisan mahal untuk bitcoin. Cerita ini akan memperkenalkan risiko serangan konsensus 51% bagi penjualan barang-barang bernilai tinggi.
+
+Jasa kontrak lepas pantai
+((("offshore contract services")))((("use cases", "offshore contract services")))Bob, pemilik kafe di Palo Alto, sedang membangun situs web baru. Dia telah menjalin kontrak dengan pengembang situs dari India, Gopesh, yang tinggal di Bangalore, India. Gopesh sepakat untuk dibayar dengan bitcoin. Cerita ini akan menjelaskan kegunaan bitcoin untuk outsourcing, layanan kontrak dan wire transfer internasional.
+
+Toko web::
+((("use cases", "web store")))Gabriel adalah remaja yang memulai berbisis di Rio de Janeiro, menjalankan toko online kecil yang menjual kaos berlabel bitcoin, cangkir kopi dan stiker. Gabriel masih terlalu muda untuk memiliki akun bank, tapi orang tuanya mendukung spirit wirausaha yang dia miliki
+
+Sumbangan amal
+((("charitable donations")))((("use cases", "charitable donations")))Eugenia adalah seorang direktur dari lembaga amal anak-anak di Filiphina. Akhir-akhir ini dia mengetahui tentang Bitcoin dan ingin menggunakannya agar bisa mencapai kelompok donatur yang lebih luas dari luar ataupun dari dalam negeri untuk lembaganya. Dia juga menyelidiki cara untuk menggunakan bitcoin agar bisa mendistribusikan dana dengan cepat ke berbagai area yang membutuhkan. Cerita ini akan menunjukkan kegunaan bitcoin untuk pengumpulan dana global dan kegunaan dari buku catatan terbuka untuk transparansi dalam organisasi amal.
+
+Impor/ekspor
+((("use cases", "import/export")))Muhammad adalah seorang importir peralatan elektronik di Dubai. Dia sedang ingin menggunakan bitcoin untuk membeli peralatan elektronik dari Amerika Serikat dan China ke UAE untuk mempercepat proses pembayaran impor. Cerita ini akan menunjukkan bagaimana bitcoin bisa digunakan untuk pembayaran internasional bisnis ke bisnis yang berhubungan dengan barang-barang fisik.
+
+Menambang untuk bitcoin
+((("use cases", "mining for bitcoin")))Jing merupakan murid teknik komputer di Shanghai. Dia telah membangun alat penambangan untuk menambang bitcoin, dengan keahlian teknik yang dimilikinya untuk menambah pemasukannya. Cerita ini akan menjelaskan basis industrial dari bitcoin, peralatan khusus yang digunakan untuk mengamankan jaringain bitcoin dan merilis mata uang baru.
+
+Setiap cerita tersebut berdasarkan orang dan perusahaan atau industri nyata yang saat ini menggunakan bitcoin untuk membuka pasar baru, industri baru dan solusi inovatif untuk masalah ekonomi dunia.((("", startref="GSuses01")))
+
+=== Langkah Awal
+
+((("getting started", "wallet selection", id="GSwallet01")))((("wallets", "selecting", id="Wselect01")))((("bitcoin", "getting started", id="BCbasic01")))Bitcoin merupakan sebuah protokol yang bisa diakses dengan aplikasi klien yang "berbicara" protokol tersebut. Sebuah dompet atau wallet bitcoin merupakan antarmuka pengguna yang umum untuk mengakses sistem bitcoin, sebagaimana browser web merupakan aplikasi umum untuk protokol HTTP. Ada banyak implementasi dan merk dompet bitcoin, seperti halnya banyak merk browser web (contoh, Chrome, Safari, Firefox, dan Internet Explorer). Dan seperti halnya kita punya browser favorit (Mozilla Firefox, yey!) dan yang paling tidak disukai (Internet Explorer, urgh!), dompet bitcoin berbeda dalam hal kualitas, performa, keamanan, privasi dan kehandalan. Ada pula referensi implementasi protokol bitcoin yang termasuk dengan dompetnya, disebut dnegan nama "Satoshi Client" atau "Bitcoin Core", yang diturunkan dari implementasi asli yang ditulis oleh Satoshi Nakamoto.
+
+==== Memilih Dompet Bitcoin
+
+((("security", "wallet selection")))Dompet bitcoin merupakan salah satu aplikasi yang dikembangkan paling aktif dalam ekosistem bitcoin. Ada kompetisi yang ketat, dan saat dompet baru sedang dibuat, beberapa dompet yang muncul pada tahun sebelumnya mungkin sudah tidak lagi aktif digunakan. Banyak dompet yang hanya fokus ke platform atau penggunaan khusus dan beberapa di antaranya lebih cocok untuk pemula sementara sisanya dipenuhi dengan fitur yang berguna untuk pengguna ahli. Memilih dompet merupakan hal yang sangat subjektif dan bergantung pada penggunaan dan pengalaman pengguna. Oleh karena itu hampir tidak mungkin untuk merekomendasikan merk atau wallet khusus. Akan tetapi, kita bisa mengkategorisasikan wallet bitcoin berdasarkan platform dan fungsi dan memberikan beberapa kejelasan mengenai semua jenis wallet yang ada. Kabar baiknya, memindahkan kunci atau seeds di antara wallet bitcoin relatif mudah, sehingga mencoba beberapa dompet sampai kamu menemukan yang paling cocok bisa dilakukan.
+
+[role="pagebreak-before"]
+Dompet Bitcoin dapat dikategorikan sebagai berikut, menurut platform:
+
+Wallet desktop:: Sebuah wallet desktop merupakan jenis dompet bitcoin pertama yang dibuat sebagai referensi implementasi dan banyak pengguna menjalankan dompet ini untuk fitur, otonomi dan kontrol yang ditawarkannya. Walaupun demikian, menjalankan dompet ini di beberapa sistem operasi umum seperti Windows dan Mac OS memiliki beberapa kelemahan keamanan karena platform tersebut biasanya tidak aman dan dikonfigurasikan dengan buruk.
+
+Wallet mobile:: Wallet mobile merupakan jenis wallet paling umum dari dompet bitcoin. Dompet ini berjalan di sistem operasi telepon pada umumnya seperti Apple iOS dan Android, yang biasanya menjadi pilihan yang baik untuk pengguna baru. Banyak wallet ini didesain untuk kemudahan dan kesederhanaan penggunaan, akan tetapi ada pula wallet dengan fitur penuh untuk pengguna yang ahli.
+
+Web wallet:: Wallet web diakses melalui browser dan menyimpan data wallet pengguna pada server yang dimiliki oleh pihak ketiga. Hal ini mirip dengan email web yang bergantung pada server pihak ketiga. Beberapa layanan ini bekerja menggunakan kode pada sisi klien yang berjalan di browser klien, yang membuat kontrol kunci bitcoin tetap ada di tangan pengguna. Akan tetapi, kebanyakan mengandung bahaya mengambil kendali kunci pengguna sebagai ganti kemudahan penggunaan. Tidak disarankan menyimpan banyak bitcoin pada sistem pihak ketiga.
+
+Hardware wallet:: Hardware wallet atau dompet perangkat keras merupakan perangkat yang mengoperasikan wallet khusus yang mengandung bitcoin di atas sebuah perangkat keras yang dibuat dengan tujuan khusus. Dompet ini dioperasikan lewat USB dengan menggunakan browser atau melalui NFC lewat perangkat telepon genggam. Dengan mengelola semua operasi yang berhubungan dengan bitcoin pada perangkat keras khusus, wallet ini biasanya dianggap sangat aman dan cocok untuk menyimpan bitcoin dalam jumlah besar.
+
+Paper wallet:: ((("cold storage", seealso="storage")))((("storage", "cold storage")))Kunci untuk mengelola bitcoin juga bisa dicetak untuk penyimpanan jangka panjang. Hal ini dikenal dengan paper wallet atau dompet kertas meskipun bahan-bahan lain juga bisa dipakai (kayu, logam, dst). Paper wallet menawarkan kecanggihan yang relatif rendah tetapi tingkat keamanan yang sangat tinggi untuk menyimpan bitcoin dalam jangka panjang. Penyimpanan offline seperti ini juga seringkali disebut dengan _cold storage_.
+
+Cara lain untuk mengelompokkan dompet bitcoin adalah dengan melihat tingkat otonomi dan bagaimana mereka berinteraksi dengan jaringan bitcoin.
+
+Klien node penuh:: (full client) ((("full nodes")))Klien penuh, atau "full node," merupakan sebuah klien yang menyimpan seluruh catatan transaksi bitcoin (setiap transaksi oleh semua pengguna yang pernah terjadi), mengelola dompet pengguna, dan bisa menginisiasi transaksi langsung di jaringan bitcoin. Klien node penuh mengelola semua aspek protokol dan bisa memvalidasi seluruh blockchain dan transaksi apapun secara independen. Klien node penuh membutuhkan sumber daya komputer yang tidak sedikit (misalnya lebih dari 125 GB ruang penyimpanan, 2 GB RAM) akan tetapi memberikan otonomi penuh dan verifikasi transaksi independen.
+
+Lightweight client:: ((("lightweight clients")))((("simple-payment-verification (SPV)")))Sebuah klien ringan atau lightweight client, juga dikenal dengan klien simple-payment-verification (SPV), menghubungkan ke klien penuh bitcoin (yang sebelumnya disebutkan) untuk mengakses informasi transaksi bitcoin, akan tetapi menyimpan dompet pengguna secara lokal dan secara independen membuat, memvalidasi dan mengirimkan transaksi. Klien ringan berinteraksi langsung dengan jaringan bitcoin tanpa perantara.
+
+Klien API pihak ketiga:: ((("third-party API clients")))Sebuah klien API pihak ketiga merupakan klien yang berinteraksi dengan bitcoin melalui sistem API pihak ketiga, daripada berhubungan langsung dengan jaringan bitcoin. Dompet pengguna bisa disimpan oleh pengguna atau server pihak ketiga, akan tetapi semua transaksi dilakukan melalui pihak ketiga.
+
+Dengan mengombinasikan berbagai macam kategorisasi tersebut, banyak dompet bitcoin yang bisa digolongkan ke dalam beberapa grup, dengan tiga yang paling sering ditemui adalah klien penuh desktop, klien ringan telepon genggam dan dompet web pihak ketiga. Garis pembeda di antara kategori tersebut seringkali tidak jelas, karena banyak wallet berjalan di berbagai macam platform dan bisa berinteraksi dengan jaringan melalui berbagai jalan.
+
+Demi tujuan buku ini, kita akan mendemonstrasikan penggunaan dari berbagai macam klien bitcoin yang bisa diunduh, dari referensi implementasi (Bitcoin Core) ke wallet telepon genggam dan web. Beberapa contoh akan membutuhkan penggunaan Bitcoin Core, yang selain menjadi klien penuh juga membuka API ke wallet, jaringan dan layanan transaksi. Apabila kamu ingin menjelajahi antarmuka pemrograman sistem bitcoin, maka kamu perlu menjalankan Bitcoin Core, atau salah satu klien alternatif. (lihat <<alt_libraries>>).((("", startref="GSwallet01")))((("", startref="Wselect01")))
+
+==== Memulai dengan Cepat
+
+((("getting started", "quick start example", id="GSquick01")))((("wallets", "quick start example", id="Wquick01")))((("use cases", "buying coffee", id="aliceone")))Alice, yang kita kenalkan di bagian <<user-stories>>, tidak terlalu paham tentang hal teknis dan hanya baru-baru ini saja mendengar bitcoin dari temannya Joe. Pada suatu pesta, Joe sekali lagi menjelaskan bitcoin dengan antusias ke semua orang di sekitarnya dan menawarkan untuk melakukan demonstrasi. Oleh karena tertarik, Alice bertanya bagaimana dia bisa memulai menggunakan bitcoin. Joe berkata bahwa wallet mobile adalah pilihan terbaik untuk pengguna baru dan dia merekomendasikan beberapa wallet favoritnya. Alice mengundung "Mycellium" untuk Android dan menginstallnya di hapenya.
+
+Saat Alice menjaankan Mycelium pertama kalinya, layaknya banyak wallet bitcoin yang lain, aplikasi tersebut secara otomatis membuat wallet baru untuk dirinya. Alice melihat wallet di layarnya, sebagaimanya terlihat di <<mycelium-welcome>> (catatan: jangan_mengirimkan bitcoin ke alamat contoh ini, bitcoin tersebut akan hilang untuk selamanya).
+
+[[mycelium-welcome]]
+Dompet Mobile Mycelium
+image::images/mbc2_0101.png["MyceliumWelcome"]
+
+((("addresses", "bitcoin wallet quick start example")))((("QR codes", "bitcoin wallet quick start example")))((("addresses", see="also keys and addresses")))Bagian paling penting dari tampilan tersebut adalah alamat bitcoin Alice. Sebagaimana alamat email, Alice bisa membagikan alamt ini dan siapa saja bisa menggunakannya untuk mengirim uang secara langsung ke dompetnya. Di layar alamat ini tampak sebagai string yang panjang yang terdiri atas huruf dan angka: +1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK+. Di sampingnya terdapat kode QR, sebuah bentuk barcode yang mengandung informasi yang sama dalam format yang bisa di-scan dengan kamera smartphone. Kode QR merupakan kotak hitam-putih yang ada di samping kanan. Alice bisa menyalin alamat bitcoin atau kode QR dengan mengklik tombol copy yang ada di samping mereka. Mengklik kode QR itu sendiri akan memperbesarnya, sehingga bisa di-scan dengan mudah oleh kamera smartphone.
+
+[TIP]
+====
+((("addresses", "security of")))((("security", "bitcoin addresses")))Alamat bitcoin dimulai dari digit 1 atau 3. Sebagaimana alamat email, alamat ini bisa dibagi dengan pengguna bitcoin yang lain, yang kemudian bisa memakainya untuk mengirimkan bitcoin langsung ke dompetmu. Tidak seperti alamat email, kamu bisa membuat alamat bitcoin sesering mungkin yang kamu sukai, di mana semuanya bisa digunakan untuk mengisi dompetmu. Secara ringkas, dompet merupakan koleksi alamat dan kunci yang membuka dana yang ada di dalamnya. 
+====
+
+Sekarang Alice telah siap untuk menerima uang. Aplikasi walletnya secara acak membuat private key (dijelaskan lebih detail pada <<private_keys>>) dan juga alamat bitcoin yang cocok dengannya. Pada tahap ini, alamat bitcoinnya belum dikenal oleh jaringan bitcoin atau terdaftar dengan bagian manapun dari sistem bitcoin. Alamat bitcoinnnya hanyalah sebuah angka yang berhubungan dengan kunci yang bisa ia gunakan untuk mengendalikan akses ke dana yang dimiliki. Pada faktanya, di kebanyakan wallet, tidak ada asosiasi antara alamatbitcoin dan informasi yang bisa diidentifikasi secara eksternal termasuk identitas pengguna. Sebelum alamat ini digunakan sebagai alamat transaksi yang ditampilkan di buku catatan bitcoin, alamat ini hanyalah bagian dari berbagai macam alamat yang mungkin dan valid dalam sistem bitcoin. Hanya ketika alamat itu dihubungkan dengan sebuah transaksilah, alamat ini menjadi bagian yang dikenal dalam jaringan bitcoin.
+
+Sekarang Alice sudah siap untuk menggunakan dompet bitcoinnya yang baru. ((("", startref="GSquick01")))((("", startref="Wquick01")))
+
+[[mendapatkan_bitcoin_pertama]]
+==== Mendapatkan Bitcoin Pertama Anda
+
+((("getting started", "acquiring bitcoin")))Hal pertama yang juga seringkali menjadi bagian tersulit untuk pengguna baru adalah untuk mendapatkan beberapa bitcoin. Tidak seperti mata uang asing lainnya, kamu tidak bisa membeli bitcoin di bank atau tempat penukaran mata uang asing saat ini.
+
+Transaksi bitcoin tidak bisa dikembalikan. Kebanyakan jaringan pembayaran elektronik seperti kartu kredit, kartu debit, PayPal dan transfer bank bisa dikembalikan. Bagi seseorang yang menjual bitcoin, sifat ini melahirkan risiko yang sangat besar karena pembeli bisa saja menggagalkan transaksi atau membalik ulang transaksi ketika mereka telah menerima bitcoin, sehingga menipu penjualnya. Untuk mengelola risiko ini, perusahaan yang menerima pembayaran elektronik tradisional biasanya mengharuskan pembeli untuk melakukan verifikasi identitas dan penilaian kredit untuk membeli bitcoin yang bisa memakan waktu harian atau mingguan. Sebagai pengguna baru, kamu tidak bisa membeli bitcoin secara instan dengan kartu kredit. Dengan sedikit kesabaran dan kreativitas, sebenarnya kamu tidak perlu melakukannya.
+
+[role="pagebreak-before"]
+Berikut adalah beberapa metode untuk mendapatkan bitcoin sebagai pengguna baru:
+
+* Find a friend who has bitcoin and buy some from him or her directly. Many bitcoin users start this way. This method is the least complicated. One way to meet people with bitcoin is to attend a local bitcoin meetup listed at https://bitcoin.meetup.com/[Meetup.com].
+* Gunakan layanan terklasifikasi seperti pass:[<a class="orm:hideurl" href="https://localbitcoins.com/">localbitcoins.com</a>] untuk menemukan penjual di daerahmu untuk membeli bitcoin dengan uang melalui transaksi individu.
+* Dapatkan bitcoin dengan menjual produk ata jasa untuk bitcoin. Apabila kamu adalah seorang programmer, kamu bisa menjual keahlian programming yang kamu miliki. Apabila kamu seorang pemotong rambut, potonglah rambut dengan menerima bayaran bitcoin.
+* ((("Coin ATM Radar")))((("ATMs, locating")))Use a bitcoin ATM in your city. A bitcoin ATM is a machine that accepts cash and sends bitcoin to your smartphone bitcoin wallet. Find a bitcoin ATM close to you using an online map from https://coinatmradar.com/[Coin ATM Radar].
+* ((("exchange rates", "listing services")))Use a bitcoin currency exchange linked to your bank account. Many countries now have currency exchanges that offer a market for buyers and sellers to swap bitcoin with local currency. Exchange-rate listing services, such as https://bitcoinaverage.com/[BitcoinAverage], often show a list of bitcoin exchanges for each currency.
+
+[TIP]
+====
+((("privacy, maintaining")))((("security", "maintaining privacy")))((("digital currencies", "currency exchanges")))((("currency exchanges")))((("digital currencies", "benefits of bitcoin")))((("bitcoin", "benefits of")))Salah satu manfaat bitcoin dibandingkan sistem pembayaran yang lain adalah privasi yang lebih tinggi apabila digunakan dengan tepat. Mendapatkan, menyimpan dan menggunakan bitcoin tidak memerlukan adanya informasi sensitif dan personal pada pihak ketiga. Akan tetapi, ketika bitcoin berhubungan dengan sistem tradisional, seperti bursa mata uang, hukum nasional dan internasional seringkali berlaku. Untuk menukarkan bitcoin dengan mata uang nasionalmu, seringkali kamu harus memberikan informasi bukti identitas dan bank yang kamu miliki. Pengguna harus menyadari bahwa ketika alamat bitcoin terhubung dengan identitas, semua transaksi bitcoin bisa dengan mudah diidentifikasi dan dilacak. Inilah salah satu sebab banyak orang mempertahankan akun bursa khusus yang tidak terhubung dengan wallet mereka.
+====
+
+Alice mengenal bitcoin lewat temannya dan oleh karena itu ia memiliki cara yang mudah untuk mendapatkan bitcoin pertamanya. Sekarang kita akan melihat bagaimana dia membeli dari temannya Joe dan bagaimana Joe mengirimkan bitcoin ke walletnya.
+
+[[bitcoin_price]]
+==== Menemukan Harga Bitcoin Saat Ini
+
+((("getting started", "exchange rates")))((("exchange rates", "determining")))Sebelum Alice bisa membeli bitcoin dari Joe, mereka harus menyepakati _kurs_ di antara bitcoin dan dollar US . Hal ini memunculkan pertanyaan biasa bagi mereka yang baru mengenal bitcoin: "Siapa yang menentukan harga bitcoin?" Jawaban singkatnya adalah harga bitcoin ditentukan oleh pasar.
+
+((("exchange rates", "floating")))((("floating exchange rate")))Bitcoin, seperti kebanyakan mata uang yang lain, memiliki kurs _floating exchange_. Hal ini berarti bahwa nilai bitcoin vis-a-vis mata uang yang lain berubah sesuai dengan permintaan dan penawaran dalam berbagai pasar tempat mata uang ini diperdagangkan. Contohnya, "harga" bitcoin di dollar Amerika Serikat dihitung di tiap pasar berdasarkan hasil perdagangan terakhir antara bitcoin dan dollar AS. Sebab itulah, harga bitcoin cenderung berubah beberapa kali pada tiap menit atau detik. Layanan pemantau harga akan merata-rata harga dari berbagai macam pasar dan menghitung rata-rata berbasis volume untuk menentukan kurs umum dari pasangan mata uang yang diperdagangkan. (contohnya, BTC/USD).
+
+Ada ratusan aplikasi dan situs yang bisa menyediakan kurs pasar saat itu juga. Berikut ini adalah beberapa di antaranya yang cukup terkenal:
+
+https://bitcoinaverage.com/[Bitcoin Average]:: ((("BitcoinAverage")))A site that provides a simple view of the volume-weighted-average for each currency.
+https://coincap.io/[CoinCap]:: A service listing the market capitalization and exchange rates of hundreds of crypto-currencies, including bitcoin.
+https://bit.ly/cmebrr[Chicago Mercantile Exchange Bitcoin Reference Rate]:: A reference rate that can be used for institutional and contractual reference, provided as part of investment data feeds by the CME.
+
+Selain beberapa situs dan aplikasi tersebut, kebanyakan dompet bitcoin akan secara otomatis mengubah jumlah bitcoin dan mata uang yang lain. Joe akan menggunakan dompetnya untuk mengubah harga secara otomatis sebelum mengirim bitcoin ke Alice.
+
+[[mengirim_menerima]]
+==== Mengirim dan Menerima Bitcoin
+
+
+((("getting started", "sending and receiving bitcoin", id="GSsend01")))((("spending bitcoin", "bitcoin wallet quick start example")))((("spending bitcoin", see="also transactions")))Alice telah memutuskan untuk menukar $10 dollar AS untuk bitcoin, sehingga tidak terlalu berisiko untuk memakai teknologi baru ini. Dia memberikan $10 ke Joe dalam bentuk uang, membuka dompet Myceliumnya dan memilih Terima. Setelah itu akan muncul kode QR dengan alamat bitcoin Alice yang pertama.
+
+Setelah itu, Joe memilih Kirim pada wallet smartphonenya. Setelah itu akan muncul dua layar yang mengandung dua input:
+
+* Alamat bitcoin tujuan
+* Jumlah untuk dikirim, dalam bitcoin (BTC) atau mata uang lokalnya (USD)
+
+Pada bagian input untuk alamat bitcoin, ada ikon kecil yang terlihat seperti kode QR. Ikon tersebut membuat Joe bisa men-scan barcode dengan smartphonenya sehingga dia tidak perlu mengetik alamat bitcoin Alice, yang memakan banyak waktu dan cukup sulit untuk dilakukan. Joe memencet ikon kode QR dan mengaktifkan kamera hapenya, men-scan kode QR yang ada di smartphone Alice.
+
+Sekarang Joe telah memiliki alamat bitcoin Alice sebagai penerima. Joe mengisi jumlah yang ingin dikirim dalam dollar dan dompetnya akan secara otomatis mengubahnya dalam nilai bitcoin dengan mengakses kurs bitcoin lewat layanan online. Kurs saat itu adalah $100 US dollar per bitcoin, jadi $10 US dollar bernilai  0.10 bitcoin (BTC), atau 100 millibitcoin (mBTC) sebagaimana terlibat di tampilan layar Joe (lihat <<airbitz-mobile-send>>).
+
+[[airbitz-mobile-send]]
+[role="smallereighty"]
+.Tampilan mengirim dompet bitcoin ponsel Airbitz
+image::images/mbc2_0102.png["airbitz mobile send screen"]
+
+Setelah itu Joe memerika dengan teliti untuk memastikan bahwa dia telah mengisi jumlah yang tepat, karena dia akan mengirimkan uang dan kesalahan tidak bisa ditolerir. Setelah memeriksa ulang alamat dan jumlah yang ingin dikirimkan, dia memencet tombol Kirim untuk mengirim transaksi. Dompet mobile Joe membuat sebuah transaksi yang mengirimkan 0.10 BTC ke alamat yang disediakan oleh Alice, dengan sumber dana berasal dari wallet Joe dan menandatangani transaksi tersebut dengan private key milik Joe. Dengan hal ini jaringan bitcoin akan paham bahwa Joe telah mengizinkan transaksi nilai ke alamat Alice yang baru. Seiring dengan transaksi dikirim lewat protokol peer-to-peer, transaksi tersebut menyebar dengan cepat ke jaringan bitcoin. Dalam waktu kurang dari satu detik, kebanyakan node yang terhubung dengan baik ke jaringan akan menerima transaksi tersebut dan melihat alamat Alice untuk pertama kalinya.
+
+Sementara itu, wallet Alice "mendengarkan" dengan konstan atas transaksi yang baru dikirim pada jaringan bitcoin, mencari apakah ada yang sesuai dengan alamat di walletnya. Beberapa detik kemudian setelah Joe mengirimkan transaksinya, dompet Alice akan memberi tahu bahwa dia telah menerima 0.10 BTC.
+
+.Konfirmasi
+****
+((("getting started", "confirmations")))((("confirmations", "bitcoin wallet quick start example")))((("confirmations", see="also mining and consensus; transactions")))((("clearing", seealso="confirmations")))Pada saat awal alamat Alice akan menunjukkan bahwa transaksi dari Joe berstatus "Unconfirmed." Hal ini berarti bahwa transaksi telah disebar ke jaringan akan tetapi belum direkam dalam buku catatan bitcoin, yang dikenal dengan nama blockchain. Agar bisa dikonfirmasi, sebuah transaksi harus dimasukkan dalam sebuah block dan ditambahkan ke blockchain yang telah dikenal, yang terjadi tiap 10 menit (rata-rata). Dalam kosakata finansial tradisional, hal ini dikenal dengan nama _kliring_. Untuk detail lebih lanjut tentang penyebaran, validasi dan kliring (konfirmasi) transaksi bitcoin, lihat <<mining>>.
+****
+
+Sekarang Alice telah menjadi pemilik 0.10 BTC yang bisa dia pakai. Pada bagian berikutnya, kita akan melihat pembelian pertama yang dia lakukan dengan bitcoin, dan memahami teknologi dibalik transaksi dan penyebaran lebih detail.((("", startref="BCbasic01")))((("use cases", "buying coffee", startref="aliceone")))

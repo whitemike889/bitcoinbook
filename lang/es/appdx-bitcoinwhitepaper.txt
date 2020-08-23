@@ -1,0 +1,247 @@
+[[satoshi_whitepaper]]
+[apéndice]
+== El Whitepaper (Libro Blanco) de Bitcoin por Satoshi Nakamoto
+
+[NOTE]
+====
+((("whitepaper", id="whitethirteen")))((("bitcoin whitepaper", id="BCwhitethirteen")))((("Nakamoto, Satoshi", id="nakamatothirteen")))Este es el whitepaper original, reproducido exactamente como lo publicó Satoshi Nakamoto en Octubre del 2008.
+====
+
+=== Bitcoin: Una Plataforma de Efectivo Electrónico Entre Pares Iguales
+
+Satoshi Nakamoto
+
+_satoshin@gmx.com_
+
+pass:[<a href="https://bitcoin.org/en/" class="orm:hideurl"><em>www.bitcoin.org</em></a>]
+
+*Abstract.* Una versión de efectivo electrónico, verdaderamente entre iguales (peer-to-peer), posibilitaría realizar pagos en línea que vayan directamente de un lado al otro sin la mediación de una institución financiera. Las firmas digitales proporcionarían parte de la solución, pero los principales beneficios se perderían si todavía se requiriera de la participación de un tercero confiable para evitar el doble gasto. Proponemos una solución al problema del doble gasto empleando una red peer-to-peer. Las transacciones en una red a las que se les asigna un sello de tiempo mediante la aplicación de un algoritmo hash antes de insertarlas en una cadena de valores hash de una secuencia de Prueba-de-Trabajo, conformarían de esta manera un registro que no podría modificarse sin volverse a generar otra Prueba-de-Trabajo. La cadena más larga no solo constituiría una prueba de la secuencia de eventos atestiguados, sino también una prueba de que esta secuencia es resultante de emplear a la agrupación con el mayor poder de cómputo. Mientras que la mayor parte del poder de cómputo esté controlada por nodos que no están intentando atacar a la red, éstos generarán la cadena más larga y mantendrán a raya a cualquier atacante. La red en sí misma requiere una estructura mínima. Los mensajes se difunden con base a un esfuerzo optimizado, y los nodos pueden salirse y volver a conectarse a la red a voluntad, aceptando la cadena con la Prueba-de-Trabajo más larga como prueba de lo que sucedió mientras estaban desconectados.
+
+==== Introducción
+El comercio en Internet se ha basado casi exclusivamente en instituciones financieras que actúan como terceros de confianza para procesar pagos electrónicos. Si bien el sistema funciona lo suficientemente bien para la mayoría de las transacciones, todavía sufre las debilidades inherentes de un modelo basado en la confianza. En estas circunstancias, es imposible la entrada en escena de transacciones completamente irreversibles, ya que las instituciones financieras no pueden evitar la mediación en disputas. Los gastos de tal mediación aumentan los costos de cada transacción, limitando el tamaño mínimo que puede tener una transacción en la práctica, así como también, limitando la posibilidad de pequeñas transacciones informales o más espontáneas, y se incurre en un riesgo mas costoso cuando se pierde de la capacidad de realizar pagos irreversibles cuando se paga por servicios sí son irreversibles. Con la posibilidad de reversar pagos, la dependencia en la confianza se intensifica. Los comerciantes deben estar muy atentos de sus clientes, acosándoles con el fin de obtener información de ellos, que de otro modo sería innecesaria. Un cierto nivel de fraude se acepta como un hecho inevitable de la vida. Estos costos e incertidumbres en los pagos se pueden evitar cuando el comercio se realiza en persona y mediante el uso de moneda física, pero no existe ningún mecanismo para realizar pagos a través de un canal de comunicaciones sin que sea necesaria la necesidad de confiar en un tercero.
+
+Lo que se necesita es un sistema de pagos electrónicos basado en pruebas criptográficas, en lugar de basarse en la confianza, y que permita a las dos partes interesadas, llevar a cabo transacciones directas entre sí sin la necesidad de un tercero de confianza. Las transacciones que son computacionalmente poco prácticas para revertirse protegerían a los vendedores del fraude, y los mecanismos de custodia de rutina podrían implementarse fácilmente para proteger a los compradores. En este documento, proponemos una solución al problema del gasto duplicado utilizando un servidor distribuido con sello de tiempo entre pares de igual jerarquía, para generar pruebas computacionales del orden cronológico en que se dan las transacciones. El sistema es seguro siempre que los nodos honestos controlen colectivamente la mayor cantidad de potencia de CPU que cualquier otro grupo de nodos confabulados con los fines de un ataque. 
+
+==== Transacciones
+Definimos una moneda electrónica como una cadena de firmas digitales. Cada propietario transfiere la moneda al  siguiente o nuevo propietario, firmando digitalmente un hash de la transacción anterior y la llave pública del siguiente propietario y agregándolas al final de dicha moneda. Cualquier beneficiario puede verificar las firmas para comprobar la cadena de propietarios.
+
+image::images/mbc2_abin01.png["Transacciones"]
+
+El problema, por supuesto, es que el beneficiario no puede verificar si uno de los propietarios no ha gastado dos veces la misma moneda. Una solución común es introducir una autoridad central de confianza, o casa de moneda, que verifica que cada transacción no tenga doble gasto. Después de cada transacción, la moneda debe devolverse a la casa de moneda para emitir una moneda nueva, y solo se confía en que las monedas emitidas directamente desde la casa de la moneda no se gasten dos veces. El problema con esta solución es que el destino de todo el sistema monetario depende de la compañía que administra la casa de la moneda, y cada transacción tiene que pasar por ellos, al igual que un banco.
+
+Necesitamos una forma de que el beneficiario sepa que los propietarios previos no han firmado transacciones anteriores. Para nuestros propósitos, la transacción más temprana es la que cuenta, así que no nos preocupamos de los intentos de doble gasto posteriores. La única manera de confirmar la ausencia de una transacción es tener conocimiento de todas las transacciones. En el modelo de la casa de la moneda, esta tiene conocimiento de todas las transacciones y decide cuáles llegaron primero. Para lograr esto sin la participación de una parte de confianza, las transacciones han de ser anunciadas públicamente [1], y necesitamos un sistema para que los participantes estén de acuerdo en un único historial del orden en que fueron recibidas. El beneficiario necesita una prueba de que en el momento de la transacción la mayor parte de los nodos estaban de acuerdo en que esa fue la primera que se recibió.
+
+==== Servidor de sello de tiempo
+La solución que proponemos comienza con un servidor de sello de tiempo. Un servidor de sello de tiempo trabaja tomando el hash de un bloque de elementos para sellarlos en el tiempo y notificar públicamente su hash, como un periódico o un post Usenet [2-5]. El sello de tiempo prueba que los datos han existido en el tiempo, obviamente, para entrar en el hash. Cada sello de tiempo incluye el sello de tiempo previo en su hash, formando una cadena, con cada sello de tiempo adicional reforzando a los que estaban antes.
+
+image::images/mbc2_abin02.png["servidor de sello de tiempo"]
+
+==== Prueba-de-Trabajo
+Para implementar un servidor de sello de tiempo distribuido entre pares de la misma jerarquía, necesitaremos emplear un sistema de Prueba-de-Trabajo similar al Hashcash de Adam Back [6], en lugar de los posts de los periódicos o las Usenet. La Prueba-de-Trabajo consiste en escanear en busca de un valor que cuando fue hasheado, tal y como se hace con SHA-256, el hash comience con cierto número de cero bits. El trabajo promedio que hace falta es exponencial y crece con el número de bits con valor cero requeridos y dicho trabajo puede verificarse ejecutando un único hash. Para nuestra red de sello de tiempo, implementamos la Prueba-de-Trabajo incrementando un nonce en un bloque de datos, hasta que se encuentre un valor que dé al hash del bloque el número de bits con valor cero requeridos. Una vez que se ha agotado el esfuerzo de CPU para satisfacer la Prueba-de-Trabajo, el bloque no se puede modificar sin rehacer el trabajo. A medida que los bloques posteriores se encadenen tras él, el trabajo para cambiar un bloque incluiría rehacer todos los bloques siguientes.
+
+image::images/mbc2_abin03.png["pow"]
+
+La Prueba-de-Trabajo (de sus siglas en inglés, "pow") también resuelve el problema de determinar la representación en la toma de decisiones mayoritarias. Si la mayoría se basara en que a una dirección IP, correspondiese un voto, cualquiera podría ser capaz de asignar muchas IP's. La Prueba-de-Trabajo representa esencialmente el criterio de una CPU, un voto. La decisión mayoritaria está representada por la cadena más larga, que tiene el mayor esfuerzo de Prueba-de-Trabajo invertido en ella. Si la mayoría de la potencia de la CPU está controlada por nodos honestos, la cadena honesta crecerá más rápido y superará a las cadenas de la competencia. Para modificar un bloque pasado, un atacante tendría que rehacer la Prueba-de-Trabajo del bloque y todos los bloques posteriores y luego ponerse al día y superar el trabajo de los nodos honestos. Más adelante mostraremos que la probabilidad de que un atacante más lento se recupere disminuye exponencialmente a medida que se agregan bloques posteriores.
+
+Para compensar el incremento en la velocidad del hardware y los cambios de interés por ejecutar nodos, la dificultad de la Prueba-de-Trabajo, PoW, se determina como un promedio dinámico que hace seguimiento al número medio de bloques que se producen por hora. Si son generados demasiado rápido, la dificultad aumentará.
+
+==== Red
+
+Los pasos para ejecutar la red son los siguientes:
+
+1. Las nuevas transacciones se transmiten a todos los nodos.
+2. Cada nodo recopila nuevas transacciones en un bloque.
+3. Cada nodo trabaja para encontrar una Prueba-de-Trabajo difícil para su bloque.
+4. Cuando un nodo encuentra una Prueba-de-Trabajo, transmite el bloque a todos los nodos.
+5. Los nodos aceptan el bloque solo si todas las transacciones en él son válidas y no están gastadas.
+6. Los nodos expresan su aceptación del bloque trabajando en la creación del siguiente bloque en la cadena, utilizando el hash del bloque aceptado como el hash anterior.
+
+Los nodos siempre consideran que la cadena más larga es la correcta y seguirá trabajando para extenderla. Si dos nodos transmiten versiones diferentes del siguiente bloque simultáneamente, algunos nodos pueden recibir uno u otro primero. En ese caso, trabajan en el primero que recibieron, pero guardan la otra rama en caso de que ésta se haga más larga. El empate se romperá cuando se encuentre la próxima prueba-de-trabajo y una de las ramas se haga la más larga; los nodos que estaban trabajando en la otra rama luego cambiarán a la más larga .
+
+Las nuevas difusiones de transacciones no necesariamente tienen que llegar a todos los nodos. Siempre y cuando lleguen a muchos nodos, pronto entrarán en algún bloque. Las difusiones de los bloques también toleran mensajes perdidos. Si un nodo no recibe un bloque, lo solicitará cuando reciba el siguiente bloque y se dé cuenta de que perdió uno.
+
+==== Incentivos
+Por convención, la primera transacción en un bloque es una transacción especial que crea una nueva moneda que es propiedad del creador del bloque. Esto agrega un incentivo para que los nodos apoyen la red y proporciona una manera de distribuir nuevas monedas para que circulen, ya que no hay una autoridad central para emitirlas. La adición continua de una cantidad constante de monedas nuevas es análoga a los mineros de oro que gastan recursos para añadir más oro en circulación. En nuestro caso, es el tiempo de uso del CPU y la electricidad que se gasta.
+
+El incentivo también se puede financiar con comisiones en las transacciones. Si el valor de salida de una transacción es menor que su valor de entrada, la diferencia es una comisión de transacción que se agrega al valor de incentivo del bloque que contiene la transacción. Una vez que un número predeterminado de monedas ha entrado en circulación, el incentivo pasar a ser completamente consistente, en sólo comisiones de transacción, dejando al sistema completamente libre de inflación.
+
+El incentivo puede ayudar a alentar a los nodos a ser honestos. Si un atacante codicioso es capaz de acaparar más potencia de CPU que todos los nodos honestos, tendría que elegir entre usarla para defraudar a las personas robando sus pagos, o usarla para generar nuevas monedas. Este atacante debería encontrar más rentable la opción de apelar jugando según las reglas, reglas que lo favorecen con muchas más monedas nuevas que las que puedan acuñar todos los demás jugadores combinados, en lugar de socavar el sistema y la validez de su propia riqueza.
+
+==== Recuperar espacio en disco
+
+++++
+<p>Una vez que la última transacción referente a una moneda, está enterrada bajo suficientes bloques, las transacciones gastadas antes de esta última pueden descartarse para ahorrar espacio en disco. Para facilitar esto sin corromper el hash de los bloques, las transacciones pueden agruparse en un árbol de Merkle <a href="#ref_seven">[7]</a> <a href="#ref_two">[2]</a> <a href="#ref_five">[5]</a>, con solo la raíz incluida en el hash del bloque. Los bloques viejos, pueden de este modo compactarse, podando ramas del árbol. Los valores hash internos no necesitan ser almacenados.</p>
+++++
+
+image::images/mbc2_abin04.png["disco"]
+
+Una cabecera de bloque sin transacciones tendría aproximadamente 80 bytes. Si suponemos que los bloques se generan cada 10 minutos, +80 bytes * 6 * 24 * 365 = 4.2MB+ por año. Con sistemas informáticos que normalmente se venden con 2 GB de RAM tal como en 2008, y tomando en cuenta la Ley de Moore que predice un crecimiento actual de 1.2 GB por año, el almacenamiento no debería ser un problema, incluso si las cabeceras de bloque deben mantenerse en la memoria.
+
+==== Verificación de Pago Simplificado
+Es posible verificar pagos sin ejecutar un nodo de red completo. Un usuario solo necesita conservar una copia de las cabeceras de bloque de la cadena de Prueba-de-Trabajo más larga, que puede obtener al consultar los nodos de la red hasta que esté convencido de que tiene la cadena más larga, y obtener la rama de Merkle que vincula a la transacción que refleja el pago, al bloque en que ésta posee un sello de tiempo. Este nodo no puede verificar la transacción por sí mismo, pero al vincularla a un lugar de la cadena, puede ver que un nodo de la red sí que la ha aceptado, y al ver que se han agregado más bloques después de ello, se confirma con suficiente redundancia que la red ha aceptado dicha transacción.
+
+image::images/mbc2_abin05.png["spv"]
+
+Como tal, la verificación es confiable siempre que los nodos honestos controlen la red, pero es más vulnerable si la red es dominada por un atacante. Si bien los nodos de la red pueden verificar las transacciones por sí mismos, el método simplificado puede ser engañado por las transacciones fabricadas por un atacante mientras el atacante pueda seguir dominando la red. Una estrategia para protegerse contra esto sería aceptar alertas de los nodos de la red cuando detecten un bloqueo no válido, lo que haría que el software del usuario descargue el bloque completo y las transacciones alertadas para confirmar la inconsistencia. Las empresas que reciban pagos frecuentes probablemente aún deseen ejecutar sus propios nodos completos para una seguridad más independiente y una verificación más rápida.
+
+==== Combinando y Separando Valores
+Aunque sería posible manejar monedas individualmente, sería difícil realizar una transacción por cada centavo en una transferencia. Para permitir que el valor se divida y se combine, las transacciones contienen múltiples entradas y múltiples salidas. Comúnmente podrá haber o bien una sola entrada de una transacción previa más grande o bien múltiples entradas que combinen cantidades más pequeñas, y como máximo dos salidas: una para el pago y otra que devuelva el cambio, si corresponde, al remitente.
+
+image::images/mbc2_abin06.png["combinando-separando"]
+
+Cabe señalar que en ciertos despliegues, en donde una transacción depende de varias transacciones, y esas transacciones dependen a su vez de muchas más, no representa un problema aquí. Nunca será necesario extraer una copia completa e independiente de todo el historial de una transacción.
+
+==== Privacidad
+El modelo bancario tradicional alcanza cierto nivel de privacidad al limitarle el acceso a la información a las partes involucradas y al tercero de confianza. La necesidad de anunciar públicamente todas las transacciones excluye este método, pero la privacidad aún se puede mantener interrumpiendo el flujo de información en otro lugar: manteniendo las llaves públicas en el anonimato. El público puede ver que alguien está enviando un cierto monto a otra persona, pero sin ninguna información que vincule la transacción con nadie. Esto es similar al nivel de información publicado por las bolsas de valores, donde el tiempo y el tamaño de las transacciones individuales, es decir la "cinta", se anuncia al público, pero sin decir quiénes fueron las partes.
+
+image::images/mbc2_abin07.png["privacidad"]
+
+Como “firewall” adicional, se debería usar un nuevo par de llaves para cada transacción para evitar que ninguna de estas transacciones sea vinculada a un ningún titular en común. Algunas vinculaciones serán aún inevitables con transacciones de entradas múltiples, que necesariamente revelarán que dichas entradas fueron propiedad del mismo titular. El riesgo es que si se revela quien es el propietario de una llave, tal vinculación podría revelar otras transacciones que pertenecieron al mismo titular.
+
+==== Cálculos
+Consideraremos el escenario de un atacante que intenta generar una cadena alternativa más rápido que la cadena honesta. Incluso si esto se lograse, el sistema no abre a cambios arbitrarios, tales como crear valor de la nada o tomar dinero que nunca perteneció al atacante. Los nodos van a aceptar ninguna transacción inválida como forma de pago, y los nodos honestos nunca aceptarán un bloque que las contenga. Un atacante solo puede intentar cambiar una de sus propias transacciones para recuperar el dinero que gastó recientemente.
+
+La carrera entre la cadena honesta y la cadena de un atacante puede modelarse como una Caminata Aleatoria Binomial. El evento exitoso es que la cadena honesta se extienda un bloque, lo que aumenta su ventaja en +1, y el evento de falla es que la cadena del atacante se extiende en un bloque, reduciendo la brecha en -1.
+
+++++
+<p>La probabilidad de que un atacante se recupere de un déficit dado es análoga al problema de la Ruina de un Jugador. Supongamos que un jugador con crédito ilimitado comienza con un déficit y juega potencialmente un número infinito de pruebas para tratar de alcanzar el equilibrio. Podemos calcular la probabilidad de que él en algún momento llegue al punto de equilibrio, o de que un atacante, en algún momento, se ponga al la par con la cadena honesta, de la siguiente manera <a href="#ref_eight">[8]</a>:</p>
+++++
+
+p = probabilidad de que un nodo honesto encuentre el siguiente bloque
+
+q = probabilidad de que el atacante encuentre el siguiente bloque
+
+q~z~ = probabilidad de que el atacante se ponga a la delantera desde una posición z bloques detrás
+
+image::images/mbc2_abin08.png["ec1"]
+
+Dado nuestro supuesto de que p > q, la probabilidad cae exponencialmente a medida que aumenta el número de bloques que el atacante tiene que sobrepasar. Con las probabilidades en su contra, si no logra una embestida afortunada desde el principio, sus posibilidades se vuelven muy pequeñas a medida que se va quedando atrás.
+
+Ahora consideramos cuánto tiempo debe esperar el destinatario de una nueva transacción antes de estar suficientemente seguros de que el remitente no puede cambiar la transacción. Asumimos que el remitente es un atacante que quiere hacer creer al destinatario que le pagó por un tiempo, para luego hacer un cambio que le pague a sí mismo el monto del pago, después de que haya pasado ese tiempo. El receptor recibirá una alerta cuando eso suceda, pero el remitente espera que ya sea demasiado tarde.
+
+El receptor genera un nuevo par de llaves y entrega la llave pública al remitente poco antes de firmar. Esto evita que el remitente prepare una cadena de bloques con anticipación trabajando continuamente en ella hasta que tenga la suerte de adelantarse lo suficiente y luego ejecute la transacción en ese momento. Una vez que se envía la transacción, el remitente deshonesto comienza a trabajar en secreto en una cadena paralela que contiene una versión alternativa de su transacción.
+
+El destinatario espera hasta que la transacción se haya agregado a un bloque y al menos unos “z” bloques se hayan vinculado después. No sabe la cantidad exacta de progreso que el atacante ha logrado, pero suponiendo que los bloques honestos tomaron el tiempo promedio esperado por bloque, el progreso potencial del atacante será una distribución de Poisson con el valor esperado:
+
+image::images/mbc2_abin09.png["ec2"]
+
+Para obtener la probabilidad de que el atacante aún pueda ponerse a la par ahora, multiplicamos la densidad de Poisson por cada cantidad de progreso que pudo haber hecho por la probabilidad de que pudiera ponerse a la par desde ese punto:
+
+image::images/mbc2_abin10.png["ec3"]
+
+Reorganizando para evitar sumar la cola infinita de la distribución ...
+
+image::images/mbc2_abin11.png["ec4"]
+
+Convirtiendo a código C ...
+
+[source,c]
+----
+#include <math.h>
+double ProbabilidadExitodelAtacante(double q, int z)
+{
+    double p = 1.0 - q;
+    double lambda = z * (q / p);
+    double sum = 1.0;
+    int i, k;
+    for (k = 0; k <= z; k++)
+    {
+        double poisson = exp(-lambda);
+        for (i = 1; i <= k; i++)
+            poisson *= lambda / i;
+        sum -= poisson * (1 - pow(q / p, z - k));
+    }
+    return sum;
+}
+----
+
+Al ejecutar algunos resultados, podemos ver que la probabilidad disminuye exponencialmente con z.
+----
+q = 0.1
+z = 0 P = 1.0000000
+z = 1 P = 0,2045873
+z = 2 P = 0.0509779
+z = 3 P = 0.0131722
+z = 4 P = 0.0034552
+z = 5 P = 0.0009137
+z = 6 P = 0.0002428
+z = 7 P = 0.0000647
+z = 8 P = 0.0000173
+z = 9 P = 0.0000046
+z = 10 P = 0.0000012
+----
+----
+q = 0.3
+z = 0 P = 1.0000000
+z = 5 P = 0.1773523
+z = 10 P = 0.0416605
+z = 15 P = 0.0101008
+z = 20 P = 0.0024804
+z = 25 P = 0.0006132
+z = 30 P = 0.0001522
+z = 35 P = 0.0000379
+z = 40 P = 0.0000095
+z=45 P=0.0000024
+z=50 P=0.0000006
+----
+Resolviendo para una P menor al 0.1% ...
+----
+P < 0.001
+q = 0.10 z = 5
+q = 0.15 z = 8
+q = 0.20 z = 11
+q = 0.25 z = 15
+q = 0.30 z = 24
+q = 0.35 z = 41
+q = 0.40 z = 89
+q = 0.45 z = 340
+----
+
+==== Conclusión
+Hemos propuesto un sistema para transacciones electrónicas sin depender de la confianza. Comenzamos con el marco habitual de monedas hechas con firmas digitales, que proporciona un fuerte control de la propiedad, pero está incompleto sin una forma de evitar el gasto duplicado. Para resolver esto, propusimos una red de pares iguales utilizando la Prueba-de-Trabajo para registrar un historial público de transacciones que rápidamente se vuelve poco factible de manipular para un atacante, desde el punto de vista computacional, si los nodos honestos controlan la mayoría de la potencia de cómputo. La red es robusta en su sencillez, carente de formalidad estructural. Los nodos funcionan todos a la vez con poca coordinación. No es necesario que se identifiquen, ya que los mensajes no se enrutan a ningún lugar en particular y solo se deben entregar con base a un esfuerzo optimizado. Los nodos pueden salir y volver a unirse a la red a voluntad, aceptando la cadena de con la mejor Prueba-de-Trabajo como evidencia de lo que sucedió mientras estaban fuera. Los nodos votan con su potencia de cómputo, expresando su aceptación de los bloques válidos al trabajar en extenderlos y rechazando los bloques inválidos al negarse a trabajar en ellos. Las reglas e incentivos necesarios se pueden hacer cumplir con este mecanismo de consenso.
+
+==== Referencias
+++++
+<p>
+<span id="ref_one">[1]</span> W. Dai, "b-money," <a href="http://www.weidai.com/bmoney.txt"><em>http://www.weidai.com/bmoney.txt</em></a>, 1998.
+</p>
+<p>
+<span id="ref_two">[2]</span> H. Massias, X.S. Avila, and J.-J. Quisquater, "Design of a secure timestamping service with minimal trust requirements," en el 20vo Simposio sobre teoría de la información en el Benelux, mayo de 1999.
+</p>
+<p>
+<span id="ref_three">[3]</span> S. Haber, W.S. Stornetta, "How to time-stamp a digital document," en Journal of Cryptology, vol 3, no 2, páginas 99-111, 1991.
+</p>
+
+<p>
+<span id="ref_four">[4]</span> D. Bayer, S. Haber, W.S. Stornetta, "Improving the efficiency and reliability of digital time-stamping," En "Sequences II: Methods in Communication, Security and Computer Science", páginas 329-334, 1993.
+</p>
+
+<p>
+<span id="ref_five">[5]</span> S. Haber, W.S. Stornetta, "Secure names for bit-strings," En: "Proceedings of the 4th ACM Conference on Computer and Communications Security", páginas 28-35, Abril de 1997.
+</p>
+
+<p>
+<span id="ref_six">[6]</span> A. Back, "Hashcash - a denial of service counter-measure," <a href="http://www.hashcash.org/papers/hashcash.pdf"><em>http://www.hashcash.org/papers/hashcash.pdf</em></a>, 2002.
+</p>
+
+<p>
+<span id="ref_seven">[7]</span> R.C. Merkle, "Protocols for public key cryptosystems," En "Proc. 1980"; Simposio de 1980 sobre seguridad y privacidad, IEEE Computer Society, páginas 122-133, abril de 1980.
+</p>
+
+<p>
+<span id="ref_eight">[8]</span> W. Feller, "An introduction to probability theory and its applications," 1957.
+</p>
+++++
+
+=== Licencia
+
+((("licencias de código abierto")))Este documento fue publicado en octubre de 2008 por Satoshi Nakamoto. Más tarde (2009) se agregó como documentación de respaldo al software de bitcoin y tiene la misma licencia MIT. Se ha reproducido en este libro, sin más modificaciones que el formato, bajo los términos de la licencia MIT:
+
+La licencia MIT (MIT)
+Copyright (c) 2008 Satoshi Nakamoto
+
+Por medio de la presente, se otorga permiso, sin cargo, a cualquier persona que obtenga una copia de este software y los archivos de documentación asociados (el "Software"), para tratar con el Software sin restricciones, incluidos, entre otros, los derechos de uso, copia, modificación, fusión , publicación, distribución, para sub-licenciar y / o vender copias del Software, y permitir a las personas a quienes se les proporciona el Software que lo hagan, sujeto a las siguientes condiciones:
+
+El aviso de copyright anterior y este aviso de permiso se incluirán en todas las copias o partes sustanciales del Software.
+
+EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O IMPLÍCITA, INCLUYENDO PERO SIN LIMITARSE A LAS GARANTÍAS DE COMERCIABILIDAD, APTITUD PARA UN PROPÓSITO Y NO INFRACCIÓN EN PARTICULAR. EN NINGÚN CASO, LOS AUTORES O LOS TITULARES DE LOS DERECHOS DE AUTOR SERÁN RESPONSABLES DE NINGÚN RECLAMO, DAÑOS U OTRA RESPONSABILIDAD, YA SEA EN ACCIÓN DE CONTRATO, AGRAVIO O DE OTRA MANERA, DERIVADA DE, FUERA DE, O EN RELACIÓN CON EL SOFTWARE O AL USO U OTROS MANEJOS EN EL SOFTWARE.((("", startref="whitethirteen")))((("", startref="nakamatothirteen")))((("", startref="BCwhitethirteen")))

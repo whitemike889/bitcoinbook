@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[appendix]
+== Operatori, Constante și Simboluri ale Limbajului de Scriptare pentru Tranzacții
+
+[NOTE]
+====
+Tabele și descrieri provenite de la https://en.bitcoin.it/wiki/Script[].
+====
+
+<<tx_script_ops_table_pushdata>> arată operatorii pentru împingerea valorilor pe stivă.((("tranzacții", "scripturi și limbaj de scriptare", id="TRlang14")))((("scriptare", "operatori, constante și simboluri lae limbajului de scriptare pentru tranzacții", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+.Împinge valoare pe stivă
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| OP_0 sau OP_FALSE | 0x00 | Un șir gol este împins pe stiva
+| 1 până la 75 | 0x01 până la 0x4b | Împinge următorii N octeți pe stivă, unde N este de la 1 la 75 de octeți
+| OP_PUSHDATA1 | 0x4C | Următorul octet script conține N, împinge următorii N octeți pe stivă
+| OP_PUSHDATA2 | 0x4d | Următorii doi octeți script conțin N, împinge următorii N bytes în stivă
+| OP_PUSHDATA4 | 0x4e | Următorii patru octeți script conțin N, împinge următorii N bytes pe stivă
+| OP_1NEGATE | 0x4f | Împinge valoarea "-1" pe stivă
+| OP_RESERVED | 0x50 | Stop - tranzacție invalidă dacă nu se găsește într-o clauză OP_IF neexecutată
+| OP_1 sau OP_TRUE | 0x51 | Împinge valoarea "1" pe stivă
+| OP_2 până la OP_16 | 0x52 până la 0x60 | Pentru OP_N, împinge valoarea ”N” pe stivă, de exemplu, OP_2 împinge ”2”
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> prezintă operatorii de control condițional al execuției.
+
+[[tx_script_ops_table_control]]
+.Controlul condițional al execuției
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| OP_NOP | 0x61 | Nu fă nimic
+| OP_VER | 0x62 | Stop - tranzacție invalidă dacă nu se găsește într-o clauză OP_IF neexecutată
+| OP_IF | 0x63 | Execută instrucțiunile care urmează dacă vârful stivei nu este 0
+| OP_NOTIF | 0x64 | Execută instrucțiunile care urmează dacă vârful stivei este 0
+| OP_VERIF | 0x65 | Stop - tranzacție invalidă
+| OP_VERNOTIF | 0x66 | Stop - tranzacție invalidă
+| OP_ELSE | 0x67 | Execută doar dacă declarațiile anterioare nu au fost executate
+| OP_ENDIF | 0x68 | Termina blocul OP_IF, OP_NOTIF, OP_ELSE
+| OP_VERIFY | 0x69 | Verifică vârful stivei, oprește și invalidează tranzacția dacă nu e TRUE
+| OP_RETURN | 0x6a | Oprește și invalidează tranzacția
+|=======
+
+<<tx_script_ops_table_timelock>> prezintă operatorii utilizati pentru timpii-de-blocare.
+
+[[tx_script_ops_table_timelock]]
+.Operații cu timpii-de-blocare
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| OP_CHECKLOCKTIMEVERIFY (anterior OP_NOP2) | 0xb1 | Marchează tranzacția ca invalidă dacă vârful stivei este mai mare decât câmpul nLockTime al tranzacției, în caz contrar, evaluarea scriptului continuă ca și cum a fost executat un OP_NOP. Tranzacția este de asemenea invalidă dacă 1. stiva este goală; sau 2. elementul din vârful stivei este negativ; sau 3. elementul din vârful stivei este mai mare sau egal cu 500000000, în timp ce câmpul nLockTime al tranzacției este mai mic decât 500000000, sau invers; sau 4. câmpul nSequence al intrării este egal cu 0xffffffff. Semantica precisă este descrisă în BIP-65 
+| OP_CHECKSEQUENCEVERIFY (anterior OP_NOP3) | 0xb2 | Marchează tranzacția ca invalidă dacă timpul de blocare relativ al intrării (impus de BIP 0068 cu nSequence) nu este egal sau mai lung decât valoarea elementului din vârful stivei. Semantica precisă este descrisă în BIP-112 |
+|=======
+
+<<tx_script_ops_table_stack>> arată operatorii utilizați pentru manipularea stivei.
+
+[[tx_script_ops_table_stack]]
+.Operații pe stivă
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| OP_TOALTSTACK | 0x6b | Scoate elementul din vârful stivei și îl împinge pe stiva alternativă
+| OP_FROMALTSTACK | 0x6c | Scoate elementul din vârful stivei alternative și îl împinge pe stivă
+| OP_2DROP | 0x6d | Scoate două elemente din vârful stivei
+| OP_2DUP | 0x6e | Duplică primele două elemente din vârful stivei
+| OP_3DUP | 0x6f | Duplică primele trei elemente din vârful stivei
+| OP_2OVER | 0x70 | Copiază cel de-al treilea și al patrulea element din stivă în vârful stivei
+| OP_2ROT | 0x71 | Mută al cincilea și al șaselea element din stivă în vârful stivei
+| OP_2SWAP | 0x72 | Interschimbă cele două perechi de elemente din vârful stivei
+| OP_IFDUP | 0x73 | Duplică elementul din vârful stivei dacă nu este 0
+| OP_DEPTH | 0x74 | Numără elementele de pe stivă și împinge numărul rezultat
+| OP_DROP | 0x75 | Scoate elementul din vârful stivei
+| OP_DUP | 0x76 | Duplică elementul din vârful stivei
+| OP_NIP | 0x77 | Scoate al doilea element din stivă
+| OP_OVER | 0x78 | Copie al doilea element din stivă și îl împinge în vârful stivei
+| OP_PICK | 0x79 | Scoate valoarea de la poziția N din stivă, apoi copiază cel de-al N-ulea element în vârful stivei
+| OP_ROLL | 0x7a | Scoate valoarea de la poziția N din stivă, apoi mută cel de-al N-ulea element în vârful stivei
+| OP_ROT | 0x7b | Rotește primele trei elemente din stivă
+| OP_SWAP | 0x7c | Interschimbă primele două elemente din stivă
+| OP_TUCK | 0x7d | Copiază elementul din vârf și îl introduce între primul și cel de-al doilea element
+|=======
+
+<<tx_script_ops_table_splice>> prezinta operatori pentru text.
+
+[[tx_script_ops_table_splice]]
+.Operații de manipulare a șirurilor de caractere
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| _OP_CAT_ | 0x7e | Dezactivat (concatenează primele două elemente)
+| _OP_SUBSTR_ | 0x7f | Dezactivat (returnează un subșir)
+| _OP_LEFT_ | 0x80 | Dezactivat (returnează subșirul stâng)
+| _OP_RIGHT_ | 0x81 | Dezactivat (returnează subșirul drept)
+| OP_SIZE | 0x82 | Calculează lungimea șirului de caratere pentru elementului din vârful stivei și împinge rezultatul 
+|=======
+
+<<tx_script_ops_table_binmath>> prezinta operatori binari aritmetici si de logică booleană.
+
+[[tx_script_ops_table_binmath]]
+.Aritmetică binară și condiționare
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| _OP_INVERT_ | 0x83 | Dezactivat (inversează biții vârfului stivei)
+| _OP_AND_ | 0x84 | Dezactivat (AND boolean pe primele două elemente)
+| _OP_OR_ | 0x85 | Dezactivate (OR boolean pe primele două elemente)
+| _OP_XOR_ | 0x86 | Dezactivat (XOR boolean pe primele două elemente)
+| OP_EQUAL | 0x87 | Împinge TRUE (1) dacă primele două elemente din vârf sunt exact egale, altfel împinge FALSE (0)
+| OP_EQUALVERIFY | 0x88 | La fel ca OP_EQUAL, dar execută OP_VERIFY și oprește, dacă nu TRUE
+| OP_RESERVED1 | 0x89 | Stop - tranzacție invalidă dacă nu se găsește într-o clauză OP_IF neexecutată
+| OP_RESERVED2 | 0x8a | Halt - tranzacție invalidă dacă nu se găsește într-o clauză OP_IF neexecutată
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>> prezintă operatori numerici (aritmetici).
+
+[[tx_script_ops_table_numbers]]
+.Operatori numerici
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| OP_1ADD | 0x8b | Adăugă 1 la elementul din vârf   
+| OP_1SUB | 0x8c | Scade 1 din elementul din vârf
+| _OP_2MUL_ | 0x8d | Dezactivat (multiplică elementul din vârf cu 2)
+| _OP_2DIV_ | 0x8e | Dezactivat (împarte elementul din vârf la 2)
+| OP_NEGATE | 0x8f | Inversează semnul elementului din vârf
+| OP_ABS | 0x90 | Schimbă semnul elementului din vârf în pozitiv
+| OP_NOT | 0x91 | Dacă elementul din vârf este 0 sau 1 inversează boolean, altfel returnează 0
+| OP_0NOTEQUAL | 0x92 | Dacă din vârv este 0 returnează 0, altfel returnează 1
+| OP_ADD | 0x93 | Scoate două elemente, le adună și împinge rezultatul
+| OP_SUB | 0x94 | Scoate două elemente, scade primul din al doilea, împinge rezultatul
+| _OP_MUL_ | 0x95 | Dezactivat (multiplică primele două elemente)
+| _OP_DIV_ | 0x96 | Dezactivate (împarte al doilea element la primul element)
+| _OP_MOD_ | 0x97 | Dezactivat (restul împărțirii celui de-al doilea element la primul)
+| _OP_LSHIFT_ | 0x98 | Dezactivat (deplasează la stânga biții pentru cel de-al doilea element cu un număr specificat de primul element)
+| _OP_RSHIFT_ | 0x99 | Dezactivat (deplasează la stânga biții pentru cel de-al doilea element cu un număr specificat de primul element)
+| OP_BOOLAND | 0x9a | AND boolean din primele două elemente
+| OP_BOOLOR | 0x9b | OR boolean din primele două elemente
+| OP_NUMEQUAL | 0x9c | Returnează TRUE dacă cele două elemente din vârf sunt numere egale
+| OP_NUMEQUALVERIFY | 0x9d | La fel ca NUMEQUAL, apoi OP_VERIFY pentru a opri, dacă nu TRUE
+| OP_NUMNOTEQUAL | 0x9e | Returnează TRUE dacă cele două elemente din vârf nu sunt numere egale
+| OP_LESSTHAN | 0x9f | Returnează TRUE dacă al doilea element este mai mic decât elementul din vârf
+| OP_GREATERTHAN | 0xa0 | Returnează TRUE dacă al doilea element este mai mare decât elementul din vârf
+| OP_LESSTHANOREQUAL | 0xa1 | Returnează TRUE dacă al doilea element este mai mic sau egal cu elementul din vârf
+| OP_GREATERTHANOREQUAL | 0xa2 | Returnează TRUE dacă al doilea element este mai mare sau egal cu elementul din vârf
+| OP_MIN | 0xa3 | Returnează cel mai mic dintre cele două elemente din vârf 
+| OP_MAX | 0xa4 | Returnează cel mai mare dintre cele două elemente din vârf
+| OP_WITHIN | 0xa5 | Returnează TRUE dacă cel de-al treilea element se află între al doilea element (sau egal) și primul element
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> prezintă operatorii funcții criptografice.
+
+[[tx_script_ops_table_crypto]]
+.Operații criptografice și de rezumare
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| OP_RIPEMD160 | 0xa6 | Returnează rezumatul RIPEMD160 al elementului din vârf
+| OP_SHA1 | 0xa7 | Returnați rezumatul SHA1 al elementului din vârf
+| OP_SHA256 | 0xa8 | Returnează rezumatul SHA256 al elementului din vârf
+| OP_HASH160 | 0xa9 | Returnează rezumatul RIPEMD160 (SHA256 (x)) al elementului din vârf
+| OP_HASH256 | 0xaa | Returnează rezumatul SHA256 (SHA256 (x)) al elementului din vârf
+| OP_CODESEPARATOR | 0xab | Marchează începutul datelor verificate prin semnătură
+| OP_CHECKSIG | 0xac | Extrage o cheie publică și semnătura și validează semnătura pentru datele rezumate ale tranzacției, întoarce TRUE dacă se potrivește
+| OP_CHECKSIGVERIFY | 0xad | La fel ca CHECKSIG, apoi OP_VERIFY pentru a opri, dacă nu TRUE
+| OP_CHECKMULTISIG | 0xae | Rulează CHECKSIG pentru fiecare pereche de semnătură și chei publică furnizate. Toate trebuie să se potrivească. Un defect în implementare extrage o valoare suplimentară, prefixare cu OP_NOP ca soluție
+| OP_CHECKMULTISIGVERIFY | 0xaf | La fel ca CHECKMULTISIG, apoi OP_VERIFY pentru a opri dacă nu TRUE
+|=======
+
+<<tx_script_ops_table_nop>> afișează simboluri nonoperator.
+
+[[tx_script_ops_table_nop]]
+.Nonoperatori
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| OP_NOP1 până la OP_NOP10 | 0xb0 la 0xb9 | Nu face nimic, ignorat
+|=======
+
+
+<<tx_script_ops_table_internal>> prezintă codurile operator rezervate pentru a fi folosit de parserul de script intern.((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+.Coduri OP rezervate pentru utilizare internă de către parser
+[options="header"]
+|=======
+| Simbol | Valoare (hexa) | Descriere
+| OP_SMALLDATA | 0xf9 | Reprezintă un câmp de date mic 
+| OP_SMALLINTEGER | 0xfa | Reprezintă un câmp de date întregi mici
+| OP_PUBKEYS | 0xfb | Reprezintă câmpuri cheie publică
+| OP_PUBKEYHASH | 0xfd | Reprezintă un câmp rezumat de cheie publică
+| OP_PUBKEY | 0xfe | Reprezintă un câmp cheie publică
+| OP_INVALIDOPCODE | 0xff | Reprezintă orice cod OP care nu este atribuit în prezent
+|=======

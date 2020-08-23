@@ -1,0 +1,210 @@
+[role="pagenumrestart"]
+[[ch01_intro_what_is_bitcoin]]
+== บทนำ
+
+=== บิทคอยน์คืออะไร?
+
+((("bitcoin", "defined", id="GSdefine01")))Bitcoin is a collection of concepts and technologies that form the basis of a digital money ecosystem. Units of currency called bitcoin are used to store and transmit value among participants in the bitcoin network. Bitcoin users communicate with each other using the bitcoin protocol primarily via the internet, although other transport networks can also be used. The bitcoin protocol stack, available as open source software, can be run on a wide range of computing devices, including laptops and smartphones, making the technology easily accessible.
+
+Users can transfer bitcoin over the network to do just about anything that can be done with conventional currencies, including buying and selling goods, sending money to people or organizations, or extending credit. Bitcoin can be purchased, sold, and exchanged for other currencies at specialized currency exchanges. Bitcoin in a sense is the perfect form of money for the internet because it is fast, secure, and borderless.
+
+สิ่งที่ทำให้ bitcoin แตกต่างจากสกุลเงินทั่วไป นั่นก็คือการที่ Bitcoin นั้น เป็นเงินเสมือน กล่าวคือ bitcoin ไม่มีตัวตนทั้งทางกายภาพ และทางดิจิทัลด้วยซ้ำ หากแต่ 'เหรียญ' (coin) เป็นเพียงจำนวนที่ถูกระบุลงในการทำธุรกรรม เพื่อเคลื่อนย้ายมูลค่า ระหว่างผู้ส่ง ถึงผู้รับนั่นเอง ผู้ใช้งานจะสามารถพิสูจน์ความเป็นเจ้าของ Bitcoin ของตนเองได้ผ่านการถือครอง 'กุญแจ' ซึ่งเมื่อผู้ใช้งานต้องการที่จะทำการส่ง Bitcoin ของตนเองไปให้ยังผู้รับ ก็จะสามารถใช้กุญแจของตนเอง ปลดล็อคและทำการ 'เซ็นต์อนุมัติการทำธุรกรรม' (sign transaction) ได้ทันที โดยปรกติแล้ว 'กุญแจ' จะถูกเก็บอยู่ใน 'กระเป๋าสตางค์ดิจิทัล' (Digital Wallet) ซึ่งอาจอยู่บนคอมพิวเตอร์ หรือแม้แต่สมาร์ทโฟนของผู้ใช้งาน และด้วยเหตุที่การครอบครองกุญแจ เป็นสิ่งเดียวที่จำเป็นสำหรับการอนุมัติธุรกรรม ทำให้ผู้ใช้งานทุกคนเป็นผู้เดียวที่มีอำนาจในการควบคุมเงินของตนเองโดยสมบูรณ์
+
+เนื่องจาก Bitcoin ทำงานบนระบบกระจายศูนย์ ในรูปแบบ บุคคล-ถึง-บุคคล (peer-to-peer) จึงเป็นเหตุให้ Bitcoin ไม่มีศูนย์ควบคุมหรือผู้ให้บริการ 'กลาง' ที่จะคอยตรวจสอบดูแลระบบ การผลิต Bitcoin ใหม่ จึงกระทำผ่านกระบวนการที่เรียกว่า 'การขุด' (mining) ซึ่งเป็นการแข่งขันกันหาคำตอบในชุดสมการคณิตศาสตร์ และตรวจสอบความถูกต้องของธุรกรรมไปพร้อมกัน โดยที่ 'นักขุด' (miner) (ซึ่งหมายถึงบุคคลใดก็ได้ที่เปิดใช้งานชุดซอฟต์แวร์ Bitcoin เต็มรูปแบบ) จะเป็นผู้ช่วยกันทำหน้าที่ตรวจสอบ และบันทึกธุรกรรมต่างๆ โดยอาศัยกำลังการประมวลผลของอุปกรณ์คอมพิวเตอร์ของตนเอง ซึ่งในทุกๆ 10 นาทีโดยเฉลี่ย จะมี miner ที่สามารถตรวจสอบและบันทึกธุรกรรมที่เกิดขึ้นในช่วง 10 นาทีก่อนหน้าได้สำเร็จ และได้รางวัลเป็น Bitcoin ที่เกิดขึ้นใหม่ กล่าวคือ Bitcoin กระจายศูนย์กลางอำนาจในการผลิตเงินใหม่ และการสรุปบัญชีธุรกรรมทั้งหมดของระบบธนาคารกลางผ่านกระบวนการ mining จึงเป็นเหตุให้ไม่จำเป็นต้องมีธนาคารกลางใดๆ
+
+The bitcoin protocol includes built-in algorithms that regulate the mining function across the network. The difficulty of the processing task that miners must perform is adjusted dynamically so that, on average, someone succeeds every 10 minutes regardless of how many miners (and how much processing) are competing at any moment. The protocol also halves the rate at which new bitcoin are created every 4 years, and limits the total number of bitcoin that will be created to a fixed total just below 21 million coins. The result is that the number of bitcoin in circulation closely follows an easily predictable curve that approaches 21 million by the year 2140. Due to bitcoin's diminishing rate of issuance, over the long term, the bitcoin currency is deflationary. Furthermore, bitcoin cannot be inflated by "printing" new money above and beyond the expected issuance rate.
+
+เห็นได้ว่า ในเบื้องหลังนั้น คำว่า Bitcoin เป็นชื่อเรียกโพรโตคอล, ระบบโครงข่าย peer-to-peer และนวัตกรรมทางระบบคอมพิวเตอร์แบบกระจายศูนย์ (distributed computing) สกุลเงิน Bitcoin นั้น โดยแท้จริงแล้วเป็นเพียงรูปแบบการใช้งานรูปแบบแรก ของสิ่งประดิษฐ์ที่กล่าวมาข้างต้นนี้ Bitcoin เป็นตัวแทนแห่งบทสรุปของงานศึกษาวิจัยหลายทศวรรษ ทางด้าน cryptography และ distributed systems และประกอบด้วยนวัตกรรมทั้งสี่ด้าน ที่มารวมตัวกันในรูปแบบเฉพาะที่ทรงพลัง ได้แก่:
+
+* โครงข่ายไร้ศูนย์กลาง แบบ peer-to-peer (the bitcoin protocol)
+* สมุดบัญชีบันทึกธุรกรรมสาธารณะ (the blockchain)
+* ((("mining and consensus", "consensus rules", "satisfying"))) ชุดของกฏเกณฑ์ในการตรวจสอบธุรกรรมอย่างอิสระ (โดยไม่อาศัยตัวกลาง) และการผลิตเงิน (กฎฉันทามติ consensus rules)
+* กลไกสำหรับการได้มาซึ่งฉันทามติองค์รวมอย่างไร้ศูนย์กลางบน blockchain ที่ถูกต้องตามกฎ (Proof-of-Work algorithm)
+
+ในฐานะนักพัฒนา ผมมอง Bitcoin เป็นเสมือนอินเตอร์เน็ตสำหรับเงิน (internet of money) เป็น network สำหรับการแพร่ขยายมูลค่า การรักษาความเป็นเจ้าของของทรัพย์สินดิจิทัลผ่านระบบ distributed computation. Bitcoin เป็นอะไรหลายต่อหลายอย่าง มากกว่าที่เราคิด
+
+ในบทนี้ เราจะเริ่มด้วยการอธิบายแนวความคิดหลัก ๆ และคำศัพท์ที่จะได้พบบ่อยๆ รวมถึงการเตรียมซอฟต์แวร์ที่จำเป็น และการใช้งาน ฺBitcoin เพื่อการทำธุรกรรมอย่างง่ายๆ ส่วนในบทต่อๆไป เราจะค่อยๆแกะเปลือกของเทคโนโลยีที่ทำให้ Bitcoin เกิดขึ้นได้ทีละชั้น และเรียนรู้กลไกการทำงานของโพรโตคอล และระบบโครงข่ายของ Bitcoin ((("", startref="GSdefine01")))
+
+[role="pagebreak-before less_space"]
+.สกุลเงินดิจิทัลก่อนจะมี Bitcoin
+****
+
+((("สกุลเงินดิจิทัล", "ก่อนจะมี Bitcoin"))) เมื่อเราพิจารณาถึงความท้าทายในระดับพื้นฐานที่เกี่ยวข้องกับการนำเอาหน่วยข้อมูล (bits) มาใช้เป็นตัวแทนมูลค่าในการแลกเปลี่ยนซื้อขายสินค้าและบริการ แล้ว จึงเป็นเรื่องที่ไม่น่าแปลกใจ ที่การเกิดขึ้นของเงินดิจิทัลที่สามารถใช้งานได้จริงนั้น มีความเกี่ยวโยงอย่างใกล้ชิดกับการพัฒนาทางด้านศาสตร์ของการเข้ารหัส (cryptography) โดยคำถามพื้นฐาน ที่ใครก็ตามที่ต้องการรับเงินดิจิทัลจะต้องถาม มีอยู่สามข้อหลักๆ ด้วยกัน ได้แก่:
+
+1. จะมั่นใจได้อย่างไรว่าเงินนั้น เป็นของแท้ ไม่มีการปลอมแปลง?
+2. จะมั่นใจได้อย่างไรว่าเงินจำนวนนั้นสามารถใช้จ่ายได้เพียงครั้งเดียว? (หรือที่เรียกกันว่าปัญหาการจ่ายซ้อน หรือ "double-spend" )
+3. จะมั่นใจได้อย่างไรว่าไม่มีผู้ใดสามารถอ้างสิทธิ์ในเงินจำนวนนี้ได้นอกจากเรา?
+
+Issuers of paper money are constantly battling the counterfeiting problem by using increasingly sophisticated papers and printing technology. Physical money addresses the double-spend issue easily because the same paper note cannot be in two places at once. Of course, conventional money is also often stored and transmitted digitally. In these cases, the counterfeiting and double-spend issues are handled by clearing all electronic transactions through central authorities that have a global view of the currency in circulation. For digital money, which cannot take advantage of esoteric inks or holographic strips, cryptography provides the basis for trusting the legitimacy of a user’s claim to value. Specifically, cryptographic digital signatures enable a user to sign a digital asset or transaction proving the ownership of that asset. With the appropriate architecture, digital signatures also can be used to address the double-spend issue.
+
+เมื่อวิทยาการทางการเข้ารหัสได้รับการแพร่ขยายและมีผู้เข้าใจในวงกว้างขึ้นในช่วงท้ายยุค 1980s มีนักวิจัยจำนวนมากพยายามที่จะสร้างสกุลเงินดิจิตัลโดยใช้ cryptography ซึ่งเงินดิจิตัลในยุคแรกนี้ มักจะอาศัยสกุลเงินของชาติ หรือโลหะมีค่าเช่นทองคำ เป็นสิ่งค้ำมูลค่าอยู่เบื้องหลัง 
+
+((("decentralized systems", "vs. centralized", secondary-sortas="centralized")))เงินดิจิทัลในยุคแรก มีระบบสำนักหักบัญชีกลาง (clearinghouse) ที่ทำหน้าที่ชำระสะสางบัญชีธุรกรรมทั้งหมดอย่างสม่ำเสมอ เช่นเดียวกับระบบของธนาคารทั่วๆไป ทำให้ถึงแม้ว่าเงินดิจิทัลในยุคแรกจะสามารถใช้งานได้ แต่ยังคงมีศูนย์กลางในการควบคุม ซึ่งทำให้ง่ายต่อการตกเป็นเป้าการโจมตีจากรัฐบาลและเหล่าแฮคเกอร์ทั้งหลาย และเป็นที่น่าเสียดายที่สกุลเงินดิจิทัลที่เพิ่งเกิดใหม่เหล่านี้ ต่างตกเป็นเป้าการดำเนินคดีจากรัฐบาลที่หวั่นวิตก จนต้องล้มหายตายจากไป หรือบางสกุลก็พังทลายลงอย่างไม่เป็นท่าเมื่อบริษัทผู้เป็นเจ้าของตัดสินใจขายกิจการทิ้งอย่างกะทันหัน และเพื่อเป็นการป้องกันตนเองจากการแทรกแซงของผู้ประสงค์ร้าย ไม่ว่าจะจากรัฐบาลที่ถูกต้องตามกฎหมาย หรือ ปัจจัยทางอาชญากรรม สกุลเงินดิจิทัลที่ไร้ศูนย์กลาง ไม่มีจุดใดจุดหนึ่งเป็นเป้าของการโจมตี จึงเป็นสิ่งจำเป็น และ Bitcoin ซึ่งเป็นสกุลเงินดิจิทัลที่ถูกออกแบบให้ไม่มีศูนย์กลาง ปราศจากซึ่งตัวกลางหรือจุดควบคุมใดๆที่จะสามารถตกเป็นเป้าได้ ถูกสร้างขึ้นภายใต้แนวความคิดดังกล่าวนั่นเอง
+
+****
+
+=== ประวัติศาสตร์ Bitcoin
+
+Bitcoin ถูกประดิษฐ์ขึ้นในปี ค.ศ. 2008 ด้วยการเผยแพร่เอกสาร "Bitcoin: A Peer-to-Peer Electronic Cash System" footnote:["Bitcoin: A Peer-to-Peer Electronic Cash System," Satoshi Nakamoto (https://bitcoin.org/bitcoin.pdf).] โดยผู้เขียนที่ใช้นามปากกาว่า Satoshi Nakamoto (อ่านเพิ่มเติม <<satoshi_whitepaper>>). Nakamoto ได้รวบรวมเอาสิ่งประดิษฐ์ในอดีตหลายๆอย่าง เช่น b-money และ HashCash เข้าด้วยกัน เพื่อสร้างระบบเงินดิจิทั ที่ปราศจากศูนย์กลางโดยสิ้นเชิง ไม่ต้องมีตัวกลางคอยบริหาร ควบคุม การตรวจสอบธุรกรรม และการผลิตเงินแต่อย่างใด ((("Proof-of-Work algorithm")))((("decentralized systems", "consensus in")))((("mining and consensus", "Proof-of-Work algorithm"))) นวัตกรรมที่เป็นกุญแจสำคัญ คือการใช้งานระบบการประมวลผลแบบกระจายตัว (distributed computation system) (หรือที่เรียกว่าอัลกอริทึ่ม "Proof-of-Work") เพื่อกระทำการ "เลือกตั้ง" ในระดับโลกทุกๆ 10 นาที ส่งผลให้ระบบที่ไม่มีศูนย์กลางสามารถสรุปสถานะของธุรกรรมต่างๆได้โดยฉันทามติ (consensus) ((("double-spend problem")))((("spending bitcoin", "double-spend problem"))) นวัตกรรมนี้ช่วยให้เราสามารถแก้ปัญหาการใช้เงินซ้อน (double-spend problem) ได้อย่างสง่างาม ซึ่งในอดีต ปัญหา double-spend เป็นจุดอ่อนสำคัญของระบบเงินดิจิทัล ที่ทำให้จำเป็นต้องมีศูนย์กลางที่คอยกำกับดูแลธุรกรรมต่างๆ ผ่าน clearinghouse
+
+ระบบเครือข่ายของ bitcoin นั้นได้เริ่มเปิดใช้งานเมื่อปี 2009 โดยมันถูกพัฒนาจาก Whitepaper ที่ Satoshi Nakamoto เขียน ซึ่งถูกแก้ไขโดย Programmer จำนวนมาก การพัฒนาระบบ Proof-of-Work ที่เป็นส่วนที่รักษาความปลอดภัยและทำให้ระบบ bitcoin ยืดหยุ่นได้ (resilience) ทำให้พลังงานที่ใช้ในการประมวลผลนั้นเพิ่มขึ้นอย่างต่อเนื่อง และตอนนี้กำลังประมวลของ bitcoin นั้นมีมากกว่า Supercomputer ที่ติดท๊อป 10 ของโลกเสียอีก มูลค่าทางการตลาดของ Bitocin มีมลค่ามากกว่า $135 พันล้านตามอัตราแลกเปลี่ยน bitcoin และ ดอลลาร์ ซึ่งธุรกรรมที่มีมูลค่ามากที่สุดที่เคยมีการส่งในระบบนั้นมีมูลค่าสูงถึง $400 ล้าน โดยเสียค่าธรรมเนียมให้กับระบบเพียง $1
+
+Satoshi Nakamoto นั้นหายตัวไปเมื่อเดือนเมษายนปี 2011 โดยส่งต่อความรับผิดชอบในการพัฒนาระบบและเครือข่ายให้แก่กลุ่มอาสาสมัคร ตัวตนของหรือกลุ่มบุคคลที่อยู่เบื๊องหลัง bitcoin นั้นยังเป็นปริศนาอยู่ ((("open source licenses"))) อย่างไรก็ตามไม่ว่า Satoshi Nakamoto หรือใครก็ตามนั้นไม่ได้มีความสามารถในการควบคุมระบบ bitcoin ที่ทำงานอย่างโปร่งใสโดยใช้ หลักการทางคณิตศาสตร์ ระบบโอเพ่นซอร์สและระบบฉันทมติ (consensus) จากผู้ที่เข้าร่วมระบบ การพัฒนาระบบ Bitcoin ขึ้นมานั้นทำลายแนวคิดเดิมๆและสร้างศาสตร์ใหม่ของระบบ distributed computing, เศรษฐศาสตร์และเศรษฐมิติ
+
+
+คำตอบของปัญหาในระบบ Distributed Computing
+****
+((("Byzantine Generals&#x27; Problem"))) สิ่งที่ Satoshi Nakamoto สร้างนั้นได้แก้ไขปัญหาในระบบ distributed computing ที่มีมาตั้งแต่ในอดีตซึ่งปัญหานั้นคือ "Byzantine Generals' Problem." ซึ่งเป็นลักษณะของปัญหาว่าระบบพยายามจะยอมรับหรือทำอะไรซักอย่างโดยการแลกเปลี่ยนข้อมูลผ่านระบบที่ไม่น่าเชื่อถือและมีโอกาสที่ข้อมูลจะถูกปลอมแปลง ((("central trusted authority"))) โดยวิธีแก้ไขของ Satoshi Nakkamoto คือการใช้แนวคิดของ Proof-of-work ในการสร้างฉันทมติโดยไม่ต้องอาศัยความเชื่อถือจากตัวกลางใดๆ ซึ่งมันกลายเป็นความก้าวหน้าของระบบ distributed computing และสามารถใช้ประโยชน์มากกว่าการเป็นแค่สกุลเงิน มันสามารถสร้างฉันทามติในระบบที่ไม่มีตัวกลางอย่างการตรวจสอบความโปร่งใสของการเลือกตั้ง ล็อตตารี่ การลงทะเบียนสินทรัพย์การรับรองระบบดิจิทัล และอื่นๆอีกมากมาย
+****
+
+
+[[user-stories]]
+การใช้ Bitcoin ผู้ใช้งาน และเรื่องราวของพวกเขา
+
+((("bitcoin", "ตัวอย่างการใช้งาน", id="GSuses01"))) Bitcoin นั้นเป็นนวัตกรรมของวิทยาการที่มีมาตั้งแต่โบราณอย่างเงินตรา โดยเนื้อแท้แล้วเงินคือสิ่งที่ช่วยอำนวยความสะดวกในการส่งมูลค่าระหว่างบุคคล เพราะฉะนั้นในการที่จะเข้าใจใน Bitcoin อย่างครบถ้วนนั้นว่ามันใช้งานยังไง เราจะเล่าจากมุมมองของผู้คนที่ใช้งาน ซึ่งผู้ใช้แต่ละคนก็มีเรื่องราวของตัวเอง ตามที่ระบุไว้ โดยจะอธิบายกรณีการใช้งานเฉพาะอย่างหนึ่งอย่างหรือหลายกรณี ซึ่งเราเราจะกล่าวถึงพวกเขาในหนังสือเล่มนี้
+
+ร้านค้าปลีกรายย่อย::
+((("ตัวอย่างการใช้งาน", "ร้านค้าปลีก"))) Alice อาศัยอยู่ทางตอนเหนือของ California's Bay Area เธอได้ยินเรื่องราวเกี่ยวกับ Bitcoin จากเพื่อนที่ชื่นชอบเทคโนโลยีคนหนึ่งเธอจึงตัดสินใจที่จะลองใช้ bitcoin ดู เราจะมาติดตามเรื่องราวของ Alice กันว่าเธอเรียนรู้เกี่ยวกับ bitcoin อย่างไรบ้าง ไม่ว่าจะได้ bitcoin มาจากไหน และจะใช้ bitcoin ในการซื้อกาแฟแก้วหนึ่งในร้านกาแฟของ Bob ที่อยู่ที่ Palo Alto อย่างไร โดยเรื่องราวที่จะเล่านี้เราจะพูดถึงระบบซอฟต์แวร์ สถานที่แลกเปลี่ยน (exchange) และรูปแบบการทำธุรกรรมพื้นฐานจากมุมมองของลูกค้ารายย่อย
+
+ร้านค้าปลีกรายใหญ่::
+Carol เป็นเจ้าของห้องแสดงศิลปะใน San Francisco เธอได้ขายรูปภาพที่มีราคาแพงดโดยแลกกับ bitcoin เรื่องราวของเธอจะอธิบายถึงความเสี่ยงของ การโจมตี 51% จากการซื้อขายสินค้าที่มีมูลค่าสูง 
+
+สัญญาว่าจ้างงานบริการข้ามชาติ::
+((("สัญญาว่าจ้างงานบริการข้ามชาติ")))((("use cases", "สัญญาว่าจ้างงานบริการข้ามชาติ))) Bob เป็นเจ้าของร้านคาเฟ่ใน Palo Alto โดยเขากำลังสร้าง Website ใหม่อยู่ เขาได้ทำสัญญากับนักพัฒนาเว็บไซต์ขาวอินเดียคนหนึ่งที่ชื่อว่า Gopesh โดยเขาอาศัยอยู่ที่ Bangalore ในอินเดีย ซึ่ง Gopesh ได้ตอบตกลงที่จะได้รับค่าแรงเป็น bitcoin โดยเรื่องราวของเขาจะเล่าถึงตัวอย่างการใช้งาน bitcoin สำหรับ การจ้าง outsource การทำสัญญา และการส่งเงินข้ามประเทศ
+
+ร้านค้าออนไลน์::
+(("ตัวอย่างการใช้งาน", "ร้านค้าออนไลน์"))) Gabriel เป็นวัยรุ่นไฟแรงใน Rio de Janeiro ที่มีร้านค้าออนไลน์เล็กๆที่ขายสินค้าที่มีแบรนด์ bitcoin อย่างเสื้อ T-shirts แก้วกาแฟ สติกเกอร์ Gabriel นั้นอายุน้อยเกินกว่าจะมีบัญชีธนาคารแต่พ่อแม่ของสนับสนุนในความตั้งใจของเขา
+
+การบริจาคเพื่อการกุศล::
+((("การบริจาคการกุศล")))((("ตัวอย่างการใช้งาน", "การบริจาคการกุศล"))) Eugenia เป็นผู้อำนวยการด้านการกุศลสำหรับเด็กในฟิลิปปินส์ เมื่อไม่นานมานี้เธอได้รู้จักกับ bitcoin  และเธออยากใช้มันในการระดมทุนทางการกุศลจากคนที่อยู่ในต่างประเทศและผู้คนในประเทศ เธอได้ศึกษาเกี่ยวการใช้งาน bitcoin ในการกระจายเงินทุนไปยังพื้นที่ที่ต้องการ เรื่องราวของเธอจะเล่าถึงการใช้งาน bitcoin สำหรับการระดมทุนข้ามโลกผ่านสกุลเงินและพรหมแดนต่างๆ และการใช้บัญชีสารธารณเพื่อความโปร่งใสในองค์กรการกุศล
+
+การนำเข้า/ส่งออก::
+((("ตัวอย่างการใช้งาน", "การนำเข้า/ส่องออก"))) Mohammed เป็นผู้นำเข้าอุปกรณ์อิเล็คทรอนิคส์ใน ดูไบ เขาได้ลองใช้ bitcoin เพื่อเร่งกระบวนการจ่ายเงินสำหรับ การซื้ออุปกรณ์อิเล็คทรอนิคส์มาจากสหรัฐอเมริกาและจีนและนำเข้ามาสู่อาหรับ โดยเรื่องราวของเขาจะเล่าถึงว่า bitcoin สามารถใช้สำหรับการจ่ายเงินเพื่อซื้อสินค้าในธุุรกิจขนาดใหญ่ได้
+
+การขุด Bitcoin::
+((("ตัวอย่างการใช้งาน", "การขุด bitcoin"))) Jing เป็นนักศึกษาวิศวะคอมพิวเตอร์ในเซี่ยงไฮ้ เขาได้ประกอบริกขุด bitcoin โดยอาศัยทักษะทางวิศวะของเขาในการสร้างรายได้จากการขุด โดยเรื่องราวจะเล่าถึงอุตสาหกรรมที่เกี่ยวกับ bitcoin ที่ใช้อุปกรณ์ชนิดพิเศษในการรักษาระบบความปลอดภัยของ bitcoin ที่ใช้ในการสร้างสกุลเงิน
+
+เรื่องราวของพวกเขาเหล่านี้อ้างอิงจากบุคคลและธุรกิจที่มีตัวตนอยู่จริงๆและได้ใช้ bitcoin ในการสร้างตลาดใหม่ อุตสาหกรรมใหม่ และนวัตกรรมที่แก้ไขปัญหาเศรษฐศาสตร์ระดับโลก((("", startref="GSuses01")))
+
+=== เริ่ม​ต้น​ใช้​งาน​ bitcoin
+
+((("เริ่มต้นใช้งาน", "การเลือกwallet", id="GSwallet01")))((("wallets", "การคัดเลือก", id="Wselect01")))((("bitcoin", "เริ่มต้นใช้งาน", id="BCbasic01"))) การใช้งาน Bitcoin สามารถทำได้ผ่าน client application ใดก็ได้ ที่สามารถติดต่อสื่อสารกับ Bitcoin protocol ได้ เช่นเดียวกับที่ web browser เป็นเป็นช่องทางหลักสำหรับการติดต่อสื่อสารกับระบบเครือข่ายอินเตอร์เน็ตผ่าน HTTP protocol "กระเป๋าสตางค์ Bitcoin (Bitcoin wallet)" ก็เป็นช่องทางหลักที่เราจะสามารถติดต่อสื่อสารกับ Bitcoin protocol นั่นเอง โดยในปัจจุบัณ มี wallet ถูกพัฒนาขึ้นมาจำนวนมาก หลากหลายยี่ห้อ ไม่ต่างกับที่ในปัจจุบันมี web browser ให้เลือกหลากหลายยี่ห้อเช่นกัน (ตัวอย่างเช่น Chrome, Safari, Firefox, และ Internet Explorer) และเช่นเดียวกันกับการที่เราทุกคนมี browser ในดวงใจ (Mozilla Firefox เย่!) และศัตรูตัวร้าย (Internet Explorer อี๋..) Bitcoin ก็มี wallet ที่แตกต่างกันทั้งในเชิง คุณภาพ สมรรถนะความสามารถ ความปลอดภัย ความเป็นส่วนตัว และความเสถียร ด้วยเช่นกัน นอกจากนี้ยังมีรูปแบบอ้างอิงสำหรับการประยุกต์ใช้ Bitcoin protocol ที่รู้จักกันในชื่อว่า "Satoshi Client" หรือ "ฺBitcoin Core" ที่มาพร้อมกับ wallet ซึ่งพัฒนามาจากต้นแบบการใช้งานดั้งเดิมที่เขียนขึ้นโดย Satoshi Nakamoto
+
+==== การเลือก Bitcoin wallet
+
+((("ความปลอดภัย", "การเลือกใช้ wallet"))) Bitcoin wallet เป็นหนึ่งใน application ที่มีการพัฒนาอย่างแข็งขันที่สุดในระบบนิเวศน์ของ Bitcoin ภายใต้การแข่งขันอันดุเดือด ส่งผลให้ขณะที่ wallet application ใหม่ๆ กำลังถูกพัฒนาอยู่ในขณะนี้ ก็ยังมี wallet อีกจำนวนมากที่ถูกละทิ้ง ไม่ได้รับการดูแลปรับปรุง ทั้งๆที่ wallet เหล่านั้นเพิ่งถูกสร้างขึ้นในเวลาไม่ถึงปี นอกจากนั้น Wallet บางส่วนถูกพัฒนาขึ้นเพื่อตอบโจทย์เฉพาะด้าน เพื่อทำงานบนบาง platform โดยเฉพาะ เพื่อง่ายต่อการใช้งานสำหรับมือใหม่ หรืออัดแน่นไปด้วย feature สำหรับผู้ที่มีความเชี่ยวชาญ การเลือก wallet ที่เหมาะสม จึงต้องคำนึงถึงหลายปัจจัย รวมทั้งรูปแบบการใช้งาน และระดับความเชี่ยวชาญของผู้ใช้งานอีกด้วย ดังนั้น การจะแนะนำ wallet บางยี่ห้อ ให้กับทุกคนจึงเป็นสิ่งที่เป็นไปไม่ได้ อย่างไรก็ตาม เราสามารถจำแนกประเภทของ wallet ออกเป็นประเภทต่างๆได้ พร้อมทั้งให้ความเข้าใจเกี่ยวกับ wallet แต่ละประเภท และที่ดียิ่งกว่านั้นคือ การที่จะย้าย keys หรือ seeds ระหว่าง wallets นั้นเป็นเรื่องที่ไม่ยากนัก จึงทำให้ผู้ใช้งานสามารถทดลองใช้ wallet ต่างๆ จนกว่าจะพบ wallet ที่ตอบโจทย์ความต้องการ
+
+[role="pagebreak-before"]
+เราสามารถจัดกลุ่มประเภทของ Bitcoin wallet ได้ ตาม platform การใช้งานได้ดังนี้:
+
+Desktop wallet:: desktop wallet เป็นกระเป๋า bitcoin ประเภทแรกที่ถูกสร้างขึ้นเพื่อเป็นรูปแบบอ้างอิงในการพัฒนา และมีผู้ใช้งานจำนวนมาก ที่ใช้งาน desktop wallet เนื่องจากความอิสระในการใช้งาน ความสามารถที่จะควบคุมการทำงาน และ feature ต่างๆ ที่ desktop wallet มีให้ อย่างไรก็ตาม แน่นอนว่าการที่ desktop wallet จำเป็นต้องทำงานบนระบบปฏิบัติการทั่วไปอย่างเช่น Windows หรือ Mac OS นั่นย่อมส่งผลกระทบต่อความปลอดภัยในการใช้งาน เนื่องจาก ระบบปฏิบัติการเหล่านี้ มักมีปัญหาทางด้านความปลอดภัย และมีการติดตั้งอย่างไม่ถูกต้องนัก
+
+Mobile wallet:: Wallet ที่ทำงานบนระบบปฏิบัติการ smart-phone เช่น Apple iOS และ Android เป็น wallet ที่สามารถพบเห็นได้มากที่สุด โดย wallet เหล่านี้มักถูกออกแบบมาเพื่อความง่าย และสะดวกในการใช้งาน จึงมักจะเป็นทางเลือกที่ดีสำหรับผู้ใช้งานที่เพิ่งเริ่มต้นศึกษา แต่ก็มี mobile wallet ที่มี feature ขั้นสูงสำหรับผู้ใช้งานที่มีความเชี่ยวชาญด้วยเช่นกัน
+
+Web wallet:: Web wallets เป็น Wallet ที่สามารถใช้งานได้ผ่าน web browser โดย wallet ของผู้ใช้งานจะถูกเก็บอยู่บน Server ที่ถูกควบคุมโดยตัวกลาง คล้ายๆกับ webmail ที่ข้อมูลทั้งหมดจะถูกเก็บอยู่บน Server ของตัวกลาง ซึ่ง Web wallet บางส่วนนั้นใช้ระบบของ client ในการทำงานบน Browser ซึ่งจะทำให้การควบคุม bitcoin key จะอยู่ในมือของผู้ใช้ แต่อย่างไรก็ตามปัจจุบันก็มีระบบ Web wallet ที่ Exchange เป็นผู้ควบคุม Bitcoin keys แทนที่จะเป็นผู้ใช้งานเช่นกัน ซึ่งการเก็บ bitcoin จำนวนมากไว้กับตัวกลางนั้นเป็นสิ่งที่ควรต้องระวังอย่างยิ่ง
+
+Hardware wallet:: Hardware wallet เป็นอุปกรณ์ที่ใช้ในสำหรับเก็บรักษา Bitcoin wallet ด้วย hardware ที่ถูกสร้างมาเฉพาะทาง ตัว Hardware wallet จะใช้งานร่วมกับ web browser ผ่านสาย USB หรือ NFC  และด้วยการที่ การทำงานทุกอย่างที่เกี่ยวกับ bitcoin จะอยู่บนอุปกรณ์ที่ถูกสร้างมาอย่างเฉพาะทาง ทำให้ Wallet รูปแบบนี้นั้นมีความปลอดภัยและมีความเหมาะสมอย่างมากในการเก็บรักษา bitcoin จำนวนมาก
+
+Paper wallet:: ((("cold storage", seealso="storage")))((("storage", "cold storage"))) กุญแจที่ใช้สำหรับจัดการ bitcoin นั้นสามารถการพิมพ์ออกมาเพื่อเก็บรักษาในระยะยาวได้ Wallet ประเภทนี้มักถูกเรียกว่า paper wallet แม้ว่ามันจะถูกเก็บอยู่บนวัสดุอื่นๆ เช่นไม้หรือโลหะได้เช่นกัน Paper wallet นั้นไม่ได้ใช้เทคโนโลยีอะไรที่ล้ำหน้า แต่มีความปลอดภัยสูงมากในการเก็บรักษา bitcoin ระยะยาว การเก็บ bitcoin แบบใดก็ตามที่ไม่มีการเชื่อมต่อกับ internet นั้นเราจะเรียกมันว่า _cold storage_
+
+นอกจากนี้เราสามารถจำแนกประเภทของ Bitcoin wallet ได้จากการพิจารณาระดับความเป็นอิสระในการทำงาน และรูปแบบการปฏิสัมพันธ์กับระบบโครงข่าย Bitcoin ได้ดังนี้:
+
+Full-node client:: ((("full-node clients"))) full client หรือ "full node" เป็น client ที่จะเก็บธุรกรรมทั้งหมดที่เกิดขึ้น (ทุกๆธุรกรรมที่เกิดจากผู้ใช้งานทุกคน) จัดการ wallet ของผู้ใช้งานและสามารถส่งธุรกรรมโดยตรงไปยังเครือข่าย bitcoin ได้  full node นั้นจะจัดการทุกอย่างที่เกี่ยวกับ protocol สามารถตยืนยันความถูกต้องของ blockchain รวมถึงธุรกรรมใดๆก็ตาม การจะเป็น full node นั้นต้องใช้ทรัพยากรทางคอมพิวเตอร์ (เนื้อที่ 125 GB และ RAM 2 GB) แต่มันก็แลกมาด้วยการเป็นเจ้าของข้อมูลและการที่สามารถยืนยันธุรกรรมได้อย่างอิสระ
+
+Lightweight client:: ((("lightweight clients")))((("simple-payment-verification (SPV)"))) lightweight client หรือที่รู้จักกันในชื่อของ SPV client (simple-payment-verification) ซึ่งตัว client จะทำหน้าที่เชื่อมต่อกับ full node ของ bitcoin .นการเข้าถึงข้อมูลธุรกรรมของ bitcoin  แต่ยังเก็บ wallet ของผู้ใช้งานไว้ใน client รวมถึงสามารถ สร้าง ยืนยันความถูกต้อง และส่งธุรกรรมได้อย่างอิสระ  Lightweight client นั้นสามารถโต้ตอบกับเครื่อข่ายของ bitcoin ได้โดยตรงโดยไม่ต้องมีตัวกลาง
+
+Third-party API client:: ((("third-party API clients"))) third-party API client คือ client ที่ทำงานโต้ตอบกับเครือข่ายของ bitcoin ผ่านทางระบบ API ของตัวกลางแทนที่จะเชื่อมต่อกับเครือข่ายของ bItcoin โดยตรง wallet นี้อาจจะถูกเก็บโดยผู้ใช้งานหรือตัวกลางผู้ให้บริการก็ได้ แต่ธุรกรรมทั้งหมดจะต้องผ่านตัวกลางผู้ให้บริการ
+
+ถ้าเรารวมการจัดประเภทสองแบบนี้ไว้ด้วยกัน bitcoin wallet จำนวนมากจะถูกจัดอยู่ในหมวดหมู่ทั่วไปอย่าง desktop full client, mobile lightweight wallet และ web third-party wallet สิ่งที่แบ่งแยกว่า Wallet แต่ละประเภทนั้นควรอยู่ในหมวกหมู่ไหนนั้นก็มักไม่ชัดเจน เนื่องจากมี wallet จำนวนมากที่ทำงานอยู่หลาย platform และสามารถโต้ตอบกับเครือข่ายของ bitcoin ได้หลายวิธี 
+
+โดยในหนังสือเล่มนี้จะเราจะนำเสนอการใช้งานของ bitcoin client ประเภทต่างที่สามารถ download ได้ อ้างอิงจากการพัฒนา (ของ Bitcoin core) ไปสู่ mobile และ Web ตัวอย่างบางตัวอย่างอาจจะต้องใช้ Bitcoin core ที่เป็น full client หรืออาจจะเป็นอะไรอย่างอื่นเช่น API ของ wallet เครือข่าย และตัวกลางผู้ให้บริการในการทำธุรกรรม ถ้าคุณอยากสนใจที่จะสำรวจการเขียนโปรแกรมของระบบ bitcoin คุณจะต้องมี Bitcoin core หรือ client ตัวอื่นๆ (see <>).((("", startref="GSwallet01")))((("", startref="Wselect01")))
+
+==== Quick Start
+
+(("getting started", "quick start example", id="GSquick01")))((("wallets", "quick start example", id="Wquick01")))((("การใช้งาน", "ซื้อกาแฟ", id="aliceone")))ก่อนหน้านี้เราได้พูดถึงอลิส <<user-stories>> ผู้ซึ่งไม่ได้มีความรู้ด้านเทคโนโลยีและได้ยินเรื่องราวของ bitcoin มาจาก Joe ในงานปาร์ตี้ ตอนนั้น Joe กำลังอธิบายให้หลายๆคนในงานปาร์ตี้รวมถึงสาธิตวิธีการใช้งาน Alice รู้สึกทึ่งมากและได้ถามว่าเธอจะเริ่มใช้ bitcoin ได้อย่างไร Joe บอกเธอว่า mobile wallet นั้นเป็นตัวเลือกที่ดีที่สุดสำหรับผู้ใช้งานหน้าใหม่และเขาก็ได้แนะนำ Wallet ที่เขาชอบแก่เธอ Alice จึงได้ดาวโหลด "Mycelium" บน Android และติดตั้งลงบนมือถือของเธอ
+
+เมื่อ Alice เริ่มใช้งาน Mycelium ครั้งแรก Apllication ก็ได้สร้าง Wallet ให้เธออัตโนมัติเหมือน Wallet อื่นๆ เธอเห็น wallet บนหน้าจออย่างที่แสดงใน <<mycelium-welcome>>(คำเตือนอย่างส่ง bitcoin มาที่ address ตัวอย่างนี้มันจะหายไปตลอดกาล)
+
+[[mycelium-welcome]]
+Mycelium Mobile Wallet
+image::images/mbc2_0101.png["MyceliumWelcome"]
+
+((("addresses", "bitcoin wallet quick start example")))((("QR codes", "bitcoin wallet quick start example")))((("addresses", see="also keys and addresses"))) ส่วนที่สำคัญที่สุดบนหน้าจอคือ bitcoin address ของอลิส ซึ่งมันเป็นข้อความที่ประกอบด้วยตัวอักษรและตัวเลขปรากฎอยู่บนหน้าจอว่า  1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK ถัดไปจาก address คือ QR code มันเป็น barcode รูปแบบหนึ่งที่ประกอบด้วยจุดสีดำและขาวโดยสามารถ Scan ข้อมูลได้จากกล้องของ Smart Phone อลิสสามารถ คัดลอก bitcoin address หรือ QR code ไปยัง clipboard ได้โดยการกดที่ QR code หรือปุ่ม Receieve ซึ่งใน Wallet ส่วนใหญ่การกดที่ QR code จะเป็นการขยายรูปให้มันสามารถถูก Scan ได้ง่ายขึ้นจากกล้องของ smart phone
+
+[TIP]
+====
+((("addresses", "security of")))((("security", "bitcoin addresses"))) Bitcoin address นั้นมักจะข้นต้นด้วย 1 หรือ 3 คล้ายกับ email address มันสามารถถูกแชร์ให้กับผู้ใช้งาน bitcoin ที่ต้องการส่ง bitcoin มาที่ wallet ของคุณ โดยไม่มีความเสี่ยงด้านความปลอดภัยใดๆ  bitcoin address นั้นสามารถถูกนำไปโพสที่ไหนก็ได้โดยบัญชีของคุณจะยังปลอดภัย และมันต่างจาก Email address ตรงที่คุณสามารถสร้าง bitcoin address มากเท่าที่คุณต้องการเพียงแค่มันอยู่ที่ Wallet ของคุณ มี wallet ที่ทันสมัยจำนวนมากที่จะสร้าง address ใหม่ทุกครั้งในทุกๆการทำธุรกรรมเพื่อความปลอดภัย Wallet เป็นแค่สิ่งที่รวม Address และจะปลดล็อคเงินด้วย key 
+====
+
+ตอนนี้ Alice ก็พร้อมที่จะรับ bitcoin แล้ว Wallet ของเธอได้สร้าง private key ออกมาด้วยการสุ่ม (อธิบายเพิ่มเติม<<private_keys>>)รวมถึง bitcoin address ด้วย ในตอนนี้ bitcoin address ของเธอนั้นยังไม่ได้รับการรู้จักจากเครือข่ายอขง bitcoin หรือมันยังไม่ได้ถูกลงทะเบียนในระบบของ bitcoin ในส่วนใดก็ตาม bitcoin address ของเธอเป็นเพียงตัวเลขที่เชื่อมกับ key ที่เธอสามารถใช้เพื่อเข้าถึงเงินของเธอ address ของเธอนั้นถูกสร้างจาก wallet ของเธอโดยไม่ต้องสมัครบริการใดๆหรือใส่ข้อมูลส่วนตัว ซึ่งจริงๆแล้ว wallet ส่วนใหญ่นั้นจะไม่มีความเชื่อมโยงใดๆระหว่างข้อมูลส่วนตัวกับ bitcoin address มันเป็นเพียงสิ่งที่ใช้อ้างอิงมูลค่าการโอนเงินของธุรกรรมที่อยู่ในบัญชี bitcoin, bitcoin address นั้นเป็นเพียงแค่ตัวเลขที่เป็นไปได้ที่สามารถใช้ได้ในระบบ bitcoin เมื่อ bitcoin address นั้นมีการเชื่อมโยงกับธุรกรรมในระบบของ bitcoin แล้วมันก็จะกลายเป็น address ที่ระบบรู้จัก
+
+ตอนนี้ Alice ก็พร้อมที่จะใช้ bitcoin wallet ของเธอแล้ว ((("", startref="GSquick01")))((("", startref="Wquick01")))
+
+[[getting_first_bitcoin]]
+==== เป็นเจ้าของ Bitcoin ครั้งแรก
+
+((("getting started", "acquiring bitcoin"))) การเป็นเจ้าของBitcoin เป็นครั้งแรก มักเป็นสิ่งที่ยากลำบากสำหรับผู้ใช้งานใหม่ เนื่องจากในปัจจุบัณ คุณยังไม่สามารถเดินไปซื้อ Bitcoin จากธนาคารหรือตู้แลกเปลี่ยนเงินทั่วไปได้เหมือนสกุลเงินต่างประเทศอื่นๆ
+
+ระบบชำระเงินอิเล็คโทรนิคส่วนมาก เช่น บัตรเครดิต, Paypal, หรือการโอนเงินผ่านบัญชีธนาคาร เป็นธุรกรรมที่สามารถแก้ไขย้อนกลับได้ ต่างจาก Bitcoin ที่ธุรกรรมทั้งหมดไม่สามารถย้อนกลับได้ ซึ่งสำหรับผู้ที่ต้องการขาย Bitcoin นั้น ความแตกต่างนี้จึงกลายเป็นความเสี่ยงสำคัญ เนื่องจากผู้ซื้อ สามารถที่จะทำการฉ้แโกงผู้ขาย โดยการดึงเงินกลับหลังจากที่ได้รับ Bitcoin ไปแล้วได้ เพื่อเป็นการลดความเสี่ยงดังกล่าว บริษัทที่รับแลก Bitcoin ผ่านระบบชำระเงินอิเล็คโทรนิคส์ทั่วไป จึงมักบังคับให้ผู้ซื้อจำเป็นต้องยืนยันตัวตน และผ่านการตรวจสอบเครดิต ก่อที่จะสามารถทำการซื้อ Bitcoin ได้ ซึ่งกระบวนการดังกล่าวอาจใช้เวลานานเป็นวัน หรือสัปดาห์ ซึ่งหมายความว่า ผู้ใช้งานใหม่ จะยังไม่สามารถซื้อ Bitcoin ได้ทันทีผ่านบัตรเครดิต อย่างไรก็ตาม หากคุณมีความอดทน และความคิดสร้างสรรค์สักนิด คุณอาจไม่จำเป็นต้องใช้บัตรเครดิตเลยตั้งแต่แรก
+
+[role="pagebreak-before"]
+ต่อไปนี้คือบางวิธีที่ผู้ใช้งานใหม่ สามารถเป็นเจ้าของ Bitcoin ได้:
+
+* Find a friend who has bitcoin and buy some from him or her directly. Many bitcoin users start this way. This method is the least complicated. One way to meet people with bitcoin is to attend a local bitcoin meetup listed at https://bitcoin.meetup.com/[Meetup.com].
+* ใช้บริการจัดหาผู้ซื้อผู้ขายเช่น pass:[<a class="orm:hideurl" href="https://localbitcoins.com/">localbitcoins.com</a>] เพื่อหาผู้ขาย Bitcoin ในพื้นที่เดียวกับคุณแล้วนัดเจอกันเพื่อทำการซื้อขายแลกเปลี่ยน
+* รับ Bitcoin ผ่านการขายสินค้าหรือบริการ ถ้าคุณเป็นโปรแกรมเมอร์ ก็ขายความสามารถในการเขียนโปรแกรมของคุณ ถ้าคุณเป็นช่างทำผม ก็ลองตัดผมแลก Bitcoin ดูสิ
+* ((("Coin ATM Radar")))((("ATMs, locating")))Use a bitcoin ATM in your city. A bitcoin ATM is a machine that accepts cash and sends bitcoin to your smartphone bitcoin wallet. Find a bitcoin ATM close to you using an online map from https://coinatmradar.com/[Coin ATM Radar].
+* ((("exchange rates", "listing services")))Use a bitcoin currency exchange linked to your bank account. Many countries now have currency exchanges that offer a market for buyers and sellers to swap bitcoin with local currency. Exchange-rate listing services, such as https://bitcoinaverage.com/[BitcoinAverage], often show a list of bitcoin exchanges for each currency.
+
+[TIP]
+====
+(((("privacy, maintaining")))((("security", "maintaining privacy")))((("digital currencies", "currency exchanges")))((("currency exchanges")))((("digital currencies", "benefits of bitcoin")))((("bitcoin", "benefits of")) หนึ่งในข้อดีของ bitcoin ที่เหนือกว่าระบบ payment อย่างอื่นคือ เมื่อใช้งานอย่างถูกต้องแล้ว มันจะสามารถให้ความเป็นส่วนตัวที่สูงกว่าเป็นอย่างมากแก่ผู้ใช้งานเนื่องจาก ในการใช้งาน ถือครอง หรือการได้มาซึ่ง bitcoin นั้นคุณไม่จำเป็นที่จะต้องเปิดเผยข้อมูลส่วนบุคคลใดๆ ให้กับบุคคลที่สามแต่อย่างไรก็ตามกฎหมายและข้อบังคับระดับชาติ และนานาชาติ จะยังคงมีผลบังคับใช้ เมื่อ bitcoin มีความจำเป็นต้องสัมผัสกับระบบการเงินแบบดั้งเดิม ส่งผลให้ในการที่เราจะแลก bitcoin เป็นสกุลเงินท้องถิ่นนั้น เอกสารระบุตัวตนหรือข้อมูลทางการเงินนั้นก็ยังเป็นสิ่งที่จำเป็นต้องใช้ ผู้ใช้งานควรจะทราบว่าเมื่อมี bitcoin address ใดที่มีข้อมูลส่วนตัวผูกอยู่แล้ว ธุรกรรมทั้งหมดที่เกี่ยวข้องกับ bitcoin address นั้นจะง่ายต่อการตรวจสอบ นั้นเป็นหนึ่งในเหตุผลที่มีผู้ใช้งานมากมายที่พยายามสร้างบัญชีสำหรับใช้งานกับ exchange โดยเฉพาะ โดยตัดขาดออกจาก wallet ของเขา
+====
+
+Alice นั้นรู้จัก bitcoin ผ่านเพื่อนของเธอ เธอจึงสามารถหา bitcoin ได้ไม่ยาก ต่อไปเราจะมาดูกันว่าเธอจะซื้อ bitcoin จาก Joe และ Joe จะส่ง bitcoin มาที่ wallet ของเธออย่างไร 
+
+[[bitcoin_price]]
+==== การหาราคาปัจจุบันของ bitcoin 
+
+((("getting started", "exchange rates")))((("exchange rates", "determining"))) ก่อนที่ Alice จะซื้อ bitcoin จาก Joe พวกเขาต้องตกลงกันก่อนว่าจะซื้อขาย bitcoin ที่ _อัตราแลกเปลี่ยน_ เท่าไหร่ระหว่าง bitcoin และ ดอลลาร์ ซึ่งมันทำให้มีคำถามเกิดขึ้นว่า "ใครเป็นคนกำหนดราคาของ bitcoin" ซึ่งคำตอบสั้นๆ ของคำถามนี้คือตลาดเป็นผู้กำหนดราคา
+
+((("exchange rates", "floating")))((("floating exchange rate"))) เช่นเดียวกับสกุลเงินส่วนมาก Bitcoin นั้นมี _อัตราแลกเปลี่ยนแบบลอยตัว_ หมายความว่ามูลค่าของ bitcoin เมื่อเปรียบกับเงินสกุลอื่นๆ นั้นจะผันผวนตามความต้องการซื้อ (อุปสงค์) และความต้องการขาย (อุปทาน) ในตลาดซื้อขายแลกเปลี่ยนนั่นเอง เช่น ราคาของ bitcoin ต่อดอลลาร์จะถูกคำนวณจากราคาตลาดที่มีการซื้อขายแลกเปลี่ยนกันล่าสุดระหว่าง bitcoin กับดอลลาร์ จึงทำให้ราคามีความผันผวนเล็กน้อยตลอดเวลาทุกครั้งที่มีการซื้อขาย ผู้ให้บริการด้านอัตราซื้อขายจึงมักใช้ค่าเฉลี่ยที่แบ่งน้ำหนักตามปริมาณการซื้อขาย จากหลายๆตลาดแลกเปลี่ยน เป็นตัวแทนของอัตราแลกเปลี่ยนระหว่างสกุลเงิน (เช่น BTC/USD)
+
+กว่า 100 แอปพลิเคชั่นและเว็บไซต์ที่สามารถบอกราคาตลาดได้ ที่นิยมมีดังนี้
+
+https://bitcoinaverage.com/[Bitcoin Average]:: ((("BitcoinAverage")))A site that provides a simple view of the volume-weighted-average for each currency.
+https://coincap.io/[CoinCap]:: A service listing the market capitalization and exchange rates of hundreds of crypto-currencies, including bitcoin.
+https://bit.ly/cmebrr[Chicago Mercantile Exchange Bitcoin Reference Rate]:: A reference rate that can be used for institutional and contractual reference, provided as part of investment data feeds by the CME.
+
+นอกเหนือจากเว็บไซต์และแอปพลิเคชั่นมากมายเหล่านี้ bitcoin wallet ส่วนใหญ่ก็สามารถเปลี่ยน bitcoin เป็นสกุลเงินทั่วไปโดยอัตโนมัติได้ Joe จึงใช้ wallet ของเขาในการแปลงราคาอัตโนมัติก่อนจะส่ง bitcoin ให้ Alice
+
+[[sending_receiving]]
+==== การส่งและการรับ Bitcoin
+
+
+((("getting started", "sending and receiving bitcoin", id="GSsend01")))((("spending bitcoin", "bitcoin wallet quick start example")))((("spending bitcoin", see="also transactions"))) Alice ตั้งใจที่จะซื้อ bitcoin ด้วยเงิน 10 ดอลลารฺ์ เนื่องจากมันเป็นเงินจำนวนน้อยที่สามารถเสี่ยงได้กับเทคโนโลยีใหม่ๆ เธอจึงมอบเงินสดจำนวน 10 ดอลลาร์ให้ Joe เปิดแอปพลิเคชั่น Mycelium wallet บนโทรศัพท์ของเธอและกด Receive ซึ่งจะทำให้หน้าจอมือถือของ Alice นั้นแสดง QR code ของ bitcoin address ของเธอ
+
+จากนั้น Joe กดปุ่ม Send บน smartphone wallet ของเขา ซึ่งจะปรากฎช่องสำหรับกรอกข้อมูลขึ้นมาสองช่องด้วยกัน ได้แก่:
+
+* bitcoin address ปลายทางที่ต้องการจะส่ง
+* จำนวนเงินที่ต้องการจะส่งในหน่วย bitcoin (BTC) หรือสกุลเงินท้องถิ่น (USD)
+
+ในค่าแรกคือ bitcoin address ซึ่งจะเป็นไอคอนเล็กๆเหมือน QR code ที่จะให้ Joe สามารถสแกนมันได้ด้วยกล้องของ smartphone เขาจึงไม่ต้องพิมพ์ bitcoin address ของ Alice ซึ่งค่อนข้างยาวและยากต่อการพิมพ์ โดยเมื่อ Joe กดที่สัญลักษณ์ QR code และเปิดกล้องบน smartphone ของเขา ก็จากสามารถแสกน QR code ที่แสดงอยู่บนหน้าจอมือถือของ Alice ได้
+
+ตอนนี้ Joe ก็มี bitcoin address ของ Alice ที่ตั้งเป็นผู้รับเรียบร้อยแล้ว Joe จึงใส่จำนวนเงิน $10 ดอลลาร์ลงไปใน wallet ของเขา ซึ่ง wallet จะทำหน้าที่แปลงค่าจำนวนเงิน โดยอาศัยอัตราแลกเปลี่ยนที่อ้างอิงจากตลาด ผ่านผู้ให้บริการออนไลน์ อัตราแลกเปลี่ยนในขณะนั้นอยู่ที่ 100 ดอลลาร์ต่อ 1  bitcoin เพราะอย่างนั้น 10 ดอลลาร์จึงมีค่าเท่ากับ 0.10 bitcoin (ฺBTC)  หรือ 100 millibitcoin (mBTC) ตามที่แสดงบนหน้าจอ wallet ของ Joe (ดูที่<airbitz-mobile-send>)
+
+[[airbitz-mobile-send]]
+[role="smallereighty"]
+หน้าจอของ  Airbitz mobile bitcoin wallet 
+image::images/mbc2_0102.png["airbitz mobile send screen"]
+
+Joe ตรวจสอบอย่างถี่ถ้วนเพื่อให้แน่ใจว่าเขาใส่จำนวนที่ถูกต้อง เพราะเขากำลังจะส่งเงินที่ถ้าส่งผิดแล้วจะเรียกคืนไม่ได้ หลังจากตรวจสอบ address และจำนวนถึงสองครั้ง เขาจึงกดปุ่มส่งธุรกรรม จากนั้น mobile wallet ของ Joe จึงสร้างธุรกรรมที่มีมูลค่า 0.10 BTC เพื่อส่งไปยัง address ที่ Alice ให้มา โดยเงินนั้นมาจาก wallet ของ Joe และธุรกรรมก็ถูกเซ็นด้วย private key ของ Joe ซึ่งมันเป็นการบอกแก่เครือข่ายของ bitcoin ว่า Joe ได้ยืนยันการโอนเงินไปยัง address ใหม่ของ Alice ธุรกรรมนี้ถูกส่งต่อด้วยโปรโทคอลแบบบุคคล-ต่อ-บุคคล (peer-to-peer)  ซึ่งมันจะแพร่กระจายไปอย่างรวดเร็วในเครือข่ายของ bitcoin ภายในเวลาไม่กี่วินาที node ส่วนใหญ่ก็จะได้รับธุรกรรมและได้เห็น address ของ Alice เป็นครั้งแรก
+
+ในขณะเดียวกัน, กระเป๋าของ Alice ก็กำลังรอฟังว่าธุรกรรมที่ถูกส่งออกไปยังเครือข่ายของ bitcoin แล้วจะเชื่อมต่อเข้ากับ address ใน wallet ของเธอเมื่อไหร่ ภายในอีกไม่กี่วินาทีหลังจาก wallet ของ Joe ส่งธุรกรรมออกไป wallet ของ Alice ก็แสดงให้เห็นว่าเธอได้รับ 0.10 BTC
+
+การยืนยันธุรกรรม
+****
+((("getting started", "confirmations")))((("confirmations", "bitcoin wallet quick start example")))((("confirmations", see="also mining and consensus; transactions")))((("clearing", seealso="confirmations"))) ในตอนแรก address ของ Alice จะแสดงว่าธุรกรรมที่ได้รับจาก Joe นั้น "ยังไม่ถูกยืนยัน" ซึ่งหมายความว่าธุรกรรมนั้นถูกกระจายไปทั่วเครือข่ายแล้วแต่ยังไม่ถูกบันทึกเข้าไปในสมุกบันทึกธุรกรรมของ bitcoin ที่เรียกว่า Blockchain ในการที่จะยืนยันธุรกรรม จะต้องมี block ต่อเข้าไปใน blockchain ซึ่งเหตุการณ์นี้จะเกิดขึ้นทุกๆ 10 นาทีโดยเฉลี่ย ซึ่งขั้นตอนนี้เปรียบได้กับการ _clearing_ ในระบบการเงินแบบดั้งเดิม สำหรับรายละเอียดอื่นๆสำหรับการกระจาย การตรวจสอบ และการยืนยันธุรกรรมของ bitcoin ขอให้ดูที่ <<mining>> 
+****
+
+Alice ภูมิใจมากที่ตอนนี้เธอเป็นเจ้าของ 0.10 BTC ที่เธอสามารถนำไปใช้ได้ ในบทถัดไปเราจะมาดูการซื้อของด้วย bitcoin ครั้งแรกของเธอ รวมถึงเล่าเกี่ยวกับรายละเอียดของเทคโนโลยีต่างๆ ที่เป็นพื้นฐานในการทำธุรกรรมและการกระจายข้อมูล ((("", startref="BCbasic01")))((("use cases", "buying coffee", startref="aliceone")))

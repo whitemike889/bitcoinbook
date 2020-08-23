@@ -1,0 +1,1047 @@
+[[ch07]]
+[[adv_transactions]]
+== Transacciones avanzadas y Scripting
+
+[[ch07_intro]]
+=== Introducción
+
+En el capítulo anterior, presentamos los elementos básicos de las transacciones de bitcoin y analizamos el tipo más común de script de transacción, el script P2PKH. En este capítulo veremos scripts más avanzados y cómo podemos usarlos para generar transacciones con condiciones complejas.
+
+Primero, veremos los scripts _multifirma_. A continuación, examinaremos el segundo script de transacción más común, _Pay-to-Script-Hash_ (en español, Paga-A-Hash-de-Script), que permite todo un mundo de scripts complejos. Luego, examinaremos los nuevos operadores de script que agregan una dimensión de tiempo a bitcoin, a través de _timelocks_ (en español, _bloqueos de tiempo_). Finalmente, veremos _Segregated Witness_, un cambio arquitectónico en la estructura de las transacciones.
+
+[[multisig]]
+=== Multifirma
+
+((("transacciones", "avanzadas", "scripts multifirma")))((("transacciones", "avanzadas", id="Tadv07")))((("scripting", "scripts multifirma", id="Smulti07")))((("scripts multifirma")))Los scripts multifirma establecen una condición en la que N llaves públicas se registran en el script y al menos M de ellas deben proporcionar firmas para desbloquear los fondos. Esto también se conoce como un esquema M-de-N, donde N es el número total de llaves y M es el umbral de firmas requerido para la validación. Por ejemplo, una multifirma 2-de-3 enumera tres llaves públicas como firmantes potenciales y al menos dos de ellas deben firmar para crear una transacción válida que gastará los fondos.
+
+En este momento, los scripts multifirma estándar se limitan a un listado máximo de 3 llaves públicas, lo que significa que puedes hacer cualquier cosa desde una firma múltiple 1-de-1 a 3-de-3 o cualquier combinación dentro de ese rango. La limitación de las 3 llaves enumeradas podría levantarse para cuando se publique este libro, así que verifica la función +IsStandard()+ para ver qué acepta actualmente la red. Ten en cuenta que el límite de 3 llaves se aplica solo a los scripts multifirma estándar (también conocidas como "simples"), no a los scripts multifirma contenidos en un script Pay-to-Script-Hash (P2SH). Los scripts multifirma P2SH están limitados a 15 llaves, lo que permite hasta multifirmas 15-de-15. Aprenderemos sobre P2SH en <<p2sh>>.
+
+La forma general de un script de bloqueo que establece una condición multifirma M-de-N es:
+
+----
+M <Llave Pública 1> <Llave Pública 2> ... <Llave Pública N> N CHECKMULTISIG 
+----
+
+donde N es el número total de llaves públicas listadas y M es el umbral de firmas requeridas para gastar la salida.
+
+Un script de bloqueo que establece una condición multifirma 2-de-3 se ve así:
+
+----
+2 <Llave Pública A> <Llave Pública B> <Llave Pública C> 3 CHECKMULTISIG
+----
+
+El script de bloqueo anterior puede ser satisfecho con un script de desbloqueo conteniendo pares de firmas y llaves públicas:
+
+----
+<Firma de B> <Firma de C>
+----
+o cualquier combinación de dos firmas a partir de las llaves privadas correspondientes a las tres llaves públicas listadas.
+
+Los dos scripts juntos formarían el script de validación combinado:
+
+----
+ <Firma de B> <Firma de C> 2 <Llave Pública A> <Llave Pública B> <Llave Pública C> 3 CHECKMULTISIG
+----
+
+Cuando es ejecutado, el script combinado evaluará a VERDADERO si, y solo si, el script de desbloqueo cumple las condiciones establecidas por el script de bloqueo. En este caso, la condición es si el script de desbloqueo contiene una firma válida proveniente de las dos llaves privadas que corresponden a dos de las tres llaves públicas establecidas como obstrucciones.
+
+[[multisig_bug]]
+===== Un error en la ejecución de CHECKMULTISIG
+
+((("scripting", "scripts multifirma", "error de código en  CHECKMULTISIG")))((("error de código en CHECKMULTISIG, solución")))Hay un error en la ejecución de ++CHECKMULTISIG++ que requiere una ligera solución. Cuando se ejecuta +CHECKMULTISIG+, debería sacar como parámetros M+N+2 elementos de la pila . Sin embargo, debido al error, +CHECKMULTISIG+ sacará un valor adicional o un valor más de lo esperado.
+
+Veamos esto en más detalle usando el ejemplo anterior de validación:
+
+----
+ <Firma de B> <Firma de C> 2 <Llave Pública A> <Llave Pública B> <Llave Pública C> 3 CHECKMULTISIG
+----
+
+Primero, +CHECKMULTISIG+ saca el elemento superior, que es +N+ (en este ejemplo "3"). A continuación, aparecen +N+ elementos, que son las llaves públicas que pueden firmar. En este ejemplo, las llaves públicas A, B y C. Luego, muestra un elemento, que es +M+, el quórum (cuántas firmas son necesarias). Aquí M=2. En este punto, +CHECKMULTISIG+ debe sacar los últimos +M+ elementos, que son las firmas, y ver si son válidas. Sin embargo, desafortunadamente, un error en la implementación hace que +CHECKMULTISIG+ saque un elemento más (M+1 en total) de lo que debería. El elemento adicional no se tiene en cuenta al verificar las firmas, por lo que no tiene ningún efecto directo en +CHECKMULTISIG+ en sí. Sin embargo, debe estar presente un valor adicional porque, si no está presente, cuando +CHECKMULTISIG+ intenta sacar en una pila vacía, provocará un error de pila y fallará el script (lo que marcará la transacción como no válida). Debido a que el elemento adicional no se tiene en cuenta, puede ser cualquier cosa, pero habitualmente se usa +0+.
+
+Debido a que este error se convirtió en parte de las reglas de consenso, ahora debe ser replicado para siempre. Por lo tanto, la validación correcta del script se vería así:
+
+----
+0 <Firma de B> <Firma de C> 2 <Llave Pública A> <Llave Pública B> <Llave Pública C> 3 CHECKMULTISIG 
+----
+
+Por lo tanto, el script de desbloqueo realmente utilizado en multifirma no es:
+
+----
+<Firma de B> <Firma de C>
+----
+
+sino:
+
+----
+0 <Firma de B> <Firma de C>
+----
+
+A partir de ahora, si ves un script de desbloqueo multifirma, deberías esperar ver un +0+ adicional al principio, cuyo único propósito es como solución a un error que accidentalmente se convirtió en una regla de consenso.((("", startref="Smulti07")))
+
+[[p2sh]]
+=== Pay-to-Script-Hash (P2SH)
+
+((("transacciones", "avanzadas", "Pay-to-Script-Hash")))((("scripting", "Pay-to-Script-Hash", id="Spay07")))Pay-to-Script-Hash (P2SH) (en español, Paga-a-Hash-de-Script) se introdujo en 2012 como un nuevo y poderoso tipo de transacción que simplifica enormemente el uso de scripts de transacciones complejas. Para explicar la necesidad de P2SH, veamos un ejemplo práctico.
+
+((("casos de uso", "importación/exportación", id="mohamseven")))((("scripting", "Pay-to-Script-Hash", "ejemplo de importación/exportación")))((("Pay-to-Script-Hash (P2SH)", "ejemplo de importación/exportación")))En <<ch01_intro_what_is_bitcoin>> presentamos a Mohammed, un importador de productos electrónicos con sede en Dubai. La compañía de Mohammed utiliza ampliamente la función de multifirma de bitcoin para sus cuentas corporativas. Los scripts de multifirma son uno de los usos más comunes de las capacidades avanzadas de scripting de bitcoin y son una característica muy poderosa. ((("cuentas por cobrar (CC)")))La compañía de Mohammed usa un script de multifirma para todos los pagos de los clientes, conocido en términos contables como "cuentas por cobrar" o CC. Con el esquema de multifirma, cualquier pago realizado por los clientes se bloquea de tal manera que se requieren al menos dos firmas para su liberación, de Mohammed y uno de sus socios o de su abogado que tiene una llave de respaldo. Un esquema de multifirma como ese ofrece controles de gobierno corporativo y protege contra robo, malversación o pérdida.
+
+El script resultante es bastante largo y se ve así:
+
+----
+2 <Llave Pública de Mohammed> <Llave Pública del Socio1> <Llave Pública del Socio2> <Llave Pública del Socio3> <Llave Pública del Abogado> 5 CHECKMULTISIG 
+----
+
+Los scripts de multifirma son una característica poderosa, pero son complicados de usar. Dado el script anterior, Mohammed tendría que comunicar ese script a cada cliente antes del pago. Cada cliente tendría que usar un software especial de cartera bitcoin con la capacidad de crear scripts de transacción personalizados, y cada cliente tendría que entender cómo crear una transacción utilizando scripts personalizados. Además, la transacción resultante sería aproximadamente cinco veces más grande que una transacción de pago simple, porque este script contiene llaves públicas muy largas. La carga de esa transacción extra grande sería asumida por el cliente en forma de comisiones. Finalmente, un script de transacción de gran tamaño como esta se guardaría en el set UTXO en RAM en cada nodo completo, hasta que se gastara. Todos estos problemas hacen que el uso de scripts de bloqueo complejos sea difícil en la práctica.
+
+Para resolver estas dificultades prácticas se desarrolló P2SH y para hacer que el uso de scripts complejos sea tan fácil como un pago a una dirección bitcoin. Con los pagos P2SH, el script de bloqueo complejo se reemplaza con su huella digital, un hash criptográfico. Cuando una transacción que intenta gastar el UTXO se presenta más adelante, debe contener el script que coincida con el hash, además del script de desbloqueo. En términos simples, P2SH significa "pagar a un script que coincida con este hash, un script que se presentará más adelante cuando se gaste esta salida".
+
+((("scripts de canje")))((("scripting", "scripts de canje")))En las transacciones P2SH, el script de bloqueo que se reemplaza por un hash se conoce como _script de canje_ (en inglés, _redeem script_) porque se presenta al sistema en el momento del canje en lugar de como un script de bloqueo. <<without_p2sh>> muestra el script sin P2SH y <<with_p2sh>> muestra el mismo script codificado en P2SH.
+
+[[without_p2sh]]
+.Script complejo sin P2SH
+|=======
+| Script de Bloqueo | 2 PubKey1 PubKey2 PubKey3 PubKey4 PubKey5 5 CHECKMULTISIG
+| Script de Desbloqueo | Firma1 Firma2
+|=======
+
+[[with_p2sh]]
+.Script complejo como P2SH
+|=======
+| Script de Canje | 2 PubKey1 PubKey2 PubKey3 PubKey4 PubKey5 5 CHECKMULTISIG
+| Script de Bloqueo | HASH160 <hash de 20 bytes para el script de canje> EQUAL 
+| Script de Desbloqueo | Sig1 Sig2 <script de canje>
+|=======
+
+Como puedes ver de las tablas, con P2SH el script complejo que detalla las condiciones para gastar la salida (script de canje) no se presenta en el script de bloqueo. En cambio, solo su hash se encuentra en el script de bloqueo, y el script de canje en sí se presenta después, como parte del script de desbloqueo cuando se gasta la salida. Esto traslada la carga de comisiones y la complejidad del remitente al destinatario (gastador) de la transacción.
+
+Veamos la empresa de Mohammed, el complejo script multifirma, y los scripts P2SH resultantes.
+
+Primero, el script multifirma que usa la empresa de Mohammed para todos los pagos entrantes de clientes:
+
+----
+2 <Llave Pública de Mohammed> <Llave Pública del Socio1> <Llave Pública del Socio2> <Llave Pública del Socio3> <Llave Pública del Abogado> 5 CHECKMULTISIG 
+----
+
+Si los marcadores de posición son reemplazados por llaves públicas reales (mostradas aquí como números de 520 bits que comienzan por 04) se puede observar que el script se vuelve muy largo:
+
+----
+2
+04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C58704A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D99779650421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800 5 CHECKMULTISIG
+----
+
+En su lugar, este script completo puede representarse mediante un hash criptográfico de 20 bytes, aplicando primero el algoritmo de hash SHA256 y luego aplicando el algoritmo RIPEMD160 al resultado.
+
+Usamos +libbitcoin-explorer+ (+bx+) en la línea de comandos para producir el hash del script, de la siguiente manera:
+
+----
+echo \
+2 \
+[04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C587] \
+[04A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49] \
+[047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D9977965] \
+[0421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5] \
+[043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800] \
+5 CHECKMULTISIG \
+| bx script-encode | bx sha256 | bx ripemd160
+54c557e07dde5bb6cb791c7a540e0a4796f5e97e
+----
+
+La serie de comandos anterior codifica en primer lugar el script de canje multifirma de Mohammed como un script bitcoin de codificación hexadecimal serializada. El siguiente comando +bx+ calcula el hash SHA256 de eso. El siguiente comando +bx+ vuelve a hacer hash con RIPEMD160, produciendo el hash del script final:
+
+El hash de 20 bytes del script de canje de Mohammed es:
+
+----
+54c557e07dde5bb6cb791c7a540e0a4796f5e97e
+----
+
+Una transacción P2SH bloquea la salida a este hash en lugar del script de canje más largo, utilizando el script de bloqueo:
+
+----
+HASH160 54c557e07dde5bb6cb791c7a540e0a4796f5e97e EQUAL
+----
+
+que, como puedes ver, es mucho más corto. En lugar de "paga a este script de multifirma de 5 llaves", la transacción equivalente de P2SH es "paga a un script con este hash". Un cliente que realiza un pago a la compañía de Mohammed solo necesita incluir en su pago este script de bloqueo mucho más corto. Cuando Mohammed y sus socios deseen gastar este UTXO, deben presentar el script de canje original (aquel cuyo hash bloqueó el UTXO) y las firmas necesarias para desbloquearlo, de esta manera ("PKN" en este contexto significa "Llave-PíblicaN", del inglés, "PublicKeyN"):
+
+----
+<Firma1> <Firma2> <2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG>
+----
+
+Ambos scripts se combinan en dos etapas. Primero, el script de canje se chequea contra el script de bloqueo para asegurar que el hash concuerda:
+
+----
+<2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG> HASH160 <hash del script de canje> EQUAL 
+----
+Si el hash del script de canje concuerda, el script de desbloqueo se ejecuta automáticamente para desbloquear el script de canje:
+
+----
+ <Firma1> <Firma2> 2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG
+----
+
+Casi todos los scripts descritos en este capítulo solo pueden implementarse como scripts P2SH. No se pueden utilizar directamente en el script de bloqueo de un UTXO.((("", startref="mohamseven")))
+
+==== Direcciones P2SH
+
+((("scripting", "Pay-to-Script-Hash", "direcciones")))((("Pay-to-Script-Hash (P2SH)", "direcciones")))((("propuestas de mejora de bitcoin", "Formato de Direcciones para P2SH (BIP-13)")))Otra parte importante de las propiedades de P2SH es la capacidad de codificar un hash de script como una dirección, como se define en BIP-13. Las direcciones P2SH son codificaciones Base58Check del hash de 20 bytes de un script, al igual que las direcciones bitcoin son codificaciones Base58Check del hash de 20 bytes de una llave pública. Las direcciones P2SH usan el prefijo de versión "5", que da como resultado direcciones codificadas en Base58Check que comienzan con un "3".
+
+Por ejemplo, el script complejo de Mohammed, hasheado y codificado en Base58Check como una dirección P2SH, se convierte en +39RF6JqABiHdYHkfChV6USGMe6Nsr66Gzw+. Podemos confirmarlo con el comando +bx+:
+
+----
+echo \
+'54c557e07dde5bb6cb791c7a540e0a4796f5e97e'\
+ | bx address-encode -v 5
+39RF6JqABiHdYHkfChV6USGMe6Nsr66Gzw
+----
+
+
+Ahora, Mohammed puede dar esta "dirección" a sus clientes y pueden usar casi cualquier cartera bitcoin para hacer un pago simple, como si fuera una dirección bitcoin. El prefijo 3 les da una pista de que este es un tipo especial de dirección, una correspondiente a un script en lugar de una llave pública, pero de lo contrario, funciona exactamente de la misma manera que un pago a una dirección bitcoin.
+
+Las direcciones P2SH esconden toda la complejidad de forma que la persona realizando el pago no vea el script.
+
+==== Beneficios del P2SH
+
+((("scripting", "Pay-to-Script-Hash", "beneficios de")))((("Pay-to-Script-Hash (P2SH)", "beneficios de")))La funcionalidad P2SH ofrece los siguientes beneficios en comparación con el uso directo de scripts complejos en el bloqueo de salidas:
+
+* Scripts complejos son reemplazados por huellas más cortas en la salida de transacción, reduciendo la transacción.
+* Los scripts pueden codificarse como una dirección, de forma que el remitente y la cartera del remitente no necesitan ingeniería compleja para implementar P2SH.
+* P2SH desplaza la carga de construir el script al destinatario, no al remitente.
+* P2SH desplaza la carga en almacenamiento de datos del script largo desde la salida (que además de almacenarse en la cadena de bloques, está en el set UTXO) a la entrada (solo se almacena en la cadena de bloques).
+* P2SH desplaza la carga en almacenamiento de datos para el script largo del tiempo presente (pago) a un tiempo futuro (cuando es gastado).
+* P2SH desplaza los costos de comisiones de transacción de un script largo del remitente al destinatario, quien debe incluir el largo script de canje para gastarlo.
+
+==== Script de Canje y Validación
+
+((("scripting", "Pay-to-Script-Hash", "scripts de canje y validación")))((("Pay-to-Script-Hash (P2SH)", "scripts de canje y validación")))((("scripts de canje")))((("validación")))Antes de la versión 0.9.2 del Cliente Principal de Bitcoin, el Pago-al-Hash-de-un-Script estaba limitado a los tipos de scripts de transacciones bitcoin estándar, mediante la función +IsStandard()+. Eso significa que el script de canje presentado en la transacción de gasto podía ser tan solo uno de los tipos estándar: P2PK, P2PKH o multifirma.
+
+Hacia la versión 0.9.2 del Cliente Principal de Bitcoin, las transacciones P2SH pueden contener cualquier script válido, haciendo al estándar P2SH mucho más flexible y permitiendo experimentación con muchos tipos de transacciones novedosos y complejos.
+
+No puedes colocar un P2SH dentro de un script de canje de P2SH, porque la especificación de P2SH no es recursiva. Además, si bien es técnicamente posible incluir +RETURN+ (ver <<op_return>>) en un script de canje, ya que nada en las reglas le impide hacerlo, no tiene uso práctico porque ejecutar +RETURN+ durante la validación hará que la transacción sea marcada como inválida.
+
+Ten en cuenta que debido a que el script de canje no se presenta a la red hasta que intentas gastar una salida P2SH, si bloqueas una salida con el hash de un script de canje no válido, se procesará de todos modos. El UTXO se bloqueará con éxito. Sin embargo, no podrás gastarlo porque la transacción de gasto, que incluye el script de canje, no se aceptará porque es un script no válido. Esto crea un riesgo, porque puedes bloquear bitcoin en un P2SH que no puede gastarse más tarde. La red aceptará el script de bloqueo P2SH incluso si corresponde a un script de canje no válido, porque el hash del script no da ninguna indicación del script que representa.((("", startref="Spay07")))
+
+[WARNING]
+====
+((("advertencias y precauciones", "bloqueo accidental de bitcoin")))Los scripts de bloqueo P2SH contienen el hash de un script de canje, que no da pistas sobre el contenido del script de canje mismo. La transacción P2SH se considerará válida y aceptada incluso si el script de canje no es válido. Puedes bloquear accidentalmente bitcoin de tal manera que no pueda gastarse más tarde.
+====
+
+
+
+[[op_return]]
+=== Salida de Registro de Datos (RETURN)
+
+((("transacciones", "avanzadas", "salida de registro de datos")))((("scripting", "salida de registro de datos")))((("operador RETURN")))((("registro de datos (datos no de pago)")))((("datos no de pago")))((("cadena de bloques (la)", "registro de datos de no pago")))((("servicios de notaría digital")))El libro de contabilidad distribuido y con marca de tiempo de bitcoin, la cadena de bloques, tiene usos potenciales más allá de los pagos. Muchos desarrolladores han intentado utilizar el lenguaje de scripting de transacciones para aprovechar la seguridad y la capacidad de recuperación del sistema para aplicaciones como los servicios de notarios digitales, certificados de acciones y contratos inteligentes. Los primeros intentos de usar el lenguaje de script de bitcoin para estos fines implicaron la creación de salidas de transacción que registraran datos en la cadena de bloques; por ejemplo, para registrar una huella digital de un archivo de tal manera que cualquiera pudiera establecer la prueba de existencia de ese archivo en una fecha específica por referencia a esa transacción.
+
+((("cadena de bloques, saturación")))((("hinchazón")))((("salidas de transacción no gastadas (UTXO)")))((("sets UTXO")))El uso de la cadena de bloques de bitcoin para almacenar información sin relación a pagos bitcoin es un tema controvertido. Muchos desarrolladores lo consideran un abuso y prefieren desalentarlo. Otros lo ven como una demostración de las poderosas posibilidades de la tecnología de la cadena de bloques y prefieren alentar su experimentación. Quienes objetan a la inclusión de datos no relacionados a pagos argumentan que causa "hinchazón de la cadena de bloques", colocando una carga sobre quienes corren nodos bitcoin completos al tener que almacenar datos que la cadena de bloques no fue pensada para albergar. Adicionalmente, esas transacciones crean UTXOs que no pueden ser gastados, utilizando la dirección bitcoin de destino como un campo libre de 20 bytes. Como la dirección es utilizada para datos, no se corresponde a una llave privada y la UTXO resultante no puede ser gastada _jamás_; es un falso pago. Estas transacciones que no pueden ser gastadas, no pueden ser eliminadas del set UTXO y provocan que el tamaño de la base de datos de UTXOs crezca o "se hinche" para siempre.
+
+En la versión 0.9 del Cliente Principal de Bitcoin se alcanzó un acuerdo de compromiso con la introducción del operador +RETURN+. +RETURN+ permite a los desarrolladores añadir 80 bytes de datos no relacionados con pagos a la salida de una transacción. Sin embargo, a diferencia del uso de UTXOs falsas, el operador +RETURN+ crea una salida _demostrablemente ingastable_ de manera explícita, la cual no necesita ser almacenada en la colección de UTXOs. Las salidas del tipo +RETURN+ se registran en la cadena de bloques, por lo que consumen espacio en disco y contribuyen al incremento del tamaño de la cadena de bloques, pero no se almacenan en el set UTXO y por ende no hinchan el tanque de memoria de las UTXOs ni cargan a los nodos completos con el costo de memoria RAM adicional.
+
+Los scripts +RETURN+ se ven así:
+
+----
+RETURN <data>
+----
+
+((("Prueba de Existencia")))((("prefijo DOCPROOF")))La porción de datos se limita a 80 bytes y frecuentemente representa un hash, como el resultado del algoritmo SHA256 (32 bytes). Muchas aplicaciones colocan un prefijo delante de los datos para ayudar a identificar la aplicación. Por ejemplo, el servicio de autorización bajo notario digital http://proofofexistence.com[Proof of Existence] usa el prefijo de 8 bytes "DOCPROOF," el cual es ASCII codificado como +44 4f 43 50 52 4f 4f 46+ en hexadecimal.
+
+Ten en cuenta que no existe un "script de desbloqueo" que corresponda a un +RETURN+ que pudiera ser usado para "gastar" una salida +RETURN+. El propósito de +RETURN+ es que no se pueda gastar el dinero bloqueado en esa salida y por lo tanto no requiere almacenarse en el set UTXO como potencialmente gastable—+RETURN+ es _demostrablemente ingastable_. +RETURN+ es generalmente una salida con un monto de cero bitcoin, ya que cualquier monto en bitcoin asignado a tal salida estaría efectivamente perdido para siempre. Si se hace referencia a un +RETURN+ como una entrada en una transacción, el motor de validación del script detendrá la ejecución del script de validación y marcará la transacción como no válida. La ejecución de +RETURN+ esencialmente hace que el script retorne con un +FALSE+ y se detenga. Por lo tanto, si haces referencia accidentalmente a una salida +RETURN+ como una entrada en una transacción, esa transacción no es válida.
+
+Una transacción estándar (una que cumple con los chequeos de +isStandard()+) puede tener tan solo una salida +RETURN+. Sin embargo, una única salida +RETURN+ puede combinarse en una transacción con varias salidas de otros tipos.
+
+Se han agregado dos nuevas opciones de línea de comandos en Bitcoin Core a partir de la versión 0.10. La opción +datacarrier+ controla la retransmisión y minería de las transacciones +RETURN+, con el valor predeterminado establecido en "1" para permitirlas. La opción +datacarriersize+ toma un argumento numérico que especifica el tamaño máximo en bytes del script +RETURN+, 83 bytes por defecto, lo que permite un máximo de 80 bytes de datos +RETURN+ más un byte del opcode +RETURN+ y dos bytes del opcode +PUSHDATA+.
+
+[NOTE]
+====
++RETURN+ se propuso inicialmente con un límite de 80 bytes, pero el límite se redujo a 40 bytes cuando se lanzó la función. En febrero de 2015, en la versión 0.10 de Bitcoin Core, el límite se elevó de nuevo a 80 bytes. Los nodos pueden elegir no retransmitir o minar +RETURN+, o solo retransmitir y minar +RETURN+ que contengan menos de 80 bytes de datos.
+====
+
+=== Bloqueos de tiempo (Timelocks)
+
+((("transacciones", "avanzadas", "bloqueos de tiempo")))((("scripting", "bloqueos de tiempo", id="Stimelock07")))((("campo nLocktime")))((("scripting", "bloqueos de tiempo", "usos de")))((("bloqueos de tiempo", "usos de")))Los bloqueos de tiempo son restricciones en transacciones o salidas que solo permiten gastar después de un momento en el tiempo. Bitcoin ha tenido una característica de bloqueo de tiempo a nivel de transacción desde el principio. Se implementa mediante el campo +nLocktime+ en una transacción. Se introdujeron dos nuevas funciones de bloqueo de tiempo a finales de 2015 y mediados de 2016 que ofrecen bloqueos de tiempo a nivel de UTXO. Estos son +CHECKLOCKTIMEVERIFY+ y +CHECKSEQUENCEVERIFY+.
+
+Los bloqueos de tiempo son útiles para transacciones posteriores a la fecha actual y para bloquear fondos hasta una fecha en el futuro. Más importante aún, los bloqueos de tiempo ofrecen a los scripts de bitcoin una dimensión del tiempo, abriendo la puerta a complejos contratos inteligentes de múltiples pasos.
+
+[[transaction_locktime_nlocktime]]
+==== Bloqueo Temporal de Transacción (nLocktime)
+
+((("scripting", "bloqueos temporales", "nLocktime")))((("bloqueos temporales", "nLocktime")))Desde sus comienzos, bitcoin ha tenido una función de bloqueo de tiempo a nivel de transacción. El bloqueo temporal de la transacción es una configuración que se ubica a nivel de la transacción (en un campo en la estructura de datos de la misma) y que define a partir de qué momento una transacción es válida y se puede retransmitir en la red o agregar a la cadena de bloques. El bloqueo temporal también se conoce como +nLocktime+ proveniente del nombre de la variable utilizada en el código base de Bitcoin Core. Este parámetro se establece en cero en la mayoría de las transacciones para indicar la propagación y ejecución inmediata. Si el valor de +nLocktime+ no es cero y está por debajo de 500 millones, se interpreta como una altura de bloque, lo que significa que la transacción no será válida y no se retransmitirá ni se incluirá en la cadena de bloques antes que la referida altura de bloque no haya sido alcanzada. Si es mayor o igual a 500 millones, se interpreta como un sello de tiempo del tipo "Unix Epoch" (es decir, segundos transcurridos desde el 1° de enero de 1970) y la transacción no se admite como válida antes de cumplirse ese momento especificado. Aquellas transacciones con una especificación del parámetro +nLocktime+ que indican un número futuro de bloque un momento futuro del tiempo deben ser retenidas por el sistema que las origina y solo deben ser difundirlas a la red bitcoin una vez que sean validas. Si una transacción se transmite a la red antes que se cumpla la condición del parámetro +nLocktime+ especificado, será rechazada apenas alcance el siguiente nodo interpretándose como una transacción no válida y no será retransmitida a otros nodos. El uso de +nLocktime+ es equivalente a un cheque de papel post-fechado.
+
+[[locktime_limitations]]
+===== Limitaciones del bloqueo temporal de las transacciones
+
++nLocktime+ tiene la limitación de que si bien permite gastar algunas salidas en el futuro, no es imposible que estas puedan gastarse antes de ese momento. Vamos a explicar eso con el siguiente ejemplo.
+
+((("casos de uso", "comprando café", id="alicesseven")))Alice firma una transacción y gasta una de sus salidas hacia la dirección de Bob, estableciendo el +nLocktime+ de la transacción  a 3 meses en el futuro. Alice envía esa transacción a Bob para que la retenga. Con esta transacción Alice y Bob saben que:
+
+* Bob no puede transmitir la transacción para gastar los fondos hasta que hayan transcurrido 3 meses.
+* Bob puede transmitir la transacción después de 3 meses.
+
+Sin embargo:
+
+* Alice puede crear otra transacción, haciendo un "doble gasto" de esas mismas entradas sin requerir bloqueo temporal. Por lo tanto, Alice puede gastar el mismo UTXO antes de que hayan transcurrido los 3 meses.
+* Bob no tiene garantía de que Alice no hará eso.
+
+Es importante entender las limitaciones de la transacción +nLocktime+. La única garantía es que Bob no podrá gastarlo antes de que hayan transcurrido 3 meses. No hay garantía de que Bob obtendrá los fondos. Para lograr dicha garantía, la restricción de bloqueo de tiempo debe colocarse en el propio UTXO y ser parte del script de bloqueo, en lugar de en la transacción. Esto se logra mediante la siguiente forma de bloqueo de tiempo, llamada Check Lock Time Verify.
+
+==== Check Lock Time Verify (CLTV)
+
+((("Check Lock Time Verify (CLTV)", id="cltv07")))((("bloqueos de tiempo", "Check Lock Time Verify (CLTV)")))((("scripting", "bloqueos de tiempo", "Check Lock Time Verify (CLTV)")))((("propuestas de mejora de bitcoin", "CHECKLOCKTIMEVERIFY (BIP-65)")))En diciembre de 2015, se introdujo una nueva forma de bloqueo de tiempo en bitcoin como una bifurcación suave. Su especificación se detalla en BIP-65, que incluye un nuevo operador de script llamado _CHECKLOCKTIMEVERIFY_ (_CLTV_) que se agregó al lenguaje de scripting. +CLTV+ es un bloqueo de tiempo que afecta a cada salida, en lugar de un bloqueo de tiempo por transacción como es el caso con +nLocktime+. Esto ofrece una mayor flexibilidad en la forma en que se aplican los bloqueos de tiempo.
+
+En términos simples, al agregar el opcode +CLTV+ en el script de canje de una salida, se restringe la salida, de modo que solo puede gastarse una vez transcurrido el tiempo especificado.
+
+[TIP]
+====
+Mientras +nLocktime+ es un bloqueo de tiempo a nivel de transacción, +CLTV+ es un bloqueo de tiempo basado en salida.
+====
+
++CLTV+ no sustituye a +nLocktime+, sino que restringe UTXO específicos, de modo que solo se puedan gastar en una transacción futura que tenga establecida su +nLocktime+ a un valor mayor o igual.
+
+El opcode +CLTV+ toma un parámetro como entrada, expresado como un número en el mismo formato que +nLocktime+ (ya sea una altura de bloque o un tiempo de época de Unix). Como indica el sufijo +VERIFY+, +CLTV+ es el tipo de opcode que detiene la ejecución del script si el resultado es +FALSE+. Si resulta en VERDADERO, la ejecución continúa.
+
+Para bloquear una salida con +CLTV+, lo incluyes en el script de canje de la salida en la transacción que crea la salida. Por ejemplo, si Alice está pagando a la dirección de Bob, la salida normalmente contendría un script P2PKH como este:
+
+----
+DUP HASH160 <Bob's Public Key Hash> EQUALVERIFY CHECKSIG
+----
+
+Para bloquearlo a un momento en el tiempo, digamos que dentro de 3 meses, la transacción sería una transacción P2SH con un script de canje como este:
+
+----
+<now + 3 months> CHECKLOCKTIMEVERIFY DROP DUP HASH160 <Bob's Public Key Hash> EQUALVERIFY CHECKSIG
+----
+
+donde +<now {plus} 3 months>+ es una altura de bloque o un valor de tiempo estimado de 3 meses desde el momento en que se mina la transacción: altura de bloque actual {más} 12,960 (bloques) o tiempo actual de época de Unix {más} 7,760,000 (segundos). Por ahora, no te preocupes por el código de operación +DROP+ que sigue a +CHECKLOCKTIMEVERIFY+; Se explicará en breve.
+
+Cuando Bob intenta gastar este UTXO, construye una transacción que hace referencia al UTXO como una entrada. Utiliza su firma y llave pública en el script de desbloqueo de esa entrada y establece el +nLocktime+ de la transacción  a un valor igual o mayor que el bloqueo de tiempo en el conjunto +CHECKLOCKTIMEVERIFY+ de Alice. Bob después transmite la transacción en la red bitcoin.
+
+La transacción de Bob se evalúa de la siguiente manera. Si el parámetro de +CHECKLOCKTIMEVERIFY+ que Alice establece es menor o igual que el +nLocktime+ de la transacción de gasto, la ejecución del script continúa (actúa como si fuera &#x201c;no operación&#x201d; o se hubiera ejecutado NOP). De lo contrario, la ejecución del script se detiene y la transacción se considera inválida.
+
+Más concretamente, +CHECKLOCKTIMEVERIFY+ falla y se detiene la ejecución, marcando la transacción como inválida si (fuente: BIP-65):
+
+1. la pila está vacía; o
+1. el elemento superior en la pila es menor que 0; o
+1. el tipo de tiempo de bloqueo (altura frente a sello de tiempo) del elemento superior de la pila y el campo +nLocktime+ no son los mismos; o
+1. el elemento superior de la pila es mayor que el campo +nLocktime+ de la transacción; o
+1. el campo +nSequence+ de la entrada es 0xffffffff.
+
+[NOTE]
+====
++CLTV+ y +nLocktime+ usan el mismo formato para describir los bloqueos de tiempo, ya sea una altura de bloque o el tiempo transcurrido en segundos desde la época Unix. Necesariamente, cuando se usan juntos, el formato de +nLocktime+ debe coincidir con el de +CLTV+ en las salidas&#x2014;ambos deben hacer referencia a la altura de bloque o al tiempo en segundos.
+====
+
+Después de la ejecución, si se satisface el +CLTV+, el parámetro de tiempo que lo precedió permanece como el elemento superior en la pila y es posible que deba eliminarse, con +DROP+, para la ejecución correcta de los siguientes opcodes del script. Por este motivo, a menudo verás en los scripts +CHECKLOCKTIMEVERIFY+ seguido de +DROP+.
+
+Al usar +nLocktime+ junto con +CLTV+, el escenario descrito en <<locktime_limitations>> cambia. Alice ya no puede gastar el dinero (porque está bloqueado con la llave de Bob) y Bob no puede gastarlo antes de que expire el bloqueo temporal de 3 meses.((("", startref="alicesseven")))
+
+Al introducir la funcionalidad de bloqueo de tiempo directamente en el lenguaje de scripting, +CLTV+ nos permite desarrollar algunos scripts complejos muy interesantes.((("", startref="cltv07")))
+
+El estándar se define en https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki[BIP-65 (CHECKLOCKTIMEVERIFY)].
+
+==== Bloqueos de Tiempo Relativos
+
+Tanto +nLocktime+ como +CLTV+ son ((("bloqueos de tiempo", "bloqueos de tiempo relativos", id="Trelative07")))((("scripting", "bloqueos de tiempo", "bloqueos de tiempo relativos")))((("bloqueos de tiempo relativos", id="relativetime07"))) ambos _bloqueos de tiempo absolutos_ en el sentido de que especifican momentos absolutos de tiempo. Las siguientes dos características de bloqueo de tiempo que examinaremos son los _bloqueos de tiempo relativos_ que especifican, como condición para gastar una salida, un tiempo transcurrido desde la confirmación de la salida en la cadena de bloques.
+
+Los bloqueos de tiempo relativos son útiles porque permiten que una cadena de dos o más transacciones interdependientes se mantengan fuera de la cadena, y simultáneamente impone una restricción de tiempo en una transacción que depende del tiempo transcurrido desde la confirmación de una transacción anterior. En otras palabras, el reloj no comienza a contar hasta que se registra el UTXO en la cadena de bloques. Esta funcionalidad es especialmente útil en los canales de estado bidireccionales y en la Red Lightning, como veremos en <<state_channels>>.
+
+Los bloqueos de tiempo relativos, como los bloqueos de tiempo absolutos, se implementan tanto con una característica a nivel de transacción como con un opcode a nivel de script. El bloqueo de tiempo relativo a nivel de transacción se implementa como una regla de consenso sobre el valor de +nSequence+, un campo de transacción que se establece en cada entrada de transacción. Los bloqueos de tiempo relativos a nivel de script se implementan con el opcode +CHECKSEQUENCEVERIFY+ (CSV).
+
+((("propuestas de mejora de bitcoin", "Tiempo de bloqueo relativo usando números de secuencia impuestos por consenso (BIP-68)")))((("propuestas de mejora de bitcoin", "CHECKSEQUENCEVERIFY (BIP-112)")))Los bloqueos de tiempo relativos se implementan según las especificaciones en https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki[BIP-68, Tiempo de bloqueo relativo usando números de secuencia impuestos por consenso] y https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki[BIP-112, CHECKSEQUENCEVERIFY].
+
+BIP-68 y BIP-112 se activaron en mayo de 2016 como una bifurcación suave a las reglas de consenso.
+
+==== Bloqueos de Tiempo Relativos con nSequence
+
+((("campo nSequence")))((("scripting", "bloqueos de tiempo", "bloqueos de tiempo relativos con nSequence")))Los bloqueos de tiempo relativos se pueden establecer en cada entrada de una transacción, estableciendo el campo +nSequence+ en cada entrada.
+
+===== Significado original de nSequence
+
+El campo +nSequence+ fue originalmente pensado (pero nunca implementado correctamente) para permitir la modificación de transacciones en el mempool. En ese uso, una transacción que contuviera entradas con un valor de +nSequence+ por debajo de 2^32^ - 1 (0xFFFFFFFF) indicaba una transacción que aún no se había "finalizado". Dicha transacción se mantendría en el mempool hasta que fuera reemplazada por otra transacción que gastara las mismas entradas con un valor de  +nSequence+ más alto. Una vez que se recibiera una transacción cuyas entradas tenían un valor de +nSequence+ de 0xFFFFFFFF, se consideraría "finalizada" y se minaría.
+
+El significado original de +nSequence+ nunca se implementó correctamente y el valor de +nSequence+ se establece habitualmente en 0xFFFFFFFF en transacciones que no utilizan bloqueos temporales. Para transacciones con +nLocktime+ o +CHECKLOCKTIMEVERIFY+, el valor +nSequence+ debe establecerse en menos de 2^31^ para que los guardias de bloqueo temporal tengan efecto, como se explica a continuación.
+
+===== nSequence como bloqueo de tiempo relativo impuestos por consenso
+
+Desde la activación de BIP-68, se aplican nuevas reglas de consenso para cualquier transacción que contenga una entrada cuyo valor +nSequence+ sea menor que 2^31 ^ (el bit 1<<31 no está establecido). Programáticamente, eso significa que si el bit más significativo (bit 1<<31) no se establece, es un indicador que significa "bloqueo temporal relativo". De lo contrario (bit 1<<31 establecido), el valor +nSequence+ se reserva para otros usos, como habilitar +CHECKLOCKTIMEVERIFY+, +nLocktime+, Opt-In-Replace-By-Fee, y otros desarrollos futuros .
+
+Las entradas de transacciones con valores de +nSequence+ menores que 2^31^ se interpretan como que tienen un bloqueo de tiempo relativo. Dicha transacción solo es válida una vez que la entrada haya vencido por la cantidad relativa de bloqueo de tiempo. Por ejemplo, una transacción con una entrada y un bloqueo de tiempo relativo +nSequence+ de 30 bloques solo es válida cuando hayan transcurrido al menos 30 bloques desde el momento en que se minó el UTXO al que se hizo referencia en la entrada. Como existe un campo +nSequence+  por cada entrada, una transacción puede contener cualquier número de entradas con bloqueo de tiempo, de las cuales, todas deben tener una antigüedad suficiente para que la transacción sea válida. Una transacción puede incluir tanto entradas con bloqueo de tiempo (+nSequence+ < 2^31^) como entradas sin bloqueo de tiempo relativo (+nSequence+ >= 2^31^).
+
+El valor de +nSequence+ se especifica en bloques o en segundos, pero en un formato ligeramente diferente al que vimos en +nLocktime+. Se utiliza un indicador de tipo para diferenciar entre el conteo de valores en bloques y el conteo de valores de tiempo en segundos. El indicador de tipo se establece en el bit 23 menos significativo (es decir, el valor 1<<22). Si se establece el indicador de tipo, el valor +nSequence+ se interpreta como un múltiplo de 512 segundos. Si el indicador de tipo no está establecido, el valor +nSequence+ se interpreta como un número de bloques.
+
+Al interpretar +nSequence+ como un bloqueo de tiempo relativo, solo se consideran los 16 bits menos significativos. Una vez que se evalúan los indicadores (bits 32 y 23), el valor de +nSequence+ generalmente se "enmascara" con una máscara de 16 bits (por ejemplo, +nSequence+ & 0x0000FFFF).
+
+<<bip_68_def_of_nseq>> muestra el diseño binario del valor +nSequence+, como se define en BIP-68.
+
+[[bip_68_def_of_nseq]]
+.Definición en BIP-68 de la codificación de nSequence (Fuente: BIP-68)
+image::images/mbc2_0701.png["BIP-68 definition of nSequence encoding"]
+
+
+Los bloqueos de tiempo relativos basados en la imposición por consenso del valor +nSequence+ se definen en BIP-68.
+
+El estándar se define en https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki[BIP-68, Tiempo de bloqueo relativo usando números de secuencia impuestos por consenso].
+
+==== Bloqueos de Tiempo Relativos con CSV
+
+((("scripting", "bloqueos de tiempo", "bloqueos de tiempo relativos con CHECKSEQUENCEVERIFY")))Al igual que CLTV y +nLocktime+, hay un opcode de script para los bloqueos de tiempo relativos que aprovecha el valor de +nSequence+ en los scripts. Ese opcode es +CHECKSEQUENCEVERIFY+, comúnmente denominado +CSV+ para abreviar.
+
+El opcode +CSV+, cuando se evalúa en un script de canje de UTXO, permite gastar solo en una transacción cuyo valor +nSequence+ de entrada es mayor o igual que el parámetro +CSV+. Esencialmente, esto restringe el gasto del UTXO hasta que haya transcurrido un cierto número de bloques o segundos desde que se minó el UTXO.
+
+Al igual que con CLTV, el valor en +CSV+ debe coincidir con el formato del valor +nSequence+ correspondiente. Si se especifica +CSV+ en términos de bloques, entonces también debe +nSequence+. Si se especifica +CSV+ en términos de segundos, entonces también debe +nSequence+.
+
+Los bloqueos de tiempo relativos con +CSV+ son especialmente útiles cuando se crean y firman varias transacciones (encadenadas), pero no se propagan, cuando se mantienen "fuera de la cadena". Una transacción hija no se puede usar hasta que la transacción padre se haya propagado, minado y dejado envejecer por el tiempo especificado en el bloqueo de tiempo relativo. Una aplicación de este caso de uso se puede ver en <<state_channels>> y <<lightning_network>>.((("", startref="relativetime07")))((("", startref="Trelative07")))
+
++CSV+ se define en detalle en https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki[BIP-112, CHECKSEQUENCEVERIFY].
+
+
+==== Tiempo-Mediano-Pasado
+
+((("scripting", "bloqueos de tiempo", "Tiempo-Mediano-Pasado")))((("Tiempo-Mediano-Pasado")))((("bloqueos de tiempo", "Tiempo-Mediano-Pasado")))Como parte de la activación de los bloqueos de tiempo relativos, también hubo un cambio en la forma en que se calcula el "tiempo" para los intervalos de tiempo (tanto absolutos como relativos). En bitcoin hay una diferencia sutil, pero muy significativa, entre el tiempo de reloj de pared y el tiempo de consenso. Bitcoin es una red descentralizada, lo que significa que cada participante tiene su propia perspectiva del tiempo. Los eventos en la red no ocurren instantáneamente en todas partes. La latencia de la red se debe tener en cuenta en la perspectiva de cada nodo. Finalmente, todo se sincroniza para crear un libro de contabilidad común. Bitcoin alcanza el consenso cada 10 minutos sobre el estado del libro de contabilidad tal como existía en el _pasado_.
+
+Los mineros establecen los sellos de tiempo en las cabeceras de bloque. Las reglas de consenso permiten un cierto grado de flexibilidad para tener en cuenta las diferencias en la precisión del reloj de los nodos descentralizados. Sin embargo, esto crea un incentivo desafortunado para que los mineros mientan sobre el tiempo en un bloque para ganar comisiones adicionales al incluir transacciones bloqueadas en el tiempo que aún no están maduras. Lee la siguiente sección para más información.
+
+Para eliminar el incentivo a mentir y así fortalecer la seguridad de los bloqueos de tiempo, se propuso y activó un BIP al mismo tiempo que los BIP para bloqueos de tiempo relativos. Se trata del BIP-113, que define una nueva medida de consenso de tiempo llamada _Tiempo-Mediano-Pasado_.
+
+Tiempo-Mediano-Pasado se calcula tomando las marcas de tiempo de los últimos 11 bloques y encontrando la mediana. Ese tiempo mediano se convierte en tiempo de consenso y se utiliza para todos los cálculos de bloqueo de tiempo. Al tomar el punto medio de aproximadamente dos horas en el pasado, se reduce la influencia del sello de tiempo de cualquier bloque. Al incorporar 11 bloques, ningún minero puede influir en las marcas de tiempo para obtener comisiones de transacción con un bloqueo de tiempo que aún no ha madurado.
+
+Tiempo-Mediano-Pasado cambia la implementación de los cálculos de tiempo para +nLocktime+, +CLTV+, +nSequence+ y +CSV+. El tiempo de consenso calculado por Tiempo-Mediano-Pasado es siempre aproximadamente una hora detrás del reloj de pared. Si creas transacciones de bloqueo de tiempo, debes tenerlo en cuenta para estimar el valor deseado codificado en +nLocktime+, +nSequence+, +CLTV+ y +CSV+.
+
+Tiempo-Mediano-Pasado se especifica en https://github.com/bitcoin/bips/blob/master/bip-0113.mediawiki[BIP-113].
+
+[[fee_sniping]]
+==== Defensa de Bloqueo de Tiempo Contra Disparo de Comisiones
+
+((("scripting", "bloqueos de tiempo", "defensa contra disparo de comisiones")))((("bloqueos de tiempo", "defensa contra disparo de comisiones")))((("comisiones", "disparo de comisiones")))((("seguridad", "defensa contra disparo de comisiones")))((("francotirador")))El francotirador de comisiones es un escenario de ataque teórico, en el que los mineros que intentan volver a escribir los bloques anteriores "roban" las transacciones de mayor comisión de futuros bloques para maximizar su rentabilidad.
+
+Por ejemplo, digamos que el bloque más alto que existe es el bloque #100,000, y en lugar de intentar minar el bloque #100,001 para extender la cadena, algunos mineros intentan reminar el #100,000. Estos mineros pueden elegir incluir cualquier transacción válida (que aún no se haya minado) en su bloque candidato #100,000. No tienen por qué reminar el bloque con las mismas transacciones. De hecho, tienen el incentivo de seleccionar las transacciones más rentables (comisión más alta por kB) para incluirlas en su bloque. Pueden incluir cualquier transacción que estuviera en el bloque "antiguo" #100,000, así como cualquier transacción del mempool actual. Esencialmente tienen la opción de llevar las transacciones del "presente" al "pasado" reescrito cuando recrean el bloque #100,000.
+
+Hoy en día, este ataque no es muy lucrativo, porque la recompensa por encontrar el bloque es mucho más alta que las comisiones totales por bloque. Pero en algún momento en el futuro, las comisiones de transacción serán la mayoría de la recompensa (o incluso la totalidad de la recompensa). En ese momento, este escenario se vuelve inevitable.
+
+Para evitar el "disparo de comisiones", cuando Bitcoin Core crea transacciones utiliza +nLocktime+ para limitarlas al "bloque siguiente", de forma predeterminada. En nuestro escenario, Bitcoin Core establecería +nLocktime+ en 100,001 en cualquier transacción que haya creado. En circunstancias normales, este +nLocktime+ no tiene ningún efecto&#x2014; las transacciones solo se podrían incluir en el bloque #100,001 de todos modos; es el siguiente bloque.
+
+Pero bajo un ataque de bifurcación de la cadena de bloques, los mineros no podrían obtener transacciones con altas comisiones del mempool, porque todas esas transacciones se bloquearían en el bloque #100,001. Solo pueden reminar el #100,000 con cualquier transacción que fuera válida en ese momento, esencialmente sin obtener nuevas comisiones.
+
+Para lograr esto, Bitcoin Core establece el +nLocktime+ en todas las transacciones nuevas a <current block # + 1> y establece el +nSequence+ en todas las entradas a 0xFFFFFFFE para habilitar +nLocktime+.((("", startref="Stimelock07")))
+
+=== Scripts con Control de Flujo (Cláusulas Condicionales)
+
+((("transacciones", "avanzadas", "scripts de control de flujo")))((("scripting", "scripts de control de flujo", id="Sflow07")))((("cláusulas condicionales", id="condition07")))((("control de flujo", id="flow07")))Una de las características más poderosas de Bitcoin Script es el control de flujo, también conocido como cláusulas condicionales. Probablemente estés familiarizado con el control de flujo en varios lenguajes de programación que usan la construcción +IF...THEN...ELSE+. Las cláusulas condicionales de Bitcoin se muestran un poco diferentes, pero son esencialmente la misma construcción.
+
+En un nivel básico, los opcodes condicionales de bitcoin nos permiten construir un script de canje que tiene dos formas de desbloquear, dependiendo del resultado +TRUE+/+FALSE+ que se devuelva al evaluar una condición lógica. Por ejemplo, si x es +TRUE+, el script de canje es A y el script de canje para el "ELSE" es B.
+
+Además, las expresiones condicionales de bitcoin se pueden "anidar" indefinidamente, lo que significa que una cláusula condicional puede contener otra dentro de ella, que contiene otra, etc. El control de flujo de Bitcoin Script se puede usar para construir scripts muy complejos con cientos o incluso miles de posibles vías de ejecución. No hay límite en la anidación, pero las reglas de consenso imponen un límite en el tamaño máximo, en bytes, de un script.
+
+Bitcoin implementa el control de flujo utilizando los opcodes +IF+, +ELSE+, +ENDIF+ y +NOTIF+. Además, las expresiones condicionales pueden contener operadores booleanos como +BOOLAND+, pass:[<span class="keep-together"><code>BOOLOR</code></span>], y +NOT+.
+
+A primera vista, puedes encontrar confusos los scripts de control de flujo de bitcoin. Eso es porque Bitcoin Script es un lenguaje de pila. De la misma manera que +1 {plus} 1+ se ve "hacia atrás" cuando se expresa como +1 1 ADD+, las cláusulas de control de flujo en bitcoin también parecen verse "hacia atrás".
+
+En la mayoría de los lenguajes de programación (procedurales), el control de flujo se ve así:
+
+.Pseudocódigo del control de flujo en la mayoría de los lenguajes de programación
+----
+if (condición):
+  código a ejecutar cuando la condición es true
+else:
+  código a ejecutar cuando la condición es false
+código a ejecutar en cualquier caso
+----
+
+En un lenguaje basado en pila como el Bitcoin Script, la condición lógica viene antes del +IF+, que hace que se vea "hacia atrás", así:
+
+.Control de flujo de Bitcoin Script
+----
+condición
+IF
+  código a ejecutar cuando la condición es true
+ELSE
+  código a ejecutar cuando la condición es false
+ENDIF
+código a ejecutar en cualquier caso
+----
+
+Al leer Bitcoin Script, recuerda que la condición que se evalúa se produce _antes_ que el código de operación +IF+.
+
+==== Cláusulas Condicionales con Opcodes VERIFY
+
+((("opcodes VERIFY")))((("cláusulas IF")))((("opcodes", "VERIFY")))Otra forma de condicional en Bitcoin Script es cualquier opcode que termina en +VERIFY+. El sufijo +VERIFY+ significa que si la condición evaluada no es +TRUE+, la ejecución del script termina inmediatamente y la transacción se considera inválida.
+
+((("cláusulas guarda")))A diferencia de una cláusula +IF+, que ofrece rutas de ejecución alternativas, el sufijo +VERIFY+ actúa como una _cláusula guarda_, que continúa solo si se cumple una condición previa.
+
+Por ejemplo, el siguiente script requiere la firma de Bob y una preimagen (secreto) que produce un hash específico. Ambas condiciones deben satisfacerse para desbloquear:
+
+.Un script de canje con una cláusula guarda +EQUALVERIFY+.
+----
+HASH160 <hash esperado> EQUALVERIFY <Llave Pública de Bob> CHECKSIG
+----
+
+Para redimir esta salida, Bob debe construir un script de desbloqueo que presente una preimagen y una firma válidas:
+
+.Un script de desbloqueo que satisface el script de canje anterior
+----
+<Firma de Bob> <preimagen de hash>
+----
+
+Sin presentar la preimagen, Bob no puede acceder a la parte del script que comprueba su firma.
+
+[role="pagebreak-after"]
+En su lugar, este script se puede escribir con un +IF+:
+
+.Un script de canje con una cláusula de guardia, +IF+
+----
+HASH160 <hash esperado> EQUAL
+IF
+   <Llave Pública de Bob> CHECKSIG
+ENDIF
+----
+
+El script de desbloqueo de Bob es idéntico:
+
+.Un script de desbloqueo que satisface el script de canje anterior
+----
+<Firma de Bob> <preimagen de hash>
+----
+
+El script con +IF+ hace lo mismo que usar un opcode con un sufijo +VERIFY+; ambos operan como cláusulas de guarda. Sin embargo, la construcción +VERIFY+ es más eficiente, ya que utiliza dos opcodes menos.
+
+Entonces, ¿cuándo usamos +VERIFY+ y cuándo usamos +IF+? Si lo único que intentamos hacer es adjuntar una condición previa (cláusula de guarda), entonces +VERIFY+ es mejor. Sin embargo, si queremos tener más de una ruta de ejecución (control de flujo), necesitamos una cláusula de control de flujo +IF...ELSE+.
+
+[TIP]
+====
+((("opcode EQUAL")))((("EQUAL", "opcodes")))((("opcode EQUALVERIFY")))((("EQUALVERIFY", "opcodes")))Un opcode como +EQUAL+ empujará el resultado (+TRUE+/+FALSE+) en la pila, dejándolo allí para su evaluación por los opcodes subsiguientes. Por contra, el sufijo de opcode +EQUALVERIFY+ no deja nada en la pila. Los opcodes que terminan en +VERIFY+ no dejan el resultado en la pila.
+====
+
+==== Usando el Control de Flujo en Scripts
+
+Un uso muy común en el control de flujo en Bitcoin Script es construir un script de canje que ofrezca múltiples caminos de ejecución, cada una de las cuales es una forma diferente de redimir la UTXO.
+
+((("casos de uso", "comprando café")))Veamos un ejemplo simple, donde tenemos dos firmantes, Alice y Bob, y cualquiera de los dos puede redimir. Con multifirmas, esto se expresaría como un script multifirma 1-de-2. Como ejemplo, haremos lo mismo con una cláusula +IF+:
+
+----
+IF
+ <Llave Pública de Alice> CHECKSIG
+ELSE
+ <Llave Pública de Bob> CHECKSIG
+ENDIF
+----
+
+Al observar este script de canje, puede que te preguntes: "¿Dónde está la condición? ¡No hay nada antes de la cláusula +IF+!"
+
+La condición no es parte del script de canje. En su lugar, la condición aparecerá en el script de desbloqueo, lo que permitirá a Alice y Bob "elegir" qué camino de ejecución desean.
+
+Alice redime esto con el script de desbloqueo:
+----
+<Firma de Alice> 1
+----
+
+El +1+ al final sirve como la condición (+TRUE+) que hará que la cláusula + IF ejecute el primer camino de canje para el cual Alice tiene una firma.
+
+Para que Bob pueda redimir esta salida, tendría que elegir el segundo camino de ejecución dando un valor +FALSE+ a la cláusula +IF+:
+
+----
+<Firma de Bob> 0
+----
+
+El script de desbloqueo de Bob pone un +0+ en la pila, lo que hace que la cláusula +IF+ ejecute el segundo script (+ELSE+), que requiere la firma de Bob.
+
+Como las cláusulas +IF+ se pueden anidar, podemos crear un "laberinto" de caminos de ejecución. El script de desbloqueo puede proporcionar un "mapa" que selecciona qué camino de ejecución se ha ejecutado realmente:
+
+----
+IF
+  script A
+ELSE
+  IF
+    script B
+  ELSE
+    script C
+  ENDIF
+ENDIF
+----
+
+En este escenario, hay tres caminos de ejecución (+script A+, +script B+ y +script C+). El script de desbloqueo proporciona un camino en forma de una secuencia de +TRUE+ o +FALSE+. Para seleccionar el camino +script B+, por ejemplo, el script de desbloqueo debe terminar en +1 0+ (+TRUE+, +FALSE+). Estos valores se insertarán en la pila, de modo que el segundo valor (+FALSE+) termine en la parte superior de la pila. La cláusula +IF+ externa muestra el valor +FALSE+ y ejecuta la primera cláusula +ELSE+. Después, el valor +TRUE+ se mueve a la parte superior de la pila y se evalúa por el +IF+ interno (anidado), seleccionando el camino de ejecución +B+.
+
+Usando esta estructura, podemos construir scripts de canje con decenas o cientos de caminos de ejecución, cada uno de las cuales ofrece una forma diferente de redimir la UTXO. Para gastarla, construimos un script de desbloqueo que navega por el camino de ejecución al colocar los valores apropiados +TRUE+ y +FALSE+ en la pila en cada punto de control del flujo.((("", startref="Sflow07")))((("", startref="flow07")))((("", startref="condition07")))
+
+=== Ejemplo de Script Complejo
+
+((("transacciones", "avanzadas", "ejemplo")))((("scripting", "ejemplo de script complejo", id="Scomplex07")))En esta sección combinamos muchos de los conceptos de este capítulo en un solo ejemplo.
+
+((("casos de uso", "importación/exportación", id="mohamseventwo")))Nuestro ejemplo utiliza la historia de Mohammed, el propietario de la empresa en Dubai que opera un negocio de importación/exportación.
+
+((("transacciones", "avanzadas", "scripts de multifirma")))((("scripting", "scripts de multifirma", "ejemplo de importación/exportación")))((("scripts de multifirma")))En este ejemplo, Mohammed desea construir una cuenta de capital de empresa con reglas flexibles. El esquema que crea requiere diferentes niveles de autorización según los intervalos de tiempo. Los participantes en el esquema de multifirma son Mohammed, sus dos socios, Saeed y Zaira, y el abogado de su compañía, Abdul. Los tres socios toman decisiones basadas en una regla de mayoría, por lo que dos de los tres deben estar de acuerdo. Sin embargo, en el caso de que exista algún problema con sus llaves, quieren que sus abogados puedan recuperar los fondos con una de las firmas de los tres socios. Finalmente, si todos los socios no están disponibles o están incapacitados por un tiempo, quieren que el abogado pueda administrar la cuenta directamente.<
+
+Aquí está el script de canje que Mohammed diseña para lograr esto (prefijo de número de línea como XX):
+
+.Multi-firma Variable con Bloqueo de Tiempo
+----
+01  IF
+02    IF
+03      2
+04    ELSE
+05      <30 días> CHECKSEQUENCEVERIFY DROP
+06      <Llave Pública de Abdul el abogado> CHECKSIGVERIFY
+07      1
+08    ENDIF
+09    <Llave Pública de Mohammed> <Llave Pública de Saeed> <Llave Pública de Zaira> 3 CHECKMULTISIG
+10  ELSE
+11    <90 días> CHECKSEQUENCEVERIFY DROP
+12    <Llave Pública del abogado> CHECKSIG 
+13  ENDIF
+----
+
+El script de Mohammed implementa tres caminos de ejecución usando cláusulas de control de flujo anidadas +IF ... ELSE+.
+
+En el primer camino de ejecución, este script funciona como un multifirma simple 2 de 3 entre los tres socios. Este camino de ejecución consta de las líneas 3 y 9. La línea 3 establece el quórum del multifirma en +2+ (2-de-3). Este camino de ejecución se puede seleccionar poniendo +TRUE TRUE+ al final del script de desbloqueo:
+
+.Script de desbloqueo para el primer camino de ejecución (multifirma 2-de-3)
+----
+0 <Firma de Mohammed> <Firma de Zaira> TRUE TRUE
+----
+
+
+[TIP]
+====
+El +0+ al principio de este script de desbloqueo se debe a un error en +CHECKMULTISIG+ que saca un valor de más de la pila. +CHECKMULTISIG+ ignora el valor de más, pero debe estar presente para que el script no falle. Empujar +0+ (habitualmente) es una solución al error, como se describe en <<multisig_bug>>.
+====
+
+El segundo camino de ejecución solo se puede utilizar después de que hayan transcurrido 30 días desde la creación del UTXO. En ese momento, se requiere la firma del abogado Abdul y uno de los tres socios (un multifirma 1-de-3). Esto se logra mediante la línea 7, que establece el quórum para el mutifirma en +1+. Para seleccionar esta camino de ejecución, el script de desbloqueo terminaría en +FALSE TRUE+:
+
+.Script de desbloqueo para el segundo camino de ejecución (Abogado + 1-de-3)
+----
+0 <Firma de Saeed> <Firma de Abdul> FALSE TRUE
+----
+
+[TIP]
+====
+¿Por qué +FALSE TRUE+? ¿No sería al revés? Porque los dos valores se empujan en la pila, primero +FALSE+, y después se empuja +TRUE+. Por lo tanto, primero se saca +TRUE+ en el primer código de operación +IF+.
+====
+
+Finalmente, el tercer camino de ejecución le permite al abogado Abdul gastar los fondos por sí mismo, pero solo después de 90 días. Para seleccionar este camino de ejecución, el script de desbloqueo debe terminar en +FALSE+:
+
+.Script de desbloqueo para el tercer camino de ejecución (solo Abogado)
+----
+<Firma de Abdul> FALSE
+----
+
+Intenta ejecutar el script en papel para ver cómo se comporta en la pila.
+
+Algunas cosas más a considerar al leer este ejemplo. Intenta acertar las respuestas:
+
+* ¿Por qué no puede el abogado redimir mediante el tercer camino de ejecución en cualquier momento seleccionándolo con +FALSE+ en el script de desbloqueo?
+
+* ¿Cuántos caminos de ejecución se pueden usar 5, 35 y 105 días, respectivamente, después de que se mine el UTXO?
+
+* ¿Se pierden los fondos si el abogado pierde su llave? ¿Cambia tu respuesta si han transcurrido 91 días?
+
+* ¿Cómo "reinician" los socios el reloj cada 29 u 89 días para evitar que el abogado acceda a los fondos?
+
+* ¿Por qué algunos opcodes +CHECKSIG+ en este script tienen el sufijo +VERIFY+ mientras que otros no?((("", startref="Scomplex07")))((("", startref="mohamseventwo")))
+
+[[segwit]]
+=== Segregated Witness (Testigos Segregados)
+
+((("segwit (Segregated Witness)", id="Ssegwit07")))Segregated Witness (segwit) es una actualización de las reglas de consenso de bitcoin y de su protocolo de red, propuesto e implementado como una bifurcación blanda BIP-9 que se activó en la red principal de bitcoin el 1 de agosto de 2017.
+
+En criptografía, el término "testigo" (en inglés, "witness") se usa para describir una solución a un acertijo criptográfico. En el caso de bitcoin, el testigo satisface una condición criptográfica colocada en una salida de transacción no gastada (UTXO).
+
+En el contexto de bitcoin, una firma digital es _un tipo de testigo_, pero un testigo es, en un sentido más amplio, cualquier solución que pueda satisfacer las condiciones impuestas en un UTXO y desbloquear ese UTXO para gastarlo. Generalmente, el término "testigo" es un término para un "script de desbloqueo" o "scriptSig".
+
+Antes de la introducción de segwit, cada entrada en una transacción era seguida por los datos testigo que la desbloqueaban. Los datos testigo se incluían en la transacción como parte de cada entrada. El término _segregated witness_, (en español, _testigo segregado_) o _segwit_ para abreviar, simplemente significa separar la firma o el script de desbloqueo de una salida específica. Piensa en "scriptSig separado" o "firma separada" en la forma más simple.
+
+Segregated Witness es, por lo tanto, un cambio de arquitectura en bitcoin con el objetivo de mover los datos testigo desde el campo +scriptSig+ (script de desbloqueo) de una transacción a una estructura de datos _testigo_ separada que acompaña a una transacción. Los clientes pueden solicitar datos de transacción con o sin los datos testigo adjuntos.
+
+En esta sección analizaremos algunos de los beneficios de Segregated Witness, describiremos el mecanismo utilizado para usar y desplegar este cambio de arquitectura y demostraremos el uso de Segregated Witness en transacciones y direcciones.
+
+En los siguientes BIPs se define Segregated Witness:
+
+https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki[BIP-141] :: La definición principal de Segregated Witness.
+
+https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki[BIP-143] :: Transaction Signature Verification for Version 0 Witness Program
+
+https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki[BIP-144] :: Peer Services&#x2014;New network messages and serialization formats
+
+https://github.com/bitcoin/bips/blob/master/bip-0145.mediawiki[BIP-145] :: getblocktemplate Updates for Segregated Witness (para minería)
+
+https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki[BIP-173]:: Base32 address format for native v0-16 witness outputs
+
+
+==== ¿Por qué Segregated Witness?
+
+Segregated Witness es un cambio de arquitectura que tiene varios efectos en la escalabilidad, seguridad, incentivos económicos y rendimiento de bitcoin:
+
+Maleabilidad de transacciones: al mover el testigo fuera de la transacción, el hash de transacción utilizado como identificador ya no incluye los datos testigo. Dado que los datos testigo son la única parte de la transacción que puede ser modificada por un tercero (ver <<segwit_txid>>), eliminarla también elimina la posibilidad de ataques de maleabilidad de la transacción. Con Segregated Witness, los hashes de transacciones se vuelven inmutables por cualquier persona que no sea el creador de la transacción, lo que mejora en gran medida la implementación de muchos otros protocolos que se basan en la construcción avanzada de transacciones de bitcoin, como los canales de pago, las transacciones encadenadas y las redes lightning.
+
+Versionado de script: con la introducción de los scripts Segregated Witness, cada script de bloqueo está precedido por un número de _versión de script_, similar a los números de versión de transacciones y bloques. Añadir un número de versión de script permite que el lenguaje de scripting se actualice de una manera compatible con versiones anteriores (es decir, mediante el uso de actualizaciones de bifurcación suave) para introducir nuevos operandos, sintaxis o semánticas de script. La capacidad de actualizar el lenguaje de scripting de manera no disruptiva acelerará en gran medida la velocidad de innovación en bitcoin.
+
+Escalado y almacenamiento de red: habitualmente, los datos testigo contribuyen en gran medida al tamaño total de una transacción. Los scripts más complejos, como los que se utilizan para canales de pago o multifirma son muy grandes. En algunos casos, estos scripts representan la mayoría (más del 75%) de los datos en una transacción. Al mover los datos testigo fuera de la transacción, Segregated Witness mejora la escalabilidad de bitcoin. Los nodos pueden eliminar los datos del testigo después de validar las firmas, o ignorarlos por completo cuando se realiza una verificación de pago simplificado. Los datos de los testigos no necesitan ser transmitidos a todos los nodos y no necesitan ser almacenados en el disco por todos los nodos.
+
+Optimización en la verificación de firmas: Segregated Witness actualiza las funciones de firmas (+CHECKSIG+, +CHECKMULTISIG+, etc.) para reducir la complejidad computacional del algoritmo. Antes de segwit, el algoritmo utilizado para producir una firma requería varias operaciones hash que eran proporcionales al tamaño de la transacción. Los cálculos de hashing de datos aumentaban en O(n^2^) con respecto al número de operaciones de firma, lo que introduce una carga computacional sustancial en todos los nodos que verifican la firma. Con segwit, el algoritmo se cambia para reducir la complejidad a O(n).
+
+Mejora del firmado fuera de línea: las firmas de Segregated Witness incorporan el valor (cantidad) referenciado por cada entrada en el hash que se firma. Anteriormente, un dispositivo de firma fuera de línea, como una cartera hardware, tenía que verificar la cantidad de cada entrada antes de firmar una transacción. Esto generalmente se logra mediante la transmisión de una gran cantidad de datos sobre las transacciones anteriores a las que se hace referencia como entradas. Dado que la cantidad ahora es parte del hash de compromiso que se firma, un dispositivo fuera de línea no necesita las transacciones anteriores. Si las cantidades no coinciden (están falsificadas por un sistema en línea comprometido), la firma no será válida.
+
+==== Cómo Funciona Segregated Witness
+
+A primera vista, Segregated Witness parece ser un cambio en la forma en que se construyen las transacciones y, por lo tanto, en una función de nivel de transacción, pero no lo es. Más bien, Segregated Witness es un cambio en la forma en que se gastan los UTXO individuales y, por lo tanto, es una característica de cada salida.
+
+Una transacción puede gastar salidas de Segregated Witness o salidas tradicionales (testigo en línea) o ambas. Por lo tanto, no tiene mucho sentido referirse a una transacción como una "transacción de Segregated Witness". Más bien, deberíamos referirnos a salidas específicas de transacciones como "salidas de Segregated Witness".
+
+Cuando una transacción gasta un UTXO, debe proporcionar un testigo. En un UTXO tradicional, el script de bloqueo requiere que se proporcionen datos testigo _en línea_ en la parte de entrada de la transacción que gasta el UTXO. Un UTXO de Segregated Witness, sin embargo, especifica un script de bloqueo que puede satisfacerse con datos testigo fuera de la entrada (segregado).
+
+==== Bifurcación suave (Compatibilidad hacia Atrás)
+
+Segregated Witness es un cambio significativo en la forma en que se diseñan las salidas y las transacciones. Un cambio de este tipo normalmente requeriría un cambio simultáneo en cada nodo y cartera de bitcoin para modificar las reglas de consenso&#x2014; lo que se conoce como una bifurcación fuerte (en inglés, hard fork). En cambio, segregated witness se introduce con un cambio mucho menos perturbador, que es compatible con versiones anteriores, conocido como bifurcación suave (en inglés, soft fork). Este tipo de actualización permite que el software no actualizado ignore los cambios y continúe operando sin interrupciones.
+
+Las salidas de Segregated Witness se construyen de modo que los sistemas más antiguos que todavía no son conscientes de segwit puedan validarlos. Para una cartera o nodo antiguo, una salida de Segregated Witness parece una salida que "cualquiera puede gastar". Dichas salidas se pueden gastar con una firma vacía, por lo tanto, el hecho de que no haya una firma dentro de la transacción (está segregada) no invalida la transacción. Sin embargo, los monederos y nodos de minería más nuevos ven la salida de Segregated Witness y esperan encontrar un testigo válido para ello en los datos testigo de la transacción.
+
+==== Salida de Segregated Witness y Ejemplos de Transacciones
+
+Veamos algunas de nuestras transacciones de ejemplo y veamos cómo cambiarían con Segregated Witness. Primero veremos cómo se transforma un pago de Pago-a-Hash-de-Llave-Pública (Pay-to-Public-Key-Hash, P2PKH) con el programa de Segregated Witness. Después, veremos el equivalente de Segregated Witness para los scripts Pago-a-Hash-de-Script (Pay-to-Script-Hash, P2SH). Finalmente, veremos cómo los dos programas anteriores de Segregated Witness se pueden integrar dentro de un script P2SH.
+
+[[p2wpkh]]
+===== Pago-al-Testigo-Hash-de-Llave-Pública (Pay-to-Witness-Public-Key-Hash, P2WPKH)
+
+En <<cup_of_coffee>>, ((("casos de uso", "comprando café", id="aliced")))Alice creó una transacción para pagarle a Bob una taza de café. Esa transacción creó una salida P2PKH con un valor de 0.015 BTC que Bob podía gastar. El script de salida se ve así:
+
+.Ejemplo de script de salida P2PKH
+----
+DUP HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 EQUALVERIFY CHECKSIG
+----
+
+Con Segregated Witness, Alice crearía un script Pay-to-Witness-Public-Key-Hash (P2WPKH), que se ve así:
+
+.Ejemplo de script de salida de P2WPKH
+----
+0 ab68025513c3dbd2f7b92a94e0581f5d50f654e7
+----
+
+Como puede verse, el script de bloqueo en la salida de un testigo segregado es mucho más simple que una salida tradicional. Consiste en dos valores que se insertan en la pila de evaluación de scripts. Para un cliente bitcoin no actualizado (que no esté al tanto del testigo segregado), los dos ingresos a la pila se verían como una salida que cualquiera puede gastar y no que requiere de una firma (o más bien, puede gastarse con una firma vacía). Para un cliente actualizado, consciente del testigo segregado, el primer número (0) se interpreta como un número de versión (la _versión del testigo_) y el segundo dato (de 20 bytes) es el equivalente de un script de bloqueo conocido como _programa de testigo_. El programa de testigos de 20 bytes es simplemente el hash de la llave pública, como en un script P2PKH.
+
+Ahora, veamos la transacción correspondiente que Bob usa para gastar esta salida. Para el script original (no-segwit), la transacción de Bob debería incluir una firma en la entrada de la transacción:
+
+.Transacción decodificada que muestra el gasto de una salida P2PKH con una firma
+----
+[...]
+“Vin” : [
+"txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+"vout": 0,
+     	 "scriptSig": “<scriptSig de Bob>”,
+]
+[...]
+----
+
+Sin embargo, para gastar la salida de Segregated Witness, la transacción no tiene firma en esa entrada. En cambio, la transacción de Bob tiene un +scriptSig+ vacío e incluye un Segregated Witness, fuera de la transacción en sí:
+
+.Transacción decodificada que muestra una salida P2WPKH que se gasta con datos testigo separados
+----
+[...]
+“Vin” : [
+"txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+"vout": 0,
+     	 "scriptSig": “”,
+]
+[...]
+“witness”: “<datos testigo de Bob>”
+[...]
+----
+
+===== Construcción de cartera de P2WPKH
+
+Es extremadamente importante tener en cuenta que P2WPKH solo debe crearlo el beneficiario (destinatario) y no debe convertirlo el remitente a partir de una llave pública conocida, un script P2PKH o una dirección. El remitente no tiene forma de saber si la cartera del destinatario tiene la capacidad de construir transacciones segwit y gastar salidas P2WPKH.
+
+Además, las salidas P2WPKH deben construirse a partir del hash de una llave pública _comprimida_. Las llaves públicas no comprimidas no son estándar en segwit y pueden deshabilitarse explícitamente en una futura bifurcación suave. Si el hash utilizado en el P2WPKH provino de una llave pública no comprimida, es posible que no se pueda gastar y que pierdas fondos. Las salidas P2WPKH deben ser creadas por la cartera del beneficiario al derivar una llave pública comprimida a partir su llave privada.
+
+[WARNING]
+====
+P2WPKH debe ser construido por el beneficiario (destinatario) convirtiendo una llave pública comprimida en un hash P2WPKH. Nunca debes transformar un script P2PKH, una dirección bitcoin o una llave pública no comprimida en un script testigo P2WPKH.
+====
+
+[[p2wsh]]
+===== Pago-a-Testigo-Hash-de-Script (Pay-to-Witness-Script-Hash, P2WSH)
+
+El ((("casos de uso", "importación/exportación", id="mohamappd"))) segundo tipo de programa testigo corresponde a un script Pay-to-Script-Hash (P2SH). Vimos este tipo de script en <<p2sh>>. En ese ejemplo, se utilizó P2SH en la empresa de Mohammed para expresar un script de multifirma. Los pagos a la empresa de Mohammed se codificaron con un script de bloqueo como este:
+
+.Ejemplo de script de salida P2SH
+----
+HASH160 54c557e07dde5bb6cb791c7a540e0a4796f5e97e EQUAL
+----
+
+Este script P2SH hace referencia al hash de un _script de canje_ que define un requisito de multifirma 2-de-3 para gastar fondos. Para gastar esta salida, la compañía de Mohammed presentaría el script de canje (cuyo hash coincide con el hash del script en la salida P2SH) y las firmas necesarias para satisfacer ese script de canje, todo dentro de la entrada de la transacción:
+
+.Transacción decodificada que muestra el gasto de una salida P2SH
+----
+[...]
+“Vin” : [
+"txid": "abcdef12345...",
+"vout": 0,
+     	 "scriptSig": “<Firma A> <Firma B> <2 PubA PubB PubC PubD PubE 5 CHECKMULTISIG>”,
+]
+----
+
+Ahora, veamos cómo este ejemplo completo se actualizaría a segwit. Si los clientes de Mohammed estuvieran usando una cartera compatible con segwit, harían un pago, creando una salida Pay-to-Witness-Script-Hash (P2WSH) que se vería así:
+
+.Ejemplo de un script de salida P2WSH
+----
+0 a9b7b38d972cabc7961dbfbcb841ad4508d133c47ba87457b4a0e8aae86dbb89
+----
+
+Nuevamente, como en el ejemplo de P2WPKH, puedes ver que el script equivalente de Segregated Witness es mucho más simple y omite los diversos operandos de script que se ven en los scripts de P2SH. En su lugar, el programa Segregated Witness consta de dos valores que se empujan en la pila: una versión testigo (0) y el hash SHA256 de 32 bytes del script de canje.
+
+[TIP]
+====
+Mientras que P2SH usa el hash de 20 bytes: +RIPEMD160 (SHA256 (script))+, el programa testigo P2WSH usa un hash de 32 bytes: +SHA256 (script)+. Esta diferencia en la selección del algoritmo de hash es deliberada y se usa para diferenciar los dos tipos de programas testigos (P2WPKH y P2WSH) por la longitud del hash y para proporcionar mayor seguridad a P2WSH (128 bits de seguridad en P2WSH versus 80 bits de seguridad en P2SH).
+
+====
+
+La compañía de Mohammed puede gastar la salida P2WSH presentando el script de canje correcto y las firmas suficientes para satisfacerlo. Tanto el script de canje como las firmas se segregarían _fuera_ de la transacción de gastos como parte de la data del testigo. Dentro de la entrada de la transacción, la billetera de Mohammed ((("", startref="mohamappd")))pondría un +scriptSig+ vacío:
+
+. Transacción codificada que muestra una salida P2WSH que se gasta con datos de testigos separados
+----
+[...]
+“Vin” : [
+"txid": "abcdef12345...",
+"vout": 0,
+     	 "scriptSig": “”,
+]
+[...]
+“witness”: “<Firma A> <Firma B> <2 PubA PubB PubC PubD PubE 5 CHECKMULTISIG>”
+[...]
+----
+
+===== Diferenciando entre P2WPKH y P2WSH
+
+En las dos secciones anteriores, demostramos dos tipos de programas de testigo: <<p2wpkh>> y <<p2wsh>>. Ambos tipos de programas de testigo consisten en un número de versión de un solo byte seguido de un hash más largo. Se ven muy similares, pero se interpretan de manera muy diferente: uno se interpreta como un hash de llave pública, que se satisface con una firma y el otro como un hash de script, que se satisface con un script de canje. La diferencia crítica entre ellos es la longitud del hash:
+
+* El hash de llave pública en P2WPKH es de 20 bytes
+* El hash de script in P2WSH es de 32 bytes
+
+Esta es la única diferencia que permite que una cartera diferencie entre los dos tipos de programas testigo. Al observar la longitud del hash, una cartera puede determinar qué tipo de programa testigo es, P2WPKH o P2WSH.
+
+==== Actualización a Segregated Witness
+
+Como podemos ver en los ejemplos anteriores, la actualización a Segregated Witness es un proceso de dos pasos. Primero, las carteras deben crear salidas especiales de tipo segwit. Después, estas salidas pueden ser gastadas por carteras que saben cómo construir transacciones de Segregated Witness. En los ejemplos, la cartera de Alice era consciente de segwit y era capaz de crear salidas especiales con scripts de Segregated Witness. La cartera de Bob también es consciente de segwit y es capaz de gastar esas salidas. Lo que puede no ser obvio en el ejemplo es que, en la práctica, la cartera de Alice debe _saber_ que Bob usa una cartera que es consciente de segwit y puede gastar esas salidas. De lo contrario, si la cartera de Bob no se actualiza y Alice intenta realizar pagos de segwit a Bob, la cartera de Bob no podrá detectar estos pagos.
+
+[TIP]
+====
+Para los tipos de pago P2WPKH y P2WSH, tanto las carteras del remitente como del destinatario deben actualizarse para poder utilizar segwit. Además, la cartera del remitente debe saber que la cartera del destinatario es consciente de segwit.
+====
+
+Segregated Witness no se implementará simultáneamente en toda la red. Por el contrario, Segregated Witness se implementa como una actualización compatible con versiones anteriores, donde _clientes antiguos y nuevos_ pueden coexistir. Los desarrolladores de carteras actualizarán el software de cartera de forma independiente para agregar capacidades de segwit. Los tipos de pago P2WPKH y P2WSH se utilizan cuando tanto el remitente como el destinatario son conscientes de segwit. Los P2PKH y el P2SH tradicionales continuarán funcionando en las carteras no actualizadas. Así emergen dos escenarios importantes, que se abordan en la siguiente sección:
+
+* Capacidad de la cartera de un remitente que no es consciente de segwit para realizar un pago a la cartera del destinatario que puede procesar transacciones segwit.
+
+* Capacidad de la cartera de un remitente que es consciente de segwit para reconocer y distinguir entre destinatarios que son conscientes de segwit y los que no lo son, por sus _direcciones_.
+
+===== Integración de Segregated Witness dentro de P2SH
+
+Supongamos, por ejemplo, que la cartera de Alice no se actualiza a segwit, pero la cartera de Bob se actualiza y puede manejar transacciones segwit. Alice y Bob pueden usar transacciones "antiguas" no segwit. Pero es probable que Bob quiera usar Segwit para reducir las comisiones de transacción, aprovechando el descuento que se aplica a los datos testigo.
+
+En este caso, la cartera de Bob puede construir una dirección P2SH que contenga un script segwit en su interior. La cartera de Alice ve esto como una dirección P2SH "normal" y puede realizar pagos sin ningún conocimiento de segwit. La cartera de Bob puede gastar este pago con una transacción de segwit, aprovechando segwit al máximo y reduciendo las comisiones de transacción.
+
+Ambas formas de scripts de testigos, P2WPKH y P2WSH, se pueden integrar dentro de una dirección P2SH. Al primero se le referiere como P2SH (P2WPKH) y al segundo se le refiere como P2SH (P2WSH).
+
+===== Pay-to-Witness-Public-Key-Hash dentro de Pay-to-Script-Hash (Pago-a-Testigo-Hash-de-Llave-Pública dentro de Pago-a-Hash-de-Script)
+
+La primera forma de script de testigo que examinaremos es P2SH (P2WPKH). Este es un programa de testigo Pay-to-Witness-Public-Key-Hash, integrado dentro de un script de Pay-to-Script-Hash, de modo que pueda ser utilizado por una cartera que no tenga conocimiento de segwit.
+
+La cartera de Bob construye un programa testigo P2WPKH con la llave pública de Bob. Este programa testigo se hashea y el hash resultante se codifica como un script P2SH. El script P2SH se convierte en una dirección bitcoin, una que comienza con un "3", como vimos en la sección <<p2sh>>.
+
+La cartera de Bob comienza con el programa testigo P2WPKH que vimos anteriormente:
+
+.El programa testigo P2WPKH de Bob
+----
+0 ab68025513c3dbd2f7b92a94e0581f5d50f654e7
+----
+
+El programa testigo P2WPKH consta de la versión testigo y el hash de llave pública de 20 bytes de Bob.
+
+Después, la cartera de Bob hashea el programa testigo anterior, primero con SHA256, luego con RIPEMD160, produciendo otro hash de 20 bytes.
+
+Usemos +bx+ desde la línea de comandos para replicar eso:
+
+.HASH160 del programa testigo P2WPKH
+----
+echo \
+'0 [ab68025513c3dbd2f7b92a94e0581f5d50f654e7]'\
+ | bx script-encode | bx sha256 | bx ripemd160
+3e0547268b3b19288b3adef9719ec8659f4b2b0b
+----
+
+
+A continuación, el hash de script de canje se convierte en una dirección bitcoin. Usemos de nuevo +bx+ desde la línea de comando:
+
+.Dirección P2SH
+----
+echo \
+'3e0547268b3b19288b3adef9719ec8659f4b2b0b' \
+| bx address-encode -v 5
+37Lx99uaGn5avKBxiW26HjedQE3LrDCZru
+----
+
+Ahora, Bob puede mostrar esta dirección para que los clientes paguen por su café. La cartera de Alice puede realizar un pago a +37Lx99uaGn5avKBxiW26HjedQE3LrDCZru+, tal como lo haría con cualquier otra dirección bitcoin.
+
+Para pagar a Bob, la cartera de Alice bloquearía la salida con un script P2SH:
+----
+HASH160 3e0547268b3b19288b3adef9719ec8659f4b2b0b EQUAL
+----
+
+Aunque la cartera de Alice no tiene soporte para segwit, el pago que crea puede ser gastado por Bob con una transacción segwit.((("", startref="aliced")))
+
+===== Pay-to-Witness-Script-Hash dentro de Pay-to-Script-Hash (Pago-a-Testigo-Hash-de-Script dentro de Pago-a-Hash-de-Script)
+
+De manera similar, un programa testigo P2WSH para un script multifirma o cualquier otro script complicado se puede integrar dentro de un script y dirección P2SH, lo que hace posible que cualquier cartera realice pagos que sean compatibles con segwit.
+
+Como vimos en <<p2wsh>>, la compañía de Mohammed ((("casos de uso", "importar/exportar")))está usando pagos del Testigo Segregado con scripts de múltiples firmas. Para hacer posible que cualquier cliente le pague a su compañía, independientemente de si sus billeteras están actualizadas para el Testigo Segregado, la billetera de Mohammed puede incrustar el programa de testigo P2WSH dentro de un script P2SH.
+
+Primero, la cartera de Mohammed hashea el script de canje con SHA256 (solo una vez). Usemos +bx+ para hacer eso desde la línea de comandos:
+
+.La cartera de Mohammed crea un programa testigo P2WSH
+----
+echo \
+2 \ [04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C587] \
+[04A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49] \
+[047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D9977965] \
+[0421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5] \
+[043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800] \
+5 CHECKMULTISIG \
+| bx script-encode | bx sha256
+9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73
+----
+
+A continuación, el script de canje hasheado se convierte en un programa testigo P2WSH:
+
+----
+0 9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73
+----
+
+Después, el programa testigo en sí mismo se hashea con SHA256 y RIPEMD160, produciendo un nuevo hash de 20 bytes, tal como se usa en el P2SH tradicional. Usemos +bx+ desde la línea de comandos para hacer eso:
+
+.El HASH160 del programa testigo P2WSH
+----
+ echo \
+'0 [9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73]'\
+ | bx script-encode | bx sha256 | bx ripemd160
+86762607e8fe87c0c37740cddee880988b9455b2
+----
+
+A continuación, la cartera construye una dirección bitcoin P2SH a partir de este hash. Nuevamente, usamos +bx+ para calcular desde la línea de comando:
+
+.Dirección bitcoin P2SH
+----
+echo \
+'86762607e8fe87c0c37740cddee880988b9455b2'\
+ | bx address-encode -v 5
+3Dwz1MXhM6EfFoJChHCxh1jWHb8GQqRenG
+----
+
+Ahora, los clientes de Mohammed pueden realizar pagos a esta dirección sin necesidad de soportar segwit. Para enviar un pago a Mohammed, una cartera bloquearía la salida con el siguiente script P2SH:
+
+.Script P2SH usado para bloquear pagos al multifirma de Mohammed
+----
+HASH160 86762607e8fe87c0c37740cddee880988b9455b2 EQUAL
+----
+
+La compañía de Mohammed puede después construir transacciones segwit para gastar estos pagos, aprovechando las características de segwit que incluyen comisiones de transacción más bajas.
+
+===== Direcciones de Segregated Witness
+
+Incluso después de la activación del Testigo Segregado, tomará algún tiempo hasta que se actualicen la mayoría de las billeteras. Al principio, Testigo Segregado se integrará en un P2SH, como vimos en la sección anterior, para facilitar la compatibilidad entre billeteras al tanto del Testigo Segregado y las que no estén al tanto.
+
+Sin embargo, una vez que las carteras sean ampliamente compatibles con segwit, tiene sentido codificar scripts de testigos directamente en un formato de dirección nativo diseñado para segwit, en lugar de integrarlo en P2SH.
+
+El formato nativo de direcciones segwit se define en BIP-173:
+
+https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki[BIP-173]:: Base32 address format for native v0-16 witness outputs
+
+BIP-173 solo codifica los scripts del testigo (P2WPKH y P2WSH). No es compatible con scripts P2PKH o P2SH que no sean acordes al Testigo Segregado. BIP-173 es una codificación Base32 con suma de comprobación, en comparación con la codificación Base58 de una dirección bitcoin "tradicional". Las direcciones BIP-173 también se llaman direcciones _bech32_, pronunciadas "bej-che treinta y dos", aludiendo al uso de un algoritmo de detección de errores "BCH" y un conjunto de codificación de 32 caracteres.
+
+Las direcciones BIP-173 utilizan un set de 32 caracteres alfanuméricos en minúsculas, seleccionados cuidadosamente para reducir errores de lectura o de escritura errónea. Al elegir un conjunto de caracteres en minúsculas, bech32 es más fácil de leer, deletrear y un 45% más eficiente para la codifcación en códigos QR.
+
+El algoritmo de detección de errores BCH es una gran mejora con respecto al algoritmo de checksum anterior (de Base58Check), ya que permite no solo la detección sino también la corrección de errores. Las interfaces de entrada de direcciones (como las cajas de texto en los formularios) pueden detectar y resaltar qué carácter fue mal escrito cuando detectan un error.
+
+A partir de la especificación BIP-173, aquí tienes algunos ejemplos de direcciones bech32:
+
+Mainnet P2WPKH:: bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4
+Testnet P2WPKH:: tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx
+Mainnet P2WSH:: bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3
+Testnet P2WSH:: tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7
+
+Como puede ver en estos ejemplos, una cadena segwit bech32 tiene hasta 90 caracteres y consta de tres partes:
+
+La parte legible para humanos:: este prefijo "bc" o "tb" identifica mainnet o testnet.
+
+El separador:: el dígito "1", que no forma parte del set de codificación de 32 caracteres y solo puede aparecer en esta posición como separador
+
+La parte de datos:: Un mínimo de 6 caracteres alfanuméricos, el script de testigo codificado con checksum
+
+En este momento, solo unas pocas carteras aceptan o producen direcciones bech32 segwit nativas, pero a medida que aumenta la adopción de segwit, se verán cada vez más a menudo.
+
+[[segwit_txid]]
+===== Identificadores de transacción
+
+((("transaction IDs (txid)")))Uno de los mayores beneficios de Segregated Witness es que elimina la maleabilidad de las transacciones de terceros.
+
+Antes de segwit, las firmas de las transacciones podían ser sutilmente modificadas por terceros, cambiando su ID de transacción (hash) sin cambiar ninguna propiedad fundamental (entradas, salidas, cantidades). Esto creó oportunidades para ataques de denegación de servicio, así como ataques contra software de carteras mal programadas que presuponían erróneamente que los hashes de transacción no confirmados eran inmutables.
+
+Con la activación de Segregated Witness, las transacciones tienen dos identificadores, +txid+ y +wtxid+. El ID de transacción tradicional +txid+ es el hash doble SHA256 de la transacción serializada, sin los datos del testigo. El +wtxid+ de una transacción es el hash doble SHA256 del nuevo formato de serialización de la transacción con dato testigo.
+
+El +txid+ tradicional se calcula exactamente de la misma manera que con una transacción no segwit. Sin embargo, dado que la transacción segwit tiene los ++scriptSig++ s vacíos para todas las entradas, no hay ninguna parte de la transacción que pueda ser modificada por un tercero. Por lo tanto, en una transacción segwit, el +txid+ es inmutable por un tercero, incluso cuando la transacción no está confirmada.
+
+El +wtxid+ es como un ID "extendido", ya que el hash también incorpora los datos del testigo. Si una transacción se transmite sin datos de testigos, entonces +wtxid+ y +txid+ deben ser idénticos. Tenga en cuenta que dado que +wtxid+ incluye datos de testigos (firmas) y dado que los datos de testigos pueden ser maleables, el +wtxid+ debe considerarse maleable hasta que se confirme la transacción. Solo el +txid+ de una transacción a corde al Testigo Segregado puede considerarse inmutable por terceros y solo si _todas_ las entradas de la transacción son entradas acordes al testigo Segregado.
+
+[TIP]
+====
+Las transacciones de Segregated Witness tienen dos IDs: +txid+ y +wtxid+. El +txid+ es el hash de la transacción sin los datos testigo y el +wtxid+ es el hash que incluye los datos testigo. El +txid+ de una transacción donde todas las entradas son entradas segwit no es susceptible a la maleabilidad de la transacción por parte de terceros.
+====
+
+==== Nuevo Algoritmo de Firma de Segregated Witness
+
+Segregated Witness modifica la semántica de las cuatro funciones de verificación de firma (+CHECKSIG+, +CHECKSIGVERIFY+, +CHECKMULTISIG+, y +CHECKMULTISIGVERIFY+), cambiando la forma en que se calcula un hash de compromiso de transacción.
+
+Las firmas en transacciones bitcoin se aplican a un _hash de compromiso_, que se calcula a partir de los datos de transacción, bloqueando partes específicas de los datos que indican el compromiso del firmante con esos valores. Por ejemplo, en una firma de tipo +SIGHASH_ALL+ simple, el hash de compromiso incluye todas las entradas y salidas.
+
+Desafortunadamente, la forma en que se calculó el hash de compromiso introdujo la posibilidad de que un nodo que verifique la firma pueda ser forzado a realizar un número significativo de cálculos de hash. Específicamente, las operaciones de hash aumentan en O(n^2^) con respecto al número de operaciones de firma en la transacción. Por lo tanto, un atacante podría crear una transacción con una gran cantidad de operaciones de firma, lo que provocaría que toda la red bitcoin tuviera que realizar cientos o miles de operaciones hash para verificar la transacción.
+
+Segwit representó una oportunidad para abordar este problema cambiando la forma en que se calcula el hash de compromiso. Para los programas testigo de segwit versión 0, la verificación de firmas se realiza utilizando un algoritmo hash de compromiso mejorado como se especifica en BIP-143.
+
+El nuevo algoritmo logra dos objetivos importantes. En primer lugar, el número de operaciones de hash aumenta mucho más gradualmente, en O(n) al número de operaciones de firma, lo que reduce la oportunidad de crear ataques de denegación de servicio con transacciones demasiado complejas. En segundo lugar, el hash de compromiso ahora también incluye el valor (cantidades) de cada entrada como parte del compromiso. Esto significa que un firmante puede comprometerse con un valor de entrada específico sin necesidad de "buscar" y verificar la transacción anterior a la que hace referencia la entrada. En el caso de los dispositivos sin conexión, como las carteras de hardware, esto simplifica enormemente la comunicación entre el host y la cartera de hardware, eliminando la necesidad de transmitir transacciones anteriores para su validación. Una cartera hardware puede aceptar el valor de entrada "como se indica" por un host no confiable. Dado que la firma no es válida si el valor de entrada no es correcto, la cartera hardware no necesita validar el valor antes de firmar la entrada.
+
+==== Incentivos Económicos para Segregated Witness
+
+Los nodos de minería de bitcoin y los nodos completos incurren en costos por los recursos utilizados para soportar la red bitcoin y la cadena de bloques. A medida que aumenta el volumen de transacciones de bitcoin, también aumenta el costo de los recursos (CPU, ancho de banda de la red, espacio en disco, memoria). Los mineros son compensados por estos costos a través de comisiones que son proporcionales al tamaño (en bytes) de cada transacción. Los nodos completos que no son mineros no son compensandos, por lo que incurren en estos costos porque tienen la necesidad de ejecutar un nodo de índice completo con validación autoritativa, tal vez porque utilizan el nodo para operar un negocio de bitcoin.
+
+Sin comisiones de transacción, el crecimiento en los datos de bitcoin sin duda aumentaría dramáticamente. Las comisiones se destinan a alinear las necesidades de los usuarios de bitcoin con la carga que sus transacciones imponen en la red, a través de un mecanismo de descubrimiento de precios basado en el mercado.
+
+El cálculo de las comisiones según el tamaño de la transacción trata todos los datos de la transacción como iguales en costo. Pero desde la perspectiva de los nodos completos y los mineros, algunas partes de una transacción tienen costos mucho más altos. Cada transacción agregada a la red bitcoin afecta el consumo de cuatro recursos en los nodos:
+
+Espacio en disco :: Cada transacción se almacena en la cadena de bloques, lo que aumenta el tamaño total de la cadena de bloques. La cadena de bloques se almacena en el disco, pero el almacenamiento se puede optimizar "recortando" las transacciones anteriores.
+
+CPU :: Cada transacción debe ser validada, lo que requiere tiempo de CPU.
+
+Ancho de banda :: Cada transacción se transmite (a través de propagación por inundación) a través de la red al menos una vez. Sin ninguna optimización en el protocolo de propagación de bloques, las transacciones se transmiten nuevamente como parte de un bloque, duplicando el impacto en la capacidad de la red.
+
+Memoria :: Los nodos que validan las transacciones mantienen el índice UTXO o todo el set UTXO configurado en memoria para acelerar la validación. Debido a que la memoria es al menos un orden de magnitud más costosa que el disco, el crecimiento del conjunto UTXO contribuye de manera desproporcionada al costo de ejecutar un nodo.
+
+Como puedes ver en la lista, no todas las partes de una transacción tienen el mismo impacto en el costo de ejecutar un nodo o en la capacidad de escala de bitcoin para admitir más transacciones. La parte más costosa de una transacción son las salidas recién creadas, ya que se agregan al set UTXO en memoria. En comparación, las firmas (también conocidas como datos testigo) agregan la menor carga a la red y al costo de ejecutar un nodo, ya que los datos testigo solo se validan una vez y luego no se vuelven a utilizar. Además, inmediatamente después de recibir una nueva transacción y validar los datos testigo, los nodos pueden descartar esos datos testigo. Si las comisiones se calcularan según el tamaño de la transacción, sin discriminar entre estos dos tipos de datos, entonces los incentivos de mercado de las comisiones no estarían alineados con los costos reales impuestos por una transacción. De hecho, la estructura de comisiones actual en realidad fomenta el comportamiento opuesto, porque los datos de testigo son la mayor parte de una transacción.
+
+Los incentivos creados por las comisiones son importantes porque afectan al comportamiento de las carteras. Todas las carteras deben implementar alguna estrategia para ensamblar transacciones que tengan en cuenta una serie de factores, como la privacidad (reduciendo la reutilización de direcciones), la fragmentación (generando mucho cambio) y las comisiones. Si las comisiones motivan de manera abrumadora que las carteras usen la menor cantidad posible de entradas en las transacciones, esto puede llevar a seleccionar UTXO y a estrategias de direcciones de cambio que aumenten inadvertidamente el set UTXO.
+
+Las transacciones consumen UTXO en sus entradas y crean nuevas UTXO con sus salidas. Por lo tanto, una transacción que tiene más entradas que salidas dará como resultado una disminución en el set UTXO, mientras que una transacción que tiene más salidas que entradas dará como resultado un aumento en el set UTXO. Consideremos la _diferencia_ entre entradas y salidas y llamemos a eso “Nuevo-UTXO-neto”. Esa es una métrica importante, ya que nos dice qué impacto tendrá una transacción en el recurso más costoso de la red, el conjunto UTXO en memoria. Una transacción con un Nuevo-UTXO-neto positivo se suma a esa carga. Una transacción con un Nuevo-UTXO-neto negativo reduce la carga. Por lo tanto, deseamos fomentar las transacciones que sean negativas en Nuevo-UTXO-neto o neutrales con cero Nuevo-UTXO-neto.
+
+Veamos un ejemplo de qué incentivos se crean mediante el cálculo de las comisiones de transacción, con y sin Segregated Witness. Vamos a ver dos transacciones diferentes. La transacción A es una transacción de 3 entradas y 2 salidas, que tiene una métrica Nuevo-UTXO-neto de &#x2013;1, lo que significa que consume una UTXO más de la que crea, reduciendo el set UTXO en una unidad. La transacción B es una transacción de 2 entradas y 3 salidas, que tiene una métrica Nuevo-UTXO-neto, lo que significa que agrega una UTXO al set UTXO, lo que impone un costo adicional en toda la red bitcoin. Ambas transacciones utilizan scripts de multifirma (2-de-3) para demostrar cómo los scripts complejos aumentan el impacto de segregated witness en las comisiones. Asumamos unas comisiones de transacción de 30 satoshi por byte y un descuento del 75% en los datos testigo:
+
+++++
+<dl>
+<dt>Sin Segregated Witness</dt>
+<dd>
+<p>Comisión de transacción A: 25,710 satoshi</p>
+<p>Comisión de transacción B: 18,990 satoshi</p>
+</dd>
+
+<dt>Con Segregated Witness</dt>
+<dd>
+<p>Comisión de transaction A: 8,130 satoshi</p>
+<p>Comisión de Transacción B: 12,045 satoshi</p>
+</dd>
+</dl>
+++++
+
+
+Ambas transacciones son menos costosas cuando se implementa segregated witness. Pero comparando los costos entre las dos transacciones, vemos que antes de Segregated Witness, la comisión es más alta para la transacción que tiene un Nuevo-UTXO-neto negativo. Después de Segregated Witness, las comisiones de transacción se alinean con el incentivo para minimizar la creación de nuevos UTXO al no penalizar inadvertidamente las transacciones con muchas entradas.
+
+Segregated Witness, por lo tanto, tiene dos efectos principales en las comisiones pagadas por los usuarios de bitcoin. En primer lugar, segwit reduce el costo general de las transacciones al descontar los datos testigo y aumentar la capacidad de la cadena de bloques de bitcoin. En segundo lugar, el descuento de segwit en los datos testigo corrige una desalineación de incentivos que podría haber creado, sin querer, más hinchazón en el set UTXO.((("", startref="Tadv07")))((("", startref="Ssegwit07")))

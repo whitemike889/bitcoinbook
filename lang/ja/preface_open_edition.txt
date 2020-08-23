@@ -1,0 +1,132 @@
+[序文]
+== 序文
+
+=== Bitcoinの本を書くにあたって
+
+((("bitcoin", "benefits of", id="BCbasicbenefits0")))((("decentralized systems", "bitcoin as")))I first stumbled upon bitcoin in mid-2011. My immediate reaction was more or less "Pfft! Nerd money!" and I ignored it for another six months, failing to grasp its importance. This is a reaction that I have seen repeated among many of the smartest people I know, which gives me some consolation. The second time I came across bitcoin, in a mailing list discussion, I decided to read the whitepaper written by Satoshi Nakamoto to study the authoritative source and see what it was all about. ((("digital currencies", "bitcoin vs. others")))I still remember the moment I finished reading those nine pages, when I realized that bitcoin was not simply a digital currency, but a network of trust that could also provide the basis for so much more than just currencies. The realization that "this isn't money, it's a decentralized trust network," started me on a four-month journey to devour every scrap of information about bitcoin I could find. I became obsessed and enthralled, spending 12 or more hours each day glued to a screen, reading, writing, coding, and learning as much as I could. I emerged from this state of fugue, more than 20 pounds lighter from lack of consistent meals, determined to dedicate myself to working on bitcoin.
+
+Two years later, after creating a number of small startups to explore various bitcoin-related services and products, I decided that it was time to write my first book. Bitcoin was the topic that had driven me into a frenzy of creativity and consumed my thoughts; it was the most exciting technology I had encountered since the internet. It was now time to share my passion about this amazing technology with a broader audience.
+
+=== 想定している読者
+
+((("intended audience")))This book is mostly intended for coders. If you can use a programming language, this book will teach you how cryptographic currencies work, how to use them, and how to develop software that works with them. The first few chapters are also suitable as an in-depth introduction to bitcoin for noncoders—those trying to understand the inner workings of bitcoin and cryptocurrencies.
+
+=== この本で使用される表記規約
+
+((("typographical conventions")))The following typographical conventions are used in this book:
+
+_イタリック_:: 新しい用語、URL、Eメールアドレス、ファイル名、ファイル拡張子を表す
+
++等幅(Constant width)+:: プログラムを表示するときに使用され、また変数や関数名、データベース、データタイプ、環境変数、ステートメント、キーワードなどプログラムの一要素を表現するときにも使用される
+
+**`等幅太字(Constant width bold)`**:: ユーザに文字通り入力されるべきコマンドやその他テキストを表す
+
+_++等幅イタリック(Constant width italic)++_:: ユーザ側の環境や文脈によって変わる値によって置き換えられるべきテキストを表す
+
+
+[TIP]
+====
+This icon signifies a tip or suggestion.
+====
+
+[NOTE]
+====
+This icon signifies a general note.
+====
+
+[WARNING]
+====
+このアイコンは、警告や注意を表します。
+====
+
+=== コード例
+
+((("code examples, obtaining and using", id="codeuse00")))The examples are illustrated in Python, C++, and using the command line of a Unix-like operating system such as Linux or macOS. All code snippets are available in the GitHub repository (https://github.com/bitcoinbook/bitcoinbook[https://github.com/bitcoinbook/bitcoinbook]) in the _code_ subdirectory of the main repo. Fork the book code, try the code examples, or submit corrections via GitHub.
+
+すべてのコードスニペットは、ほとんどのオペレーティングシステムにおいて、対応する言語のコンパイラとインタプリタを最小限インストールすることで、置き換えられます。本書では、必要に応じて、基本的なインストールの命令と、その命令のアウトプットについて順を追った例を提供します。
+
+コードスニペットやコードアウトプットには、紙上で読むのに適するよう、ある行がバックスラッシュ(\)で分けられて改行されているものがあります。読者がこれらを書き移すときは、バックスラッシュを除いて行をつなげば、この本で示した通りの正しい結果を得られます。
+
+すべてのコードスニペットは、読者が本書と同じ計算をすれば同じ結果となることを確認できるよう、できる限り現実の数値と計算を使用しています。例えば、秘密鍵と、これと対応する公開鍵およびアドレスは、すべて現実に存在するものです。本書に掲載されたトランザクション、ブロック、ブロックチェーンの事例は、実際のBitcoinのブロックチェーンに存在しており、公開された台帳の一部ですので、読者は実際にこれらを確認することができます。
+
+=== Bitcoin Addresses and Transactions in This Book
+
+((("getting started", "warnings and cautions")))((("warnings and cautions", "avoid sending money to addresses appearing in book")))((("keys and addresses", "warnings and cautions")))((("transactions", "warnings and cautions")))((("blockchain applications", "warnings and cautions")))((("QR codes", "warnings and cautions")))The bitcoin addresses, transactions, keys, QR codes, and blockchain data used in this book are, for the most part, real. That means you can browse the blockchain, look at the transactions offered as examples, retrieve them with your own scripts or programs, etc.
+
+However, note that the private keys used to construct addresses are either printed in this book, or have been "burned." That means that if you send money to any of these addresses, the money will either be lost forever, or in some cases everyone who can read the book can take it using the private keys printed in here.
+
+[WARNING]
+====
+DO NOT SEND MONEY TO ANY OF THE ADDRESSES IN THIS BOOK. Your money will be taken by another reader, or lost forever.((("", startref="codeuse00")))
+====
+
+=== Publication by O'Reilly Media
+
+This book is derived under license from the book "Mastering Bitcoin 2nd Edition", by O'Reilly Media.
+
+=== Copyright and Book License
+
+Copyright (c) 2014 Andreas M. Antonopoulos LLC
+
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit
+
+http://creativecommons.org/licenses/by-sa/4.0/.
+
+To provide attribution please link to the book's repository:
+
+https://github.com/bitcoinbook/bitcoinbook
+
+and include this license or an equivalent open license, to satisfy the ShareAlike requirements.
+
+This "Free Culture" compliant license was approved by my publisher O'Reilly Media (http://oreilly.com), who understand the value of open source. O'Reilly Media is not just the world's best publisher of technical books but also a strong supporter of an open culture and the sharing of knowledge.
+
+Thank you O'Reilly!
+
+[role="pagebreak-before"]
+=== Contacting the Author
+
+You can contact me, Andreas M. Antonopoulos, on my personal site:
+link:$$https://aantonop.com/$$[]
+
+Information about _Mastering Bitcoin_ as well as the Open Edition and translations are available on:
+link:$$https://bitcoinbook.info/$$[]
+
+Follow me on Twitter:
+link:$$https://twitter.com/aantonop$$[]
+
+Find more than 500 education videos on my YouTube channel:
+link:$$https://youtube.com/aantonop$$[]
+
+Many thanks to all my patrons who support my work through monthly donations. You can follow my Patreon page here:
+link:$$https://patreon.com/aantonop$$[]
+
+=== 謝辞
+
+((("acknowledgments", id="acknowledge0")))This book represents the efforts and contributions of many people. I am grateful for all the help I received from friends, colleagues, and even complete strangers, who joined me in this effort to write the definitive technical book on cryptocurrencies and bitcoin.
+
+Bitcoinのテクノロジーと、Bitcoinのコミュニティを切り分けて考えることは不可能です。そしてこの本はそのコミュニティによる本でもあります。私の本書への取り組みは、まさに本を書き終わる時まで、Bitcoinのコミュニティ全体から励まされ、応援され、支えられ、称賛を頂きました。これは何よりもかけがえのないことであり、この本を書くことで私は2年間その素晴らしいコミュニティの一部でいることができました。私を受け入れてくれたこのコミュニティに対して私はいくら感謝してもしきれません。そして名前をあげるにはあまりにも多くの方々の支え、例えばカンファレンスやイベント、セミナー、ミートアップ、ピザを食べる集まり、小さな個人的な集まり、Twitter、Reddit、bitcointalk.orgで私と交流して下さった方々がいらっしゃいます。あらゆるアイディアやアナロジー、質問、回答、そして貴方がこの本でご覧になった説明のいくつかは、私のコミュニティとの交流の中でインスパイアされ、検証され、改善されてきました。支えて下さった皆様ありがとうございます。あなた方無しにこの本は完成し得なかった。私の一生の喜びです。
+
+The journey to becoming an author starts long before the first book, of course. My first language (and schooling) was Greek, so I had to take a remedial English writing course in my first year of university. I owe thanks to Diana Kordas, my English writing teacher, who helped me build confidence and skills that year. Later, as a professional, I developed my technical writing skills on the topic of data centers, writing for _Network World_ magazine. I owe thanks to John Dix and John Gallant, who gave me my first writing job as a columnist at _Network World_ and to my editor Michael Cooney and my colleague Johna Till Johnson who edited my columns and made them fit for publication. Writing 500 words a week for four years gave me enough experience to eventually consider becoming an author.
+
+Thanks also to those who supported me when I submitted my book proposal to O'Reilly, by providing references and reviewing the proposal. Specifically, thanks to John Gallant, Gregory Ness, Richard Stiennon, Joel Snyder, Adam B. Levine, Sandra Gittlen, John Dix, Johna Till Johnson, Roger Ver, and Jon Matonis. Special thanks to Richard Kagan and Tymon Mattoszko, who reviewed early versions of the proposal and Matthew Taylor, who copyedited the proposal.
+
+Thanks to Cricket Liu, author of the O'Reilly title _DNS and BIND_, who introduced me to O'Reilly. Thanks also to Michael Loukides and Allyson MacDonald at O'Reilly, who worked for months to help make this book happen. Allyson was especially patient when deadlines were missed and deliverables delayed as life intervened in our planned schedule. For the second edition, I thank Timothy McGovern for guiding the process, Kim Cofer for patiently editing, and Rebecca Panzer for illustrating many new diagrams.
+
+The first few drafts of the first few chapters were the hardest, because bitcoin is a difficult subject to unravel. Every time I pulled on one thread of the bitcoin technology, I had to pull on the whole thing. I repeatedly got stuck and a bit despondent as I struggled to make the topic easy to understand and create a narrative around such a dense technical subject. Eventually, I decided to tell the story of bitcoin through the stories of the people using bitcoin and the whole book became a lot easier to write. I owe thanks to my friend and mentor, Richard Kagan, who helped me unravel the story and get past the moments of writer's block. I thank Pamela Morgan, who reviewed early drafts of each chapter in the first and second edition of the book, and asked the hard questions to make them better. Also, thanks to the developers of the San Francisco Bitcoin Developers Meetup group as well as Taariq Lewis and Denise Terry for helping test the early material. Thanks also to Andrew Naugler for infographic design.
+
+During the development of the book, I made early drafts available on GitHub and invited public comments. More than a hundred comments, suggestions, corrections, and contributions were submitted in response. Those contributions are explicitly acknowledged, with my thanks, in <<github_contrib>>. Most of all, my sincere thanks to my volunteer GitHub editors Ming T. Nguyen (1st edition) and Will Binns (2nd edition), who worked tirelessly to curate, manage and resolve pull requests, issue reports, and perform bug fixes on GitHub.
+
+ドラフトの完成後、技術的なレビューを全体を通して何度も行いました。Cricket LieとLorne Lantxの全てのレビューとコメント、そして支援に感謝します。
+
+Several bitcoin developers contributed code samples, reviews, comments, and encouragement. Thanks to Amir Taaki and Eric Voskuil for example code snippets and many great comments; Chris Kleeschulte for contributing the Bitcore appendix; Vitalik Buterin and Richard Kiss for help with elliptic curve math and code contributions; Gavin Andresen for corrections, comments, and encouragement; Michalis Kargakis for comments, contributions, and btcd writeup; and Robin Inge for errata submissions improving the second print. In the second edition, I again received a lot of help from many Bitcoin Core developers, including Eric Lombrozo who demystified Segregated Witness, Luke Dashjr who helped improve the chapter on transactions, Johnson Lau who reviewed Segregated Witness and other chapters, and many others. I owe thanks to Joseph Poon, Tadge Dryja, and Olaoluwa Osuntokun who explained Lightning Network, reviewed my writing, and answered questions when I got stuck.
+
+私の母、Theresaのおかげで、言葉や本に愛着を持つことができました。母は、壁一面に本が並ぶ家で私を育ててくれました。母は、自称ハイテク恐怖症であるにもかかわらず、1982年に初めてのコンピューターを買ってくれました。私の父、Manelaosは、80歳の時に初の著書を出版した市井のエンジニアでしたが、私に、論理的で分析的な思考、科学とエンジニアリングへの愛を教えてくれました。
+
+この旅を支えて下さったすべての方々に、感謝します。
+
+
+////
+Github contributor acknowledgments in a new file...
+////
+
+include::github_contrib.asciidoc[]

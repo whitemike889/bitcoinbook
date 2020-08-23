@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[נספח]
+== פעולות שפת סקריפט עם עסקות, קבועים, וסמלים
+
+[הערה]
+====
+Tables and descriptions sourced from https://en.bitcoin.it/wiki/Script[].
+====
+
+<<tx_script_ops_table_pushdata>> מראה פעולות לדחיפת ערכים לתוך המחסנית .((("transactions", "scripts and Script language", id="TRlang14")))((("scripting", "Script language operators, constants, and symbols", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+דחיפת ערך לתוך המחסנית
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| OP_0 or OP_FALSE | 0x00 | מערך ריק נדחף למחסנית
+| 1 to 75 | 0x01 to 0x4b | דחיפת N הבתים הבאים למחסנית, כאשר N הנו בין 1 ל 75
+| OP_PUSHDATA1 | 0x4c | הסקריפט הבא כולל N, דחוף את N הבתים הבאים למחסנית
+| OP_PUSHDATA2 | 0x4d | שני הבתים הבאים כוללים בתי סקריפט כוללים N, דחוף את N הבתים הבאים למחסנית
+| OP_PUSHDATA4 | 0x4e | ארבעת הבתים הבאים  של סקריפט כוללים N, דחוף את N הבתים הבאים למחסנית
+| OP_1NEGATE | 0x4f | דחוף את הערך "–1" למחסנית
+| OP_RESERVED | 0x50 | Halt&#x2014;עסקה לא ואלידית אלא אם נמצא בפסקה של _IF שלא מבוצעת
+| OP_1 or OP_TRUE| 0x51 | דחיפת הערך  "1" למחסנית
+| OP_2 to OP_16 | 0x52 to 0x60 |  עבור OP_N, דחוף את הערך "N" למחסנית, כגון OP_2 שדוחף "2"
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> מראה פעולות בקרה של זרימה מותנית.
+
+[[tx_script_ops_table_control]]
+.בקרת זרימה מותנית
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| OP_NOP | 0x61 | אל תעשה כלום
+| OP_VER | 0x62 | Halt&#x2014;I עסקה לא ואלידית אלא אם נמצאה בפסקת OP_IF שלא בוצעה
+| OP_IF | 0x63 | בצע את ההוראה הבאה אם גג המחסנית אינו 0
+| OP_NOTIF | 0x64 | בצע את ההוראה הבאה אם גג המחסנית הנו  0
+| OP_VERIF | 0x65 | Halt&#x2014;עסקה לא ואלידית
+| OP_VERNOTIF | 0x66 | Halt&#x2014;עסקה לא ואלידית
+| OP_ELSE | 0x67 | בצע רק אם האלמנטים הקודמים לא בוצעו
+| OP_ENDIF | 0x68 | סיים את בלוק  OP_IF, OP_NOTIF, OP_ELSE 
+| OP_VERIFY | 0x69 | בדוק את גג המחסנית, עצור והפווך ללא ואלידית אם לא TRUE
+| OP_RETURN | 0x6a | עצור והפוך עסקה ללא ואלידית
+|=======
+
+<<tx_script_ops_table_timelock>> מראה פעולות המשמשות לנעילת זמן
+
+[[tx_script_ops_table_timelock]]
+פעולות נעילת זמן
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| OP_CHECKLOCKTIMEVERIFY (previously OP_NOP2) | 0xb1 | מסמן עסקה כלא ואלידית אם פריט גג המחסנית יותר גדול משדה   nLockTime של העסקה, אחרת סקריפט הבדיקה ממשיך כאילו  OP_NOP בוצע. עסקה גם אינה ואלידית אם 1. המחסנית ריקה; או 2.פריט גג המעלית שלילי;  או 3. פריט גג המעלית גדול או שווה 500000000 בעוד ששדה nLockTime  של העסקה קטן מ 500000000, או להפך; או 4. שדה הלקטים nSequence שווה ל 0xffffffff. ההגדרה המדויקת מתוארת ב BIP-65 
+| OP_CHECKSEQUENCEVERIFY (previously OP_NOP3) | 0xb2 | מסמן עסקה כלא ואלידית אם חותמת הזמן היחסית של הקלט  (מוכתבת ב BIP 0068 עם nSequence) אינה שווה או ארוכה יותר מהערך שלל פריט גג המחסנית. ההגדרה המדויקת מתוארת ב BIP-112|
+|=======
+
+<<tx_script_ops_table_stack>> מציג פעולות המשמשות למניפולציה של המחסנית.
+
+[[tx_script_ops_table_stack]]
+פעולות מחסנית
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| OP_TOALTSTACK | 0x6b | לוקח את הפריט העליון מהמחסנית ודוחף למחסנית חלופית
+| OP_FROMALTSTACK | 0x6c | לוקח את הפריט העליון מהמחסנית החלופית ודוחף למחסנית
+| OP_2DROP | 0x6d | לוקח את שני הפריטים העליונים מהמחסנית
+| OP_2DUP | 0x6e | מכפיל את שני הפריטים העליונים במחסנית
+| OP_3DUP | 0x6f | מכפיל את שלשת הפריטים העליונים במחסנית
+| OP_2OVER | 0x70 | מעתיק את הפריט השלישי והרביעי במחסנית לצמרת
+| OP_2ROT | 0x71 | העבר פריטים 5 ו 6 לצמרת המחסנית
+| OP_2SWAP | 0x72 | החלף בין שני הפריטים העליונים
+| OP_IFDUP | 0x73 | הכפל את הפריט העליון במחסנית אם איננו 0
+| OP_DEPTH | 0x74 | ספור את פריטי המחסנית ודחוף את תוצאת הספירה
+| OP_יDROP | 0x75 | לוקח את הפריט העליון במחסנית
+| OP_DUP | 0x76 | מכפיל את הפריט העליון במחסנית
+| OP_NIP | 0x77 | לוקח את הפריט השני מלמעלה במחסנית
+| OP_OVER | 0x78 | מעתיק את הפריט השני במחסנית ודוחף אותו לצמרת
+| OP_PICK | 0x79 | לוקח ערך N מגג המחסנית ואז מעתיק,  את הפריט ה N לצמרת המחסנית
+| OP_ROLL | 0x7a | לוקח ערך N מהפריט העליון ומעביר את הפריט ה N לצמרת המחסנית
+| OP_ROT | 0x7b | סובב את שלשת הפריטים העליונים במחסנית
+| OP_SWAP | 0x7c | החלף בין שני הפריטים העליונים במחסנית
+| OP_TUCK | 0x7d | העתק את הפריט העליון והצב בין הפריט העליון והשני במחסנית
+|=======
+
+<<tx_script_ops_table_splice>> מראה פעולות על רצפי תוים.
+
+[[tx_script_ops_table_splice]]
+.פעולות איחוד על רצפי תוים
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| _OP_CAT_ | 0x7e | מנוטרל (איחוד שני פריטים)
+| _OP_SUBSTR_ | 0x7f | מנוטרל (מחזיר חלק מהרצף)
+| _OP_LEFT_ | 0x80 | מנוטרל  (returns left substring)
+| _OP_RIGHT_ | 0x81 | מנוטרל  (returns right substring)
+| OP_SIZE | 0x82 | מחשב את אורך הפריט העליון ודוחף את התוצאה 
+|=======
+
+<<tx_script_ops_table_binmath>> מראה פעולות בינריות ולוגיקה בוליאנית.
+
+[[tx_script_ops_table_binmath]]
+.פעולות בינאריות והתניות
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| _OP_INVERT_ | 0x83 | מנוטרל (Flip the bits of the top item)
+| _OP_AND_ | 0x84 | מנוטרל (Boolean AND of two top items)
+| _OP_OR_ | 0x85 | מנוטרל  (Boolean OR of two top items)
+| _OP_XOR_ | 0x86 | מנוטרל  (Boolean XOR of two top items)
+| OP_EQUAL | 0x87 | דחיפתTRUE (1) אם שני הפריטים העליונים זהים לגמרי או דחיפת, FALSE (0) בכל מקרה אחר
+| OP_EQUALVERIFY | 0x88 | כמו OP_EQUAL, אך מבצע OP_VERIFY אחרי כן כדי לעצור אם לא TRUE
+| OP_RESERVED1 | 0x89 | Halt&#x2014;עסקה לא ולידית אלא אם נכללת בפסקה של OP_IF שלא בוצעה
+| OP_RESERVED2 | 0x8a | Halt&#x2014;עסקה לא ולידית אלא אם נכללת בפסקה של OP_IF שלא בוצעה
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>>  מראה פעולות מספריות (אריתמתיות).
+
+[[tx_script_ops_table_numbers]]
+.פעולות נומריות
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| OP_1ADD | 0x8b | הוסף 1 לפריט העליון   
+| OP_1SUB | 0x8c | חסר 1 מהפריט העליון
+| _OP_2MUL_ | 0x8d | מנוטרל (multiply top item by 2)
+| _OP_2DIV_ | 0x8e | מנוטרל  (divide top item by 2)
+| OP_NEGATE | 0x8f | החלף את הסימן בפריט העליון
+| OP_ABS | 0x90 | שנה את סימנו של הפריט העליון לחיובי
+| OP_NOT | 0x91 | אם הפריט העליון 0 או 1 בוליאני 0 החלף אותם, אחרת החזר  0
+| OP_0NOTEQUAL | 0x92 | אם הפריט העליון 0 החזר 0 אחרת החזר  1
+| OP_ADD | 0x93 | קח את שני הפריטים העליונים, הוסף אותם ודחוף את התוצאה
+| OP_SUB | 0x94 | קח את שני הפריטים העליונים, חסר את הראשון מהשני ודחוף חזרה
+| _OP_MUL_ | 0x95 | מנוטרל (multiply top two items)
+| _OP_DIV_ | 0x96 | מנוטרל  (divide second item by first item)
+| _OP_MOD_ | 0x97 | מנוטרל  (remainder divide second item by first item)
+| _OP_LSHIFT_ | 0x98 | מנוטרל  (shift second item left by first item number of bits)
+| _OP_RSHIFT_ | 0x99 | מנוטרל (shift second item right by first item number of bits)
+| OP_BOOLAND | 0x9a |  AND בוליאני של שני הפריטים העליונים
+| OP_BOOLOR | 0x9b | OR בוליאני של שני הפריטים העליונים
+| OP_NUMEQUAL | 0x9c | החזר TRUE אם שני הפריטים העליונים הם מספרים שווים
+| OP_NUMEQUALVERIFY | 0x9d | כמו NUMEQUAL, ואז  OP_VERIFY לעצור אם לא TRUE
+| OP_NUMNOTEQUAL | 0x9e | החזר TRUE אם שני הפריטים העליונים אינם מספרים שווים
+| OP_LESSTHAN | 0x9f | החזר TRUE אם הפריט השני קטן מהעליון
+| OP_GREATERTHAN | 0xa0 | החזר TRUE אם הפריט השני גדול מהראשון
+| OP_LESSTHANOREQUAL | 0xa1 | החזרTRUE אם הפריט השני קטן או שווה מהפריט העליון 
+| OP_GREATERTHANOREQUAL | 0xa2 | ההחזרTRUE אם הפריט השני גדול או שווה מהפריט העליון 
+| OP_MIN | 0xa3 | החזר את הקטן משני הפריטים העליונים 
+| OP_MAX | 0xa4 | החזר את הגדול מבין שני הפריטים העליונים
+| OP_WITHIN | 0xa5 | החזרTRUE אם הפריט השלישי נמצא בין הפריט השני (או שווה) והפריט הראשון
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> מראה פעולות של פונקציות קריפטוגרפיות.
+
+[[tx_script_ops_table_crypto]]
+פעולות קריפטוגרפיות והאשינג
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| OP_RIPEMD160 | 0xa6 | החזר האש RIPEMD160 של הפריט העליון
+| OP_SHA1 | 0xa7 | החזר האש של  SHA1 של הפריט העליון
+| OP_SHA256 | 0xa8 |החזר האש SHA256 של הפריט העליון
+| OP_HASH160 | 0xa9 | החזר האש RIPEMD160(SHA256(x)) של הפריט העליון
+| OP_HASH256 | 0xaa | החזר האש SHA256(SHA256(x)) של הפריט העליון
+| OP_CODESEPARATOR | 0xab | סמן את ההתחלה של נתוןנים בדוקים בחתימה
+| OP_CHECKSIG | 0xac | קבל את המפתח הציבורי והחתימה ואמת את החתימה עבור ההאש של נתוני העסקה, החזר TRUE אם תואמים
+| OP_CHECKSIGVERIFY | 0xad | כמו CHECKSIG, ואז OP_VERIFY לעצור אם לא TRUE
+| OP_CHECKMULTISIG | 0xae | הרץ CHECKSIG לכל אחד מהחתימות והמפתחות הציבוריים שסופקו כולם חייבים להתאים. באג ביישום מקפיץ (POP) ערך מיותר, הקדם  OP_NOP כפתרון עוקף
+| OP_CHECKMULTISIGVERIFY | 0xaf | כמו CHECKMULTISIG, ואז OP_VERIFY לעצור אם לא TRUE
+|=======
+
+<<tx_script_ops_table_nop>> מראה סמלים שאינם פעולות.
+
+[[tx_script_ops_table_nop]]
+לא פעולות
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| OP_NOP1 to OP_NOP10 | 0xb0 ל  0xb9 לא עושה כלום, להתעלם
+|=======
+
+
+<<tx_script_ops_table_internal>> מראה קודי פעולה השמורים לשימוש הפארסר הפנימי של סקריפט .((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+.OP codes שמורים לשימוש פנימי של הפארסר
+[options="header"]
+|=======
+|  סמל | ערך (בהקסא) | תאור
+| OP_SMALLDATA | 0xf9 | מייצג שדה נתונים קטן 
+| OP_SMALLINTEGER | 0xfa | מייצג שדה נתונים קטן של מספר
+| OP_PUBKEYS | 0xfb | מייצג שדות מפתח ציבורי
+| OP_PUBKEYHASH | 0xfd | מייצג האש של שדה מפתח ציבורי
+| OP_PUBKEY | 0xfe | מייצג שדה של מפתח ציבורי
+| OP_INVALIDOPCODE | 0xff | מייצג כל OP code שטרם מומש
+|=======

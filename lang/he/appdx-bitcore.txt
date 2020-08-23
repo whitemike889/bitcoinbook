@@ -1,0 +1,117 @@
+[[appdx_bitcore]]
+[נספח]
+
+== Bitcore
+
+
+((("Bitcore", id="bitcore16")))Bitcore הנה סוויטת כלים שמסופקת ע"י  BitPay. מטרתה לספק כלים קלי שימוש למפתחי ביטקוין. כמעט כל הקוד של ביטקור כתוב ב JavaScript. יש מודולים שנכתבו ספציפית ל NodeJS. ולבסוף, מודול ה"node" של Bitcore  כולל את תוכנת ליבת ביטקוין בשפת  C++ . בבקשה לעיין ב  https://bitcore.io for more information.
+
+=== רשימת התכונות של Bitcore
+
+* צומת שלמה של ביטקוין (bitcore-node)
+*  דפדפן בלוקים (insight)
+* תכניות שרות לבלוקים, עסקות, וארנקים (bitcore-lib)
+* מתקשרת ישירות עם רשת P2P של ביטקוין (bitcore-p2p)
+* יצירת שורש (סיד) מילולי (mnemonic) באנטרופיה  (bitcore-mnemonic)
+* פרוטוקול תשלומים (bitcore-payment-protocol)
+* אימות וחתימת הודעות (bitcore-message)
+* סכמת עקומה אליפטית משולב הצפנה (bitcore-ecies)
+* שרות ארנק (bitcore-wallet-service)
+* ארנק לקוח (bitcore-קwallet-client)
+* מגרש משחקים (bitcore-playground)
+* שרותי אינטגרציה ישירות עם ליבת ביטקוין (bitcore-node)
+
+=== דוגמאות ספרית ביטקור
+
+==== דרישות מוקדמות
+
+* NodeJS >= 4.x או שימוש בשלנו https://bitcore.io/playground[hosted online playground]
+
+אם משתמשים ב NodeJS וב REPL:
+
+[source,bash]
+----
+$ npm install -g bitcore-lib bitcore-p2p
+----
+
+==== דוגמאות ארנק שמשתמשות ב bitcore-lib
+
+יצירת כתובת ביטקוין חדשה ומפתח פרטי שלה:
+
+----
+> bitcore = require('bitcore-lib')
+> privateKey = new bitcore.PrivateKey()
+> address = privateKey.toAddress().toString()
+----
+
+יצירת כתובת היררכית דטרמיניסטית עם מפתח פרטי
+
+----
+> hdPrivateKey = bitcore.HDPrivateKey()
+> hdPublicKey = bitcore.HDPublicKey(hdPrivateKey)
+> hdAddress = new bitcore.Address(hdPublicKey.publicKey).toString()
+----
+
+יצירת וחתימת עסקה מ UTXO:
+
+----
+> utxo = {
+  txId: transaction id containing an unspent output,
+  outputIndex: output index e.g. 0,
+  address: addressOfUtxo,
+  script: bitcore.Script.buildPublicKeyHashOut(addressOfUtxo).toString(),
+  satoshis: amount sent to the address
+}
+> fee = 3000 //set appropriately for conditions on the network
+> tx = new bitcore.Transaction()
+        .from(utxo)
+        .to(address, 35000)
+        .fee(fee)
+        .enableRBF()
+        .sign(privateKeyOfUtxo)
+----
+
+החלפת העסקה האחרונה במאגר הזמני  ממפול  (replace-by-fee):
+
+----
+> rbfTx = new Transaction()
+           .from(utxo)
+           .to(address, 35000)
+           .fee(fee*2)
+           .enableRBF()
+           .sign(privateKeyOfUtxo);
+> tx.serialize();
+> rbfTx.serialize();
+----
+
+שידור עסקה לרשת ביטקוין:
+(הערה: יש לשדר רק עסקות ואלידיות; ראה https://bitnodes.21.co/nodes[] עבור שרותי עמיתים):
+
+1. העתיקו את הקוד שלמטה לקובץ בשם _broadcast.js_.
+2. משתני ה +tx+ ו +rbfTx+ הנם הפלט של f +tx.serialize()+ ו +rbfTx.serialize()+, בהתאמה.
+3. כדי לבצע replace-by-fee,  העמית חייב לתמוך באופצית bitcoind שהיא +mempoolreplace+ ולכוונן אותה ל  +1+.
+4. הרץ את קובץ הצומת _broadcast.js_((("", startref="bitcore16"))):
+
+----
+var p2p = require('bitcore-p2p');
+var bitcore = require('bitcore-lib');
+var tx = new bitcore.Transaction('output from serialize function');
+var rbfTx = new bitcore.Transaction('output from serialize function');
+var host = 'ip address'; //use valid peer listening on tcp 8333
+var peer = new p2p.Peer({host: host});
+var messages = new p2p.Messages();
+peer.on('ready', function() {
+  var txs = [messages.Transaction(tx), messages.Transaction(rbfTx)];
+  var index = 0;
+  var interval = setInterval(function() {
+    peer.sendMessage(txs[index++]);
+    console.log('tx: ' + index + ' sent');
+    if (index === txs.length) {
+      clearInterval(interval);
+      console.log('disconnecting from peer: ' + host);
+      peer.disconnect();
+    }
+  }, 2000);
+});
+peer.connect();
+----

@@ -1,0 +1,210 @@
+[role="pagenumrestart"]
+[[ch01_intro_what_is_bitcoin]]
+== Uvod
+
+== Šta je bitkoin?
+
+((("bitcoin", "defined", id="GSdefine01")))Bitkoin je skup koncepata i tehnologija koji čini osnovu ekosistema digitalnog novca. Jedinice valute nazvane bitkoin koriste se za skladištenje i prenošenje vrednosti među učesnicima bitkoin mreže. Korisnici bitkoina međusobno komuniciraju koristeći bitkoin protokol prvenstveno putem interneta, mada mogu da se koriste i druge transportne mreže. Stek bitkoin protokola dostupan kao softver otvorenog koda (open source), može se pokrenuti na širokom rasponu računarskih uređaja, uključujući laptopove i smart telefone, čineći tehnologiju lako dostupnom.
+
+Korisnici mogu prenositi bitkoine preko mreže i raditi sa njima gotovo sve što se može uraditi i sa konvencionalnim valutama, uključujući kupovinu i prodaju robe, slanje novca ljudima ili organizacijama ili produživanje kredita. Bitkoin se može kupiti, prodati i zameniti za druge valute na specijalizovanim berzama valuta. Bitkoin je u određenom smislu savršen oblik novca za internet, jer je brz, siguran i bez granica.
+
+Za razliku od tradicionalnih valuta, bitkoin je u potpunosti virtuelan. Nema fizičkih kovanica, pa čak ni digitalnih. Kovanice se podrazumevaju u transakcijama koje prenose vrednost sa pošiljaoca na primaoca. Korisnici bitkoina koji poseduju odgovarajuće ključeve mogu time da dokažu vlasništvo nad bitkoinom u mreži bitkoina. Pomoću ovih ključeva mogu potpisati transakcije kako bi otključali vrednost i potrošili je prenoseći je na novog vlasnika. Ključevi se često čuvaju u digitalnom novčaniku na računaru ili smart telefonu korisnika. Posedovanje ključa koji može potpisati transakciju jedini je preduslov za trošenje bitkoina, čime je kontrola u potpunosti u rukama svakog korisnika.
+
+Bitkoin je distribuirani, peer-to-peer (P2P) sistem. Kao takav ne postoji "centralni" server ili tačka kontrole. Bitkoin se stvara kroz proces koji se zove "rudarenje" (mining), koji uključuje takmičenja za nalaženje rešenja za matematički problem tokom obrade bitkoin transakcija. Bilo koji učesnik bitkoin mreže (tj. svako ko koristi računar na kom radi kompletan protokol bitkoina) može raditi kao rudar, koristeći procesorsku moć svog računara za verifikaciju i snimanje transakcija. Svaki bitkoin rudar može na 10 minuta u proseku da potvrdi transakcije iz poslednjih 10 minuta, i bude nagrađen potpuno novim bitkoinima. U osnovi, rudarenje bitkoina decentralizuje funkciju izdavanja i kliringa (clearing) centralne banke i zamenjuje potrebu za bilo kojom centralnom bankom.
+
+Bitkoin protokol uključuje ugrađene algoritme koji regulišu funkciju rudarenja širom mreže. Težina zadatka obrade koji rudari moraju da obave prilagođava se dinamički, tako da u proseku neko uspe svakih 10 minuta bez obzira koliko se rudara (i koliko oni koriste mašine) takmiči u bilo kom trenutku. Protokol takođe prepolovljava brzinu kojom se stvaraju novi bitkoini svake 4 godine i ograničava ukupni broj bitkoina koji će se stvoriti na fiksni ukupni iznos ispod 21 miliona kovanica. Rezultat toga je da broj bitkoina u opticaju prati lako predvidljivu krivu koja do 2140. godine može dostići 21 milion. Zbog smanjene stope izdavanja bitkoina, dugoročno, bitkoin valuta je deflacijska. Pored toga, bitkoin se ne može naduvati "štampanjem" novog novca iznad očekivane stope izdavanja.
+
+Iza kulisa bitkoin je takođe naziv protokola, peer-to-peer mreža i računarska inovacija. Bitkoin valuta je zapravo samo prva primena ovog pronalaska. Bitkoin predstavlja vrhunac višedecenijskog istraživanja kriptografije i distribuiranih sistema i uključuje četiri ključne novine okupljene u jednu jedinstvenu i moćnu kombinaciju. Bitkoin se sastoji od:
+
+* Decentralizovane peer-to-peer mreže (bitkoin protokol)
+* Glavne knjige transakcija (takozvani blokčejn)
+* ((("mining and consensus", "consensus rules", "satisfying")))Skupa pravila za nezavisnu validaciju transakcija i izdavanje valute (pravila konsenzusa)
+* Mehanizma za postizanje globalnog decentralizovanog konsenzusa o važećem blokčejnu (algoritam za dokaz rada)
+
+Kao programer, smatram da je bitkoin srodan sa internet novcem, mrežom za širenje vrednosti i obezbeđivanje vlasništva nad digitalnom imovinom distribuiranim računanjem. Mnogo više stoji iza bitkoina, nego što bi se reklo na prvi pogled.
+
+Ovo poglavlje ćemo početi objašnjenjima vezanim za glavne koncepate i termine, nabavku potrebnog softvera i upotrebu bitkoina za jednostavne transakcije. U narednim poglavljima odmotavaćemo slojeve tehnologije koji omogućavaju postojanje bitkoina i istaživaćemo unutrašnjost rada bitkoin mreže i protokola.((("", startref="GSdefine01")))
+
+[role="pagebreak-before less_space"]
+.Digitalne valute pre bitkoina
+****
+
+((("digital currencies", "prior to bitcoin")))Pojava održivog digitalnog novca usko je povezana sa razvojem kriptografije. Ovo nije iznenađujuće kada se uzmu u obzir fundamentalni izazovi korišćenja bitova za predstavljanje vrednosti koja se može zameniti za robu i usluge. Tri osnovna pitanja za svakoga ko prima digitalni novac su:
+
+1. Mogu li da verujem u autentičnost novca i da li je falsifikovan?
+2. Mogu li da verujem da će digitalni novac biti potrošen samo jednom (poznat kao problem "duplog trošenja" ili "double-spend")?
+3. Mogu li biti siguran da niko drugi neće tvrditi da taj novac pripada njemu, a ne meni?
+
+Izdavači papirnog novca se stalno bore sa problemom falsifikovanja. U toj borbi koriste sve sofisticiranije papire i tehnologiju štampanja. Fizički novac lako rešava problem dvostrukog trošenja (double-spend), jer ista papirna novčanica ne može biti na dva mesta odjednom. Naravno, konvencionalni novac se takođe često čuva i prenosi digitalno. U tim slučajevima, problemi sa falsifikovanjem i dvostrukom potrošnjom rešavaju se tako što se sve elektronske transakcije razreše putem centralnih organa koji imaju globalni pregled valute u opticaju. Za digitalni novac, za koji se ne mogu koristiti ezoterična mastila ili holografske trake, kriptografija pruža osnovu za pouzdanu proveru legitimiteta zahteva korisnika u vrednost jedne kripto valute. Konkretno, kriptografski digitalni potpisi omogućavaju korisniku da potpiše digitalni proizvod ili transakciju kojom dokazuje vlasništvo nad tim sredstvom. Sa odgovarajućom arhitekturom, digitalni potpisi takođe mogu da se koriste za rešavanje problema dvostrukog trošenja.
+
+Kada je krajem 1980-ih kriptografija postala dostupnija i razumljivija sve većem broju ljudi, mnogi istraživači su počeli da koriste kriptografiju u pokušaju da stvore digitalne valute. Ovi najraniji projekti kreiranja digitalne valute doveli su do izdavanja digitalnog novca, koji je obično imao pokriće u vidu nacionalne valute ili nekog dragocenog metala, kao što je zlato.
+
+((("decentralized systems", "vs. centralized", secondary-sortas="centralized")))Iako su ove ranije digitalne valute bile u opticaju, bile su centralizovane, a kao rezultat toga, lako su ih napadale strane vlade i hakeri. Ranije digitalne valute koristile su centralnu klirinšku kuću za utvrđivanje svih transakcija u pravilnim intervalima, baš kao i tradicionalni bankarski sistem. Nažalost, u većini slučajeva ove novonastale digitalne valute bile su na meti zabrinutih vlada i na kraju su ukinute sudskim putem. Neke su spektakularno propale iznenadnom likvidacijom matične kompanije. Da bi bile snažnije od protivnika, bilo da su to legitimne vlade ili krivični elementi, potrebna je _decentralizovana_ digitalna valuta da bi se izbegao napad. Bitkoin je takav sistem, decentralizovan dizajnom i bez ikakvih centralnih organa ili tačaka kontrole koji bi mogli da budu napadnuti ili oštećeni.
+
+****
+
+=== Istorija bitkoina
+
+((("Nakamoto, Satoshi")))((("distributed computing")))((("bitcoin", "history of")))Bitkoin je nastao 2008. godine objavljivanjem rada pod nazivom "Bitcoin: Peer-to-peer elektronski keš sistem, fusnota: ["Bitcoin: A Peer-to-Peer Electronic Cash System," Satoshi Nakamoto (https://bitcoin.org/bitcoin.pdf).], napisan pod pseudonimom Satoši Nakamoto (vidi  <<satoshi_whitepaper>>). Nakamoto je kombinovao nekoliko prethodnih izuma kao što su b-money i HashCash da bi stvorio potpuno decentralizovani elektronski keš sistem, koji se ne oslanja na centralni organ za izdavanje ili poravnanje i potvrđivanje transakcija. ((("Proof-of-Work algorithm")))((("decentralized systems", "consensus in")))((("mining and consensus", "Proof-of-Work algorithm")))Ključna inovacija je bila upotreba distribuiranog računarskog sistema (zvanog algoritam „Proof-of-Work“ / "Dokaz Rada") za sprovođenje globalnih „izbora“ svakih 10 minuta, omogućavajući decentralizovanoj mreži da dođe do _konsenzusa_ o stanju transakcija. ((("double-spend problem")))((("spending bitcoin", "double-spend problem"))) Ovo elegantno rešava problem dvostrukog trošenja gde se jedna valuta može potrošiti dva puta. Ranije je problem sa dvostrukom potrošnjom bio slabost digitalne valute, koji je rešavan kliringom svih transakcija putem centralne klirinške kuće.
+
+Mreža bitkoina je pokrenuta 2009. godine, na osnovu referentne implementacije (reference implementation) koju je objavio Nakamoto, posle revidiranu od strane mnogih programera. Primena algoritma Proof-of-Work (rudarenje) koji obezbeđuje sigurnost i otpornost bitkoina povećala je snagu eksponencijalno i sada nadmašuje kombinovanu moć obrade najboljih svetskih superračunara. Ukupna tržišna vrednost bitkoina je premašila 135 milijardi američkih dolara krajem 2017. godine (beleška prevodioca: 2017. godine je bila najveća tržišna vrednost od oko 237 milijarde američkih dolara), zavisno od kursa bitkoina prema dolaru. Najveća transakcija koja je do sada obavljena preko mreže bila je 400 miliona američkih dolara, koja je poslata odmah i obrađena za naknadu od 1 USD.
+
+Satoši Nakamoto (Satoshi Nakamoto) se povukao iz javnosti u aprilu 2011. godine, prepuštajući odgovornost za razvijanje koda i mreže naprednoj grupi dobrovoljaca. Još uvek nije poznat identitet osobe ili osoba koje stoje iza bitkoina. ((("open source licenses"))) Međutim, ni Satoši Nakamoto, ni bilo ko drugi ne vrši individualnu kontrolu nad bitkoin sistemom, koji funkcioniše na osnovu potpuno transparentnih matematičkih principa, otvorenog koda i dogovora među učesnicima. Sam pronalazak je revolucionaran, i već je stvorio novu nauku u oblastima distribuiranog računanja, ekonomije i ekonometrije (nauka matematike i ekonomije).
+
+
+.Rešenje za problem distribuiranog računanja
+****
+((("Byzantine Generals&#x27; Problem")))Izum Satošija Nakamota takođe je praktično i novo rešenje problema u distribuiranom računanju, poznat kao "problem vizantijskih generala". Ukratko, problem se sastoji u pokušaju dogovora o toku akcije ili stanju sistema razmenom informacija preko nepouzdane i potencijalno ugrožene mreže. ((("central trusted authority")))Rešenje Satošija Nakamota, koje koristi koncept Proof-of-Work za postizanje konsenzusa _bez centralnog poverenog autoriteta_, predstavlja proboj u distribuiranom računarstvu i ima široku primenu van valute. Može se koristiti za postizanje konsenzusa o decentralizovanim mrežama za dokazivanje pravednosti izbora, lutrija, registra imovine, digitalne overe i još mnogo toga.
+****
+
+
+[[user-stories]]
+=== Bitkoin upotrebe, korisnici i njihove priče
+
+((("bitcoin", "use cases", id="GSuses01")))Bitkoin je inovacija u staroj tehnologiji novca. Novac jednostavno olakšava razmenu vrednosti između ljudi. Da bismo u potpunosti razumeli bitkoin i njegovu upotrebu, ispitaćemo ga iz perspektive ljudi koji ga koriste. Svi oni sa svojim pričama, kako je ovde navedeno, ilustruju jedan ili više specifičnih slučajeva upotrebe bitkoina. Susretaćemo se sa njima kroz celu knjigu:
+
+Severnoamerička maloprodajna cena:
+((("use cases", "retail sales")))Alisa živi u zalivu Severne Kalifornije. Čula je za bitkoin od svojih prijatelja informatičara i želi da počne sa njegovim korišćenjem. Pratićemo njenu priču dok ona uči o bitkoinu, nabavlja ih, a zatim potroši deo svog bitkoina da bi kupila šolju kafe u Bobovom kafiću u Paulo Altu. Ova priča će nas upoznati sa softverom, razmenama i osnovnim transakcijama iz ugla maloprodajnog potrošača.
+
+Severnoamerička maloprodajna cena:
+Karol je vlasnica umetničke galerije u San Francisku. Prodaje skupe slike za bitkoin. Ova priča će predstaviti rizike "51%" napada na trgovce artiklima velike vrednosti. (Vidi: <<consensus_attacks>>)
+
+Kontraktni ofšor radovi::
+((("offshore contract services")))((("use cases", "offshore contract services")))Bob, vlasnik kafića u Palo Altu, pravi novu web stranicu. On je sklopio ugovor sa indijskim web programerom, Gopešom, koji živi u Bangaloru u Indiji. Gopeš je pristao da bude plaćen u bitkoinu. Ova priča će ispitati upotrebu bitkoina za outsourcing, ugovorne usluge i međunarodno elektronsko plaćanje.
+
+Web prodavnica::
+((("use cases", "web store")))Gabrijel je mladi tinejdžer i preduzetnik u Rio de Žaneiru, koji vodi malu web prodavnicu koja prodaje bitkoin brendirane majice, šolje za kafu i nalepnice. Gabrijel je suviše mlad da bi imao račun u banci, ali roditelji podržavaju njegov preduzetnički duh.
+
+Dobrotvorne donacije::
+((("charitable donations")))((("use cases", "charitable donations")))Eugenija je direktor dečije dobrotvorne organizacije na Filipinima. Nedavno je otkrila bitkoin i želi da ga koristi a bi dostigla potpuno novu grupu stranih i domaćih donatora za prikupljanje sredstava za svoju dobrotvornu organizaciju. Ona takođe istražuje načine upotrebe bitkoina za brzu raspodelu sredstava područjima kojima su ona potrebna. Ova priča će prikazati upotrebu bitkoina za globalno prikupljanje sredstava prelazeći valute i granice i upotrebu otvorene knjige za transparentnost u dobrotvornim organizacijama.
+
+Import/eksport::
+((("use cases", "import/export")))Mohamed je uvoznik elektronike u Dubaiju. Pokušava da upotrebi bitkoin za kupovinu elektronike iz Sjedinjenih Američkih Država i Kine za uvoz u Ujedinjene Arapske Emirate kako bi se ubrzao proces plaćanja za uvoz. Ova priča će pokazati kako se bitkoin može koristiti za velike međunarodne isplate vezane za fizičku robu.
+
+Rudarenje bitkoina::
+((("use cases", "mining for bitcoin")))Đing je student računarskog inženjerstva u Šangaju. Izgradio je instalaciju za rudarenje bitkoina koristeći svoje inženjerske veštine kako bi dopunio svoj prihod. Ova priča će ispitati "industrijsku" bazu bitkoina: specijalizovanu opremu koja se koristi za obezbeđivanje bitkoin mreže i izdavanje nove vrednosti te valute.
+
+Svaka od ovih priča zasnovana je na stvarnim ljudima i realnim industrijama koje trenutno koriste bitkoin za stvaranje novih tržišta, novih industrija i inovativnih rešenja za globalna ekonomska pitanja.((("", startref="GSuses01")))
+
+=== Prvi koraci
+
+((("getting started", "wallet selection", id="GSwallet01")))((("wallets", "selecting", id="Wselect01")))((("bitcoin", "getting started", id="BCbasic01"))) Bitkoin je protokol kojem može da se pristupi pomoću klijentske aplikacije koja razume taj protokol. "Bitkoin novčanik" (Bitcoin Wallet) je najčešći korisnički interfejs za bitkoin sistem, baš kao što je web pretraživač najčešći korisnički interfejs za HTTP protokol. Postoji mnogo implementacija i brendova bitkoin novčanika, baš kao što postoje i mnogi brendovi web pretraživača (npr. Chrome, Safari, Firefox i Internet Explorer). I baš kao što svi mi imamo svoje omiljene pretraživače (Mozilla Firefox, jupi!) i naše negativce (Internet Explorer, bljak!), bitkoin novčanici se razlikuju u kvalitetu, performansama, sigurnosti, privatnosti i pouzdanosti. Postoji i referentna implementacija bitkoin protokola koja uključuje novčanik, poznat kao "Satoshi klijent" ili "Bitcoin Core", koji je izveden iz originalne implementacije koju je napisao Satoši Nakamoto.
+
+==== Odabir bitkoin novčanika
+
+((("security", "wallet selection")))Bitkoin novčanici su jedna od najaktivnije razvijanih aplikacija u bitkoin ekosistemu. Konkurencija je intenzivna, tako da je vrlo moguće da se u ovom trenutku razvija novi novčanik, a nekoliko novčanika iz prošle godine se više ne održava aktivno. Mnogi novčanici se fokusiraju na jednu određenu platformu ili specifičnu upotrebu. Neki su pogodniji za početnike, dok su drugi puni funkcija za napredne korisnike. Biranje novčanika  je veoma subjektivno i zavisi od potrebe i stručnosti korisnika. Zbog toga je nemoguće preporučiti određenu marku ili novčanik. Međutim, bitkoin novčanike možemo kategorisati u skladu sa njihovom platformom i funkcijom, i dati pregled o svim vrstama novčanika koji postoje. Još bolje, premeštanje ključeva ili semena (seed) između bitkoin novčanika relativno je jednostavno, zato vredi isprobati nekoliko različitih novčanika dok ne pronađete onaj koji odgovara vašim potrebama.
+
+[role="pagebreak-before"]
+Bitkoin novčanici mogu da se kategorišu prema platformi na sledeći način:
+
+Desktop novčanik:: Desktop novčanik je prva vrsta bitkoin novčanika kreirana kao referentna implementacija i mnogi korisnici imaju desktop novčanike zbog funkcija, autonomije i kontrole koje nude. Međutim, pokretanje bitkoin aplikacije na operativnim sistemima opšte namene, kao što su Windows i Mac OS, ima određene sigurnosne nedostatke, jer su ove platforme često nesigurne i loše konfigurisane.
+
+Mobilni novčanik:: Mobilni novčanik je najčešća vrsta bitkoin novčanika. Radeći na operativnim sistemima smart telefona, kao što su Apple iOS i Android, ovi novčanici su često odličan izbor za nove korisnike. Mnogi su dizajnirani za jednostavnost i lakoću upotrebe, ali ima i maksimalno funkcionalno opremljenih mobilnih novčanika za napredne korisnike.
+
+Web novčanik:: Web novčanicama se pristupa putem web pretraživača i skladišti novčanik korisnika na server koji je u vlasništvu treće strane. Ovo je slično imejlu koji se u potpunosti oslanja na servere treće strane. Neki od ovih servisa rade pomoću koda na strani klijenta koji radi u korisničkom web pretraživaču, i drži kontrolu nad bitkoin ključevima u rukama korisnika. Međutim, većina predstavlja kompromis preuzimajući kontrolu nad bitkoin ključevima od korisnika u zamenu za jednostavniju upotrebu. Nije poželjno skladištenje velike količine bitkoina na sistemima trećih proizvođača.
+
+Hardverski novčanik:: Hardverski novčanici su uređaji koji upravljaju sigurnim samostalnim bitkoin novčanikom na hardveru posebne namene. Njima se upravlja putem USB-a sa web pretraživača na PC-u ili putem komunikacije kratkog polja (NFC) na mobilnom uređaju. Rukovanjem svim operacijama vezanim za bitkoin na specijalizovanom hardveru, ovi novčanici se smatraju vrlo sigurnim i pogodnim za čuvanje velikih količina bitkoina.
+
+Papirni novčanik:: ((("cold storage", seealso="storage")))((("storage", "cold storage")))Ključevi koji upravljaju bitkoinom mogu da se štampaju i za dugoročno skladištenje. Poznati su kao papirni novčanici, iako se mogu koristiti i drugi materijali (drvo, metal itd.). Papirni novčanici nude niskotehnološki, ali veoma siguran način dugoročnog čuvanja bitkoina. Oflajn skladište se takođe često naziva _cold storage_ ili _offline storage_.
+
+Drugi način kategorizacije bitkoin novčanika je prema stepenu njihove autonomije i kako oni komuniciraju sa bitkoin mrežom:
+
+Potpuni klijent:: (Full-node client):: ((("full-node clients")))Potpuni klijent ili pun čvor (full node), je klijent koji čuva celokupnu istoriju bitkoin transakcija (svaka transakcija svakog korisnika, ikada), upravlja korisničkim novčanicima i može da inicira transakcije direktno na bitkoin mreži. Potpuni klijent obrađuje sve aspekte protokola i može nezavisno da potvrdi celokupni blokčejn (lanac blokova ili blockchain na engleskom) i bilo koju transakciju. Potpuni klijent troši značajne računarske resurse (npr. više od 125 GB diska, 2 GB RAM-a u 2017-e i više od 240 GB 2020-e), ali nudi potpunu autonomiju i nezavisnu verifikaciju transakcija.
+
+Lagani klijent:: ((("lightweight clients")))((("simple-payment-verification (SPV)")))Lagani klijent, poznat i kao klijent jednostavne verifikacije plaćanja (simple payment verification ili SPV), povezuje se sa potpunim bitkoin klijentima (full node client; prethodno pomenuti) za pristup informacijama o bitkoin transakcijama, ali lokalno skladišti novčanik i samostalno kreira, potvrđuje i prenosi transakcije. Lagani klijenti direktno komuniciraju sa bitkoin mrežom, bez posrednika.
+
+API klijent treće strane:: ((("third-party API clients")))API klijent treće strane je onaj koji komunicira sa bitkoin mrežom preko sistemskih programskih interfejs aplikacija (API) treće strane, umesto povezivanjem direktno na bitkoin mrežu. Novčanik može da bude sačuvan kod korisnika ili na serveru treće strane (third party server), ali sve transakcije idu preko treće strane.
+
+Kombinujući ove kategorizacije, mnogi bitkoin novčanici spadaju u nekoliko grupa, a tri su najčešća: potpuni klijenti za desktop, lagani mobilni novčanik i novčanik treće strane. Linije između različitih kategorija često su mutne, jer mnogi novčanici rade na više platformi i mogu na različite načine da komuniciraju sa mrežom.
+
+Za ovu knjigu, demonstriraćemo upotrebu raznih bitkoin klijenata koji mogu da se skinu sa interneta, od referentne implementacije (Bitcoin Core) do mobilnih i web novčanika. Neki od primera zahtevaju korišćenje Bitcoin Core-a, pored toga što je potpuni klijent (full node), takođe eksponira API-je u novčaniku, mreži i uslugama transakcija. Ako planirate da istražite programske interfejse u bitkoin sistemu, moraćete da pokrenete Bitcoin Core ili neki od alternativnih klijenata (see <<alt_libraries>>).((("", startref="GSwallet01")))((("", startref="Wselect01")))
+
+==== Brzi start
+
+((("getting started", "quick start example", id="GSquick01")))((("wallets", "quick start example", id="Wquick01")))((("use cases", "buying coffee", id="aliceone")))Alisa, koju smo predstavili u <<user-stories>>, nije tehnički korisnik i tek je nedavno čula za bitkoin od prijatelja Džoa. Na jednoj žurci je Džo sa oduševljenjem govorio o bitkoinu svima oko sebe i ponudio demonstraciju. Alisa je zainteresovano upitala kako može da počne sa korišćenjem bitkoina. Džo joj je rekao da je mobilni novčanik najbolji za nove korisnike, i preporučio joj nekoliko njegovih omiljenih novčanika. Alisa je preuzela "Mycelium" za Android i instalirala ga na svoj telefon.
+
+Kada je Alisa prvi put pokrenula Mycelium, kao i kod mnogih bitkoin novčanika, aplikacija automatski stvorila novi novčanik za nju. Alisa vidi novčanik na svom ekranu, kao što je prikazano u  <<mycelium-welcome>> (napomena: _ne_ šaljite bitkoine na ovu adresu koja se koristi kao primer, jer će biti zauvek izgubljeni).
+
+[[mycelium-welcome]]
+.Mycelium mobilni novčanik
+image::images/mbc2_0101.png["MyceliumWelcome"]
+
+((("addresses", "bitcoin wallet quick start example")))((("QR codes", "bitcoin wallet quick start example")))((("addresses", see="also keys and addresses")))Najvažniji deo ovog ekrana je Alisina _bitkoin adresa_. Na ekranu se pojavljuje kao dugačak niz slova i brojeva: +1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK+. Pored bitkoin adrese novčanika nalazi se i QR kod (ili matrični kod), sličan bar kodu, koji sadrži iste informacije u formatu koji mogu da se skeniraju kamerom smart telefona. QR kod je kvadrat sa šarom crno-belih tačaka. Alisa može da kopira bitkoin adresu ili QR kod i da je sačuva u memoriji (clipboard) dodirom na QR kod ili dugme Receive. U većini novčanika dodirom na QR kod, on se povećava da bi ga kamera smart telefona lakše skenirala. 
+
+[TIP]
+====
+((("addresses", "security of")))((("security", "bitcoin addresses")))Bitkoin adrese počinju sa 1 ili 3. Kao i imejl adrese, mogu se deliti sa drugim korisnicima bitkoina koji ih mogu koristiti za slanje bitkoina direktno u vaš novčanik. Iz sigurnosne perspektive, nema ništa problematično u vezi sa bitkoin adresom. Može se objaviti bilo gde, a da se ne rizikuje sigurnost računa. Za razliku od imejl adresa, nove adrese možete kreirati onoliko često koliko želite, i sve će usmeriti poslate bitkoine u vaš novčanik. Ustvari, mnogi moderni novčanici automatski kreiraju novu adresu za svaku transakciju kako bi maksimizovali privatnost. Novčanik je jednostavno kolekcija adresa i ključeva koji otključavaju sredstva vezana za njih.
+====
+
+Alisa može da primi bitkoine. Njena aplikacija u novčaniku je generisala nasumični privatni ključ (detaljnije je opisano u <<private_keys>>) zajedno sa odgovarajućom bitkoin adresom. U ovom trenutku, njena bitkoin adresa nije poznata bitkoin mreži, niti je „registrovana“ za bilo koji deo bitkoin sistema. Njena bitkoin adresa je jednostavno broj koji odgovara ključu koji može da koristi za kontrolu pristupa svojim bitkoinima. Adresu je sam od sebe kreirao njen novčanik, bez podataka o registraciji u bilo kom dodatnom servisu. U stvari, u većini novčanika ne postoji povezanost između bitkoin adrese i bilo kakvih spoljnih podataka koji uključuju identitet korisnika. Sve do trenutka kada se ova adresa navodi kao primalac vrednosti u transakciji koja je objavljena na glavnoj knjizi bitkoina, bitkoin adresa je jednostavno deo ogromnog broja mogućih adresa koje su validne u bitkoinu. Tek kada je povezana sa nekom transakcijom, ona postaje deo poznatih adresa u mreži.
+
+Alisa sada može da počne sa korišćenjem svog novog bitkoin novčanika.((("", startref="GSquick01")))((("", startref="Wquick01")))
+
+[[getting_first_bitcoin]]
+==== Dobijanje prvog bitkoina
+
+((("getting started", "acquiring bitcoin")))Prvi i često najteži zadatak novih korisnika je da nabave bitkoine. Za razliku od drugih stranih valuta, bitkoin još ne možete da kupite u banci ili deviznoj menjačnici.
+
+Transakcije u bitkoinu su nepovratne. Većina elektronskih platnih mreža kao što su kreditne kartice, debitne kartice, PayPal i transferi sa bankovnih računa su povratni. Za nekoga ko prodaje bitkoin, ova razlika uvodi veoma visok rizik da će kupac preokrenuti elektronsko plaćanje nakon što je primio bitkoin, čime bi prevario prodavca. Da bi umanjili ovaj rizik, kompanije koje prihvataju tradicionalna elektronska plaćanja u zamenu za bitkoin obično zahtevaju od kupaca da prođu proveru identiteta i proveru kreditnog rejtinga, što može potrajati nekoliko dana ili nedelja. Kao novi korisnik, to znači da ne možete odmah da kupite bitkoin kreditnom karticom. Uz malo strpljenja i kreativnog razmišljanja nećete ni morati.
+
+[role="pagebreak-before"]
+Evo nekoliko načina za sticanje bitkoina kao novi korisnik:
+
+* Pronađite prijatelja koji ima bitkoin i kupite ga direktno od njega ili nje. Mnogi korisnici bitkoina započinju na ovaj način. Ovaj metod je najmanje komplikovan. Jedan od načina da se upoznaju ljudi sa bitkoinom je prisustvovanje lokalnom sastanku na temu bitkoina, navedenom na https://bitcoin.meetup.com/[Meetup.com].
+* Koristite oglase kao što je pass: [https://localbitcoins.com/] da biste pronašli prodavca u vašoj okolini kako biste kupili bitkoin za gotovinu na licu mesta u direktnoj transakciji sa tom osobom. 
+* Zaradite bitkoin prodajom proizvoda ili usluga za bitkoin. Ako ste programer, prodajte svoje veštine programiranja. Ako ste frizer, ošišajte kosu za bitkoin.
+* ((("Coin ATM Radar")))((("ATMs, locating")))Koristite bitkoin bankomat u svom gradu. Bitkoin bankomat je mašina koja prihvata gotovinu i šalje bitkoin u vaš bitkoin novčanik smart telefona. Pronađite bitkoin bankomat koji vam je blizu koristeći mrežnu mapu sa https://coinatmradar.com/[Coin ATM Radar].
+* ((("exchange rates", "listing services")))Koristite menjačnicu bitkoina koja je povezana sa vašim bankarskim računom. Mnoge zemlje sada imaju menjačnice koje nude kupcima i prodavcima tržište za zamenu bitkoina sa lokalnom valutom. Usluge kotiranja deviznog kursa, poput https://bitcoinaverage.com/[BitcoinAverage], često prikazuju listu razmena bitkoina za svaku valutu.
+
+[TIP]
+====
+((("privacy, maintaining")))((("security", "maintaining privacy")))((("digital currencies", "currency exchanges")))((("currency exchanges")))((("digital currencies", "benefits of bitcoin")))((("bitcoin", "benefits of")))Jedna od prednosti bitkona u odnosu na ostale platne sisteme je što, ako se pravilno koristi, pruža korisnicima mnogo više privatnosti. Nabavka, zadržavanje i trošenje bitkoina ne zahteva od vas da delite osetljive i lično identifikujuće informacije sa trećim licima. Međutim, tamo gde bitkoin dodiruje tradicionalne sisteme, poput razmene valuta, često se primenjuju nacionalni i međunarodni propisi. Da biste razmenili bitkoin za svoju nacionalnu valutu, često će se od vas zahtevati da dostavite dokaz o identitetu i bankarskim podacima. Korisnici bi trebalo da budu svesni da nakon što se bitkoin adresa asocira sa njihovim identitetom, sve bitkoin transakcije sa te bitkoin adrese je lako prepoznati i pratiti. To je jedan od razloga što se mnogi korisnici odluče da održavaju bitkoin adrese deviznih računa odvojeno od svog novčanika.
+====
+
+Alisa se preko prijatelja upoznala sa bitkoinom, tako da je ona imala jednostavan način da nabavi svoj prvi bitkoin. Posle ćemo videti kako ona kupuje bitkoin od svog prijatelja Džoa i kako on šalje bitkoin u njen novčanik.
+
+[[bitcoin_price]]
+==== Pronalaženje trenutne cene bitkoina
+
+((("getting started", "exchange rates")))((("exchange rates", "determining")))Pre nego što Alisa kupi bitkoin od Džoa, oni moraju da se dogovore o _deviznom kursu_ između bitkoina i američkih dolara. Ovo postavlja često pitanje za nove korisnika bitkoina: "Ko postavlja cenu bitkoina?" Kratak odgovor je da cenu određuju tržišta.
+
+((("exchange rates", "floating")))((("floating exchange rate")))Bitkoin kao i većina drugih valuta, ima _promenjiv kurs_. To znači da vrednost bitkoina u odnosu na bilo koju drugu valutu varira u skladu sa ponudom i potražnjom na različitim tržištima na kojima se trguje. Na primer, "cena“ bitkoina u američkim dolarima izračunava se na svakom tržištu na osnovu najnovije trgovine bitkoinom i američkim dolarima. Kao takva, cena obično varira nekoliko puta u sekundi. Usluga određivanja cena objediniće cene sa nekoliko tržišta i izračunati količinsko-ponderisani prosek (volume-weighted average), koji predstavlja tržišni kurs valutnog para (npr. BTC/USD).
+
+Postoje stotine aplikacija i web stranica koje mogu da pruže trenutnu tržišnu stopu. Evo nekih od najpopularnijih:
+
+https://bitcoinaverage.com/[Bitcoin Average]:: ((("BitcoinAverage")))Web stranica koja pruža jednostavan prikaz količinsko ponderisanog proseka za svaku valutu.
+https://coincap.io/[CoinCap]:: Usluga koja navodi tržišnu kapitalizaciju i kurs stotina kripto-valuta, uključujući bitkoin.
+https://bit.ly/cmebrr[Chicago Mercantile Exchange Bitcoin Reference Rate]:: Referentna stopa koja može da se koristi za institucionalnu i ugovornu referencu. Pruža se kao deo izliva podataka o investiranju od strane CME (Chicago Mercantile Exchange).
+
+Pored različitih web stranica i aplikacija, većina bitkoin novčanika automatski će pretvoriti iznose između bitkoina i drugih valuta. Džo će koristiti svoj novčanik da automatski pretvori novčani iznos u bitkoin pre nego što ga pošalje Alisi.
+
+[[sending_receiving]]
+==== Slanje i primanje bitkoina
+
+
+((("getting started", "sending and receiving bitcoin", id="GSsend01")))((("spending bitcoin", "bitcoin wallet quick start example")))((("spending bitcoin", see="also transactions")))Alisa je odlučila da razmeni 10 američkih dolara za bitkoin, da ne rizikuje ulažuči više novca u ovu novu tehnologiju. Ona je dala Džou gotovinu u iznosu od 10 dolara, zatim je otvorila aplikaciju Mycelium novčanik i izabrala opciju Receive. Na displeju se pojavio QR kod sa Alisinom prvom bitkoin adresom.
+
+Zatim Džo pritišće Send na novčaniku svog smart telefona, koji se na ekranu vidi kao dva polja za unos podataka:
+
+* Destinacija bitkoin adrese
+* Iznos koji se šalje u bitkoinu (BTC) ili u njegovoj lokalnoj valuti (USD)
+
+U polju za unos bitkoin adrese nalazi se mala ikona koja izgleda kao QR kod. To omogućava Džou da skenira bar kod kamerom na njegovom smart telefonu, tako da ne mora unositi Alisinu bitkoin adresu, koja je prilično dugačka i teška za kucanje. Kada Džo dodirne ikonicu QR kod aktivira kameru smart telefona skenirajući QR koji je prikazan na Alisinom smart telefonu.
+
+Džo je Alisinu bitkoin adresu stavio kao primaoca. Džo unosi iznos od 10 američkih dolara, a novčanik ga pretvara u bitkoine koristeći najnoviji kurs putem internetske usluge. Tada kurs iznosi 100 američkih dolara po bitkoinu, tako da 10 USD vredi 0,10 bitkoina (BTC), ili 100 milibitkoina (mBTC), kao što je prikazano na slici iz Džoovog novčanika (vidi <<airbitz-mobile-send>>).
+
+[[airbitz-mobile-send]]
+[role="smallereighty"]
+.Prikaz ekrana za slanje u aplikaciji bitkoin novčanika Airbitz na smart telefonu
+image::images/mbc2_0102.png["Airbitz mobilni ekran za slanje"]
+
+Zatim, Džo pažljivo proverava da li je uneo tačan iznos, jer će uskoro da prebaci novac, a greške su nepovratne. Nakon dvostruke provere adrese i iznosa, pritišće Send da pošalje transakciju. Džoov mobilni bitkoin novčanik konstruiše transakciju koja dodeljuje 0,10 BTC na adresu koju mu je pružila Alisa, prikupljajući sredstva iz Džoovog novčanika i potpisujući transakciju Džoovim privatnim ključevima. To govori bitkoin mreži da je Džo odobrio prenos vrednosti na Alisinu novu adresu. Kako se transakcija prenosi putem peer-to-peer protokola, ona se brzo širi preko bitkoin mreže. Za manje od sekunde, većina dobro povezanih bitkoin čvorova (bitkoin nodes) u mreži prima transakciju i prvi put vidi Alisinu adresu.
+
+U međuvremenu Alisin novčanik neprestano "preslušava" objavljene transakcije na bitkoin mreži, tražeći koje odgovaraju adresama u njenim novčanicima. Nekoliko sekundi nakon što Džoov novčanik završi transakciju, Alisin novčanik će prikazati da prima 0,10 BTC.
+
+.Potvrde
+****
+((("getting started", "confirmations")))((("confirmations", "bitcoin wallet quick start example")))((("confirmations", see="also mining and consensus; transactions")))((("clearing", seealso="confirmations")))Alisina adresa će u početku prikazati transakciju od Džoa kao "Unconfirmed" (nepotvrđena). To znači da se transakcija proširila na mreži, ali još nije zabeležena u knjizi bitkoin transakcija, poznatoj kao blokčejn. Da bi se potvrdila, transakcija mora biti uključena u blok i dodata blokčejnu, što se dešava u proseku svakih 10 minuta. U tradicionalnom finansijskom smislu ovo je poznato kao _clearing_ (kliring ili potvrđivanje). Za više detalja o širenju, validaciji i kliringu (potvrdivanju) bitkoin transakcija, pogledajte <<mining>>.
+****
+
+Alisa je postala ponosna vlasnica 0,10 BTC koje može da potroši. U sledećem poglavlju videćemo njenu prvu kupovinu putem bitkoina, ali ćemo i detaljnije ispitati tehnologije transakcija i njenog širenja.((("", startref="BCbasic01")))((("use cases", "buying coffee", startref="aliceone")))

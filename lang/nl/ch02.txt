@@ -1,0 +1,288 @@
+[[Ch02_bitcoin_overview]]
+== Hoe Bitcoin werkt
+
+=== Transacties, Blokken, Mijnen en de Blockchain
+
+(((&quot;bitcoin&quot;, &quot;overview of&quot;, id = &quot;BCover02&quot;))) (((centrale vertrouwde instantie)))) (((decentrale systemen &quot;,&quot; bitcoin overzicht &quot;, id =&quot; DCSover02 &quot;) )) Het bitcoin systeem is, in tegenstelling tot traditionele bank- en betalingssystemen, gebaseerd op gedecentraliseerd vertrouwen. In plaats van een centrale vertrouwde autoriteit wordt in bitcoin vertrouwen verkregen als een emergente eigenschap van de interacties van de verschillende deelnemers in het bitcoin systeem. In dit hoofdstuk zullen we bitcoin van een hoog niveau onderzoeken door een enkele transactie te volgen via het bitcoin systeem en gaan bekijken als het &quot;vertrouwd&quot; en geaccepteerd wordt door het bitcoin mechanisme van gedistribueerde consensus en uiteindelijk wordt vastgelegd op de blockchain, het gedistribueerde grootboek van alle transacties. Latere hoofdstukken zullen ingaan op de technologie achter transacties, het netwerk en mijnen.
+
+==== Bitcoin overzicht
+
+In het overzichtsschema in &lt; <bitcoin-overview> &gt;, zien we dat het bitcoin systeem bestaat uit gebruikers met portemonnees die sleutels bevatten, transacties die over het netwerk worden verspreid en mijners die (via competitieve berekening) de consensus blockchain produceren, die het gezaghebbende grootboek van alle transacties is.
+
+
+(((&quot;blockchain explorer-sites&quot;))) Elk voorbeeld in dit hoofdstuk is gebaseerd op een daadwerkelijke transactie die is uitgevoerd op het bitcoin-netwerk, waarbij de interacties tussen de gebruikers (Joe, Alice, Bob en Gopesh) worden gesimuleerd door het verzenden van geld van één portefeuille naar de andere. Bij het volgen van een transactie via het bitcoin netwerk naar de blockchain, gebruiken we een "blockchain verkenner" site om elke stap te visualiseren. Een blockchain verkenner is een web toepassing die als een bitcoin zoekmachine werkt, in die zin dat u kunt zoeken naar adressen, transacties en blokken en de relaties en stromen ertussen kunt zien.
+
+[[Bitcoin-overzicht]]
+.Bitcoin overzicht
+afbeelding :: images / mbc2_0201.png [&quot;Bitcoin-overzicht&quot;]
+
+(((&quot;Bitcoin Block Explorer&quot;))) (((&quot;BlockCypher Explorer&quot;))) (((blockchain.info)))) (((&quot;BitPay Insight&quot;))) Populaire blockchain verkenners omvatten:
+
+* https://live.blockcypher.com [BlockCypher Explorer]
+* https://blockchain.info [blockchain.info]
+* https://insight.bitpay.com [BitPay Insight]
+* https://blockstream.info [Blockstream Explorer]
+
+Elk van deze verkenners heeft een zoekfunctie die een bitcoin adres, transactiehash, bloknummer of blokhash kan aannemen en bijbehorende informatie van het bitcoin netwerk kan ophalen. Bij elk transactie- of blokvoorbeeld zullen we een URL opgeven zodat u het zelf kunt opzoeken en in detail kunt bestuderen.
+
+
+[[kop koffie]]
+==== Een kop koffie kopen
+
+(((use cases &quot;,&quot; buying coffee &quot;, id =&quot; UCcoffee02 &quot;))) Alice, geïntroduceerd in het vorige hoofdstuk, is een nieuwe gebruiker die net haar eerste bitcoin heeft verworven. In &lt; <getting_first_bitcoin> &gt;, Alice ontmoette haar vriend Joe om geld in te wisselen voor bitcoin. De transactie gemaakt doordat Joe de portefeuille van Alice financierde met 0,10 BTC. Nu zal Alice haar eerste transactie in de detailhandel doen door een kopje koffie te kopen in Bob&#39;s coffeeshop in Palo Alto, Californië.
+
+(((&quot;wisselkoersen&quot;, &quot;bepalen&quot;))) Bob&#39;s Cafe is onlangs begonnen met het accepteren van bitcoin betalingen door een bitcoin optie toe te voegen aan het kassasysteem. De prijzen bij Bob&#39;s Cafe worden in de lokale valuta (US dollars) vermeld, maar bij de kassa hebben klanten de mogelijkheid om in dollars of bitcoin te betalen. Alice plaatst haar bestelling voor een kopje koffie en Bob voert het in het register in, zoals hij voor alle transacties doet. Het kassasysteem converteert de totale prijs automatisch van Amerikaanse dollars naar bitcoin tegen de geldende marktrente en geeft de prijs in beide valuta weer:
+
+----
+Totaal:
+$ 1,50 USD
+0.015 BTC
+----
+
+
+((millibits)))) Bob zegt: &quot;Dat is één dollar vijftig of vijftien millibits.&quot;
+
+(((&quot;betalingsaanvragen&quot;))) (((QR-codes &quot;,&quot; betalingsverzoeken &quot;))) Bob&#39;s verkoop systeem (POS) maakt automatisch een speciale QR code met een "betalingsverzoek" (zie &lt; <payment-request-QR> &gt;).
+
+In tegenstelling tot een QR code die eenvoudigweg een bitcoin adres van een bestemming bevat, is een betalingsverzoek een QR gecodeerde URL die een bestemmingsadres, een betalingsbedrag en een generieke beschrijving zoals &#39;Bob&#39;s Cafe&#39; bevat. Hierdoor kan een bitcoin portefeuille toepassing de informatie die wordt gebruikt om de betaling te verzenden, vooraf invullen en een door de mens leesbare beschrijving voor de gebruiker weergeven. U kunt de QR code scannen met een bitcoin portefeuille toepassing om te zien wat Alice zou zien.
+
+
+[[Betaalverzoek QR]]
+Betaalverzoek QR code
+image :: images / mbc2_0202.png [ &quot;payment-request&quot;]
+
+[TIP]
+====
+(((&quot;QR-codes&quot;, &quot;waarschuwingen en voorzorgsmaatregelen&quot;))) (((&quot;transacties&quot;, &quot;waarschuwingen en voorzorgsmaatregelen&quot;))) (((waarschuwingen en waarschuwingen &quot;,&quot; vermijd het verzenden van geld naar adressen die in het boek gebruikt worden &quot; ))) Probeer dit te scannen met uw portemonnee om het adres en het bedrag te zien, maar verzend GEEN geld.
+====
+[[Betaal verzoek URL]]
+De QR-code van het betaal verzoek codeert de volgende URL, gedefinieerd in BIP-21:
+----
+Bitcoin: 1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA?
+amount = 0,015 &amp;
+label = Bob% 27s% 20Cafe &amp;
+message = Purchase% 20AT% 20Bob% 27s% 20Cafe
+
+Onderdelen van de URL
+
+Een bitcoin-adres: &quot;1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA&quot;
+Het betalingsbedrag: &quot;0.015&quot;
+Een label voor het adres van de ontvanger: &quot;Bob&#39;s Cafe&quot;
+Een beschrijving voor de betaling: &quot;Aankoop in Bob&#39;s Cafe&quot;
+----
+
+Alice gebruikt haar smartphone om de streepjescode op het scherm te scannen. Haar smartphone toont een betaling van +0.0150 BTC + tot + Bob&#39;s Cafe + en zij selecteert Verzenden om de betaling te autoriseren. Binnen een paar seconden (ongeveer dezelfde hoeveelheid tijd als een creditcard autorisatie) ziet Bob de transactie in het register en voltooit de transactie.
+
+In de volgende paragrafen zullen we deze transactie in meer detail bekijken. We zullen zien hoe de portemonnee van Alice het heeft geconstrueerd, hoe het werd gepropageerd over het netwerk, hoe het werd geverifieerd en, tot slot, hoe Bob dat bedrag in latere transacties kan uitgeven.
+
+[NOTITIE]
+====
+(((&quot;fractionele waarden&quot;))) (((&quot;milli-bitcoin&quot;))) (((&quot;satoshis&quot;))) Het bitcoin-netwerk kan transacties uitvoeren in fractionele waarden, bijv. van millibitcoin (1/1000ste bitcoin ) tot 1 / 100.000.000ste van een bitcoin, die bekend staat als een satoshi. In dit boek gebruiken we de term &quot;bitcoin&quot; om te verwijzen naar elke hoeveelheid bitcoin valuta, van de kleinste eenheid (1 satoshi) tot het totale aantal (21.000.000) van alle bitcoin die ooit wordt gedolven.
+====
+
+U kunt de transactie van Alice naar Bob&#39;s Cafe op de blockchain onderzoeken met behulp van een block explorer-site (&lt; <view_alice_transaction> &gt;):
+
+[[View_alice_transaction]]
+Bekijk de transactie van Alice op https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[blockchain.info]
+====
+----
+https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2
+----
+====
+
+=== Bitcoin transacties
+
+(((&quot;transacties&quot;, &quot;gedefinieerd&quot;))) In eenvoudige termen verteld een transactie het netwerk dat de eigenaar van een bitcoin waarde toestemming heeft gegeven voor de overdracht van die waarde aan een andere eigenaar. De nieuwe eigenaar kan nu de bitcoin uitgeven door een nieuwe transactie te maken die de overdracht aan een andere eigenaar toestaat, enzovoort, in een keten van eigendom.
+
+==== Transactie invoer en uitvoer
+
+(((&quot;transactions&quot;, &quot;overview of&quot;, id = &quot;Tover02&quot;))) (((outputs en inputs &quot;,&quot; basics of &quot;))) Transacties zijn als lijnen in een dubbele boekhouding. Elke transactie bevat één of meer quot;ingangen&quot;, die als afschrijvingen op een bitcoin rekening zijn. Aan de andere kant van de transactie zijn er een of meer &quot;outputs&quot;, die vergelijkbaar zijn met de creditering die aan een bitcoin account zijn toegevoegd. (((vergoedingen &quot;,&quot; transactiekosten &quot;))) De in- en uitvoer (debitering en creditering) komen niet noodzakelijkerwijs overeen met hetzelfde bedrag. In plaats daarvan worden uitvoer opgeteld tot iets minder dan inputs en vertegenwoordigt het verschil een impliciete transactie vergoeding, wat een kleine betaling is die verzameld wordt door de mijner die de transactie in het grootboek vastlegt. Een bitcoin transactie wordt weergegeven als een boekhoudregel in &lt; <transaction-double-entry> &gt;.
+
+De transactie bevat ook een eigendomsbewijs voor elk bedrag aan bitcoin (invoer) waarvan de waarde wordt uitgegeven, in de vorm van een digitale handtekening van de eigenaar, die onafhankelijk door iemand kan worden gevalideerd. (((&quot;spending bitcoin&quot;, &quot;defined&quot;))) In bitcoin termen is &quot;uitgeven&quot; het ondertekenen van een transactie die waarde overdraagt van een vorige transactie naar een nieuwe eigenaar die wordt geïdentificeerd door een bitcoin adres.
+
+[[Transaction-double-entry]]
+Transactie als dubbel boekhouden
+afbeelding :: images / mbc2_0203.png [&quot;Transactie dubbele invoer&quot;]
+
+==== Transactieketens
+
+(((&quot;transactieketen&quot;))) De betaling van Alice aan Bob&#39;s Cafe gebruikt de uitvoer van een eerdere transactie als invoer. In het vorige hoofdstuk ontving Alice bitcoin van haar vriend Joe in ruil voor geld. Die transactie heeft een bitcoin waarde gecreëerd die door de sleutel van Alice is vergrendeld. Haar nieuwe transactie aan Bob&#39;s Cafe verwijst naar de vorige transactie als een input en creëert nieuwe outputs om de kop koffie te betalen en de ontvangst van het wisselgeld. De transacties vormen een keten, waarbij de invoer van de laatste transactie overeenkomt met de resultaten van eerdere transacties. De sleutel van Alice biedt de handtekening die de vorige transactie uitvoer ontgrendelt, waarmee het bitcoin netwerk bewijst dat zij de fondsen bezit. Zij betaalt de betaling voor koffie aan het adres van Bob, waardoor deze uitvoer wordt &#39;belast&#39; met de vereiste dat Bob een handtekening maakt om dat bedrag te besteden. Dit vertegenwoordigt een overdracht van waarde tussen Alice en Bob. Deze reeks transacties, van Joe tot Alice tot Bob, wordt geïllustreerd in &lt; <blockchain-mnemonic> &gt;.
+
+[[Blockchain mnemonisch]]
+. Een keten van transacties waarbij de uitvoer van één transactie de invoer is van de volgende transactie
+afbeelding :: images / mbc2_0204.png [&quot;Transactieketen&quot;]
+
+==== Veranderingen aanbrengen
+
+(((veranderen, maken &quot;))) (((verander adressen)))) (((adressen&quot;, &quot;verander adressen&quot;))) Veel bitcoin transacties zullen uitvoer bevatten die verwijzen naar zowel een adres van de nieuwe eigenaar en een adres van de huidige eigenaar, genaamd het wissel-adres. Dit komt omdat transactie invoer, zoals bankbiljetten, niet verdeeld kunnen worden. Als u een artikel van $ 5 in een winkel koopt, maar een rekening van USD 20 gebruikt om het artikel te betalen, verwacht u $ 15 dollar te ontvangen. Hetzelfde concept is van toepassing op bitcoin transactie invoer. Als u een item hebt gekocht dat 5 bitcoin kost maar slechts 20 bitcoin invoer heeft om te gebruiken, stuurt u één uitvoer van 5 bitcoin naar de winkeleigenaar en één uitvoer van 15 bitcoin terug naar uzelf als wijziging (minus enige toepasselijke transactiekosten). Belangrijk is dat het wijzigingsadres niet hetzelfde adres hoeft te zijn als dat van de invoer en om privacyredenen vaak een nieuw adres is uit de portefeuille van de eigenaar.
+
+Verschillende portefeuilles kunnen verschillende strategieën gebruiken bij het samenvoegen van invoer om een door de gebruiker gevraagde betaling te verrichten. Ze kunnen veel kleine ingangen samenvoegen of er één gebruiken die gelijk is aan of groter is dan de gewenste betaling. Tenzij de portefeuille invoer zodanig kan aggregeren dat ze precies overeenkomen met de gewenste betaling plus transactiekosten, zal de portefeuille enig wisselgeld moeten genereren. Dit lijkt erg veel op hoe mensen met contant geld omgaan. Als u altijd het grootste biljet gebruikt, krijgt u een zak vol los wisselgeld. Als u alleen los wisselgeld gebruikt, heeft u altijd alleen maar grote biljetten. Mensen vinden onbewust een balans tussen deze twee uitersten, en ontwikkelaars van bitcoin portefeuilles streven ernaar om dit evenwicht te programmeren.
+
+(((&quot;transacties&quot;, &quot;defined&quot;))) (((&quot;outputs en inputs&quot;, &quot;defined&quot;))) (((&quot;inputs&quot;, zie = &quot;outputs en inputs&quot;))) Samengevat, "transactions" verplaatsen waarde van transactie invoer naar transactie uitvoer. Een invoer is een verwijzing naar de uitvoer van een eerdere transactie, die aangeeft waar de waarde vandaan komt. Een transactie uitvoer stuurt een specifieke waarde naar het bitcoin adres van een nieuwe eigenaar en kan een uitvoer van wijzigingen bevatten naar de oorspronkelijke eigenaar. Uitvoer van één transactie kan worden gebruikt als invoer in een nieuwe transactie, waardoor een keten van eigendom ontstaat wanneer de waarde van eigenaar naar eigenaar wordt verplaatst (zie &lt; <blockchain-mnemonic> &gt;).
+
+==== Veel voorkomende transactieformulieren
+
+De meest gebruikelijke vorm van transactie is een eenvoudige betaling van het ene adres naar het andere, waarbij vaak enig &quot;wisselgeld&quot; wordt teruggegeven aan de oorspronkelijke eigenaar. Dit type transactie heeft één invoer en twee keer uitvoer en wordt weergegeven in &lt; <transaction-common> &gt;.
+
+[[Transaction-common]]
+De meest gebruikelijke transactie
+afbeelding :: images / mbc2_0205.png [&quot;Algemene transactie&quot;]
+
+Een andere veelvoorkomende vorm van transactie is een transactie waarbij meer dan één invoer worden samengevoegd tot één enkele uitvoer (zie &lt; <transaction-aggregating> &gt;). Dit vertegenwoordigt in de praktijk het equivalent van het uitwisselen van een stapel munten en bankbiljetten voor een groter biljet. Transacties zoals deze worden soms gegenereerd door portefeuille toepassingen om vele kleinere bedragen op te schonen die als wisselgeld voor betalingen zijn ontvangen.
+
+[[Transaction-aggregerende]]
+Transactie aggregatie van fondsen
+afbeelding :: images / mbc2_0206.png [&quot;Aggregating Transaction&quot;]
+
+Ten slotte is een andere vorm van transactie die vaak in het bitcoin grootboek wordt gezien, een transactie die één invoer naar meer dan één uitvoer verdeelt die meerdere ontvangers vertegenwoordigen (zie &lt; <transaction-distributing> &gt;). Dit type transactie wordt soms door commerciële entiteiten gebruikt om geld te verdelen, zoals bij het verwerken van loonbetalingen aan meerdere werknemers. (((&quot;&quot;, Startref = &quot;Tover02&quot;)))
+
+[[Transaction-verdelende]]
+Fondsen verdelende transactie
+afbeelding :: images / mbc2_0207.png [&quot;Distributing Transaction&quot;]
+
+=== Een transactie construeren
+
+(((transacties &quot;,&quot; construeren &quot;, id =&quot; Tconstruct02 &quot;))) (((portefeuilles&quot;, &quot;construeren van transacties&quot;))) Alice&#39;s portefeuille toepassing bevat alle logica voor het selecteren van de juiste invoer en uitvoer om een transactie op te bouwen volgens de specificatie van Alice. Alice hoeft alleen een bestemming en een hoeveelheid op te geven, en de rest gebeurt in de portefeuille toepassing zonder dat ze de details ziet. Belangrijk is dat een portefeuille toepassing transacties kan bouwen, zelfs als deze volledig offline is. Net zoals het thuis uitschrijven van een cheque en deze later naar de bank sturen in een envelop, hoeft de transactie niet te worden geconstrueerd en ondertekend terwijl deze verbonden is met het bitcoin netwerk.
+
+==== De juiste invoer krijgen
+
+(((&quot;outputs and inputs&quot;, &quot;locating and tracking inputs&quot;))) De portefeuille toepassing van Alice zal eerst invoer moeten vinden die het bedrag kan betalen dat ze naar Bob wil verzenden. De meeste portefeuilles houden alle beschikbare uitvoer bij die tot de adressen in de portefeuille behoren. Daarom bevat de portefeuille van Alice een kopie van de transactie uitvoer van de transactie van Joe, die gemaakt is in ruil voor contanten (zie &lt; <getting_first_bitcoin> &gt;). Een bitcoin portefeuille toepassing die als een volledige cliënt knooppunt wordt uitgevoerd, bevat feitelijk een kopie van elke ongebruikte uitvoer van elke transactie in de blockchain. Hierdoor kan een portemonnee transactie invoer construeren en binnenkomende transacties snel verifiëren als zijnde correct ingevoerd. Omdat een cliënt met een volledig knooppunt echter veel schijfruimte in beslag neemt, hebben de meeste portefeuilles van gebruikers &#39;lichtgewicht&#39; cliënten die alleen de eigen niet uitgegeven uitvoer van de gebruiker bijhouden.
+
+Als de portefeuilletoepassing geen kopie bijhoudt van niet-uitgegeven transactie-uitgangen, kan deze het bitcoin-netwerk vragen deze informatie op te halen met behulp van een verscheidenheid aan API&#39;s die door verschillende providers beschikbaar zijn of door een volledig knooppunt te vragen met behulp van een API-aanroep (application programming interface). &lt; <example_2-2> &gt; toont een API-verzoek, geconstrueerd als een HTTP GET-opdracht voor een specifieke URL. Deze URL retourneert alle niet-uitgegeven transactie-uitgangen voor een adres, waardoor elke toepassing de informatie krijgt die nodig is om transactie-ingangen voor uitgaven te construeren. We gebruiken de eenvoudige HTTP-clientclient _cURL_ om het antwoord op te halen.
+
+[[Example_2-2]]
+.Klik op alle ongebruikte uitgangen voor Alice&#39;s bitcoin-adres
+====
+[Bron, dreun]
+----
+$ curl https://blockchain.info/unspent?active=1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK
+----
+====
+
+[Bron, json]
+----
+{
+
+	&quot;Unspent_outputs&quot;: [
+
+		{
+			&quot;Tx_hash&quot;: &quot;186f9f998a5 ... 2836dd734d2804fe65fa35779&quot;,
+			&quot;Tx_index&quot;: 104810202,
+			&quot;tx_output_n&quot;: 0,
+			&quot;Script&quot;: &quot;76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac&quot;,
+			&quot;waarde&quot;: 10000000,
+			&quot;value_hex&quot;: &quot;00989680&quot;,
+			&quot;Bevestiging&quot;: 0
+		}
+
+	]
+}
+----
+
+
+Het antwoord in &lt; <example_2-2> &gt; toont één niet-uitgegeven uitvoer (een die nog niet is ingewisseld) onder het eigendom van het adres van Alice + 1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK +. Het antwoord bevat de verwijzing naar de transactie waarbij deze niet-uitgegeven uitvoer is inbegrepen (de betaling van Joe) en de waarde in satoshis, op 10 miljoen, gelijk aan 0.10 bitcoin. Met deze informatie kan de portefeuilletoepassing van Alice een transactie construeren om die waarde over te dragen naar nieuwe eigenaaradressen.
+
+[TIP]
+====
+Bekijk de https://www.blockchain.com/btc/tx/7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18[transaction van Joe naar Alice].
+====
+
+Zoals je ziet, bevat Alice&#39;s portemonnee genoeg bitcoin in een enkele niet-uitgegeven output om voor de kop koffie te betalen. Als dit niet het geval was geweest, zou de portefeuilletoepassing van Alice misschien moeten &quot;snuffelen&quot; door een stapel kleinere, niet-uitgegeven uitgaves, zoals munten uit een portemonnee plukken totdat deze genoeg zou kunnen vinden om de koffie te betalen. In beide gevallen kan het nodig zijn om iets terug te krijgen, wat we in de volgende sectie zullen zien, aangezien de portefeuilletoepassing de transactie-outputs creëert (betalingen).
+
+
+==== De uitgangen maken
+
+((("outputs and inputs", "creating outputs")))A transaction output is created in the form of a script that creates an encumbrance on the value and can only be redeemed by the introduction of a solution to the script. In simpler terms, Alice's transaction output will contain a script that says something like, "This output is payable to whoever can present a signature from the key corresponding to Bob's address." Because only Bob has the wallet with the keys corresponding to that address, only Bob's wallet can present such a signature to redeem this output. Alice will therefore "encumber" the output value with a demand for a signature from Bob.
+
+Deze transactie zal ook een tweede output bevatten, omdat Alice&#39;s fondsen de vorm hebben van een 0,10 BTC-output, te veel geld voor de 0.015 BTC-kop koffie. Alice heeft 0.085 BTC nodig om te veranderen. De wisselgeldbetaling van Alice wordt gecreëerd door de portefeuille van Alice als een uitvoer in dezelfde transactie als de betaling aan Bob. In essentie breekt de portemonnee van Alice haar geld in twee betalingen: één voor Bob en één voor zichzelf. Vervolgens kan ze de wijziging in een volgende transactie gebruiken (uitgeven).
+
+Om de transactie tijdig door het netwerk te laten verwerken, zal de portefeuilletoepassing van Alice een kleine vergoeding toevoegen. Dit is niet expliciet in de transactie; het wordt geïmpliceerd door het verschil tussen inputs en outputs. Als in plaats van 0,085 in verandering wordt genomen, creëert Alice slechts 0,0845 als de tweede uitvoer, dan blijft er 0,0005 BTC (een halve millibitcoïne) over. De ingang 0.10 BTC wordt niet volledig besteed aan de twee uitgangen, omdat deze optellen tot minder dan 0.10. Het resulterende verschil is de _transaction fee_ die door de mijnwerker wordt verzameld als een vergoeding voor het valideren en opnemen van de transactie in een blok dat moet worden geregistreerd op de blockchain.
+
+De resulterende transactie kan worden bekeken met behulp van een web-applicatie voor blockchain-explorer, zoals getoond in &lt; <transaction-alice> &gt;.
+
+[[Transaction-Alice]]
+[Role = &quot;smallerseventyfive&quot;]
+.Alice&#39;s transactie met Bob&#39;s Cafe
+afbeelding :: images / mbc2_0208.png [&quot;Alice Coffee Transaction&quot;]
+
+[[Transactie-alice-url]]
+[TIP]
+====
+Bekijk de https://www.blockchain.com/btc/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[transaction van Alice naar Bob&#39;s Cafe].
+====
+
+==== De transactie aan het grootboek toevoegen
+
+De transactie die is gemaakt door de portefeuilletoepassing van Alice is 258 bytes lang en bevat alles wat nodig is om het eigendom van het geld te bevestigen en nieuwe eigenaren toe te wijzen. Nu moet de transactie worden verzonden naar het bitcoin-netwerk waar het onderdeel van de blockchain wordt. In de volgende sectie zullen we zien hoe een transactie onderdeel wordt van een nieuw blok en hoe het blok wordt &quot;gedolven&quot;. Ten slotte zullen we zien hoe het nieuwe blok, eenmaal toegevoegd aan de blockchain, steeds meer wordt vertrouwd door het netwerk als er meer blokken worden toegevoegd.
+
+===== De transactie verzenden
+
+(((propagation &quot;,&quot; process of &quot;))) Omdat de transactie alle informatie bevat die nodig is om te verwerken, maakt het niet uit hoe of waar het naar het bitcoin-netwerk wordt verzonden. Het bitcoin-netwerk is een peer-to-peer-netwerk, waarbij elke bitcoin-client deelneemt door verbinding te maken met verschillende andere bitcoin-clients. Het doel van het bitcoin-netwerk is om transacties en blokken voor alle deelnemers uit te dragen.
+
+===== Hoe het propageert
+
+(((&quot;bitcoin-knooppunten&quot;, &quot;gedefinieerd&quot;))) (((&quot;knooppunten&quot;, zie = &quot;bitcoin-knooppunten&quot;))) Elk systeem, zoals een server, desktopapplicatie of portefeuille, dat deelneemt aan het bitcoin-netwerk door &quot;speaking&quot; wordt het bitcoin-protocol een _bitcoin node_ genoemd. De portefeuilleapplicatie van Alice kan de nieuwe transactie verzenden naar elk willekeurig bitcoin-knooppunt waarmee het is verbonden via elk type verbinding: bedraad, wifi, mobiel, enz. Haar bitcoin-portemonnee hoeft niet rechtstreeks verbonden te zijn met Bob&#39;s bitcoin-portemonnee en ze hoeft niet gebruik de internetverbinding aangeboden door het café, maar beide opties zijn ook mogelijk. (((&quot;propagation&quot;, &quot;flooding technique&quot;))) (((&quot;flooding technique&quot;))) Elk bitcoin-knooppunt dat een geldige transactie ontvangt die het nog niet eerder heeft gezien, zal het onmiddellijk doorsturen naar alle andere knooppunten waarmee het is verbonden , een propagatietechniek bekend als _flooding_. De transactie wordt dus snel verspreid over het peer-to-peer-netwerk en bereikt binnen enkele seconden een groot percentage van de knooppunten.
+
+===== Bob&#39;s weergave
+
+Als de bitcoin-portefeuilletoepassing van Bob direct is verbonden met de portefeuilletoepassing van Alice, is Bob&#39;s portefeuilletoepassing mogelijk het eerste knooppunt dat de transactie ontvangt. Zelfs als de portefeuille van Alice de transactie via andere knooppunten verzendt, zal deze binnen enkele seconden de portefeuille van Bob bereiken. De portefeuille van Bob identificeert de transactie van Alice onmiddellijk als een inkomende betaling omdat deze uitgangen bevat die verzilverd kunnen worden door Bob&#39;s sleutels. De portefeuilletoepassing van Bob kan ook onafhankelijk controleren of de transactie goed is opgebouwd, gebruikt niet-gebruikte uitgangen en bevat voldoende transactiekosten om in het volgende blok te worden opgenomen. Op dit punt kan Bob aannemen, met weinig risico, dat de transactie binnenkort in een blok zal worden opgenomen en bevestigd.
+
+[TIP]
+====
+(((bevestigingen &quot;,&quot; van transacties met kleine waarde &quot;, secondary-sortas =&quot; transacties met kleine waarde &quot;))) Een algemene misvatting over bitcoin-transacties is dat ze moeten worden&quot; bevestigd &quot;door 10 minuten te wachten op een nieuw blok of tot 60 minuten voor een volledige zes bevestigingen. Hoewel bevestigingen ervoor zorgen dat de transactie door het hele netwerk is geaccepteerd, is een dergelijke vertraging niet nodig voor artikelen met een kleine waarde, zoals een kop koffie. Een handelaar kan een geldige transactie met een kleine waarde accepteren zonder bevestigingen, zonder meer risico dan een creditcardbetaling zonder ID of handtekening, zoals handelaars vandaag standaard accepteren. (((&quot;&quot;, Startref = &quot;Tconstruct02&quot;)) )
+====
+
+=== Bitcoin Mining
+
+(((mijnbouw en consensus &quot;,&quot; overzicht van &quot;, id =&quot; MACover02 &quot;))) (((blockchain (de)&quot;, &quot;overzicht van mijnen&quot;, id = &quot;BToverview02&quot;))) De transactie van Alice is nu gepropageerd op het bitcoin-netwerk. Het wordt geen onderdeel van de _blockchain_ totdat het is geverifieerd en opgenomen in een blok door een proces genaamd _mining_. Zie &lt; <mining> &gt; voor een gedetailleerde uitleg.
+
+Het bitcoin-systeem van vertrouwen is gebaseerd op berekening. Transacties worden gebundeld in _blocks_, waarvoor een enorme hoeveelheid berekening nodig is om te bewijzen, maar slechts een kleine hoeveelheid berekeningen om te bewijzen als bewezen. Het mijnbouwproces dient twee doelen in bitcoin:
+
+* (((mijnbouw en consensus &quot;,&quot; consensusregels &quot;,&quot; veiligheid geboden door &quot;))) (((&quot; consensus &quot;, zie =&quot; mijnbouw en consensus &quot;))) Mijnknopen valideren alle transacties door te verwijzen naar bitcoin&#39;s consensus reglement_. Daarom biedt mijnen beveiliging voor bitcoin-transacties door ongeldige of ongeldige transacties te weigeren.
+* Mining maakt in elk blok nieuwe bitcoin, bijna als een centrale bank die nieuw geld afdrukt. De hoeveelheid bitcoin die per blok wordt gemaakt, is beperkt en neemt af met de tijd, volgens een vast uitgifteschema.
+
+
+Mining bereikt een goede balans tussen kosten en beloning. Mijnbouw gebruikt elektriciteit om een wiskundig probleem op te lossen. Een succesvolle mijnwerker zal een _reward_ verzamelen in de vorm van nieuwe bitcoin en transactiekosten. De beloning wordt echter alleen verzameld als de mijnwerker alle transacties correct heeft gevalideerd, tot tevredenheid van de regels van _conensus_. Deze delicate balans biedt beveiliging voor bitcoin zonder een centrale autoriteit.
+
+Een goede manier om mijnbouw te beschrijven is als een gigantisch competitief spel van sudoku dat telkens wordt gereset als iemand een oplossing vindt en de moeilijkheid automatisch aanpast zodat het ongeveer 10 minuten duurt om een oplossing te vinden. Stel je een gigantische sudokupuzzel voor, enkele duizenden rijen en kolommen groot. Als ik je een voltooide puzzel laat zien, kun je deze vrij snel verifiëren. Als de puzzel echter een paar vierkanten gevuld heeft en de rest is leeg, dan kost het veel moeite om dit op te lossen! De moeilijkheidsgraad van de sudoku kan worden aangepast door de grootte te wijzigen (meer of minder rijen en kolommen), maar deze kan nog steeds vrij gemakkelijk worden geverifieerd, zelfs als deze erg groot is. De &quot;puzzel&quot; die in bitcoin wordt gebruikt, is gebaseerd op een cryptografische hash en vertoont vergelijkbare kenmerken: het is asymmetrisch moeilijk op te lossen maar eenvoudig te verifiëren en de moeilijkheidsgraad kan worden aangepast.
+
+(((mijnbouw en consensus &quot;,&quot; mijnbouwkwekerijen en pools &quot;))) In &lt; <user-stories> &gt;, we introduceerden (((use cases), &quot;mining for bitcoin&quot;))) Jing, een ondernemer in Shanghai. Jing heeft een _mijnboerderij_, een bedrijf dat duizenden gespecialiseerde mijncomputers runt en strijden om de beloning. Om de 10 minuten concurreren Jing&#39;s mijncomputers in een wereldwijde race tegen duizenden vergelijkbare systemen om een oplossing voor een transactieblok te vinden. (((&quot;Proof-of-Work-algoritme&quot;))) (((mijnbouw en consensus &quot;,&quot; Proof-of-Work-algoritme &quot;))) Het vinden van een dergelijke oplossing, het zogenaamde _Proof-of-Work_ (PoW ), vereist kwadrillaties hashingbewerkingen per seconde over het gehele bitcoin-netwerk. Het algoritme voor Proof-of-Work bestaat uit het herhaaldelijk hashen van de header van het blok en een willekeurig getal met het SHA256 cryptografische algoritme totdat een oplossing die overeenkomt met een vooraf bepaald patroon tevoorschijn komt. De eerste mijnwerker die zo&#39;n oplossing vindt, wint de ronde van concurrentie en publiceert die blokkering in de blockchain.
+
+Jing started mining in 2010 using a very fast desktop computer to find a suitable Proof-of-Work for new blocks. As more miners started joining the bitcoin network, the difficulty of the problem increased rapidly. Soon, Jing and other miners upgraded to more specialized hardware, with high-end dedicated graphical processing units (GPUs), often used in gaming desktops or consoles. At the time of this writing, the difficulty is so high that it is profitable only to mine with ((("application-specific integrated circuits (ASIC)")))application-specific integrated circuits (ASIC), essentially hundreds of mining algorithms printed in hardware, running in parallel on a single silicon chip. ((("mining pools", "defined")))Jing's company also participates in a _mining pool_, which much like a lottery pool allows several participants to share their efforts and rewards. Jing's company now runs a warehouse containing thousands of  ASIC miners to mine for bitcoin 24 hours a day. The company pays its electricity costs by selling the bitcoin it is able to generate from mining, creating some income from the profits.
+
+=== Mijntransacties in blokken
+
+(((&quot;blocks&quot;, &quot;mining transactions in&quot;))) Nieuwe transacties stromen voortdurend in het netwerk van gebruikersportefeuilles en andere applicaties. Omdat deze worden gezien door de bitcoin-netwerkknooppunten, worden ze toegevoegd aan een tijdelijke pool van niet-geverifieerde transacties die worden onderhouden door elk knooppunt. Terwijl mijnwerkers een nieuw blok maken, voegen ze niet-geverifieerde transacties uit deze pool toe aan het nieuwe blok en proberen ze vervolgens de geldigheid van dat nieuwe blok te bewijzen, met het mining-algoritme (Proof-of-Work). Het mijnbouwproces wordt in &lt; <mining> &gt;.
+
+Transactions are added to the new block, prioritized by the highest-fee transactions first and a few other criteria. Each miner starts the process of mining a new block of transactions as soon as he receives the previous block from the network, knowing he has lost that previous round of competition. He immediately creates a new block, fills it with transactions and the fingerprint of the previous block, and starts calculating the Proof-of-Work for the new block. Each miner includes a special transaction in his block, one that pays his own bitcoin address the block reward (currently 12.5 newly created bitcoin) plus the sum of transaction fees from all the transactions included in the block. If he finds a solution that makes that block valid, he "wins" this reward because his successful block is added to the global blockchain and the reward transaction he included becomes spendable. ((("mining pools", "operation of")))Jing, who participates in a mining pool, has set up his software to create new blocks that assign the reward to a pool address. From there, a share of the reward is distributed to Jing and other miners in proportion to the amount of work they contributed in the last round.
+
+(((kandidaatblokken)))) (((&quot;blokken&quot;, &quot;kandidaatblokken&quot;))) Transactie van Alice werd opgepikt door het netwerk en opgenomen in de pool van niet-geverifieerde transacties. Eenmaal gevalideerd door de mijnsoftware werd het opgenomen in een nieuw blok, een _kandidate block_, gegenereerd door Jing&#39;s mining pool. Alle mijnwerkers die aan die mijnpool deelnemen, beginnen meteen met het berekenen van Proof-of-Work voor het kandidaat-blok. Ongeveer vijf minuten nadat de transactie voor het eerst was verzonden door Alice&#39;s portefeuille, vond een van de ASIC mijnwerkers van Jing een oplossing voor het kandidaat-blok en kondigde het aan op het netwerk. Nadat andere mijnwerkers het winnende blok hadden gevalideerd, startten ze de race om het volgende blok te genereren.
+
+Het winnende blok van Jing werd onderdeel van de blockchain als blok # 277316, met 419 transacties, waaronder de transactie van Alice. Het blok met de transactie van Alice wordt geteld als één &quot;bevestiging&quot; van die transactie.
+
+[TIP]
+====
+You can see the block that includes https://blockchain.info/btc/block/277316[Alice's transaction].
+====
+
+(((&quot;bevestigingen&quot;, &quot;rol in transacties&quot;))) Ongeveer 19 minuten later wordt een nieuw blok, # 277317, gewonnen door een andere mijnwerker. Omdat dit nieuwe blok is gebouwd op blok # 277316 dat de transactie van Alice bevatte, voegde het nog meer berekening toe aan de blockchain, waardoor het vertrouwen in die transacties werd versterkt. Elk blok dat wordt gedolven bovenop datgene dat de transactie bevat, telt mee als een extra bevestiging voor de transactie van Alice. Naarmate de blokken op elkaar stapelen, wordt het exponentieel moeilijker om de transactie ongedaan te maken, waardoor het steeds betrouwbaarder wordt voor het netwerk.
+
+(((&quot;genesis block&quot;))) (((&quot;blocks&quot;, &quot;genesis block&quot;))) (((&quot;blockchain (the)&quot;, &quot;genesis block&quot;))) In het diagram in &lt; <block-alice1> &gt;, we kunnen blok # 277316 zien, die de transactie van Alice bevat. Daaronder zijn 277.316 blokken (inclusief blok # 0), met elkaar verbonden in een keten van blokken (blockchain) helemaal terug naar blok # 0, bekend als het _genesis block_. Na verloop van tijd neemt de &quot;hoogte&quot; in blokken toe, evenals de berekeningsmoeilijkheden voor elk blok en de hele keten. De blokken die worden ontgonnen na de transactie die de transactie van Alice bevat, fungeren als verdere zekerheid, omdat ze zich baseren op meer berekeningen in een langere en langere keten. Per conventie wordt elk blok met meer dan zes bevestigingen als onherroepelijk beschouwd, omdat het een immense hoeveelheid berekening zou vereisen om zes blokken ongeldig te maken en opnieuw te berekenen. We zullen het proces van mijnbouw en de manier waarop het vertrouwt in meer detail in &lt; <mining> &gt;. (((&quot;&quot;, startref = &quot;BToverview02&quot;))) (((&quot;&quot;, startref = &quot;MACover02&quot;)))
+
+[[Block-alice1]]
+. De transactie van Alice was inbegrepen in blok # 277316
+afbeelding :: images / mbc2_0209.png [&quot;Alice&#39;s transactie opgenomen in een blok&quot;]
+
+=== Uitgaven van de transactie
+
+(((&quot;spending bitcoin&quot;, &quot;simple-payment-verification (SPV)&quot;))) (((simple-payment-verification (SPV) &quot;))) Nu Alice&#39;s transactie is ingebed in de blockchain als onderdeel van een blok, het maakt deel uit van het gedistribueerde grootboek van bitcoin en zichtbaar voor alle bitcoin-toepassingen. Elke bitcoin-client kan de transactie onafhankelijk verifiëren als geldig en besteedbaar. Klanten met een volledig knooppunt kunnen de bron van het geld volgen vanaf het moment dat de bitcoin voor het eerst in een blok werden gegenereerd, stapsgewijs van transactie tot transactie, totdat ze het adres van Bob bereiken. Lichtgewicht clients kunnen een vereenvoudigde betalingsverificatie uitvoeren (zie &lt; <spv_nodes> &gt;) door te bevestigen dat de transactie zich in de blockchain bevindt en meerdere blokken na de transactie heeft gedolven, waardoor zekerheid wordt verschaft dat de mijnwerkers het als geldig hebben aanvaard.
+
+Bob kan nu de output van deze en andere transacties uitgeven. Bob kan bijvoorbeeld een aannemer of leverancier betalen door waarde over te dragen van de koffiebekerbetaling van Alice aan deze nieuwe eigenaren. Hoogstwaarschijnlijk zal Bob&#39;s bitcoin-software veel kleine betalingen samenvoegen tot een grotere betaling, misschien door de hele dag de bitcoin-inkomsten te concentreren in één enkele transactie. Dit zou de verschillende betalingen samenvoegen tot een enkele uitvoer (en een enkel adres). Zie &lt;voor een diagram van een verzameltransactie <transaction-aggregating> &gt;.
+
+As Bob spends the payments received from Alice and other customers, he extends the chain of transactions. Let's assume that Bob pays his web designer Gopesh((("use cases", "offshore contract services"))) in Bangalore for a new web page. Now the chain of transactions will look like <<block-alice2>>.
+
+[[Block-alice2]]
+.Alice&#39;s transactie als onderdeel van een transactieketen van Joe naar Gopesh
+afbeelding :: images / mbc2_0210.png [&quot;De transactie van Alice als onderdeel van een transactieketen&quot;]
+
+In dit hoofdstuk hebben we gezien hoe transacties een keten bouwen die waarde verplaatst van eigenaar naar eigenaar. We hebben ook de transactie van Alice bijgehouden, vanaf het moment dat deze in haar portemonnee werd aangemaakt, via het bitcoin-netwerk en de mijnwerkers die het op de blockchain opnamen. In de rest van dit boek zullen we de specifieke technologieën achter portefeuilles, adressen, handtekeningen, transacties, het netwerk en uiteindelijk mijnbouw onderzoeken. (((&quot;&quot;, Startref = &quot;BCover02&quot;))) (((&quot;&quot;, startref = &quot;DCSover02&quot;))) (((&quot;&quot;, startref = &quot;UCcoffee02&quot;)))

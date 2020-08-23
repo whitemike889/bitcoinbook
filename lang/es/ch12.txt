@@ -1,0 +1,409 @@
+[[ch12]]
+== Programación Sobre la Cadena de Bloques
+
+Ahora vamos a desarrollar nuestra comprensión de bitcoin viéndolo como una _plataforma de protocolos_. Hoy en día, muchas personas usan el término "blockchain" (o cadena de bloques) para referirse a cualquier plataforma de protocolos que comparta los fundamentos de diseño de bitcoin. El término a menudo se usa incorrectamente y se aplica a muchas cosas que no ofrecen las características principales que sí ofrece la cadena de bloques de bitcoin.
+
+En este capítulo vamos a revisar las características que ofrece la cadena de bloques de bitcoin, como una plataforma de protocolos. Consideraremos los fundamentos _rudimentarios_, que conforman los ladrillos de cualquier código ó aplicación en la cadena de bloques. Examinaremos varios protocolos relevantes que utilizan estos rudimentos, tales como los canales de pagos (o de estados) y los canales de pago orientados a conexión (La célebre red llamada “Lightning Network”).
+
+=== Introducción
+
+((("programación sobre la cadena de bloques", "prestaciones del sistema bitcoin")))El sistema bitcoin fue diseñado tanto como una moneda descentralizada, así como también una plataforma de pagos. Sin embargo, la mayor parte de su funcionalidad, se deriva de unos ladrillos de construcción de muy bajo nivel que se pueden usar para aplicaciones mucho más variadas. Bitcoin no se creó con componentes tales como “cuentas”, “usuarios”, “saldos” y “pagos”. En lugar de esto, bitcoin utiliza un lenguaje de instrucciones de gestión transaccional (o scripts) con funciones criptográficas de bajo nivel, como se vio en <1>. Del mismo modo que los conceptos de cuentas, saldos y pagos de nivel superior pueden derivarse de estos rudimentos básicos, también pueden hacerlo muchas otras aplicaciones complejas. Por lo tanto, la cadena de bloques de bitcoin puede convertirse en una plataforma de protocolos capaz de ofrecer servicios confiables a sus aplicaciones, tales como los “contratos inteligentes”, superando con creces el propósito original de la moneda digital y de la plataforma de pagos.
+
+=== Ladrillos (rudimentos)
+
+((("programación sobre la cadena de bloques", "ladrillos (rudimentos) utilizados")))(((""rudimentos ")))Cuando funciona correctamente y de manera continua, el sistema bitcoin ofrece ciertas garantías, que pueden usarse como bloques de construcción o "ladrillos" para crear nuevos protocolos. Estas garantías incluyen:
+
+Ausencia de Gastos Duplicados:: La garantía más fundamental del algoritmo de consenso descentralizado de bitcoin, asegura que no será posible gastar una misma “UTXO” dos veces.
+
+Inmutabilidad:: Una vez que se registra una transacción en la cadena de bloques y se ha agregado suficiente trabajo de cómputo con los bloques subsecuentes, los datos de toda transacción se vuelven inmutables. La inmutabilidad está asegurada por la energía, ya que reescribir la cadena de bloques requiere del gasto de energía para producir una nueva Prueba-de-Trabajo. La energía requerida para manipular a una transacción y por lo tanto, el grado de inmutabilidad que ésta posee, aumentará con la cantidad de trabajo de cómputo comprometido en la cadena de los bloques que le siguen al bloque que contiene a dicha transacción.
+
+Neutralidad:: El sistema descentralizado de bitcoin propagará por toda su red a toda aquella transacción que simplemente cumpla con ser válida, sin importar el origen o el contenido de dicha transacción. Esto significa que cualquiera puede crear una transacción válida y que pagando suficientes comisiones, tendrá la certeza de que podrá transmitir esa transacción e incluirla en la cadena de bloques en cualquier momento .
+
+Sellos de Tiempo Seguros:: Las reglas de consenso rechazan cualquier bloque cuyo sello de tiempo esté en un punto muy alejado del pasado o del futuro. Esto asegura que los sellos de tiempo en los bloques sean confiables. El sello de tiempo en un bloque representa una prueba que garantiza que ninguna entrada de ninguna transacción incluida en él, ha sido previamente gastada.
+
+Pruebas de Autorización:: Las firmas digitales, validadas en una red descentralizada, ofrecen garantías de autorización. Las instrucciones que contienen un requisito de firma digital válida, no se pueden ejecutar sin la autorización del titular de la llave privada implícita en dicha instrucción.
+
+Auditabilidad:: Todas las transacciones son públicas y pueden ser auditadas. Todas las transacciones y todos los bloques se pueden vincular de regreso en una cadena ininterrumpida, hasta el bloque génesis.
+
+Contabilidad:: En toda transacción (exceptuando a las de acuñación o transacción coinbase) el valor de las entradas debe igualar al valor neto de las salidas más las comisiones. No es posible crear o destruir valor de bitcoin en una transacción. Las salidas jamás podrán exceder a las entradas.
+
+Ausencia de Caducidad:: Una transacción de bitcoin válida no tiene fecha de caducidad. Si es válida hoy, lo será también en el mañana, siempre y cuando las entradas permanezcan sin gastar y las reglas de consenso no cambien.
+
+Integridad:: Una transacción de bitcoin firmada con el banderín +SIGHASH_ALL+ o cuyas partes han sido firmadas por otro tipo de banderín +SIGHASH+ no puede modificarse sin invalidar la firma, invalidando así la totalidad de la transacción.
+
+Atomicidad de las Transacciones:: Las transacciones de bitcoin son atómicas. O bien son válidas y confirmadas (o minadas) en su totalidad o no lo son. Las transacciones no se pueden confirmar parcialmente y no hay un estado intermedio para ninguna transacción. En todo momento, una transacción o bien ha sido confirmada o no.
+
+Unidades de Valor Discretas (ó Indivisibles):: Las salidas de toda transacción son unidades de valor discretas e indivisibles. O se gastan en su totalidad, o no se gastan. No se pueden dividir ni se pueden gastar parcialmente.
+
+Quórum de Control:: Las instrucciones transaccionales de multifirma, imponen restricciones tales que exigen un quórum mínimo de autorización, predefinido en dicho esquema de multifirma. El requisito de “al menos M-de-N” se aplica mediante las reglas de consenso.
+
+Disposición de Bloqueos Temporales / Procesos de Maduración:: Cualquier cláusula script que contenga un bloqueo temporal relativo o absoluto, solo puede ejecutarse después de que su antigüedad exceda el tiempo especificado por dicha cláusula.
+
+Replicación:: El almacenamiento descentralizado típico de la cadena de bloques, asegura que cuando una transacción ha sido minada y después de suficientes confirmaciones, la información se replica en toda la red y se vuelve duradera y resistente a cortes de energía, corrupción de datos, etc.
+
+Blindaje ante la Falsificación:: Una transacción solo puede gastar salidas existentes y convalidadas. No es posible crear o falsificar valor.
+
+Consistencia:: En ausencia de un ataque de aislamiento o “particionamiento” entre mineros, los bloques que se registran en la cadena de bloques están sujetos a reorganización o desacuerdo con una probabilidad exponencialmente decreciente, en función de la profundidad a la que éstos van quedando registrados. Una vez que quedan profundamente registrados en la cadena, el cómputo y la energía necesarios para manipular un bloque hacen que el cambio sea prácticamente inviable.
+
+Posibilidad de Registro de Estados Externos:: Una transacción puede consignar un tren de datos, a través de +OP_RETURN+, capaz de representar una transición de estado en una máquina de estados externa a la cadena de bloques de bitcoin.
+
+Acuñación Predecible:: En total serán acuñados 21 millones de bitcoins o menos, a una tasa predecible.
+
+Esta lista de ladrillos fundamentales del protocolo de bitcoin no es exhaustiva, y además que se agregan otras con cada nueva característica introducida en el sistema.
+
+=== Desarrollos a Partir de los Ladrillos
+
+((("programación sobre la cadena de bloques", "ejemplos")))Los ladrillos fundacionales que nos ofrece bitcoin, son elementos de una plataforma confiable que se pueden usar para desarrollar aplicaciones. Aquí hay algunos ejemplos de las aplicaciones que existen hoy día y de los componentes básicos que estas utilizan:
+
+Pruebas-de-Existencia (Notarios Digitales):: ((("servicios de notaría digital")))((("Prueba de existencia")))Inmutabilidad + Sello de tiempo + Durabilidad. El registro de la huella digital de un archivo puede perpetuarse mediante una transacción en la cadena de bloques, demostrando que existía previamente otro documento (un “Sello de Tiempo”) para el momento del registro. Esta huella digital no podrá modificarse a-posteriori (Inmutabilidad) y la prueba de su existencia se almacenará de forma permanente (Durabilidad).
+
+Colectas de Emprendimiento sin Intermediarios (Tales como Lighthouse.cash):: Consistencia + Atomicidad + Integridad. Si una entrada se firma conjuntamente con la salida (Integridad) de una transacción de recaudación de fondos, otras entradas pueden contribuir a la recaudación, pero la transacción como tal no se podrá gastar o confirmar (Atomicidad) hasta que la suma total de las entradas no financie la totalidad del objetivo (valor neto de la salida) (Consistencia).
+
+Canales de Pago:: ((("canales de (estados) pagos", "ladrillos (rudimentos) utilizados")))Quórum de Control + Bloqueo Temporal + Sin Gastos Duplicados + Sin Caducidad + Resistencia a la Censura + Pruebas de Autorización. Una instrucción de firma múltiple bajo esquema (Quórum) “al menos 2-de-2” con un bloqueo de tiempo (Bloqueo Temporal), utilizada para la transacción de “liquidación” de un canal de pago, puede ser conservada (Sin Caducidad) y gastada en cualquier momento (Resistencia a la Censura) por cualquiera de las partes (Prueba de Autorización). Las dos partes pueden crear transacciones de compromiso que invaliden mediante doble gato (ya que no pueden haber Gastos Duplicados ) un acuerdo previo de liquidación, utilizando un bloqueo de tiempo más corto (Bloqueo Temporal).
+
+=== La Plataforma “Counterparty”
+
+((("programación sobre la cadena de bloques", "Counterparty")))((("Counterparty")))((("contratos inteligentes")))((("Máquina Virtual de Ethereum (EVM)")))((("gestión de activos extrínsecos")))((("gestión de activos virtuales")))Counterparty es un protocolo que funciona como capa de servicios construida sobre bitcoin. El protocolo de Counterparty ofrece la capacidad de crear y comercializar activos y tokens (fichas) virtuales. Además, Counterparty ofrece una casa de cambio de activos descentralizada. Counterparty también está incorporando en su protocolo la capacidad de gestionar contratos inteligentes, basados en la Máquina Virtual de Ethereum (MVE o también del inglés “EVM”) .
+
+Counterparty incrusta los metadatos en las transacciones de bitcoin, utilizando la instrucción transaccional +OP_RETURN+ o direcciones multifirma con esquemas “al menos 1-de-N” que codifican los metadatos en lugar de utilizar llaves públicas. Usando estos mecanismos, Counterparty implementa una capa de protocolos codificada en transacciones de bitcoin. La capa de protocolos adicional puede ser interpretada por cualquiera de las aplicaciones desarrolladas para detectar metadatos de Counterparty, tales como billeteras, exploradores de la cadena de bloques, o cualquier otra aplicación creada utilizando las bibliotecas de Counterparty.
+
+((("propiedad digital")))Counterparty puede a su vez, utilizarse como plataforma base para otras aplicaciones y servicios. Por ejemplo, Tokenly es una capa de servicios construida sobre la capa de Counterparty, que permite a los creadores de contenidos, artistas y compañías diversas emitir tokens que den fe de cierta participación en propiedades de tipo digital o intelectual y que se pueden usar para alquilar, acceder, comerciar o comprar contenido, productos y servicios. Otras aplicaciones que aprovechan Counterparty incluyen juegos (como por ejemplo “Spells of Genesis”) y proyectos de computación en malla (como “Folding Coin”).
+
+Se pueden encontrar más detalles sobre Counterparty en https://counterparty.io. El proyecto de código abierto se puede encontrar en https://github.com/CounterpartyXCP[].
+
+[[state_channels]]
+=== Canales de Pago y Canales de Estados
+
+_Los Canales de Pago_ ((("programación sobre la cadena de bloques", "canales de (estados) pagos", id="BCApayment12")))((("canales de (estados) pagos", "definidos")))son mecanismos libres de la dependencia en la confianza o “desconfiables”, capaces de intercambiar transacciones de bitcoin entre dos partes, fuera de la cadena de bloques de bitcoin. Estas transacciones, que serían válidas si se liquidan en la cadena de bloques de bitcoin, se mantienen fuera de la cadena y en su lugar, actúan como _pagarés_ para producir una liquidación final por lotes. Debido a que las transacciones no se difunden en la red bitcoin, se pueden intercambiar sin la latencia de confirmación habitual, lo que permite un rendimiento de transacciones extremadamente alto, una latencia baja (sub-milisegundos) y una granularidad fina (a nivel de satoshis).
+
+En realidad, el término _canal_ es una metáfora. Los canales de estados son idealizaciones virtuales representadas por el intercambio de estados entre dos partes, fuera de la cadena de bloques. No hay "canales" como tales y el mecanismo de transporte de datos subyacente no es ningún canal. Usamos el término "canal" para representar la relación y el estado compartido entre dos partes, fuera de la cadena de bloques.
+
+((("canales de (estados) pagos", "concepto de")))Para explicar mejor este concepto, considérese una secuencia de datos TCP (datos enviados con protocolos de transmisión controlada). Desde la perspectiva de los protocolos de nivel superior, esta secuencia no es más que una "interfaz" de internet, que conecta dos aplicaciones a través de la red de redes. Pero si se observa el tráfico real de la red, una secuencia TCP es una especie de canal virtual sobre la capa de servicios de los paquetes IP. Cada punto final del protocolo TCP transmite las secuencias y ensambla los paquetes IP, para crear la ilusión de una secuencia de bytes. Por debajo del protocolo, toda la data se conforma de paquetes desconectados. Del mismo modo, un canal de pagos es solo una serie de transacciones. Si éstas están correctamente secuenciadas y conectadas, crearán obligaciones de pago redimibles en las que se puede confiar aun cuando no exista confianza alguna en la contraparte del comercio que yace conectada al otro lado del canal.
+
+En esta sección se abordarán varios tipos de canales de pago. Primero, examinaremos los mecanismos utilizados para construir un canal de pagos de un solo sentido (unidireccional) para asistir a un servicio de micropagos por demanda, como por ejemplo el pago por la transmisión de un vídeo. Luego, ampliaremos este mecanismo e introduciremos canales de pagos bidireccionales. Finalmente, abordaremos cómo los canales bidireccionales se pueden conectar de extremo-a-extremo para formar canales de saltos múltiples en una red orientada a conexión, inicialmente propuesta bajo el nombre de _Lightning Network_.
+
+Los canales de pagos son parte de un concepto más amplio conocido como _canales de estados_, que representan una alteración de los estados de un sistema externo a la cadena de bloques (off-chain), y que vienen garantizados por un compromiso que eventualmente se difundirá hacia la cadena de bloques. Un canal de pago es un canal de estados donde el estado que se está alterando es el saldo referido a una moneda virtual.
+
+==== Canales de Estados&#x2014;Conceptos Básicos y Terminología
+
+((("canales de (estados) pagos", "terminología")))Un canal de estados puede establecerse entre dos partes, a través de una transacción que comprometa un estado de saldos compartido, en la cadena de bloques. A esta se le conoce como la _transacción de financiación_ o _transacción de anclaje_. Esta transacción única debe difundirse a la red bitcoin y confirmarse para establecer el canal. En el ejemplo de un canal de pagos, el estado comprometido es el saldo inicial (en valor monetario) del canal.
+
+Luego, las dos partes intercambiarán un par de transacciones firmadas, llamadas _transacciones de compromiso_, capaces de alterar el estado inicial. Estas son transacciones válidas en el sentido de que _pudieran_ ser difundidas para su confirmación por cualquiera de las partes, pero aún así son mantenidas fuera de la cadena en espera de un cierre amistoso del canal. Las actualizaciones de cada estado se pueden crear a la misma velocidad a la que cada parte puede redactar, firmar y transmitir una transacción a la otra parte. En la práctica, esto significa que se pueden intercambiar miles de transacciones por segundo.
+
+Al intercambiarse las transacciones de compromiso, las dos partes también invalidan los estados anteriores, buscando que la transacción de compromiso más actualizada sea siempre la única que pueda convalidarse. Esto evita que cualquiera de las partes haga trampa cerrando unilateralmente el canal con un estado previo ya vencido, que pueda resultarle más favorable que el estado de saldos actual. Examinaremos los diversos mecanismos reales que pueden usarse para invalidar estados previos o vencidos, en el resto de este capítulo.
+
+Finalmente, el canal puede cerrarse de forma cooperativa, difundiendo una última _transacción de liquidación_ a la cadena de bloques, o bien unilateralmente (en un cierre no amistoso), cualquiera de las partes difunde la última transacción de compromiso a la cadena de bloques. Se necesita una opción de cierre unilateral en caso de que una de las partes se desconecte inesperadamente. La transacción de liquidación representa el estado final del canal y su propósito es ser difundida en la cadena de bloques.
+
+Durante toda la vida útil del canal, solo se deben enviar dos transacciones para ser confirmadas en la cadena de bloques: las transacciones de financiación y de liquidación. Entre estos dos estados, las dos partes pueden intercambiar cualquier cantidad de transacciones de compromiso que nunca son observadas por nadie más, ni enviadas a la cadena de bloques .
+
+<1> ilustra un canal de pagos entre Alice y Bob, exhibiendo las transacciones de financiación, compromiso y liquidación.((("casos de uso", "comprar café", startref="alicetwelve")))
+
+[[payment_channel]]
+.Un canal de pagos entre Alice y Bob, que demuestra las transacciones de financiación, compromiso y liquidación
+image::images/mbc2_1201.png ["Un canal de pagos entre Alice y Bob, que demuestra las transacciones de financiación, compromiso y liquidación"]
+
+==== Ejemplo de un Canal de Pagos Simple
+
+((("canales de (estados) pagos", "ejemplos de", id="PSCexample12")))Para ofrecer una explicación de los canales de estados, comenzaremos con un ejemplo muy simple. Se describirá un canal unidireccional, es decir, un canal en el cual el valor fluye en una sola dirección. También se dará inicio a la explicación con la suposición ingenua de que nadie está tratando de hacer trampa, para mantener las cosas simples. Una vez explicada la idea básica del canal, serán abordados los recursos que se necesitan para hacer que dicho canal sea desconfiable para que ninguna de las partes _pueda_ engañar al otro, incluso si tuviesen la intención de hacerlo.
+
+Para este ejemplo asumiremos dos participantes: Emma y Fabián. Fabián ofrece un servicio de transmisión de video que se factura por segundo, usando un canal de micropagos. Fabián cobra 0.01 millibit (0.00001 BTC), por segundo de video, equivalente a 36 millibits (0.036 BTC) por hora de video. Emma es un usuario que compra este servicio de transmisión de video a Fabián. <1> muestra a Emma comprándole el servicio de transmisión de video a Fabián usando un canal de pago.
+
+[[emma_fabian_streaming_video]]
+.Emma compra vídeos “por demanda” a Fabián con un canal de pago, pagando por cada segundo de vídeo
+image::images/mbc2_1202.png["Emma compra vídeos “por demanda” a Fabián con un canal de pago, pagando por cada segundo de vídeo"]
+
+En este ejemplo, Fabián y Emma están utilizando un software especial que maneja tanto el canal de pagos como la transmisión de video. Emma está ejecutando el software en su navegador y Fabián lo está ejecutando desde un servidor. El software incluye las funcionalidades básicas de una cartera de bitcoin y puede crear y firmar transacciones en bitcoin. Tanto el concepto como el término "canal de pagos" están completamente ocultos para los usuarios. Lo que ven es un vídeo que se está pagando por segundo.
+
+Para configurar el canal de pagos, Emma y Fabián establecen una dirección de multifirma de “al menos 2-de-2” firmas, mientras cada uno de ellos posee una de las dos llaves. Desde la perspectiva de Emma, el software en su navegador presentará ante ella un código QR con una dirección P2SH (o del tipo “pagar a un script-hash”, que comienza con “3”), y le pide que envíe un “depósito” de hasta 1 hora de vídeo. La dirección P2SH es entonces financiada por Emma. La transacción de Emma, que ha hecho el pago a la dirección de multifirma, es la transacción de financiación o de anclaje para el canal de pagos.
+
+Para este ejemplo, supongamos que Emma financia el canal con 36 millibits (0.036 BTC). Esto le permitirá a Emma consumir _hasta_ 1 hora de transmisión de vídeo. La transacción de financiación en este caso establece la cantidad máxima de material que se puede transmitir a través de este canal, lo cual  configura la _capacidad del canal_.
+
+La transacción de financiación puede consumir una o más de las entradas de la cartera de Emma, ​​para completar los fondos. Esta transacción creará una salida, con un valor de 36 millibits a favor de la dirección de multifirma de "al menos 2-de-2" firmas, controlada conjuntamente entre Emma y Fabián. Esta transacción pudiera tener salidas adicionales para devolver el cambio a favor de la cartera de Emma.
+
+Una vez que se confirma la transacción de financiación, Emma puede comenzar a recibir las secuencias del vídeo. Al inicio del primer segundo, el software de Emma crea y firma una transacción de compromiso que realizará cambios del saldo del canal para acreditar unos 0.01 millibit a favor de la dirección de Fabián y devolver 35.99 millibits a Emma. La transacción firmada por Emma se gasta toda la salida de 36 millibits que fue creada por la transacción de financiación, como su única entrada y crea dos salidas: una para su reembolso y la otra para el pago de Fabián. Pero la transacción solo está parcialmente firmada&#x2014;la misma requiere de ambas firmas (2-de-2), pero solo ha sido adjuntada la firma de Emma. Cuando el servidor de Fabián reciba esta transacción, se agregará la segunda firma (para cumplir con la entrada 2-de-2) y se la devuelve a Emma junto con 1 segundo de vídeo. Ahora ambas partes tienen una transacción de compromiso totalmente firmada que cualquiera puede canjear, lo que representa el saldo actualizado correcto del canal. Ninguna de las partes debería difundir esta transacción a la red.
+
+Al comienzo del siguiente segundo, el software de Emma crea y firma otra transacción de compromiso (el compromiso Nro. 2) que consume la misma salida de “al menos 2-de-2” (P2SH) de la transacción de financiación. La segunda transacción de compromiso asigna una salida de 0.02 millibits a favor de la dirección de Fabián y una salida de 35.98 millibits a favor de la dirección de Emma. Esta nueva transacción es el pago por dos segundos acumulados de vídeo. El software de Fabián firma y devuelve la segunda transacción de compromiso, junto con otro segundo de vídeo.
+
+De esta manera, el software de Emma continúa enviando transacciones de compromiso al servidor de Fabián a cambio de tramas adicionales de vídeo. Los estados de saldos del canal se acumulan gradualmente a favor de Fabián, ya que Emma consume progresivamente, más segundos de vídeo. Digamos que Emma mira 600 segundos (10 minutos) de vídeo, creando y firmando 600 transacciones de compromiso. La última transacción de compromiso (la Nro. 600) tendrá igualmente dos salidas, dividiendo el saldo del canal, 6 millibits a favor de Fabián y 30 millibits a favor de Emma.
+
+Llegado el momento, Emma hace clic en "Detener" para finalizar la transmisión de vídeo. Fabián o Emma ahora pueden transmitir la transacción de estados (de compromisos) más reciente para su liquidación. Esta última transacción se convierte en la transacción de liquidación que le paga a Fabián por todo el vídeo que Emma consumió, reembolsando el resto de la transacción de financiación a Emma.
+
+<1> ilustra el canal entre Emma y Fabián y las transacciones de compromiso que actualizan el saldo del canal.
+
+A la larga, solo se registran dos transacciones en la cadena de bloques: la transacción de financiación que estableció el canal y la transacción de liquidación que asignó el saldo final correctamente entre los dos participantes.((("", startref="PSCexample12")))
+
+[[video_payment_channel]]
+.El canal de pagos entre Emma y Fabián, que muestra las transacciones de compromiso que han actualizado el saldo del mismo.
+image::images/mbc2_1203.png["El canal de pagos entre Emma y Fabián, que muestra las transacciones de compromiso que han actualizado el saldo del mismo"]
+
+==== Rediseñando los Canal para que sean “Desconfiables”
+
+((("canales de (estados) pagos", "creación de canales desconfiables", id="PSCtrust12")))El canal que acabamos de describir funciona, pero solo si ambas partes cooperan amistosamente, sin fallas ni intentos de hacer trampa. Veamos algunos de los escenarios que pueden arruinar este canal y veamos qué se necesita para evitarlo:
+
+* Una vez que la transacción de financiación ha ocurrido, Emma necesita la firma de Fabián para recuperar el dinero. Si Fabián se desaparece, los fondos de Emma quedan bloqueados en un esquema de “al menos 2-de-2” firmas y efectivamente se pierden. Este canal, tal como se ha diseñado, conduce a una pérdida de fondos si uno de los participantes se desconecta antes de que haya al menos una transacción de compromiso firmada por ambas partes.
+
+* Mientras el canal se está ejecutando, Emma puede tomar cualquiera de las transacciones de compromiso que Fabián ha refrendado y difundir cualquiera de ellas a la cadena de bloques. ¿Por qué pagar 600 segundos de vídeo, si ella puede perfectamente difundir la transacción de compromiso Nro 1 y solo pagar 1 segundo de vídeo? El canal fracasa porque Emma puede hacer trampa al difundir cualquier compromiso previo que más le favorezca.
+
+Ambos problemas pueden resolverse con bloqueos temporales&#x2014;veamos cómo podríamos poner en práctica estos bloqueos temporales a nivel de transacciones (+nLocktime+).
+
+Emma no puede arriesgarse a colocar sus fondos en una dirección de “al menos 2-de-2” firmas, a menos que tenga un reembolso garantizado. Para resolver este problema, Emma redacta tanto una transacción de financiación como una de reembolso, al mismo tiempo. Ella firma la transacción de financiación pero no se la comunica a nadie. Emma le comunica a Fabián únicamente la transacción de reembolso, (que gasta la salida de la transacción de financiación que ella mantiene en secreto), con el fin de obtener su firma.
+
+La transacción de reembolso actúa como la primera transacción de compromiso y su bloqueo de tiempo establece un límite superior para la vida del canal. En este caso, Emma podría establecer el parámetro +nLocktime+ en 30 días o 4320 bloques en el futuro. Todas las transacciones de compromiso subsecuentes deben tener un bloqueo de tiempo más corto, para que puedan validarse antes de que pueda difundirse la transacción de reembolso.
+
+Ahora que Emma tiene en sus manos una transacción de reembolso completamente firmada, puede revelarle a Fabián con toda confianza, la transacción de financiación que ella ha firmado, sabiendo que en todo caso, después de que expire el bloqueo de tiempo, ella podrá difundir la transacción de reembolso, incluso si Fabián se desaparece.
+
+Cada transacción de compromiso que las partes intercambien durante la vida del canal, de ahora en más llevará un bloqueo de tiempo. Pero el lapso de maduración de cada bloqueo, será progresivamente más corto para cada compromiso, por lo que el compromiso más reciente se debe poder difundir antes que el compromiso anterior que este nuevo estará invalidando. Debido al ajuste del parámetro nLockTime, ninguna de las partes puede propagar con éxito ninguna de las transacciones de compromiso hasta que expire su bloqueo de tiempo. Si todo sale bien, las partes cooperarán y cerrarán el canal apropiadamente con una transacción de liquidación, haciendo innecesario difundir una transacción de compromiso intermedio. De lo contrario, la transacción de compromiso más reciente será difundida por la parte más interesada, para liquidar la cuenta e invalidar todas las transacciones de compromiso anteriores.
+
+Por ejemplo, si la transacción de compromiso Nro. 1 está bloqueada por un ajuste de 4320 bloques en el futuro, entonces la transacción de compromiso Nro. 2 debería venir bloqueada con un ajuste de no más de 4319 bloques en el futuro. La transacción de compromiso Nro. 600 se debería poder gastar no menos de 600 bloques antes de que la transacción de compromiso Nro. 1 pueda llegar a ser válida.
+
+<1> muestra cada transacción de compromiso ajustando un bloqueo de tiempo cada vez más corto, lo que permite gastarlos antes de que los compromisos anteriores sean válidos.
+
+[[timelocked_commitments]]
+.Cada compromiso establece un ajuste de bloqueo de tiempo cada vez más corto, lo que permite gastarlo antes de que los compromisos anteriores sean válidos
+image::images/mbc2_1204.png["Cada compromiso establece un ajuste de bloqueo de tiempo cada vez más corto, lo que permite gastarlo antes de que los compromisos anteriores sean válidos"]
+
+Cada transacción de compromiso subsiguiente debe tener un ajuste de maduración más corto para que pueda difundirse antes que sus predecesoras y antes que la transacción de reembolso. La capacidad de difundir un compromiso con mayor anterioridad, garantiza que la salida de la transacción de financiación podrá gastarse y evitar que cualquier otra transacción de compromiso se difunda gastando dicha salida. Las garantías ofrecidas por la cadena de bloques de bitcoin, tales como las de impedir gastos duplicados y la capacidad de imponer bloqueos de tiempo, permiten que cada transacción de compromiso invalide a sus predecesoras.
+
+Los canales de estados usan los bloqueos temporales para garantizar el cumplimiento de contratos inteligentes a lo largo de la línea temporal. En este ejemplo, vimos cómo la evolución temporal garantiza que la transacción de compromiso más reciente sea la única válida antes que cualquier otro compromiso anterior. Por lo tanto, la transacción de compromiso más reciente se puede difundir, gastando las entradas correspondientes, e invalidando asimismo las transacciones de compromisos anteriores. La gestión de contratos inteligentes con parámetros absolutos de bloqueos temporales protege contra el fraude de cualquiera de las partes. Esta gestión no necesita más que el ajuste del parámetro de bloqueo temporal absoluto a nivel de transacción (+nLocktime+). A continuación, veremos cómo los bloqueos temporales a nivel de comandos “script”, del tipo +CHECKLOCKTIMEVERIFY+ y +CHECKSEQUENCEVERIFY+, pueden usarse para construir canales de estados más flexibles, útiles y elegantes.
+
+La primera versión de canal de pagos unidireccional fue puesta en práctica como una aplicación prototipo de transmisión de vídeo en 2015, por un equipo argentino de desarrolladores. Todavía puede vérsele operar en pass:[<a href="https://streamium.io/" class="orm:hideurl"><em>streamium.io</em></a>].
+
+Los bloqueos temporales no son la única forma de invalidar transacciones con compromisos previas. En las siguientes secciones veremos cómo se puede usar una llave de revocación para lograr el mismo resultado. Los bloqueos temporales son efectivos pero tienen dos desventajas diferentes. Al establecerse un bloqueo temporal máximo, al momento de abrirse por primera vez el canal, se limita la vida útil del mismo. Incluso peor, esto enfrenta al diseño de canales al dilema de conseguir canales de larga duración mientras una de las partes se ve obligada a esperar mucho tiempo por un reembolso en caso de cierre prematuro. Por ejemplo, si se permite que el canal permanezca abierto durante 30 días, estableciendo el tiempo de bloqueo para el reembolso en 30 días, al desaparecerse una de las partes sin dar aviso, la otra parte debe esperar 30 días para obtener su reembolso. Cuanto más distante se concibe al punto final del canal, más distante será el reembolso.
+
+El segundo problema es que, dado que cada transacción de compromiso posterior debe disminuir el ajuste del bloqueo temporal, existe un límite explícito en el número de transacciones de compromiso que pueden intercambiarse entre las partes. Por ejemplo, un canal de 30 días, que establece un bloqueo temporal de 4320 bloques en el futuro, solo puede acomodar 4320 transacciones de compromiso intermedias antes de que deba cerrarse. Existe un cierto peligro al establecer el intervalo entre bloqueos temporales para transacciones de compromiso, en sólo 1 bloque menos que la anterior. Al establecer el intervalo de bloqueo temporal entre las transacciones de compromiso en 1 solo bloque, el desarrollador esta imponiendo una responsabilidad muy riesgosa para los participantes del canal, ya que deben estar atentos, permanecer en línea y observando, y estar listos para transmitir la transacción de compromiso correcta en cualquier momento.
+
+Ahora que entendemos cómo se pueden usar los bloqueos temporales para invalidar compromisos anteriores, podemos ver la diferencia entre el cierre de un canal de manera cooperativa y su cierre unilateral al difundir una transacción de compromiso. Todas las transacciones de compromiso poseen su bloqueo temporal, por lo tanto, difundir una transacción de compromiso siempre implicará esperar hasta que el bloqueo temporal haya expirado. Pero si las dos partes acuerdan amistosamente cuál es el saldo final y saben que ambas tienen transacciones de compromiso que eventualmente harán que ese saldo sea una realidad, pueden redactar una transacción de liquidación sin ningún bloqueo temporal, que refleje ese mismo estado de saldos. En un cierre cooperativo, cualquiera de las partes toma la transacción de compromiso más reciente y redacta una transacción de liquidación que es idéntica en todos los sentidos a la del referido compromiso, excepto que omite el bloqueo temporal. Ambas partes pueden firmar esta transacción de liquidación sabiendo que no hay forma de hacer trampa y obtener un resultado más favorable. Al firmar y difundir cooperativamente la transacción de liquidación, pueden cerrar el canal y recuperar sus saldos de inmediato. En el peor de los casos, si una de las partes resulta ser mezquina, o se negase a cooperar, obligaría a la otra parte a cerrar unilateralmente, difundiendo la transacción de compromiso más reciente. Pero si hacen eso, también tendrían que ponerse a esperar por sus fondos.((("", startref="PSCtrust12")))
+
+==== Compromisos con Revocación Asimétrica
+
+((("canales de (estados) pagos", "compromisos con revocación asimétrica", id="PSCaymetric12")))Una mejor manera de manejar los estados de compromisos anteriores es revocarlos explícitamente. Sin embargo, esto no es fácil de lograr. Una característica clave de bitcoin es que una vez que una transacción es confirmada, sigue siendo válida y jamás caduca. La única forma de cancelar una transacción es generando un gasto duplicado a sus entradas, mediante otra transacción que logre confirmarse antes de que la primera sea minada. Es por esto que usamos bloqueos temporales en el ejemplo anterior del canal de pago simple, para asegurarnos de que los compromisos más recientes puedan gastarse antes de que los compromisos anteriores sean validados. Sin embargo, la secuencia de compromisos en el tiempo crea una serie de restricciones que hacen que los canales de pago sean difíciles de usar.
+
+Aún cuando una transacción no se puede cancelar de por sí, se puede constituir de tal manera que se haga indeseable utilizarla. La forma en que esto se logra es revelando a cada parte una _llave de revocación_ que puede usarse para castigar a la contraparte si intentara hacer trampa. Este mecanismo para revocar transacciones de compromisos anteriores se propuso por vez primera, como parte de la plataforma “Lightning Network”.
+
+Para explicar el mecanismo de las llaves de revocación, construiremos un canal de pagos más complejo entre dos casas de cambio administradas por Hitesh e Irene. Hitesh e Irene administran comercios de bitcoins en India y EE. UU., respectivamente. Los clientes de la casa de cambios en India de Hitesh a menudo envían pagos a los clientes de la plataforma estadounidense de Irene y viceversa. Actualmente, estas transacciones ocurren en la cadena de bloques de bitcoin, pero esto implica pagar comisiones y esperar varios bloques para las confirmaciones. La creación de un canal de pagos entre las plataformas de intercambios reduciría significativamente los costos y aceleraría el flujo de transacciones.
+
+Hitesh e Irene inicializan el canal redactando cooperativamente una transacción de financiación, donde cada parte financia el canal con 5 bitcoins.
+El estado inicial de saldos es de 5 bitcoins para Hitesh y 5 bitcoins para Irene. La transacción de financiación bloquea el estado del canal en una salida de firmas múltiples de “al menos 2-de-2”, al igual que en el ejemplo de un canal simple.
+
+La transacción de financiación puede tener una o más entradas de Hitesh (con tal que totalicen los 5 bitcoins o más), y una o más entradas de Irene (totalizando 5 bitcoins o más). Las entradas tienen que superar ligeramente la capacidad del canal para cubrir las comisiones de la transacción. La transacción tiene una salida que bloquea un total de 10 bitcoins en una dirección de firmas múltiples de “al menos 2-de-2” firmas, controlada por Hitesh e Irene. La transacción de financiación también puede tener una o más salidas que devuelven el cambio a Hitesh y a Irene, si sus entradas exceden su contribución prevista al canal. Esta es una transacción única con entradas que han sido ofrecidas y firmadas por ambas partes. La misma tiene que ser redactada en colaboración y firmada por cada parte antes de ser difundida.
+
+Ahora, en lugar de crear una transacción de compromiso única que firmarían ambas partes, Hitesh e Irene crean dos transacciones de compromiso diferentes, es decir _asimétricas_.
+
+Hitesh tendrá una transacción de compromiso con dos salidas. La primera salida le paga a Irene los 5 bitcoins que ella posee _inmediatamente_. La segunda salida paga a Hitesh los 5 bitcoins que le pertenecen, pero solo tras madurar un bloqueo temporal de 1000 bloques. Las salidas de la transacción se ven así:
+
+----
+Entrada Única: "2-de-2" firmas (salida única de la transacción de financiación), firmada por Irene
+
+Salida 0 <5 bitcoin>:
+<Llave Pública de Irene> CHECKSIG
+
+Salida 1:
+<1000 bloques>
+    CHECKSEQUENCEVERIFY
+    DROP
+    <Llave Pública de Hitesh> CHECKSIG
+----
+
+Irene tendrá una transacción de compromiso diferente, con dos salidas también. La primera salida paga a Hitesh los 5 bitcoins que le corresponden de inmediato. La segunda salida le paga a Irene sus 5 bitcoins, pero solo después de expirar un bloqueo temporal de 1000 bloques. La transacción de compromiso que tiene Irene (firmada por Hitesh) se ve así:
+
+----
+Entrada Única: "2-de-2" firmas (salida única de la transacción de financiación), firmada por Hitesh
+
+Salida 0 <5 bitcoin>:
+    <Llave Pública de Hitesh> CHECKSIG
+
+Salida 1:
+<1000 bloques>
+    CHECKSEQUENCEVERIFY
+    DROP
+<Llave Pública de Irene> CHECKSIG
+----
+
+De esta manera, cada parte va a tener una transacción de compromiso, con una entrada capaz de gastar la salida de la transacción de financiación del tipo “al menos 2-de-2” firmas múltiples. Esta entrada está firmada por cada _contraparte_. En cualquier momento, cualquiera de las partes puede firmar esta transacción (completando el segundo componente de las “2-de-2 firmas”) y difundirla. Sin embargo, al difundir esta transacción de compromiso, cada parte le está pagando a su contraparte de inmediato, mientras que aquel que difunde la transacción tiene que esperar a que madure el bloqueo temporal. Al imponer un retraso en la redención de una de las salidas, ponemos a cada parte en una ligera desventaja cuando optan por difundir unilateralmente una transacción de compromiso. Pero tan solo un retraso de tiempo no será suficiente para alentar una conducta justa.
+
+<<asymmetric_commitments>> muestra dos transacciones de compromiso asimétrico, donde la salida que le paga al tenedor del compromiso se retrasa.
+
+[[asymmetric_commitments]]
+.Dos transacciones de compromiso asimétrico con pago retrasado para la parte que difunde la transacción
+image::images/mbc2_1205.png["Dos transacciones de compromiso asimétrico con pago retrasado para la parte que difunde la transacción"]
+
+A continuación será presentado el elemento final de este esquema: una llave de revocación para disuadir al tramposo de intentar difundir un compromiso vencido. La llave de revocación permite que la parte perjudicada castigue al tramposo, pues hace posible tomar todo el saldo del canal.
+
+Las llaves de revocación se componen de dos secretos, cada uno generado independientemente por cada participante del canal. Es similar a una firma múltiple “2-de-2”, pero en este caso se usará aritmética de curva elíptica, de modo que ambas partes conozcan la llave pública de revocación, y solo accedan a la mitad de la llave secreta de revocación.
+
+En cada ronda, ambas partes revelan su mitad del secreto de revocación a su contraparte, dándole así a la otra parte (que ahora tiene ambas mitades del secreto) los medios para gastar de inmediato la salida que tiene retrasos, como penalización si una transacción revocada alguna vez llega a difundirse.
+
+Cada una de las transacciones de compromiso tiene una salida “retrasada”. El script de redención para esa salida permite que una de las partes logre gastarla después de 1000 bloques, _o bien_ que la contraparte (y solo la contraparte) la gaste, si tienen la llave secreta de revocación completa, penalizando la difusión de un compromiso revocado.
+
+Entonces, cuando Hitesh redacta una transacción de compromiso para que Irene la firme, hace que la segunda salida se pague a su favor después de 1000 bloques, o a favor de la correspondiente llave pública de revocación (de la cual él solo conocerá la mitad del secreto). Hitesh redacta esta transacción. Él solo revelará su mitad del secreto de revocación a Irene cuando esté listo para pasar a un nuevo estado del canal y quiera revocar este compromiso.
+
+El script de la segunda salida se ve así:
+
+----
+Salida 0 <5 bitcoin>:
+<Llave Pública de Irene> CHECKSIG
+
+Salida 1 <5 bitcoin>:
+IF
+    # Salida de penalización por revocación
+<Llave Pública de Revocación>
+ELSE
+<1000 bloques>
+    CHECKSEQUENCEVERIFY
+    DROP
+    <Llave Pública de Hitesh>
+ENDIF
+CHECKSIG
+----
+
+Irene puede firmar con confianza esta transacción, ya que si se difunde, inmediatamente le pagará lo que se le debe. Hitesh retiene la transacción, pero sabe que si la difunde en un cierre de canal unilateral, tendrá que esperar 1000 bloques para recibir su pago.
+
+Cuando el canal avanza hacia el siguiente estado, Hitesh tiene que _revocar_ esta transacción de compromiso antes de que Irene acepte firmar la próxima transacción de compromiso. Para lograr esto, todo lo él que tiene que hacer es comunicar su mitad de la _llave secreta de revocación_ a Irene. Una vez que Irene tiene las dos mitades de la llave secreta de revocación para este compromiso (la que ella produjo mas la que le acaba de entregar Hitesh), puede firmar el próximo compromiso con confianza. Ella sabe que si Hitesh intenta hacer trampa publicando este compromiso vencido, ella puede usar la llave de revocación para gastar a su favor la salida retrasada de Hitesh. _Si Hitesh hace trampa, Irene se queda con los fondos de AMBAS salidas_. Mientras tanto, Hitesh solo tiene la mitad del secreto para esta llave pública de revocación y no puede cobrar la segunda salida, hasta transcurridos 1000 bloques. Irene podrá cobrar dicha salida retrasada y castigar a Hitesh antes de que hayan transcurrido los 1000 bloques.
+
+El protocolo de revocación es bilateral, lo que significa que en cada ronda, a medida que avanza el estado del canal, las dos partes intercambian nuevos compromisos, intercambian secretos de revocación por los compromisos anteriores y firman las nuevas transacciones de compromiso de cada uno. A medida que aceptan un nuevo estado, hacen que el estado anterior sea imposible de usar, dándose mutuamente los secretos de revocación necesarios para castigar cualquier trampa.
+
+Veamos un ejemplo de cómo funciona. Uno de los clientes de Irene quiere enviar 2 bitcoins a uno de los clientes de Hitesh. Para transmitir 2 bitcoins a través del canal, Hitesh e Irene deben modificar el estado del canal para reflejar los nuevos saldos. Se comprometerán con un nuevo estado (estado número 2) donde se dividen los 10 bitcoins del canal, 7 bitcoins para Hitesh y 3 bitcoins para Irene. Para modificar el estado del canal, cada uno creará nuevas transacciones de compromiso que reflejen los nuevos saldos del mismo.
+
+Como antes, estas transacciones de compromiso son asimétricas, de modo que la transacción de compromiso que tiene cada parte las obliga a esperar si la difunden. Es crucial que antes de firmar las nuevas transacciones de compromiso, primero se intercambien llaves de revocación para invalidar el compromiso anterior. En este caso particular, los intereses de Hitesh están alineados con el estado real del canal y, por lo tanto, no tiene ninguna razón para difundir un estado anterior. Sin embargo, para Irene, el estado número 1 la deja con un saldo más alto que el estado número 2. Cuando Irene le da a Hitesh la llave de revocación para su transacción de compromiso anterior (el estado número 1), efectivamente está revocando su capacidad para beneficiarse de regresar al canal a un estado anterior, ya que con la llave de revocación, Hitesh puede redimir ambas salidas de la transacción de compromiso anterior sin demora. Es decir, si Irene difunde el estado anterior, Hitesh puede ejercer su derecho a apoderarse de todas las salidas.
+
+Es importante destacar que la revocación no ocurre automáticamente. Si bien Hitesh tiene la capacidad de castigar a Irene por hacer trampa, él tiene que mantenerse atento a la cadena de bloques diligentemente en busca de signos de trampa. Si ve una que una transacción de compromiso previa es difundida, tiene un lapso de tiempo correspondiente a 1000 bloques, para tomar medidas y usar la llave de revocación para frustrar el engaño de Irene y castigarla tomando el saldo completo, los 10 bitcoins.
+
+Los compromisos revocables asimétricos con bloqueos temporales relativos (+CSV+) son una forma mucho mejor de implementar canales de pago y una innovación muy significativa en esta tecnología. Con este diseño, el canal puede permanecer abierto indefinidamente y puede tener miles de millones de transacciones de compromiso intermedias. En las implementaciones de pruebas de la plataforma Lightning Network, el estado de compromisos del canal se identifica mediante un índice de 48-bits, lo que permite más de 281 billones (2.8 x 10^14^) de transiciones de estado en cualquier canal!((("", startref="PSCaymetric12")))
+
+==== Contratos por Bloqueo Temporal y de Hash (del inglés, HTLC)
+
+((("Contratos por Bloqueo Temporal y de Hash (HTLC)"))) ((("canales de (estados) pagos", " Contratos por Bloqueo Temporal y de Hash (HTLC)")))Los canales de pago pueden ampliarse aún más con un tipo especial de contrato inteligente, que permite a los participantes comprometer fondos a un secreto redimible, con un tiempo de vencimiento. Esta prestación se conoce como _Contrato por Bloqueo Temporal y de Hash_, o del inglés _HTLC_ (Hash Time Lock Contract), y se usa en canales de pago bidireccionales y enrutados u orientados a conexión.
+
+Pero primero se explicará el rasgo de bloqueo por “hash” de la prestación HTLC. Para crear un HTLC, el destinatario del pago creará primero un secreto +R+. Luego calculará el valor hash de este secreto +H+:
+
+----
+H = Hash(R)
+----
+
+Esto produce un valor hash +H+ que se puede incluir en los script de bloqueo de alguna salida de una transacción. Quien conozca el secreto puede usarlo para redimir esa salida. El secreto +R+ también se conoce como la _preimagen_ de la función hash. La preimagen no es más que la data que se utiliza como parámetro de una función hash.
+
+La segunda parte de un HTLC es el componente de “bloqueo temporal”. Si no se revela el secreto, el pagador del HTLC puede obtener un “reembolso” después de un cierto tiempo. Esto se logra con un bloqueo de tiempo absoluto usando la instrucción transaccional +CHECKLOCKTIMEVERIFY+.
+
+El código script que implementa un HTLC podría verse así:
+
+----
+IF
+    # Proceso de pago a quien posea el secreto R
+    HASH160 <H> EQUALVERIFY
+ELSE
+    # Reembolso en caso de expiración.
+    <bloqueo temporal> CHECKLOCKTIMEVERIFY DROP
+    <Llave Pública del Pagador> CHECKSIG
+ENDIF
+----
+
+Cualquiera que conozca un secreto +R+, tal que cuando se le procesa con cierta función hash, devuelve el valor +H+, puede redimir esta salida ejecutando la primera cláusula de la estructura de control +IF+.
+
+Si nadie revela este secreto para reclamar el pago del HTLC después de un cierto número de bloques, el pagador puede reclamar un reembolso utilizando la segunda cláusula de la estructura de control +IF+.
+
+Esta es una implementación básica de un HTLC. Este tipo de HTLC puede ser redimido por _cualquier persona_ que tenga el secreto +R+. Un HTLC puede tomar muchas formas diferentes con ligeras variaciones en el código script. Por ejemplo, agregar un operador transaccional +CHECKSIG+ y una llave pública en la primera cláusula restringe la redención del hash a un destinatario pre-designado, que también debe conocer el secreto +R+.((("", startref="BCApayment12")))
+
+[[lightning_network]]
+=== Canales de Pago Enrutados (Lightning Network)
+
+((("programación sobre la cadena de bloques", "canales de pago enrutados", seealso="Lightning Network", id="BCAlightning12")))((("canales de pago enrutados", see="Lightning Network"))))((( "Lightning Network", "definidos")))La plataforma Lightning Network es una red orientada a conexión compuesta por canales de pagos bidireccionales, conectados de extremo a extremo. Una red como esta puede permitir a cualquier participante enrutar un pago de un canal a otro sin la necesidad de confiar en ninguno de los intermediarios. Lightning Network fue https://lightning.network/lightning-network-paper.pdf[por primera vez descrita por Joseph Poon y Thadeus Dryja en febrero de 2015], basándose en los conceptos de canales de pago, según se habían propuesto y elaborado por muchos otros.
+
+“Lightning Network” se refiere a un diseño específico para una red de canales de pago enrutada, que ahora ha sido implementada por al menos cinco equipos de código abierto diferentes.(((""Fundamentos Básicos de Lightning Technology (BOLT)")))Los desarrollos independientes están coordinados por un conjunto de estándares de interoperabilidad descritos en el paper del protocolo https://bit.ly/2rBHeoL[_Basics of Lightning Technology (BOLT)_].
+
+Varios equipos han lanzado implementaciones de prueba para Lightning Network.
+
+Lightning Network es una forma posible de implementar canales de pago enrutados. Hay varios otros diseños que apuntan a lograr objetivos similares, como Teechan y Tumblebit.
+
+==== Ejemplo básico usando Lightning Network
+
+((("Lightning Network", "ejemplo básico")))Veamos cómo funciona esta red.
+
+En este ejemplo, tenemos cinco participantes: Alice, Bob, Carol, Diana y Eric. Estos cinco participantes han abierto canales de pago entre ellos, en pares. Alice tiene un canal de pagos con Bob. Bob está conectado con Alice y con Carol, Carol con Bob y Diana y Diana con Carol y Eric. Para simplificar, supongamos que cada canal está financiado con 2 bitcoins por cada participante por canal, para una capacidad total de 4 bitcoins en cada canal.
+
+<<lightning_network_fig>> muestra cinco participantes en una red Lightning Network, conectados por canales de pago bidireccionales que se pueden vincular para realizar un pago de Alice a Eric (<<lightning_network>>).
+
+[[lightning_network_fig]]
+.Una serie de canales de pago bidireccionales vinculados para formar una Lightning Network que puede enrutar un pago desde Alice hasta Eric
+image::images/mbc2_1206.png["Una serie de canales de pago bidireccionales vinculados para formar una Lightning Network"]
+
+Alice quiere pagarle a Eric 1 bitcoin. Sin embargo, Alice no está conectada con Eric por un canal de pago. La creación de un canal de pago requiere una transacción de financiación, que debe comprometerse con la cadena de bloques de bitcoin. Alice no quiere abrir un nuevo canal de pago y comprometer más de sus fondos. ¿Hay alguna forma de pagarle a Eric, indirectamente?
+
+<<ln_payment_process>> muestra el proceso paso a paso de enrutar un pago de Alice a Eric, a través de una serie de compromisos HTLC en los canales de pago que conectan a los participantes.
+
+[[ln_payment_process]]
+.Enrutamiento de pagos paso-a-paso a través de una red  Lightning Network
+image::images/mbc2_1207.png["Enrutamiento de pagos paso-a-paso a través de una red Lightning Network"]
+
+Alice está ejecutando un nodo de Lightning Network, o “LN”, que es capaz de realizar un seguimiento de su canal de pagos a Bob y además puede descubrir rutas entre otros canales de pagos. El nodo LN de Alice también tiene la capacidad de conectarse a través de Internet al nodo LN de Eric. El nodo LN de Eric crea un secreto +R+ utilizando un generador de números aleatorios. El nodo de Eric no revela este secreto a nadie. En cambio, el nodo de Eric calcula el valor hash +H+ del secreto +R+ y transmite este valor hash al nodo de Alice (ver <<ln_payment_process>> paso 1).
+
+Ahora el nodo LN de Alice construye una ruta entre su nodo LN y el nodo LN de Eric. El algoritmo de enrutamiento utilizado se examinará con más detalle más adelante, pero por ahora supongamos que al nodo de Alice le es posible encontrar una ruta eficiente.
+
+El nodo de Alice luego redacta un protocolo HTLC, pagadero al hash +H+, con un tiempo de espera de reembolso de 10 bloques (bloque actual + 10), por una cantidad de 1.003 bitcoins (ver <<ln_payment_process>> paso 2). El valor 0.003 adicional se usará para compensar a los nodos intermedios por su participación en esta ruta de pago. Alice ofrece este HTLC a Bob, deduciendo 1.003 bitcoins del saldo de su canal con Bob y comprometiéndolo con el HTLC. El HTLC tiene el siguiente significado: _"Alice está comprometiendo 1.003 bitcoins del saldo de su canal a Bob si Bob conoce el secreto, o a que se le reembolse a su favor este saldo si transcurren 10 bloques o más."_ Los saldos del canal entre Alice y Bob son ahora expresados por transacciones de compromiso con tres salidas: un saldo de 2 bitcoins para Bob, un saldo de 0,997 bitcoins para Alice y de 1,003 bitcoins comprometidos en el contrato HTLC de Alice. El saldo de Alice se reduce por la cantidad comprometida con el contrato HTLC.
+
+Bob ahora tiene un compromiso que promete que si puede obtener el secreto +R+ dentro de los próximos 10 bloques, puede reclamar los 1.003 bitcoins bloqueados por Alice. Con este compromiso en la mano, el nodo de Bob redacta un nuevo contrato HTLC en su canal de pago con Carol. El HTLC de Bob compromete 1.002 bitcoins al hash +H+ por un lapso de 9 bloques, que Carol puede redimir si averigua el secreto +R+ (ver <<ln_payment_process>> paso 3). Bob sabe que si Carol puede redimir su HTLC, ella tiene que producir de algún modo a +R+. Si Bob obtiene +R+ en menos de nueve bloques, puede usarlo para reclamar el saldo del HTLC de Alice. También ganará 0.001 bitcoins por comprometer el saldo de su canal durante nueve bloques. Si Carol no puede reclamar su HTLC y él no podrá reclamar el HTLC de Alice, todo vuelve a los saldos de canales anteriores y nadie está perdiendo. El balance del canal entre Bob y Carol ahora es: 2 bitcoins para Carol, 0.998 para Bob y 1.002 comprometidos por Bob en su particular HTLC.
+
+Carol ahora tiene un compromiso que promete que si obtiene de algún modo el secreto +R+ dentro de los próximos nueve bloques o menos, ella puede reclamar 1.002 bitcoins bloqueados por Bob. Ahora puede hacer un compromiso HTLC propio en su canal con Diana. Ella puede comprometer un HTLC de 1.001 bitcoin a favor de quien posea el secreto que produce el hash +H+, por un lapso de ocho bloques; compromiso que Diana puede redimir si obtiene el secreto +R+ (ver <<ln_payment_process>> paso 4). Desde la perspectiva de Carol, si esto funciona, ella podría ganarse 0.001 bitcoins y si no funciona, no pierde nada. Su oferta HTLC para con Diana solo será viable si en algún momento el secreto +R+ es revelado, en cuyo momento podrá reclamar el HTLC entre ella y Bob. Los saldos del canal entre Carol y Diana serán ahora: 2 bitcoins para Diana, 0.999 para Carol y 1.001 comprometidos por Carol para su HTLC.
+
+Finalmente, Diana puede redactar un HTLC a Eric, comprometiendo 1 bitcoin por siete bloques a favor del hash +H+ (ver <<ln_payment_process>> paso 5). Los saldos del canal entre Diana y Eric son ahora: 2 bitcoins para Eric, 1 bitcoin para Diana y 1 bitcoin comprometido por Diana en su HTLC.
+
+Sin embargo, en este salto final de la ruta, Eric _es el dueño_ del secreto +R+. Por lo cual él puede inmediatamente reclamar el HTLC ofrecido por Diana. Él envía así el valor +R+ a Diana y reclama el bitcoin de ese HTLC, y lo agrega a su favor en los saldos de su canal con Diana (ver <<ln_payment_process>> paso 6). Los saldos de este canal son ahora: 1 bitcoin para Diana y 3 para Eric.
+
+Ahora que Diana posee el secreto +R+, puede reclamar el HTLC ofrecido por Carol. Diana transmite +R+ a Carol y agrega el valor de 1.001 bitcoins a su saldo del canal (ver <<ln_payment_process>> paso 7). Ahora los saldos del canal entre Carol y Diana son: 0.999 bitcoins para Carol y 3.001 para Diana. Diana ha "ganado" 0.001 bitcoin por participar en esta ruta de pago.
+
+Volviendo hacia atrás a través de la ruta, el secreto +R+ permite a cada participante reclamar los fondos de los HTLC pendientes. Carol reclama 1.002 de Bob, estableciendo en su canal con él los siguientes saldos: 0.998 bitcoins a Bob y 3.002 a Carol (ver <<ln_payment_process>> paso 8). Finalmente, Bob reclama el HTLC ofrecido por Alice (ver <<ln_payment_process>> paso 9). Así, los saldos de su canal con ella se actualizan a: 0.997 bitcoins para Alice y 3.003 para Bob.
+
+Alice le ha pagado a Eric 1 bitcoin sin tener que abrir un canal con Eric. Ninguna de las partes intermedias en la ruta de pago tuvo que confiar entre sí. Por el compromiso a corto plazo de sus fondos en el canal, pueden ganar una pequeña tarifa, con el único riesgo de que se produzca un pequeño retraso en el reembolso si el canal se cerró o el pago enrutado falló.
+
+==== Transporte y Enrutamiento de Lightning Network
+
+((("Lightning Network", "transporte y enrutamiento")))Todas las comunicaciones entre nodos LN están encriptadas de punto a punto. Además, los nodos tienen una llave pública a largo plazo que utilizan como identificador y para autenticarse entre sí.
+
+Siempre que un nodo desee enviar un pago a otro nodo, primero debe establecer una _ruta_ a través de la red conectando canales de pago con capacidad suficiente. Los nodos anuncian la información de enrutamiento, incluidos qué canales tienen abiertos, cuánta capacidad tiene cada canal y qué comisiones cobran para enrutar los pagos. La información de enrutamiento se puede compartir de varias maneras y es probable que surjan diferentes protocolos de enrutamiento a medida que avanza la tecnología de Lightning Network. Algunas implementaciones de Lightning Network usan el protocolo IRC (el "Internet Relay Chat") como un mecanismo conveniente para que los nodos anuncien información de enrutamiento. Otra implementación de la exploración de rutas, utiliza un modelo P2P donde los nodos propagan anuncios de sus canales a sus pares, en un modelo de "inundación", similar a cómo Bitcoin propaga sus transacciones. Los planes futuros incluyen una propuesta llamada http://bit.ly/2r5TACm[Flare], que es un modelo de enrutamiento híbrido con "vecindarios" de nodos locales y nodos de balizaje de mayor alcance.
+
+En nuestro ejemplo anterior, el nodo de Alice usa uno de estos mecanismos de exploración de rutas para encontrar una o más rutas que conecten su nodo con el nodo de Eric. Una vez que el nodo de Alice haya establecido una ruta, ella inicializará esa ruta a través de la red, propagando una serie de instrucciones encriptadas y anidadas para conectar cada uno de los canales de pago adyacentes.
+
+Es importante destacar que esta ruta solo es conocida por el nodo de Alice. Todos los demás participantes en la ruta de pago solo ven los nodos adyacentes. Desde la perspectiva de Carol, esto parece un pago de Bob a Diana. Carol no sabe que Bob está retransmitiendo un pago de Alice. Tampoco sabe que Diana le enviará un pago a Eric.
+
+Esta es una característica crítica de Lightning Network, ya que garantiza la privacidad de los pagos y hace que sea muy difícil aplicar la vigilancia, la censura o las listas negras. Pero, ¿cómo establece Alice esta ruta de pago, sin revelar nada a los nodos intermediarios?
+
+Lightning Network implementa un protocolo de enrutamiento de cebollas basado en un esquema llamado https://bit.ly/2q6ZDrP[Sphinx]. Este protocolo de enrutamiento garantiza que un remitente de pagos pueda construir y comunicar una ruta a través de Lightning Network de manera que:
+
+* Los nodos intermedios pueden verificar y descifrar su porción de información de ruta y encontrar el próximo salto.
+
+* Aparte de los saltos anteriores y siguientes, no pueden averiguar nada más sobre ningún otro nodo que forme parte de la ruta.
+
+* No pueden identificar la longitud de la ruta de pago ni su propia posición en esa ruta.
+
+* Cada parte de la ruta está encriptada de tal manera que un atacante a nivel de la red no podrá asociar los paquetes de diferentes partes de la ruta entre sí.
+
+* A diferencia del protocolo Tor (un protocolo de anonimización de enrutado por cebollas en Internet), no hay "nodos terminales" (o “exit nodes”) que se puedan poner bajo vigilancia. No es necesario que los pagos se transmitan a la cadena de bloques de bitcoin; los nodos solo actualizan los saldos de sus canales.
+
+Usando este protocolo enrutado por cebollas, Alice envuelve cada elemento de la ruta en una capa de encriptación, comenzando por el final y procediendo hacia atrás en la ruta. Ella encripta un mensaje a Eric con la llave pública de Eric. Este mensaje está envuelto en un mensaje cifrado a Diana, que identifica a Eric como el próximo destinatario. El mensaje a Diana se envuelve en un mensaje encriptado con la llave pública de Carol e identifica a Diana como el próximo destinatario. El mensaje a Carol se envuelve con la llave de Bob. Por lo tanto, Alice ha construido esta "cebolla" de mensajes multicapas encriptada. Ella le envía esto a Bob, quien solo puede descifrar y desenvolver la capa más externa. Adentro, Bob encuentra un mensaje dirigido a Carol que puede reenviar a Carol pero no que puede descifrar. Siguiendo el camino, los mensajes se reenvían, descifran, reenvían, etc., hasta llegar a Eric. Cada participante conoce solo el nodo anterior y el siguiente en cada salto.((("", startref="alicetwelve")))
+
+Cada elemento de la ruta contiene información sobre el protocolo HTLC que debe extenderse al siguiente salto, la cantidad que se envía, la tarifa a incluir y el tiempo de bloqueo de CLTV (CHECKLOCKTIMEVERIFY en bloques) al vencimiento del HTLC. A medida que se propaga la información de la ruta, los nodos se comprometen con HTLC que yace en el próximo salto.
+
+En este punto, es posible que surja la duda de cómo es posible que los nodos no conozcan la longitud de la ruta y su posición en esa ruta. Después de todo, reciben un mensaje y lo reenvían al siguiente salto. ¿No se debería acortar progresivamente el mensaje, permitiendo deducir el tamaño del camino y su posición? Para evitar esto, la ruta siempre se fija en 20 saltos y se rellena con datos aleatorios. Cada nodo ve el siguiente salto y un mensaje cifrado de longitud fija para reenviar. Solo el destinatario final ve que no hay próximo salto. Para todos los demás, parece que siempre quedan 20 saltos más.
+
+==== Ventajas de Lightning Network
+
+((("Lightning Network", "ventajas")))Una plataforma Lightning Network consiste en una tecnología de enrutamiento de segunda capa. Se puede aplicar sobre cualquier cadena de bloques que admita algunas capacidades básicas, como transacciones multifirma, bloqueos de tiempo y contratos inteligentes básicos.
+
+Si una red Lightning Network se superpone como capa de servicios a la red bitcoin, la red bitcoin puede aumentar significativamente su capacidad, privacidad, granularidad y velocidad, sin sacrificar los principios de su operación desconfiable y sin intermediarios:
+
+Privacidad:: Los pagos de Lightning Network son mucho más privados que los pagos en la cadena de bloques de bitcoin, ya que no son públicos. Si bien los participantes en una ruta pueden ver los pagos propagados a través de sus canales, no conocen al remitente o al destinatario.
+
+Fungibilidad:: Una plataforma Lightning Network hace que sea mucho más difícil aplicar cualquier tipo de vigilancia así como listas negras en bitcoin, aumentando la fungibilidad de la moneda.
+
+Velocidad:: Las transacciones de Bitcoin que utilizan Lightning Network se liquidan en milisegundos, en lugar de minutos, ya que los HTLC se verifican sin comprometer las transacciones en un bloque de la red Bitcoin.
+
+Granularidad:: Una plataforma Lightning Network puede permitir pagos al menos tan pequeños como el límite ínfimo (o de "polvo") de bitcoin, quizás incluso más pequeños. Algunas propuestas permiten incrementos en subsatoshis.
+
+Capacidad:: Una plataforma Lightning Network aumenta la capacidad del sistema bitcoin en varios órdenes de magnitud. No existe un límite superior práctico para la cantidad de pagos por segundo que se pueden enrutar a través de una plataforma Lightning Network, ya que depende solo de la capacidad y la velocidad de cada nodo.
+
+Operatividad Desconfiable:: Una plataforma Lightning Network utiliza transacciones de bitcoin entre nodos que operan como pares sin depender en ningún tipo de confianza el uno del otro. Por lo tanto, una plataforma Lightning Network conserva los principios del sistema bitcoin, al tiempo que amplía significativamente sus parámetros operativos.
+
+Por supuesto, como se mencionó anteriormente, el protocolo Lightning Network no es la única forma de implementar canales de pago enrutados. Otros sistemas propuestos incluyen Tumblebit y Teechan. En este momento, sin embargo, Lightning Network ya se ha implementado en la red de pruebas “testnet”. Varios equipos diferentes han desarrollado implementaciones competitivas de LN y están trabajando en pro de un estándar de interoperabilidad común (llamado BOLT). Es probable que Lightning Network sea la primera red de canales de pago enrutada que se implementará en producción.((("", startref="BCAlightning12")))
+
+=== Conclusión
+
+Hemos examinado solo algunas de las aplicaciones emergentes que se pueden construir utilizando la cadena de bloques de bitcoin como plataforma de confianza. Estas aplicaciones amplían el alcance de bitcoin más allá de los pagos y más allá de los instrumentos financieros, para abarcar muchas otras aplicaciones donde la confianza es crítica. Al descentralizar la base de la confianza, la cadena de bloques de bitcoin funge de plataforma que generará muchas aplicaciones revolucionarias en una amplia variedad de industrias.

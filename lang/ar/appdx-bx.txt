@@ -1,0 +1,181 @@
+[[appdx_bx]]
+[appendix]
+
+== أوامر (bx) لمستعرض بت كوين
+
+((("Bitcoin Explorer (bx) commands", id="BX18_1", range="startofrange"))) يعد مستعرض البيتكوين (bx) أداة أوامر سطرية وهو يقدم أوامر متنوعة لإدارة المفاتيح وبناء العلاقات. وهي تأتي كجزء من مكتبة بيتكوين "libbitcoin".
+
+----
+الاستخدام: bx COMMAND [--help]
+
+معلومات: أوامر bx هي:
+
+address-decode
+address-embed
+address-encode
+address-validate
+base16-decode
+base16-encode
+base58-decode
+base58-encode
+base58check-decode
+base58check-encode
+base64-decode
+base64-encode
+bitcoin160
+bitcoin256
+btc-to-satoshi
+ec-add
+ec-add-secrets
+ec-multiply
+ec-multiply-secrets
+ec-new
+ec-to-address
+ec-to-public
+ec-to-wif
+fetch-balance
+fetch-header
+fetch-height
+fetch-history
+fetch-stealth
+fetch-tx
+fetch-tx-index
+hd-new
+hd-private
+hd-public
+hd-to-address
+hd-to-ec
+hd-to-public
+hd-to-wif
+help
+input-set
+input-sign
+input-validate
+message-sign
+message-validate
+mnemonic-decode
+mnemonic-encode
+ripemd160
+satoshi-to-btc
+script-decode
+script-encode
+script-to-address
+seed
+send-tx
+send-tx-node
+send-tx-p2p
+settings
+sha160
+sha256
+sha512
+stealth-decode
+stealth-encode
+stealth-public
+stealth-secret
+stealth-shared
+tx-decode
+tx-encode
+uri-decode
+uri-encode
+validate-tx
+watch-address
+wif-to-ec
+wif-to-public
+wrap-decode
+wrap-encode
+----
+
+لمزيد من المعلومات، زر الروابط https://github.com/libbitcoin/libbitcoin-explorer[Bitcoin Explorer homepage] و  https://github.com/libbitcoin/libbitcoin-explorer/wiki[Bitcoin Explorer user documentation]
+
+=== Examples of bx Command Use
+
+لنلقي نظرة على بعض الأمثلة حول أوامر مستعرض البيتكوين لتجريبها على المفاتيح والعناوين.
+
+قم بتوليد قيمة عشوائية لل"بذرة" مستعملاً أمر +seed+، والذي يستعمل مولد نظام التشغيل للأرقام العشوائية. قم بتمرير تلك البذرة للأمر +ec-new+ لتوليد مفتاح خاص جديد. نقوم بحفظ المخرجات المعيارية في ملف _private_key_:
+
+----
+$ bx seed | bx ec-new > private_key
+$ cat private_key
+73096ed11ab9f1db6135857958ece7d73ea7c30862145bcc4bbc7649075de474
+----
+
+الآن/ قم بتوليد المفتاح العام من المفتاح الخاص باتسعمال الأمر +ec-to-public+. نقوم بتمرير ملف المفتاح الخاص  _private_key_ إلى المدخل المعياري ونحفظ المخرجات المعيارية للأمر في ملف مفتاح عام _public_key_:
+
+----
+$ bx ec-to-public < private_key > public_key
+$ cat public_key
+02fca46a6006a62dfdd2dbb2149359d0d97a04f430f12a7626dd409256c12be500
+----
+
+يمكننا إعادة صياغة المفتاح العام +public_key+ ليصبح عنواناً باستعمال الأمر +ec-to-address+. نقوم بتمرير المفتاح العام _public_key_ للمدخل المعياري:
+
+----
+$ bx ec-to-address < public_key
+17re1S4Q8ZHyCP8Kw7xQad1Lr6XUzWUnkG
+----
+
+وتُنتج المفاتيح المولدة بهذه الطريقة محفطة غير محددة من نوع type-0. مما يعني أن كل مفتاح مولّد من بذرة مستقلة. ويمكن أيضاً لأوامر مستعرض البيتكوين توليد مفاتيح محدودة، متوافقةً مع BIP-32. في هذه الحالة، ينشأ المفتاح "الرئيسي" من بذرة ما وتمدد بعد ذلك بشكل محدود حتى تنتج شجرة من المفاتيح الفرعية ناتجة عنها محفظة محددة من نوع  type-2.
+
+نستعمل أولاً الأوامر +seed+ و +hd-new+  لتوليد مفتاح رئيسي والذي سيستعمل كقاعدة تتفرع منها سلسلة من المفاتيح:
+
+----
+$ bx seed > seed
+$ cat seed
+eb68ee9f3df6bd4441a9feadec179ff1
+
+$ bx hd-new < بذرة > master
+$ cat master
+xprv9s21ZrQH143K2BEhMYpNQoUvAgiEjArAVaZaCTgsaGe6LsAnwubeiTcDzd23mAoyizm9cApe51gNfLMkBqkYoWWMCRwzfuJk8RwF1SVEpAQ
+----
+
+والآن نستعمل أمر  +hd-private+ لتوليد مفتاح "حساب" صلب وسلسلة مؤلفة من مفتاحين خاصين متضمنين في الحساب:
+
+----
+$ bx hd-private --hard < المفتاح الرئيس > account
+$ cat account
+xprv9vkDLt81dTKjwHB8fsVB5QK8cGnzveChzSrtCfvu3aMWvQaThp59ueufuyQ8Qi3qpjk4aKsbmbfxwcgS8PYbgoR2NWHeLyvg4DhoEE68A1n
+
+$ bx hd-private --index 0 < account
+xprv9xHfb6w1vX9xgZyPNXVgAhPxSsEkeRcPHEUV5iJcVEsuUEACvR3NRY3fpGhcnBiDbvG4LgndirDsia1e9F3DWPkX7Tp1V1u97HKG1FJwUpU
+
+$ bx hd-private --index 1 < account
+xprv9xHfb6w1vX9xjc8XbN4GN86jzNAZ6xHEqYxzbLB4fzHFd6VqCLPGRZFsdjsuMVERadbgDbziCRJru9n6tzEWrASVpEdrZrFidt1RDfn4yA3
+----
+
+تالياً، نستعمل الأمر +hd-public+ لتوليد التسلسل الموافق من المفتاحين العامين:
+
+----
+$ bx hd-public --index 0 < account
+xpub6BH1zcTuktiFu43rUZ2gXqLgzu5F3tLEeTQ5t6iE3aQtM2VMTxMcyLN9fYHiGhGpQe9QQYmqL2eYPFJ3vezHz5wzaSW4FiGrseNDR4LKqTy
+
+$ bx hd-public --index 1 < account
+xpub6BH1zcTuktiFx6CzhPbGjG3UYQ13WR16CmtbPiagEKpEVtpyjshWyMaMV1cn7nUPUkgQHPVXJVqsrA8xWbGQDhohEcDFTEYMvYzwRD7Juf8
+----
+
+ويمكن اشتقاق المفاتيح العامة من المفاتيح الخاصة الموافقة لهم باستعمال الأمر +hd-to-public+:
+
+----
+$ bx hd-private --index 0 < account | bx hd-to-public
+xpub6BH1zcTuktiFu43rUZ2gXqLgzu5F3tLEeTQ5t6iE3aQtM2VMTxMcyLN9fYHiGhGpQe9QQYmqL2eYPFJ3vezHz5wzaSW4FiGrseNDR4LKqTy
+
+$ bx hd-private --index 1 < account | bx hd-to-public
+xpub6BH1zcTuktiFx6CzhPbGjG3UYQ13WR16CmtbPiagEKpEVtpyjshWyMaMV1cn7nUPUkgQHPVXJVqsrA8xWbGQDhohEcDFTEYMvYzwRD7Juf8
+----
+
+نستطيع عملياً توليد عدد لا حد له من المفاتيح في سلسة محددة (deterministic chain)، جميعها مشتقة من بذرة واحدة. هذا الأسلوب مستخدم في كثير من تطبيقات المَحَافِظ لتوليد مفاتيح يمكن نسخها نسخاً احتياطياً واستعادتها من خلال قيمة واحدة وهي قيمة البذرة. هذا أسهل من أن يكون علينا القيام بنسخ المحفظة بكاملها نسخاً احتياطياً بما في ذلك جميع مفاتيحها المولدة عشوائياً في كل مرة نقوم فيها بإنشاء مفتاح جديد.
+
+أما البذرة فيمكن ترميزها باستعمال الأمر +mnemonic-encode+:
+
+----
+$ bx hd-mnemonic < البذرة > words
+adore repeat vision worst especially veil inch woman cast recall dwell appreciate
+----
+
+ويمكن لاحقاً فك ترميز البذرة باستعمال الأمر +mnemonic-decode+:
+
+----
+$ bx mnemonic-decode < words
+eb68ee9f3df6bd4441a9feadec179ff1
+----
+
+ويمكن أن يسهل الترميز باستعمال الذاكرة تسجيل البذرة وحتى تذكرها.

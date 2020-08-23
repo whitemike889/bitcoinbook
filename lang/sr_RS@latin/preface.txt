@@ -1,0 +1,170 @@
+[preface]
+== Predgovor
+
+=== Pisanje bitkoin knjige
+
+((("bitcoin", "benefits of", id="BCbasicbenefits0")))((("decentralized systems", "bitcoin as")))Prvi put sam naleteo na bitkoin sredinom 2011. Moja neposredna reakcija bila je manje-više "Pfft! Novac za gikove! (Nerd money!)" i ignorisao sam ga još šest meseci, ne uspevajući da shvatim njegovu važnost. Ovo je bila reakcija koju sam video više puta kod mnogo pametnih ljudi koje poznajem, što mi daje utehu. Drugi put kada sam naišao na bitkoin, u diskusiji na jednoj mejl listi. Tu sam odlučio da pročitam članak koji je napisao Satoši Nakamoto, da proučim taj autoritativni izvor i da vidim o čemu se tu radi. ((("digital currencies", "bitcoin vs. others"))) Još se sećam trenutka kada sam završio čitanje tih devet stranica, tada sam shvatio da bitkoin nije samo digitalna valuta, već mreža poverenja koja bi takođe mogla da pruži osnovu za mnogo više od valuta. Kada sam shvatio da "ovo nije novac, to je decentralizovana mreža poverenja", krenuo sam na četveromesečno putovanje na kojem sam gutao gomile informacija o bitkoinu na koje sam naišao. Postao sam opsednut i očaran, provodeći 12 i više sati svakog dana zalepljen za ekran, čitajući, pišući, programirajući i učeći koliko sam mogao. Iz ove zone sumraka izašao sam lakši za više od 20 kilograma zbog nedostatka redovnih obroka, ali odlučan da se posvetim radu na bitkoinu.
+
+Dve godine kasnije, nakon što sam stvorio brojne male startape da bih istražio razne usluge i proizvode koji se odnose na bitkoin, shvatio sam da je bilo vreme da napišem svoju prvu knjigu. Bitkoin je bila tema koja me dovela u besomučnost kreativnosti i okupirala moje misli; to je bila najuzbudljivija tehnologija sa kojom sam se susreo od interneta. Bilo je vreme da podelim svoju strast vezanu za ovu neverovatnu tehnologiju sa širom publikom.
+
+=== Predviđena publika
+
+((("intended audience")))Ova knjiga je uglavnom namenjena programerima. Ako znate da koristite programski jezik, ova knjiga će vas naučiti kako rade kriptografske valute, kako da ih koristite i kako da razvijete softver koji radi sa njima. Prvih nekoliko poglavlja su takođe pogodni kao detaljni uvod u bitkoin za ljude koji ne programiraju - oni koji pokušavaju da shvate unutrašnjost rada bitkoina i kriptovaluta.
+
+=== Zašto ima bube na omotu?
+
+((("decentralized systems", "in nature")))Mrav koji seče lišće je vrsta koja pokazuje veoma složeno ponašanje u koloniji superorganizma, ali svaki pojedinačni mrav deluje u skupu jednostavnih pravila vođenih socijalnom interakcijom i razmenom hemijskih mirisa (feromona). Po Vikipediji: "Pored ljudi, mravi koji seku lišće čine najveće i najsloženije životinjsko društvo na Zemlji." Ti mravi zapravo ne jedu lišće, već ih koriste za uzgoj gljiva, što je centralni izvor hrane za koloniju. Shvatate? Ovi mravi se bave poljoprivredom!
+
+Iako mravi formiraju društvo zasnovano na kastama i imaju kraljicu za proizvodnju potomstva, ne postoji centralni autoritet ili vođa u koloniji mrava. Izuzetno inteligentno i sofisticirano ponašanje koje pokazuje višemilionska kolonija novo je svojstvo interakcije pojedinaca na društvenoj mreži.
+
+Priroda pokazuje da decentralizovani sistemi mogu biti otporni i mogu stvoriti novonastalu složenost i neverovatnu sofisticiranost bez potrebe za centralnim autoritetom, hijerarhijom ili složenim delovima.
+
+((("decentralized systems", "benefits of")))Bitkoin je visoko sofisticirana decentralizovana mreža poverenja koja može podržati bezbroj finansijskih procesa. Ipak, svaki čvor u bitkoin mreži sledi nekoliko jednostavnih matematičkih pravila. Interakcija između mnogih čvorova je ono što dovodi do pojave sofisticiranog ponašanja, a ne bilo kakva urođena složenost ili poverenje u bilo koji čvor. Poput kolonije mrava, bitkoin mreža je elastična mreža jednostavnih čvorova koja sledi jednostavna pravila koja zajedno mogu raditi neverovatne stvari bez ikakve centralne koordinacije.((("", startref="BCbasicbenefits0")))
+
+=== Konvencije korišćene u ovoj knjizi
+
+((("typographical conventions")))U ovoj knjizi koriste se sledeće tipografske konvencije:
+
+_Kurzivno_:: Označava nove pojmove, URL adrese, adrese imejla, nazive fajlova i ekstenzije fajlova.
+
++Konstantna širina+:: Koristi se za ispisane programe, kao i unutar odlomaka za pozivanje na elemente programa kao što su imena promenljivih ili funkcija, baze podataka, tipovi podataka, promenljive okoline, naredbe i ključne reči.
+
+**`Konstantna širina masno` **:: Prikazuje naredbe ili drugi tekst koji korisnik treba doslovno da upiše.
+
+_++Kurziv sa konstantnom širinom++_:: Prikazuje tekst koji treba zameniti vrednostima koje daje korisnik ili vrednostima određenim kontekstom.
+
+
+[TIP]
+====
+Ova ikonica označava savet ili predlog.
+====
+
+[NOTE]
+====
+Ova ikona označava opštu belešku.
+====
+
+[WARNING]
+====
+Ova ikona označava upozorenje ili oprez.
+====
+
+=== Primeri koda
+
+((("code examples, obtaining and using", id="codeuse00")))Primeri su ilustrovani u Python-u, C++-u i upotrebom komandne linije operativnog sistema sličnog Unix-u, kao što su Linux ili macOS. Svi isečci koda dostupni su u skladištu GitHub (https://github.com/bitcoinbook/bitcoinbook[https://github.com/bitcoinbook/bitcoinbook]) u poddirektorijumu _code_ glavnog repozitorijuma. Napravite fork (račvu) koda knjige, isprobajte primere koda ili pošaljite ispravke putem GitHub-a.
+
+Svi isečci koda mogu da se ponove na većini operativnih sistema uz minimalno korišćenje kompajlera i interpretera za odgovarajuće jezike. Ako je potrebno, pružamo osnovna uputstva za instalaciju i detaljne primere rezultata tih uputstava.
+
+Neki isečci koda i izlazni rezultat koda su preoblikovani za štampanje. U takvim slučajevima, linije su podeljene crtom unazad (\), praćeni znakom za novu liniju. Kada prepisujete primere, uklonite ta dva znaka i ponovo spojite linije i videćete identične rezultate kao što je prikazano u primeru.
+
+Svi isečci koda koriste stvarne vrednosti i proračune gde je to moguće, tako da možete graditi kod od primera do primera i videti iste rezultate u bilo kom kodu koji napišete da biste izračunali iste vrednosti. Na primer, privatni ključevi i odgovarajući javni ključevi i adrese su stvarni. Primeri transakcija, blokova i reference blokčejna uvedeni su u stvarni bitkoin blokčejn i deo su javne knjige, tako da ih možete pregledati u bilo kom bitkoin sistemu.
+
+=== Korišćenje primera koda
+
+Ova knjiga je tu da vam pomogne da obavite svoj posao. Generalno, ako se uz ovu knjigu nudi primer, možete je koristiti u svojim programima i dokumentaciji. Ne morate nas kontaktirati za dozvolu ako ne reprodukujete značajan deo koda. Na primer, za pisanje programa koji koristi nekoliko delova koda iz ove knjige nije potrebno odobrenje. Za prodaju ili distribuciju CD-ROM-a primera iz O'Reilly knjiga potrebna je dozvola. Da biste odgovorili na pitanje citirajući ovu knjigu i navodeći primer koda, ne zahteva dozvolu. Uključivanje značajne količine primera koda iz ove knjige u dokumentaciju vašeg proizvoda zahteva dozvolu.
+
+((("attribution")))Cenimo, ali ne zahtevamo, priznanje. Priznanje obično uključuje naslov, ime autora, izdavača i ISBN broj. Na primer: “_Mastering Bitcoin_ by Andreas M. Antonopoulos (O’Reilly). Copyright 2017 Andreas M. Antonopoulos, 978-1-491-95438-6.”
+
+((("open source licenses")))Neka izdanja ove knjige nude se pod licencom otvorenog koda, kao što je https://creativecommons.org/licenses/by-nc/4.0/[CC-BY-NC], u tom slučaju se primenjuju uslovi te licence.
+
+Ako smatrate da vaša upotreba primera koda spada van okvira poštene upotrebe ili gore date dozvole, slobodno nam se obratite putem adrese:[<a href="mailto:permissions@oreilly.com">permissions@oreilly.com</a>].
+
+=== Adrese i transakcije bitkoina u ovoj knjizi
+
+((("getting started", "warnings and cautions")))((("warnings and cautions", "avoid sending money to addresses appearing in book")))((("keys and addresses", "warnings and cautions")))((("transactions", "warnings and cautions")))((("blockchain applications", "warnings and cautions")))((("QR codes", "warnings and cautions")))Bitkoin adrese, transakcije, ključevi, QR kodovi i podaci o blokčejnu koji se koriste u ovoj knjizi su većinom stvarni. To znači da možete pregledati blokčejn, pogledati ponuđene transakcije kao primere, preuzimati ih u sopstvenim skriptama ili programima, itd.
+
+Međutim, imajte na umu da su privatni ključevi koji se koriste za pravljenje adresa ili odštampani u ovoj knjizi ili "spaljeni". To znači da ako pošaljete novac na bilo koju od tih adresa, novac će biti zauvek izgubljen, ili ga može uzeti neko ko pročita knjigu pomoću privatnih ključeva štampanih ovde.
+
+[WARNING]
+====
+NE ŠALJITE NOVAC BILO KOJOJ ADRESI U OVOJ KNjIZI. Vaš novac će uzeti drugi čitalac ili ćete ga izgubiti zauvek.((("", startref="codeuse00")))
+====
+
+=== O'Reilly Safari
+
+[role = "safarienabled"]
+[NOTE]
+====
+pass:[<a href="http://oreilly.com/safari" class="orm:hideurl"><em class="hyperlink">Safari</em></a>](ranije Safari Books Online) je trening i referentna platforma za preduzeća, vladu, nastavnike i pojedince zasnovana na članstvu.
+====
+
+Članovi imaju pristup hiljadama knjiga, video zapisima treninga, putevima za učenje, interaktivnom podučavanju i uređenim listama za reprodukciju sa preko 250 izdavača, uključujući O’Reilly Media, Harvard Business Review, Prentice Hall Professional, Addison-Wesley Professional, Microsoft Press, Sams, Que, Peachpit Press, Adobe, Focal Press, Cisco Press, John Wiley & Sons, Syngress, Morgan Kaufmann, IBM Redbooks, Packt, Adobe Press, FT Press, Apress, Manning, New Riders, McGraw-Hill, Jones & Bartlett, and Course Technology,  među ostalima.
+
+Za više informacija posetite pass:[<a href="http://oreilly.com/safari" class="orm:hideurl"><em>http://oreilly.com/safari</em></a>].
+
+=== Kako da nas kontaktirate
+
+((("comments and questions")))((("contact information")))Komentare i pitanja vezana za ovu knjigu pošaljite izdavaču:
+
+++++
+<ul class="simplelist">
+  <li>O’Reilly Media, Inc.</li>
+  <li>1005 Gravenstein Highway North</li>
+  <li>Sebastopol, CA 95472</li>
+  <li>800-998-9938 (u Sjedinjenim Državama ili Kanadi)</li>
+  <li>707-829-0515 (internacionalno ili lokalno)</li>
+  <li>707-829-0104 (faks)</li>
+</ul>
+++++
+
+Da biste komentarisali ili postavili tehnička pitanja o ovoj knjizi, pošaljite imejl na adresu:pass:[<a class="email" href="mailto:bookquestions@oreilly.com"><em>bookquestions@oreilly.com</em></a>].
+
+Za više informacija o našim knjigama, kursevima, konferencijama i vestima pogledajte našu web stranu na linku:$$http://www.oreilly.com$$[].
+
+Potražite nas na Facebook-u: link:$$http://facebook.com/oreilly$$[]
+
+Pratite nas na Twitter-u: link:$$http://twitter.com/oreillymedia$$[]
+
+Gledajte nas na YouTube-u: link:$$http://www.youtube.com/oreillymedia$$[]
+
+[role="pagebreak-before"]
+=== Kontaktiranje autora
+
+Možete da me kontaktirate, Andreas M. Antonopoulos, preko moje lične web strane:
+link:$$https://antonopoulos.com/$$[]
+
+Informacije o _Mastering Bitcoin_-u kao i prvo izdanje i prevodi su dostupni na:
+link:$$https://bitcoinbook.info/$$[]
+
+Pratite me na Facebook-u:
+link:$$https://facebook.com/AndreasMAntonopoulos$$[]
+
+Pratite me na Twitter-u:
+link:$$https://twitter.com/aantonop$$[]
+
+Pratite me na Linkedin-u:
+link:$$https://linkedin.com/company/aantonop$$[]
+
+Mnogo se zahvaljujem svim pokroviteljima koji su podržali moj rad sa mesečnim donacijama. Ovde možete pratiti moju Patreon stranu:
+link:$$https://patreon.com/aantonop$$[]
+
+=== Priznanja
+
+((("acknowledgments", id="acknowledge0")))Ova knjiga predstavlja napore i doprinose mnogih ljudi. Zahvalan sam za svu pomoć koju sam dobio od prijatelja, kolega, pa čak i potpunih stranaca, koji su mi se pridružili u naporu da napišem tehničku knjigu o kriptovalutama i bitkoinu.
+
+Nemoguće je napraviti razliku između bitkoin tehnologije i bitkoin zajednice, a ova knjiga je proizvod te zajednice koliko je i knjiga o tehnologiji. Moj rad na ovoj knjizi je podsticala, bodrila, podržavala i nagrađivala čitava bitkoin zajednica od samog početka do samog kraja. Više od svega, ova knjiga mi je omogućila da budem deo jedne divne zajednice dve godine i ne znam kako da izrazim zahvalnost što ste me prihvatili u ovu zajednicu. Ima mnogo ljudi koje bih mogao imenom pomenuti - ljudi koje sam sreo na konferencijama, događajima, seminarima, sastancima, pica okupljanjima i malim privatnim okupljanjima, kao i mnogi drugi koji su sa mnom komunicirali preko Twitter-a, na Reddit-u, na bitcointalk.org-u, i na GitHub-u, a koji su uticali na ovu knjigu. Svaka ideja, analogija, pitanje, odgovor i objašnjenje koje nađete u ovoj knjizi bilo je u nekom trenutku nadahnuto, testirano ili poboljšano kroz moje interakcije sa zajednicom. Zahvaljujem se svima na podršci; jer bez vas ne bi bilo ove knjige. Zauvek sam vam zahvalan.
+
+Put ka tome da postanem autor, naravno počinje mnogo pre prve knjige. Moj prvi jezik (i školovanje) bio je grčki, tako da sam morao da položem kurs engleskog jezika na prvoj godini studija. Zahvaljujem Diana-i Kordas, mojoj učiteljici engleskog pisanja, koja mi je tih godina pomagala da izgradim samopouzdanje i veštine. Kasnije sam, kao profesionalac, razvio svoje tehničko pisanje na temu data centra, pišući za magazin _Network World_. Dugujem zahvalnost John Dix-u i John Gallant-u, koji su me zaposlili kao kolumnistu u _Network World_ i mom uredniku Michael Cooney-u i mom kolegi John Till Johnson-u koji su uređivali moje kolumne i učinili ih pogodnim za objavljivanje. Pisanje 500 reči nedeljno tokom četiri godine, dalo mi je dovoljno iskustva da na kraju razmotrim mogućnost da postanem autor.
+
+Hvala i onima koji su me podržali kada sam svoj predlog knjige predao O'Reilly-u, pružajući reference i pregledavajući predlog knjige. Konkretno, zahvaljujem se John Gallant-u, Gregory Ness-u, Richard Stiennon-u, Joel Snyder-u, Adam B. Levine-u, Sandra Gittlen-u, John Dix-u, Johna Till Johnson-u, Roger Ver-u, and Jon Matonis-u. Posebna zahvalnost ide Richard Kagan-u i Tymon Mattoszko-u koji su pregledali rane verzije predloga knjige, i Matthey Taylor-u koji je uređivao kopiju predloga.
+
+Zahvaljujem se Cricket Liu-u, autoru O'Reilly knjige _DNS i BIND_, koji me je upoznao sa O'Reilly-om. Hvala i Michael Loukides-u i Allyson MacDonald-u iz O'Reilly-a, koji su mesecima radili na tome da se ova knjiga objavi. Allyson je bio posebno strpljiva kada su promašeni i odloženi rokovi pošto se život umešao u naš planirani raspored. Za drugo izdanje zahvaljujem se Timothy McGovern-u koji je vodio postupak, Kim Cofer-u za strpljivo uređivanje i Rebecca Panzer-i za ilustraciju mnogih novih dijagrama.
+
+Prvih nekoliko verzija privih par poglavlja bilo je najteže, jer je bitkoin kao temu teško resplesti. Svaki put kada sam povukao jedan konac bitkoin tehnologije, morao sam da promenim celu stvar. Više puta sam se zaglavio i pomalo očajavao dok sam se borio da temu učinim razumljivom i da stvorim priču oko tako složene tehničke teme. Na kraju sam odlučio da ispričam priču o bitkoinu kroz priče ljudi koji koriste bitkoin i čitava knjiga je mogla mnogo lakše da se piše. Dugujem zahvalnost svom prijatelju i mentoru, Richard Kagan-u, koji mi je pomogao da raspletem priču i pređem trenutke autorske blokade. Zahvaljujem se Pamela Morgan-i, koja je pregledala rane verzije svakog poglavlja u prvom i drugom izdanju knjige i postavila složena pitanja kako bi ih poboljšala. Takođe, hvala programerima San Francisco Bitcoin Developers Meetup grupe, kao i Taarik Levis-u i Denise Terry-i za pomoć u testiranju ranog materijala. Hvala i Andrew Naugler-u na dizajnu infografika.
+
+Tokom stvaranja knjige, stavio sam na raspolaganje rane verzije na GitHub-u i tražio javne komentare. Više od stotine komentara, sugestija, ispravki i priloga je poslato kao odgovor. Ti doprinosi su izričito priznati, uz moju zahvalnost, u <<github_contrib>>. Najviše od svega, iskrena zahvalnost ide mojim volonterskim urednicima GitHub-a Ming T. Nguye-un (1. izdanje) i Will Binns-u (2. izdanje), koji su neumorno radili na održavanju, upravljanju i rešavanju zahteva za pull-requests, issue reports, i izvođenju ispravki na GitHub-u.
+
+Kada je knjiga sastavljena, prošla je kroz nekoliko krugova tehničkog pregleda. Hvala Cricket Liu-u i Lorne Lantz-u na njihovim detaljnim pregledima, komentarima i podršci.
+
+Nekoliko programera bitkoina priložili su uzorke koda, recenzije, komentare i podršku. Zahvaljujem Amiru Taaki-u i Erik Voskuil-u, za primer isečaka koda i mnogo sjajnih komentara; Chris Kleeschulte-u za doprinos Bitcore dodatka; Vitalik Buterin-u i Richard Kiss-u za pomoć u vezi sa matematikom eliptičkih krivi i doprinosom koda; Gavin Andresen-u za ispravke, komentare i podršku; Michalis Kargakis-u za komentare, priloge i pisanje btcd-a koda; i Robin Inge-i za prijave grešaka poboljšavajući drugo izdanje. U drugom izdanju ponovo sam dobio veliku pomoć mnogih programera Bitcoin Core-a, uključujući Erica Lombrozo-a koji je demistificirao odvojenog svedoka, Luke Dashjr-a koji je pomogao u poboljšanju poglavlja o transakcijama, Johnson Lau-u koji je pregledao odvojenog svedoka i druga poglavlja. Dugujem zahvalnost iJoseph Poon-u, Tadge Dryja-u i Olaoluwa Osuntokun-i koji su objasnili Lightning mrežu, pregledali moje pisanje i odgovarali na pitanja kada bih se zaglavio.
+
+Svoju ljubav prema rečima i knjigama dugujem svojoj majci, Terezi, koja me je odgajala u kući sa zidovima obloženim knjigama. Majka mi je kupila i prvi računar 1982. godine, uprkos tome što je tehnofob, kako sama sebe opisuje. Moj otac Menelaos, građevinski inženjer, upravo je objavio svoju prvu knjigu u 80. godini, on je bio taj koji me naučio logičkom i analitičkom razmišljanju i ljubavi prema nauci i tehnici.
+
+Hvala svima što ste me podržali tokom ovog putovanja.
+
+
+////
+Priznanja Github saradnika u novom fajlu...
+////
+
+include::github_contrib.asciidoc[]

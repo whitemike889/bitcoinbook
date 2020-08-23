@@ -1,0 +1,19 @@
+<section data-type="dedication" class="praise">
+<h1> Laude pentru <em>Mastering Bitcoin</em> </h1>
+<blockquote>
+  <p> Când vorbesc despre bitcoin publicului, uneori sunt întrebat ”dar cum funcționează cu adevărat?” Acum am un răspuns excelent pentru această întrebare, deoarece oricine citește <em>Mastering Bitcoin</em> va înțelege profund modul de funcționare și va fi bine echipat pentru a scrie următoarea generație de aplicații cu criptomonede.</p>
+  <p data-type="attribution">Gavin Andresen, Chief Scientist Bitcoin Foundation</p>
+</blockquote>
+<blockquote>
+  <p> Tehnologiile Bitcoin și Blockchain devin blocuri fundamentale pentru internetul viitoarei generații. Cele mai bune și strălucitoare minți ale Silicon Valley lucrează la ea. Cartea lui Andreas vă va ajuta să vă alăturați revoluției software în lumea finanțelor.</p>
+  <p data-type="attribution">Naval Ravikant, co-fondator AngelList</p>
+</blockquote>
+<blockquote>
+  <p> <em>Mastering Bitcoin</em> este cea mai bună referință tehnică disponibilă pentru bitcoin astăzi. Și bitcoin este probabil văzut în retrospectivă ca fiind cea mai importantă tehnologie din acest deceniu. Ca atare, această carte este un must-have absolut pentru orice dezvoltator, în special pentru cei interesați de construirea aplicațiilor cu protocolul bitcoin. Recomand! </p>
+  <p data-type="attribution"> Balaji S. Srinivasan (@balajis), partener general, Andreessen Horowitz </p>
+</blockquote>
+<blockquote>
+  <p>Invenția Lanțului-de-Blocuri Bitcoin reprezintă o platformă complet nouă pentru a construi, una care va permite un ecosistem la fel de larg și divers ca Internetul însuși. Ca unul dintre cei mai importanți lideri de gândire, Andreas Antonopoulos este alegerea perfectă pentru a scrie această carte.</p>
+  <p data-type="attribution">Roger Ver, antreprenor bitcoin și investitor</p>
+</blockquote>
+</section>

@@ -1,0 +1,288 @@
+[[ch02_bitcoin_overview]]
+== Kako funkcioniše bitkoin
+
+=== Transakcije, blokovi, rudarenje i blokčejn
+
+((("bitcoin", "overview of", id="BCover02")))((("central trusted authority")))((("decentralized systems", "bitcoin overview", id="DCSover02")))Bitkoin sistem, za razliku od tradicionalnih bankarskih i platnih sistema, zasnovan je na decentralizovanom poverenju. Umesto centralnog autoriteta poverenja kod bitkoina se poverenje postiže pomoću nove osobine koja podrazumeva interakciju različitih učesnika bitkoin sistema. U ovom poglavlju ćemo ispitati bitkoin sa visokog nivoa tako što ćemo pratiti jednu transakciju preko bitkoin sistema i gledati kako ona postaje "pouzdana“ i prihvaćena od strane bitkoin mehanizma distribuiranog konsenzusa, i konačno kako je zabeležena na blokčejnu i distribuiranoj knjizi svih transakcija. Sledeća poglavlja će se udubiti u tehnologiju koja stoji iza transakcija, mreže i rudarenja.
+
+==== Pregled bitkoina
+
+U dijagramu pregleda prikazanom u <<bitcoin-overview>>, vidimo da se bitkoin sistem sastoji od korisnika sa novčanicima koji sadrže ključeve, transakcije koje se šire putem mreže i rudara koji proizvode (putem takmičarskog računanja) konsenzusni blokčejn, koji je autoritativna knjiga svih transakcija.
+
+
+((("blockchain explorer sites")))Svaki primer u ovom poglavlju zasnovan je na stvarnoj transakciji izvršenoj na bitkoin mreži, simulirajući interakcije između korisnika (Džoa, Alise, Boba i Gopeša) dok šalju sredstva iz jednog novčanika u drugi. Dok pratimo transakciju preko bitkoin mreže do blokčejna, koristićemo web stranicu _Blockchain Explorer_ za vizuelizaciju svakog koraka. Blockchain Explorer (blokčejn explorer) je web aplikacija koja deluje kao bitkoin pretraživač jer vam omogućava da pronađete adrese, transakcije i blokove, isto tako da vidite odnose i tokove među njima.
+
+[[bitcoin-overview]]
+.Pregled bitkoina
+image::images/mbc2_0201.png["Pregled bitkoina"]
+
+((("Bitcoin Block Explorer")))((("BlockCypher Explorer")))((("blockchain.info")))((("BitPay Insight")))Popularni blokčejn exploreri su:
+
+* https://live.blockcypher.com[BlockCypher Explorer]
+* https://blockchain.info[blockchain.info]
+* https://insight.bitpay.com[BitPay Insight]
+* https://blockstream.info[Blockstream Explorer]
+
+Svaki od njih ima funkciju pretraživanja, koja može primiti bitkoin adresu, heš transakcije, broj bloka ili heš bloka i dohvatiti odgovarajuće informacije iz bitkoin mreže. Uz svaki primer transakcije ili bloka, dajemo vam URL da biste mogli sami da ga nađete i detaljno proučite.
+
+
+[[cup_of_coffee]]
+==== Kupovina šolje kafe
+
+((("use cases", "buying coffee", id="UCcoffee02")))Alisa, koju smo predstavili u prethodnom poglavlju, je novi korisnik koji je tek kupio svoj prvi bitkoin. U <<getting_first_bitcoin>>, Alisa se sastala sa svojim prijateljem Džoom kako bi razmenila novac za bitkoin. Transakcija koju je izvršio Džo je stavila 0,10 BTC u Alisin novčanik. Sada će Alisa izvršiti svoju prvu maloprodajnu transakciju, kupovinu šolje kafe u Bobovom kafiću u Palo Altu u Kaliforniji.
+
+((("exchange rates", "determining")))Bobov kafić je počeo nedavno da prihvata bitkoin plaćanja dodavanjem bitkoin opcije u svoj sistem prodaje. Cene u Bobovom kafiću su navedene u lokalnoj valuti (američkim dolarima), ali na registru kupci imaju mogućnost plaćanja u dolarima ili bitkoinima. Alisa naručuje svoju šolju kafe i Bob je upisuje u registar, kao i za sve transakcije. Sistem prodajnog mesta automatski pretvara ukupnu cenu iz američkih dolara u bitkoin po aktuelnom tržišnom kursu i prikazuje cene u obe valute:
+
+----
+Total:
+$1.50 USD
+0.015 BTC
+----
+
+
+((("millibits")))Bob reče: "To je dolar i po, ili petnaest milibita."
+
+((("payment requests")))((("QR codes", "payment requests")))Bobov prodajni sistem će takođe automatski kreirati poseban QR kod koji sadrži _ zahtev za plaćanje_ (videti <<payment-request-QR>>).
+
+Za razliku od QR koda koji jednostavno sadrži odredišnu bitkoin adresu, zahtev za plaćanje je kodiran u QR kod URLu koji sadrži odredišnu adresu, iznos plaćanja i generički opis kao što je "Bob's Cafe". Ovo omogućava aplikaciji bitkoin novčanika da unapred popuni informacije kao zahtev za plaćanje, a korisniku prikazuje čitljiv opis. QR kod možete skenirati pomoću aplikacije bitkoin novčanika da biste videli ono što je Alisa videla.
+
+
+[[payment-request-QR]]
+.QR kod zahteva za plaćanje
+image::images/mbc2_0202.png["payment-request"]
+
+[TIP]
+====
+((("QR codes", "warnings and cautions")))((("transactions", "warnings and cautions")))((("warnings and cautions", "avoid sending money to addresses appearing in book")))Pokušajte da skenirate ovo svojim novčanikom kako biste videli adresu i iznos, ali NE ŠALJITE NOVAC.
+====
+[[payment-request-URL]]
+.QR zahtev za plaćanje kodira sledeću URL adresu, definisanu u BIP-21:
+----
+bitcoin:1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA?
+amount=0.015&
+label=Bob%27s%20Cafe&
+message=Purchase%20at%20Bob%27s%20Cafe
+
+Komponente URL-a
+
+Bitkoin adresa: "1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA"
+Iznos plaćanja: "0,015"
+Oznaka za adresu primaoca: "Bob's Cafe"
+Opis plaćanja (Kupovina u Bobovom kafiću): "Purchase at Bob's Cafe"
+----
+
+Alisa koristi svoj smart telefon da skenira bar kod na ekranu. Njen smart telefon prikazuje plaćanje od +0.0150 BTC+ za +Bob's Cafe+ i ona bira Send da odobri plaćanje. U roku od nekoliko sekundi (otprilike isto vreme kao i za autorizaciju kreditne kartice), Bob vidi transakciju u registru, čime se transakcija završava.
+
+U sledećim odeljcima ovu transakciju ispitaćemo detaljnije. Videćemo kako ju je konstruisao Alisin novčanik, kako se širi po mreži, kako je verifikovana i na kraju kako Bob može da troši iznos tih bitkoina u narednim transakcijama.
+
+[NOTE]
+====
+((("fractional values")))((("milli-bitcoin")))((("satoshis")))Bitkoin mreža može da pravi transakcije u razlomcima jednog bitkoina, na primer od jednog milibitkoina (1/1000ti deo bitkoina) sve do 1/100,000,000tog dela bitkoina, koji je poznat kao satoši (po pseudonimu Satoši Nakamoto). Kroz ovu knjigu koristićemo termin "bitkoin" da bismo označili bilo koju količinu bitkoin valute, od najmanje jedinice (1 satoši) do najvećeg mogućeg broja (21,000,000) svih bitkoina koji će ikada biti izrudareni.
+====
+
+Možete ispitati Alisinu transakciju u Bobovom kafiću na blokčejnu pomoću blok explorera (<<view_alice_transaction>>):
+
+[[view_alice_transaction]]
+.Pogledajte Alisinu transakciju pod https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[blockchain.info]
+====
+----
+https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2
+----
+====
+
+=== Bitkoin transakcije
+
+((("transactions", "defined")))Jednostavno rečeno, transakcija govori mreži da je vlasnik neke vrednosti bitkoina odobrio prenos te vrednosti drugom vlasniku. Novi vlasnik sada može da potroši bitkoine kreirajući drugu transakciju koja daje ovlašćenje prenosa drugom vlasniku, i tako dalje, u lancu vlasništva.
+
+==== Ulazni i izlazni podaci
+
+((("transactions", "overview of", id="Tover02")))((("outputs and inputs", "basics of")))Transakcije su kao linija u poslovnoj knjizi dvojnog knjigovodstva footnote:[vidi https://sr.wikipedia.org/sr/Dvojno_knjigovodstvo]. Svaka transakcija sadrži jedan ili više "ulaza", koji su dugovanja na bitkoin računu. Sa druge strane transakcija ima jedan ili više "izlaza", koji su potraživanja po dvojnom knjigovodstvu dodati na bitkoin račun. ((("fees", "transaction fees")))Ulazi i izlazi (dugovanja i potraživanja) ne moraju nužno iznositi isto. Umesto toga, izlazi su nešto manji od ulaza, a razlika predstavlja impliciranu nadoknadu za transakciju (_fee_ na engleskom). To je mala uplata koju je prikupio rudar koji transakciju upisuje u glavnu knjigu. Transakcija bitkoina je prikazana kao unos u poslovnoj knjizi<<transaction-double-entry>>.
+
+Transakcija takođe sadrži i dokaz o vlasništvu u obliku digitalnog potpisa vlasnika za svaki iznos bitkoina (ulaz), čija se vrednost troši. Tu transakciju može svako samo za sebe da potvrdi. ((("spending bitcoin", "defined")))U bitkoin terminima, "trošenje" potpisuje transakciju koja prenosi vrednost iz prethodne transakcije na novog vlasnika identifikovanog pomoću bitkoin adrese.
+
+[[transaction-double-entry]]
+.Transakcija kao dvojno knjigovodstvo
+image::images/mbc2_0203.png["Transaction Double-Entry"]
+
+==== Lanac transakcija
+
+((("chain of transactions")))Alisina uplata Bobovom kafiću koristi izlaz prethodne transakcije kao svoj ulaz. U prethodnom poglavlju, Alisa je od svog prijatelja Džoa dobila bitkoin u zamenu za gotovinu. Ta je transakcija stvorila bitkoin vrednost zaključanu Alisinim ključem. Njena nova transakcija Bobovom kafiću spominje prethodnu transakciju kao ulaz i stvara nove izlaze za plaćanje šolje kafe i primanje kusura. Transakcije formiraju lanac gde ulazi aktuelne transakcije odgovaraju izlazima iz prethodnih transakcija. Alisin ključ omogućava potpis, koji otključava te prethodne izlazne transakcije i time dokazuje bitkoin mreži da je ona vlasnik tih sredstva. Ona povezuje plaćanje za kafu sa Bobovom adresom i tako "pravi prepreku" na taj izlaz uz zahtev da Bob proizvede potpis kako bi potrošio taj iznos. Ovo predstavlja prenos vrednosti između Alise i Boba. Ovaj lanac transakcija, od Džoa do Alise do Boba, prikazan je u <<blockchain-mnemonic>>.
+
+[[blockchain-mnemonic]]
+.Lanac transakcija, u kojem je izlaz jedne transakcije ulaz sledeće transakcije
+image::images/mbc2_0204.png["Transaction chain"]
+
+==== Kusur
+
+((("change, making")))((("change addresses")))((("addresses", "change addresses")))Mnoge bitkoin transakcije će uključivati izlaze koji upućuju na adresu novog vlasnika i na adresu trenutnog vlasnika, koja se zove adresa _za kusur_. To je zato što se unosi za transakcije ne mogu deliti kao kod novčanica. Ako kupite artikal od 5 američkih dolara u prodavnici, a koristite novčanicu od 20 američkih dolara da biste ga platili, očekujete da ćete dobiti 15 USD kao kusur. Isti koncept se odnosi i na unose za bitkoin transakcije. Ako ste kupili artikal koji košta 5 bitkoina, a imate samo 20 bitkoina kao ulaz na raspolaganju, trebali biste da pošaljete jedan izlaz od 5 bitkoina vlasniku prodavnice i jedan izlaz od 15 bitkoina nazad sebi kao kusur (umanjenim za nadoknadu za transakciju). Važno je da adresa za kusur ne mora da bude ista adresa kao za unos, a iz razloga poverljivosti je to često nova adresa vlasnika novčanika.
+
+Različiti novčanici mogu da koriste različite strategije prilikom skupljanja ulaza kako bi izvršili plaćanje koje je zatražio korisnik. Oni mogu da skupe mnogo malih ulaza ili da koriste onaj koji je jednak ili veći od iznosa željenog plaćanja u bitkoinima. Ako novčanik ne može da skupi ulaze na takav način da zbir iznosa bude jednak zbiru izlaza uz nadoknadu za rudara, onda mora za sebe da generiše kusur kao izlaz. Ovo je veoma slično načinu na koji ljudi upravljaju gotovinom. Ako uvek koristite najveću novčanicu iz džepa, na kraju ćete imati džep pun sitniša. Ako koristite samo sitniš, uvek ćete imati samo velike novčanice. Ljudi podsvesno pronalaze ravnotežu između ove dve krajnosti, a programeri bitkoin novčanika pokušavaju da isprogramiraju tu ravnotežu.
+
+((("transactions", "defined")))((("outputs and inputs", "defined")))((("inputs", see="outputs and inputs")))Ukratko, _transakcije_ pomeraju vrednost od _ulaza transakcije_ do _izlaza transakcije_. Ulaz je referenca na izlaz prethodne transakcije, pokazujući odakle vrednost dolazi. Izlaz transakcije usmerava određenu vrednost na bitkoin adresu novog vlasnika i može da uključi promenu izlaza prvobitnom vlasniku. Izlazi iz jedne transakcije mogu da se koriste kao ulazi u novu transakciju, stvarajući tako lanac vlasništva dok se vrednost prenosi sa vlasnika na vlasnika (<<blockchain-mnemonic>>).
+
+==== Česti oblici transakcija
+
+Najčešći oblik transakcije je jednostavno plaćanje sa jedne adrese na drugu, koja često uključuje i „kusur“ vraćen prvobitnom vlasniku. Ova vrsta transakcije ima jedan ulaz i dva izlaza i prikazana je u <<transaction-common>>.
+
+[[transaction-common]]
+.Najčešće transakcije
+image::images/mbc2_0205.png["Common Transaction"]
+
+Drugi uobičajeni oblik transakcije je onaj koji objedinjuje nekoliko ulaza u jedan izlaz (vidi <<transaction-aggregating>>). U stvarnosti ovo predstavlja ekvivalent u razmeni gomile kovanica i novčanica za jednu veću novčanicu. Transakcije takve vrste ponekad budu generisane novčanik aplikacijama radi čišćenja puno manjih iznosa koji su primljeni kao kusur za isplate.
+
+[[transaction-aggregating]]
+.Transakcija sakupljenih sredstva
+image::images/mbc2_0206.png["Aggregating Transaction"]
+
+Konačno, drugi oblik transakcije koji se često viđa u bitkoin knjizi je transakcija koja distribuira jedan ulaz na više izlaza, koji predstavljaju više primalaca (videti <<transaction-distributing>>). Ovu vrstu transakcije komercijalni entiteti ponekad koriste za raspodelu sredstava, kao na primer prilikom obrade isplata plata većem broju zaposlenih.((("", startref="Tover02")))
+
+[[transaction-distributing]]
+.Transakciona raspodela sredstava
+image::images/mbc2_0207.png["Distributing Transaction"]
+
+=== Konstruisanje jedne transakcije
+
+((("transactions", "constructing", id="Tconstruct02")))((("wallets", "constructing transactions")))Alisina novčanik aplikacija sadrži svu logiku za biranje odgovarajućih ulaza i izlaza za izgradnju transakcije po njenoj specifikaciji. Alisa treba samo da navede odredište i iznos, a ostatak se dešava u novčanik aplikaciji, a da ona ni ne vidi detalje. Ono što je važno, novčanik aplikacija može da konstruiše transakcije čak i kada je potpuno van mreže. Poput pisanja čeka kod kuće i kasnije slanja u banku u koverti, transakcija ne mora da bude konstruisana i potpisana dok je povezana na bitkoin mrežu, nego to može i kasnije da pošalje u bitkoin mrežu.
+
+==== Nalaženje pravih ulaza
+
+((("outputs and inputs", "locating and tracking inputs")))Alisina aplikacija novčanika prvo će morati da pronađe ulaze sa kojima može da plati iznos koji želi da pošalje Bobu. Većina novčanika prati sve dostupne izlaze koji pripadaju adresama u novčaniku. Tako i Alisin novčanik čuva kopiju transakcije izlaza od Džoove transakcije, koja je stvorena u zamenu za gotovinu (vidi <<getting_first_bitcoin>>). Aplikacija za bitkoin novčanik koja radi kao potpuni klijent (full node client) zapravo sadrži kopiju svakog neiskorišćenog izlaza iz svake transakcije u blokčejnu. To omogućava novčaniku da konstruiše ulaze za transakcije, kao i da brzo potvrdi dolazne transakcije kao ispravne ulaze. Međutim, potpuni klijent zauzima puno prostora na disku, tako da većina korisničkih novčanika pokreće "lagane" klijente koji prate samo neiskorišćene izlaze korisnika.
+
+Ako novčanik aplikacija ne održava kopiju neiskorišćenih izlaza transakcija, može da zatraži od bitkoin mreže te informacije koristeći različite API-je dostupne kod različitih davalaca tih usluga ili pomoću poziva interfejsa za programiranje aplikacija (API) jednog potpunog klijenta (full node). <<example_2-2>> prikazuje API poziv, konstruisan kao HTTP GET naredba na određenu URL adresu. Ova URL adresa će vratiti sve neiskorišćene izlazne transakcije za adresu, dajući bilo kojoj aplikaciji informacije koje su joj potrebne za izgradnju ulaznih transakcija za potrošnju. Da biste dobili te informacije jednostavno koristite HTTP klijent _cURL_ u komandnoj liniji.
+
+[[example_2-2]]
+.Pretražite sve neiskorišćene izlaze sa Alisine bitkoin adrese
+====
+[source,bash]
+----
+$ curl https://blockchain.info/unspent?active=1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK
+----
+====
+
+[source,json]
+----
+{
+
+	"unspent_outputs":[
+
+		{
+			"tx_hash":"186f9f998a5...2836dd734d2804fe65fa35779",
+			"tx_index":104810202,
+			"tx_output_n": 0,
+			"script":"76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac",
+			"value": 10000000,
+			"value_hex": "00989680",
+			"confirmations":0
+		}
+
+	]
+}
+----
+
+
+Odgovor u <<example_2-2>> prikazuje jedan neiskorišćeni izlaz (nepotrošeni izlaz ili unspent output) u vlasništvu Alisine adrese +1Cdid9KFAaatvczBvBttKcvKSICpvK8h7FK+. Odgovor uključuje referencu za transakciju u kojoj se nalazi ovaj neiskorišćen izlaz (plaćanje od Džoa) u vrednosti od 10 miliona satošija, što je ekvivalentno 0,10 bitkoina. Pomoću ovih informacija, Alisina novčanik aplikacija može da konstruiše transakciju za prenos te vrednosti na nove adrese vlasnika.
+
+[TIP]
+====
+Pogledajte https://www.blockchain.com/btc/tx/7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18[transakcija od Džoa do Alise].
+====
+
+Kao što vidite, Alisin novčanik ima dovoljno bitkoina da jednim nepotrošenom izlazom plati šolju kafe. Da to nije bio slučaj, Alisina novčanik aplikacija bi možda morala da „pretura“ kroz gomilu manjih potrošenih izlaza, poput biranja kovanica iz novčanika sve dok ne nađe dovoljno za plaćanje kafe. U oba slučaja je potrebno da se vrati kusur, što ćemo videti u sledećem odeljku, pošto novčanik aplikacija stvara izlazne transakcije (isplate).
+
+
+==== Pravljenje izlaza
+
+((("outputs and inputs", "creating outputs")))Izlaz transakcije kreira se u obliku skripte koja stvara "prepreku" vrednosti i može se prevazići samo uvođenjem rešenja u skriptu. Jednostavnije rečeno, Alisina izlazna transakcija sadrži skriptu koja kaže: "Ovaj izlaz se može isplatiti onome ko može da pokaže potpis sa ključem koji odgovara Bobovoj adresi." Pošto samo Bob ima novčanik sa ključevima koji odgovaraju toj adresi, samo Bobov novčanik može prezentovati takav potpis da bi iskoristio ovaj izlaz. Dakle, Alisa će staviti "prepreku" izlaznoj vrednost zahtevajući potpis od Boba.
+
+Ova transakcija će takođe uključivati drugi izlaz, jer su Alisina sredstva u obliku 0,10 BTC izlaza, što je previše novca za kafu od 0,015 BTC. Alisi će trebati  kusur od 0,085 BTC. Za plaćanje kusura Alisin novčanik kreira izlaz za isplatu njenog kusura u istoj transakciji kao za plaćanje Bobu. U osnovi, Alisin novčanik deli sredstva u dve transakcije: jednu za Boba, a drugu za vraćanje kusura sebi. Ona tek posle toga može da koristi (potroši) kusur u narednoj transakciji.
+
+Da bi na kraju transakcija bila blagovremeno obrađena u mreži, Alisina aplikacija za novčanik dodaje malu naknadu. To nije eksplicitno pomenuto u transakciji; implicitno se vidi u razlici između ulaza i izlaza. Ako Alisa umesto 0,085 uzme samo 0,0845 za kusur u drugom izlazu, ostaće 0,0005 BTC (pola milibitkoina). Ulazna vrednost 0,10 BTC nije u potpunosti potrošena sa dva izlaza, jer će zbir biti manji od 0,10. Dobijena razlika je _naknada za transakciju_ (ili transaction fee na engleskom) koju rudar prikupi kao naknadu za potvrđivanje i uključivanje transakcije u blok koji će se evidentirati na blokčejnu.
+
+Dobijena transakcija može da se vidi korišćenjem web aplikacije blokčejn explorera, kao što je prikazano u <<transaction-alice>>.
+
+[[transaction-alice]]
+[role="smallerseventyfive"]
+.Alisina transakcija u Bobovom kafiću
+image::images/mbc2_0208.png["Alisina transakcija za kafu"]
+
+[[transaction-alice-url]]
+[TIP]
+====
+Pogledajte https://www.blockchain.com/btc/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[transakcija od Alise do Bobovog kafića].
+====
+
+==== Dodavanje transakcije poslovnoj knjizi
+
+Transakcija kreirana putem Alisine novčanik aplikacije je duga 258 bajtova i sadrži sve što je potrebno za potvrdu vlasništva nad sredstvima i njihovo dodeljivanje novim vlasnicima. Sada se transakcija mora preneti na bitkoin mrežu gde će postati deo blokčejna. U sledećem odeljku ćemo videti kako transakcija postaje deo novog bloka i kako se blok "rudari" (engl. "mining"). Na kraju kada se novi blok doda u blokčejn vidimo da u mreži dobija sve više poverenja dodavanjem novih blokova.
+
+===== Prenos transakcije
+
+((("propagation", "process of"))) Pošto transakcija sadrži sve informacije potrebne za obradu, nije važno kako i gde se prenosi na bitkoin mrežu. Bitkoin mreža je peer-to-peer odnosno P2P mreža, pri čemu svaki bitkoin klijent učestvuje povezivanjem sa nekoliko drugih klijenata bitkoina. Svrha bitkoin mreže je širenje transakcija i blokova svim učesnicima.
+
+===== Kako se širi
+
+((("bitcoin nodes", "defined")))((("nodes", see="bitcoin nodes")))Bilo koji sistem, kao što je server, desktop aplikacija ili novčanik, koji učestvuje u bitkoin mreži "ukazujući" na bitkoin protokol naziva se _bitkoin čvor_ ili _bitcoin node_. Aplikacija Alisinog novčanika može da pošalje novu transakciju na bilo koji bitkoin čvor na koji je povezana preko bilo koje vrste veza: kablovske, WiFi, mobilne itd. Njen bitkoin novčanik ne mora da bude direktno povezan sa Bobovim bitkoin novčanikom i ne moraju koristiti internet vezu koju nudi kafić, mada su obe opcije takođe moguće. ((("propagation", "flooding technique")))((("flooding technique")))Svaki bitkoin čvor koji primi važeću transakciju koju prethodno nije video, odmah će je proslediti ostalim čvorovima sa kojima je povezan. To je tehnika širenja poznata kao _flooding_. Tako se transakcija brzo širi preko P2P mreže, dostižući veliki procenat čvorova u roku od nekoliko sekundi.
+
+===== Bobov pogled
+
+Ako je Bobova aplikacija za bitkoin novčanik direktno povezana sa Alisinom novčanik aplikacijom, Bobova novčanik aplikacija je možda prvi čvor koji prima transakciju. Međutim, čak i ako Alisin novčanik pošalje transakciju preko drugih čvorova, ona će doći do Bobovog novčanika u roku od nekoliko sekundi. Bobov novčanik će odmah identifikovati Alisinu transakciju kao dolaznu uplatu, jer sadrži izlaze koji se mogu otkupiti pomoću Bobovih ključeva. Bobova novčanik aplikacija takođe može nezavisno proveriti da li je transakcija dobro napisana, pošto koristi prethodno nepotrošene izlaze i sadrži dovoljno naknada za transakcije koje će biti uključene u sledeći blok. U tom smislu Bob može da pretpostavi, uz malo rizika, da će transakcija uskoro biti uključena u blok i potvrđena.
+
+[TIP]
+====
+((("confirmations", "of small-value transactions", secondary-sortas="small-value transactions")))Česta zabluda o bitkoin transakcijama je da se moraju "potvrditi" čekanjem od 10 minuta na novi blok ili do 60 minuta za punih šest potvrda. Iako potvrde osiguravaju da je transakciju prihvatila cela mreža, takvo kašnjenje je nepotrebno za predmete male vrednosti poput šolje kafe. Trgovac može da prihvati važeću transakciju male vrednosti bez ikakvih potvrda, ne rizikujući ništa više od plaćanja kreditnom karticom bez lične karte ili potpisa, kao što to trgovci danas rutinski prihvataju.((("", startref="Tconstruct02")))
+====
+
+=== Bitkoin rudarenje
+
+((("mining and consensus", "overview of", id="MACover02")))((("blockchain (the)", "overview of mining", id="BToverview02")))Alisina transakcija je sada raširena u bitkoin mreži. Ona ne postaje deo _bločejna_ dok se ne verifikuje i uključi u blok kroz proces koji se zove _rudarenje_ ili _mining_. Vidi <<mining>> za detaljno objašnjenje.
+
+Bitkoin sistem poverenja zasnovan je na računanju. Transakcije se spajaju u _blokove_, za koje je potrebno mnogo računanja da bi se dokazali, ali daleko manje računanja da bi se utvrdila njihova verodostojnost. Proces rudarenja se koristi za dve svrhe u bitkoinu:
+
+* ((("mining and consensus", "consensus rules", "security provided by")))((("consensus", see="mining and consensus")))Rudarski čvorovi validiraju sve transakcije pozivajući se na _konsenzus bitkoin pravila_. Time rudarenje pruža sigurnost za bitkoin transakcije odbacivanjem nevažećih ili nepravilno oblikovanih transakcija.
+* Rudarenje stvara novi bitkoin u svakom bloku, gotovo kao centralna banka koja štampa novi novac. Količina bitkoina stvorena po bloku je ograničena i opada vremenom, prateći fiksni raspored izdavanja.
+
+
+Rudarenje postiže finu ravnotežu između troškova i nagrade. Rudarenje koristi električnu energiju za rešavanje matematičkog problema. Uspešan rudar će pokupiti _nagradu_ (_reward_ na engleskom) u obliku novih bitkoina i naknade od svih transakcija u tom bloku. Međutim, nagradu će dobiti samo ako je rudar ispravno potvrdio sve transakcije, u skladu sa pravilima _konsenzusa_. Ova delikatna ravnoteža pruža sigurnost za bitkoin bez centralnog autoriteta.
+
+Rudarenje se najbolje može da se opiše kao džinovska igra sudokua, koja se resetuje svaki put kada neko nađe rešenje i čija težina se automatski prilagođava da bi se u okviru od oko 10 minuta moglo naći rešenje. Zamislite ogromnu sudoku slagalicu, veličine nekoliko hiljada redova i kolona. Ako vam pokažem kompletiranu slagalicu, možete je brzo potvrditi. Međutim, ako slagalica ima nekoliko ispunjenih kvadrata, a ostali su prazni, potrebno je mnogo rada da se reši! Težina sudoku slagalice može se podesiti promenom njene veličine (više ili manje redova i kolona), ali se i dalje može lako proveriti iako je veoma velika. "Slagalica" koja se koristi u bitkoinu zasniva se na kriptografskom hešu i pokazuje slične karakteristike: asimetrično je teško rešiti, ali se lako može proveriti, a njena težina se može prilagoditi.
+
+((("mining and consensus", "mining farms and pools")))U <<user-stories>>, predstavili smo ((("use cases", "mining for bitcoin")))Đinga, preduzetnika iz Šangaja. Đing vodi _farmu za rudarenje_, što je biznis koji pokreće hiljade specijalizovanih rudarskih računara, koji se takmiče za nagradu sa drugim rudarima po čitavom svetu. Na otprilike svakih 10 minuta, Đingovi računari za rudarenje se takmiče sa hiljadama sličnih sistema u globalnoj trci za nalaženje rešenja u blok transakciji. ((("Proof-of-Work algorithm")))((("mining and consensus", "Proof-of-Work algorithm")))Pronalaženje takvog rešenja, takozvani _Proof-of-Work ili PoW_ (dokaz rada), zahteva kvadrillion heš operacija. ( footnote:[heš rejt 2015. godine bio je kvadrilion (10^15) heša po sekundi, a 2020, godine su preko 100 kvintiliona ili 10^18 heša po sekundi] u sekundi širom celokupne bitkoin mreže.) Algoritam za dokaz rada uključuje ponavljanje hešovanja zaglavlja bloka i slučajnog broja sa kriptografskim algoritmom SHA256 dok se ne nađe rešenje koje odgovara unapred određenom uzorku. Prvi rudar koji nađe takvo rešenje pobeđuje u trci protiv konkurencije i objavljuje taj blok u blokčejnu.
+
+Đing je počeo sa rudarenjem 2010. godine, koristeći veoma brz desktop računar kako bi pronašao odgovarajući Proof-of-Work za nove blokove. Kako se sve više rudara pridruživalo mreži bitkoina, težina problema se naglo povećavala. Ubrzo su Đing i ostali rudari prešli na specijalizovaniji hardver, poput vrhunskih namenskih kartica za grafičku obradu (GPU) kao one koje se koriste u PC-ima ili konzolama za igranje. U vreme pisanja ovog teksta, težina se toliko povećala da je rudarenje isplativo samo pomoću ((("application-specific integrated circuits (ASIC)")))integrisanih kola specifičnih za aplikaciju (application-specific integrated circuits ili ASIC), u osnovi stotina algoritama za rudarenje štampanih u hardveru, koji paralelno rade na jednom silicijumskom čipu. ((("mining pools", "defined")))Đingova kompanija takođe učestvuje u _rudarskom pulu (mining pool)_, što slično lutrijskom izvlačenju omogućava da nekoliko učesnika podeli svoje napore i nagrade. Đingova kompanija sada upravlja skladištem u kome se nalaze hiljade ASIC mašina za rudarenje, koje rudare bitkoin 24 sata dnevno. Kompanija plaća troškove električne energije, a prodajom bitkoina je u stanju da napravi određeni profit. 
+
+=== Rudarenje transakcija u blokovima
+
+((("blocks", "mining transactions in")))Nove transakcije neprestano dopiru u mrežu iz korisničkih novčanika i drugih aplikacija. Kako ih vide čvorovi bitkoin mreže, oni se dodaju u privremeni pul neproverenih transakcija koje održava svaki čvor. Dok rudari konstruišu novi blok, oni dodaju neproverene transakcije iz ovog pula u novi blok, a zatim pokušavaju da dokažu verodostojnost novog bloka, pomoću algoritma za rudarenje (Proof-of-Work). Proces rudarenja je detaljno objašnjen u <<mining>>.
+
+Transakcije se dodaju u novi blok, dajući prioritet transakcijama sa najvišim nadoknadama, uz još par drugih kriterijuma. Svaki rudar započinje proces rudarenja novog bloka transakcija čim primi prethodni blok iz mreže, znajući da je izgubio onaj prethodni krug takmičenja. Odmah kreira novi blok, napuni ga transakcijama i otiskom prsta prethodnog bloka i započinje računanje dokaza rada (proof-of-work) za novi blok. Svaki rudar uključuje posebnu transakciju u svom bloku, onu koja plaća nagradu za blok na njegovu bitkoin adresu (2016. godine 12,5 novostvorenog bitkoina, a 2020. godine 6,25), plus zbir naknada za transakcije koji su uključeni u bloku. Ako nađe rešenje koje čini taj blok validnim, on "osvaja" ovu nagradu jer se njegov uspešan blok dodaje globalnom blockčejnu i nagradna transakcija koju je uključio postaje vidljiva. ((("mining pools", "operation of")))Đing, koji učestvuje u rudarskom pulu, postavio je svoj softver za kreiranje novih blokova koji dodeljuju nagradu adresi rudarskog pula. Odatle se deo nagrade deli Đingu i drugim rudarima u propocionalnoj količini rada koji su uneli u poslednjem krugu.
+
+((("candidate blocks")))((("blocks", "candidate blocks")))Alisina transakcija se proširila na mreži i uključila u niz neproverenih transakcija. Jednom potvrđena od strane rudarskog softvera, uključuje se u novi blok, zvani _kandidatski blok (candidate block)_, koji je generisao Đingov rudarski pul. Svi rudari koji učestvuju u tom rudarskom pulu odmah počinju sa računanjem Proof-of-Work-a za kandidatski blok. Otprilike pet minuta nakon što je Alisin novčanik prvi put poslao transakciju, jedan od Đingovih rudarskih ASIC-a pronašao je rešenje za kandidatski blok i objavio ga mreži. Nakon što su drugi rudari potvrdili pobednički blok, započeli su trku za generisanje sledećeg bloka.
+
+Đingov pobednički blok postao je deo blokčejna sa blokom #277316, koji sadrži 419 transakcija, uključujući Alisinu transakciju. Blok koji sadrži Alisinu transakciju računa se kao "potvrda" te transakcije.
+
+[TIP]
+====
+Možete videti blok koji uključuje Alisinu transakciju https://blockchain.info/btc/block/277316[Alisina transaction].
+====
+
+((("confirmations", "role in transactions")))Otprilike 19 minuta kasnije, novi blok, #277317, je izrudario drugi rudar. Pošto je ovaj novi blok izgrađen na vrhu bloka #277316 u kom se nalazila Alisina transakcija, on je dodao još više računarskog rada u blokčejn, jačajući tako poverenje u te transakcije. Svaki blok rudaren na vrhu bloka, koji sadrži transakciju, smatra se dodatnom potvrdom za Alisinu transakciju. Kako se blokovi gomilaju jedan preko drugog, postaje eksponencijalno teže preokrenuti transakciju i na taj način mreža u njega dobija sve više poverenja.
+
+((("genesis block")))((("blocks", "genesis block")))((("blockchain (the)", "genesis block")))U dijagramu u  <<block-alice1>>, možemo videti blok #277316, koji sadrži Alisinu transakciju. Ispod njega su 277.316 blokova (uključujući blok #0), povezani jedni sa drugima u lancu blokova (blokčejnu), sve do bloka #0, poznatog kao _genezni blok (genesis block)_. Vremenom kako se "visina" blokova povećava, tako se povećava i težina računanja za svaki sledeći blok i lanac u celini. Blokovi rudareni nakon onog u kom se nalazi Alisina transakcija deluju kao dodatna potvrda tog bloka, jer se oni zasnivaju na više računanja u sve dužem i dužem lancu. Po konvenciji, bilo koji blok sa više od šest potvrda smatra se neprovatnim, jer bi to zahtevalo ogromnu količinu preračunavanja da se poništi šest blokova. Mi ćemo detaljnije istražiti proces rudarenja i način na koji on gradi poverenje u <<mining>>.((("", startref="BToverview02")))((("", startref="MACover02")))
+
+[[block-alice1]]
+.Alisina transakcija uključena u blok #277316
+image::images/mbc2_0209.png["Alice's transaction included in a block"]
+
+=== Trošenje transakcije
+
+((("spending bitcoin", "simple-payment-verification (SPV)")))((("simple-payment-verification (SPV)")))Sada kada je Alisina transakcija ugrađena u blokčejn kao deo bloka, postaje deo distribuirane knjige bitkoina i vidljiva je svim bitkoin aplikacijama. Svaki klijent bitkoina može nezavisno da potvrdi transakciju kao validnu i spremnu za trošenje. Puni klijenti, (full node client) mogu da prate izvor sredstava od trenutka kada je bitkoin prvi put generisan u bloku, postepeno od transakcije do transakcije, dok ne stignu do Bobove adrese. Lagani klijenti mogu učiniti ono što se naziva pojednostavljena verifikacija plaćanja (simplified payment verification ( pogledajte  <<spv_nodes>>) potvrdu da je transakcija u blokčejnu i da je nakon nje rudareno nekoliko blokova, ukazujući na sigurnost da su je rudari prihvatili kao validnu.
+
+Bob sada može da potroši izlaz iz ove i drugih transakcija. Na primer, Bob može da plati radnika ili dobavljača prenoseći vrednost sa Alisinog plaćanja kafe novim vlasnicima. Najverovatnije, Bobov softver za bitkoin objedinjuje mnoga mala plaćanja u veću isplatu, možda koncentrišući celodnevni bitkoin prihod u jednu transakciju. To znači da bi se skupilo više ulaza jedne transakcije u jedan izlaz (i jednu adresu). Za dijagram agregiranja (objedinjavanja) transakcija, pogledajte <<transaction-aggregating>>.
+
+Dok Bob troši uplate primljene od Alise i drugih kupaca, on proširuje lanac transakcija. Pretpostavimo da Bob plaća svog web dizajnera Gopeša ((("use cases", "offshore contract services"))) u Bangaloru za novu web stranicu svoje web aplikacije. Sada će lanac transakcija izgledati kao <<block-alice2>>. 
+
+[[block-alice2]]
+.Alisina transakcija kao deo lanca transakcije od Džoa do Gopeša
+image::images/mbc2_0210.png["Alisina transakcija kao deo lanca transakcija"]
+
+U ovom poglavlju smo videli kako transakcije grade lanac koji pomera vrednost sa jednog na drugog vlasnika. Takođe, pratili smoAlisinu transakciju od trenutka kada je stvorena u njenom novčaniku, preko bitkoin mreže i do rudara koji su je snimili u blokčejnu. U ostatku ove knjige ispitaćemo specifične tehnologije koje se nalaze iza novčanika, adresa, potpisa, transakcija, mreže i na kraju samog rudarenja.((("", startref="BCover02")))((("", startref="DCSover02"))) ((("", startref="UCcoffee02")))

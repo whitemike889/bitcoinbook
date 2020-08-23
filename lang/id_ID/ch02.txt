@@ -1,0 +1,288 @@
+[[ch02_bitcoin_overview]]
+== Bagaimana Bitcoin Bekerja
+
+=== Transaksi, Block, Mining, dan Blockchain
+
+((("bitcoin", "overview of", id="BCover02")))((("central trusted authority")))((("decentralized systems", "bitcoin overview", id="DCSover02")))Tidak seperti sistem pembayaran dan bank tradisional pada umumnya, sistem bitcoin berbasis pada kepercayaan terdesentralisasi. Daripada bersumber dari otoritas tunggal yang dipercaya, dalam bitcoin, kepercayaan diraih sebagai hasil interaksi dari berbagai macam peserta yang ada dalam sistem bitcoin. Pada bagian ini kita akan memahami bitcoin dari sudut pandang tertentu dengan melacak satu transaksi pada sistem bitcoin dan mengamati bagaimana transaksi itu menjadi "dipercaya" dan diterima oleh mekanisme konsensus terdistribusi bitcoin dan direkam dalam blockchain. Bagian-bagian berikutnya akan memahami lebih lanjut mengenai teknologi dibalik transaksi, jaringan dan proses mining.
+
+==== Ikhtisar tentang Bitcoin
+
+Pada diagram selayang pandang yang terlihat di <<bitcoin-overview>>, kita bisa melihat bahwa sistem bitcoin terdiri dari pengguna dengan wallet yang memiliki kunci, transaksi yang disebarkan diseluruh jaringan dan penambang/miner yang menghasilkan (melalui kompetisi komputasi) konsensus blockchain, yang merupakan catatan resmi dari semua transaksi.
+
+
+((("blockchain explorer sites")))Setiap contoh dalam bab ini berdasarkan pada transaksi aktual yang terjadi pada jaringan bitcoin, sebagai simulasi di antara pengguna (Joe, Alice, Bob dan Gopesh) yang mengirimkan uang dari satu dompet ke dompet yang lain. Saat melacak transaksi melalui blockchain bitcoin, kita akan menggunakan situs _blockchain explorer_ untuk memvisualisasikan setiap langkah. Sebuah blockchain explorer merupakan aplikasi web yang bekerja sebagai pencarian bitcoin, dalam arti hal tersebut membuatmu bisa mencari alamat, transaksi dan blok serta melihat hubungan dan arus di antara mereka.
+
+[[bitcoin-overview]]
+==== Selayang Pandang tentang Bitcoin
+image::images/mbc2_0201.png["Bitcoin Overview"]
+
+((("Bitcoin Block Explorer")))((("BlockCypher Explorer")))((("blockchain.info")))((("BitPay Insight")))Blockchain explorer yang populer di antaranya:
+
+* https://live.blockcypher.com[BlockCypher Explorer]
+* https://blockchain.info[blockchain.info]
+* https://insight.bitpay.com[BitPay Insight]
+* https://blockstream.info[Penjelajah Blockstream]
+
+Setiap explorer di atas memiliki fitur pencarian yang bisa mengenali alamat bitcoin, hash transaksi, nomor blok atau hash blok dan mendapatkan informasi yang sesuai dari jaringan bitcoin. Pada contoh transaksi atau block, kita akan menyediakan alamat URL sehingga kamu bisa mencarinya sendiri dan mempelajarinya dengan detail.
+
+
+[[cup_of_coffee]]
+==== Membeli Secangkir Kopi
+
+((("use cases", "buying coffee", id="UCcoffee02")))Alice, yang kita kenal di chapter sebelumnya, merupakan pengguna baru yang baru saja mendapatkan bitcoin. Di <<getting_first_bitcoin>>, Alice bertemu dengan temannya Joe untuk menukarkan sebagian uangnya untuk bitcoin. Transaksi yang dibuat oleh Joe mengisi dompet Alice dengan 0.10 BTC. Sekarang Alice akan membuat transaksi kecil pertamanya di kafe kopi Bob yang ada di Palo Alto, California.
+
+((("exchange rates", "determining")))Kafe Bob mulai menerima pembayaran dengan bitcoin melalui sistem point-of-sale. Harga yang ada di Kafe Bob ada dalam bentuk mata uang lokal (dollar Amerika), tetapi di kasir pelanggan bisa membayar dengan bitcoin ataupun USD. Alice memesan secangkir kopi dan Bob mendatanya dalam kasir, sebagaimana transaksi yang lain. Sistem point-of-sale secara otomatis mengubah harga total dari USD ke kurs bitcoin pada saat itu dan menampilkan total harga dalam USD ataupun bitcoin:
+
+----
+Total:
+$1.50 USD
+0.015 BTC
+----
+
+
+((("millibits")))Bob berkata, "Jumlahnya satu setengah dollar, atau lima belas millibits."
+
+((("payment requests")))((("QR codes", "payment requests")))Sistem point-of-sale Bob juga akan secara otomatis membuat kode QR spesial yang mengandung _permintaan pembayaran_ (lihat <<payment-request-QR>>).
+
+Tidak seperti kode QR biasa yang hanya mengandung alamat tujuan bitcoin, permintaan pembayaran merupakan URL yang dienkode dalam bentuk QR yang mengandung alamat pembayaran, jumlah pembayaran dan deskripsi umum seperti "Kafe Bob". Hal ini membuat aplikasi bitcoin bisa mengisi sejak awal informasi yang diperlukan untuk melakukan pembayaran sembari menampilkan tampilan deskripsi yang bisa dibaca penggunanya. Kamu bisa membaca kode QR lewat aplikasi wallet bitcoin untuk melihat apa yang akan dilihat oleh Alice.
+
+
+[[payment-request-QR]]
+Kode QR permintaan pembayaran.
+image::images/mbc2_0202.png["payment-request"]
+
+[TIP]
+====
+((("QR codes", "warnings and cautions")))((("transactions", "warnings and cautions")))((("warnings and cautions", "avoid sending money to addresses appearing in book")))Cobalah untuk men-scan ini dengan walletmu untuk melihat alamat dan jumlah yang akan dikirimkan TETAPI JANGAN MENGIRIM UANGNYA.
+====
+[[payment-request-URL]]
+Kode QR permintaan pembayaran mengenkode URL berikut ini yang dijelaskan dalam BIP-21:
+----
+bitcoin:1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA?
+amount=0.015&
+label=Bob%27s%20Cafe&
+message=Purchase%20at%20Bob%27s%20Cafe
+
+Komponen dari URL tersebut
+
+Sebuah alamat bitcoin: "1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA"
+Jumlah pembayaran: "0.015"
+Label untuk alamat penerima: "Bob's Cafe"
+Deskripsi untuk pembayaran: "Purchase at Bob's Cafe"
+----
+
+Alice menggunakan hapenya untuk men-scan barcode yang ada di layar. Hapenya akan meunjukkan pembayaran sejumlah +0.0150 BTC+ to +Bob's Cafe+ dan dia memilih Send untuk melakukan pembayaran. Dalam beberapa detik (kurang lebih sama dengan waktu otorisasi kartu kredit), Bob akan melihat transaksi tersebut di kasirnya, menyelesaikan transaksi tersebut.
+
+Pada bagian berikut ini, kita akan mengamati transaksi ini dengan lebih detail. Kita akan melihat bagaimana wallet Alice membuatnya, bagaimana transaksi itu tersebar ke jaringan, bagaimana dia terverifikasi dan pada akhirnya bagaimana Bob bisa menggunakannya di transaksi berikutnya.
+
+[NOTE]
+====
+((("fractional values")))((("milli-bitcoin")))((("satoshis")))Jaringan bitcoin bisa bertransaksi dalam bentuk pecahan, misalnya dari milibitcoin (1/1000nya bitcoin) sampai 1/100,000,000nya dari satu  bitcoin, yang dikenal dengan nama satoshi.  Dalam buku ini, kita akan menggunakan kata "bitcoin" untuk mengacu pada jumlah mata uang bitcoin dari yang paling kecil (1 satoshi) sampai jumlah total dari bitcoin yang bisa ditambang (21,000,000).
+====
+
+Kami bisa mengamati transaksi Alice ke Kafe Bob lewat situs block explorere (<<view_alice_transaction>>):
+
+[[view_alice_transaction]]
+.Lihat transaksi Alice di https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[blockchain.info]
+====
+----
+https://blockchain.info/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2
+----
+====
+
+=== Transaksi Bitcoin
+
+((("transactions", "defined")))Sederhananya, transaksi menjelaskan pada jaringan bahwa pemilik bitcion tertentu telah mengizinkan dilakukannya transfer nilai tertentu pada pemilik yang lain. Pemilik yang baru tersebut sekarang bisa menggunakan bitcoin dengan membua transaksi lain yang mengizinkan transfer ke pemilik yang baru, dan seterusnya melalui rantai kepemilikan.
+
+==== Input dan Output Transaksi
+
+((("transactions", "overview of", id="Tover02")))((("outputs and inputs", "basics of")))Transaksi bisa dianggap mirip dengan garis-garis pada buku catatan dengan dua sisi. Setiap transaksi mengandung satu atau lebih "input", yang seperti debit untuk alamat bitcoin. Di sisi yang lain, ada satu atau beberapa "output", yang merupakan kredit yang ditambahkan pada alamat bitcoin tertentu. ((("fees", "transaction fees")))Input dan output (debit dan kredit) tidak harus berjumlah sama. Pada output terdapat tambahan biaya kecil yang kurang dari input, selisih output dan input ini merupakan _biaya transaksi_, yaitu pembayaran kecil yang dikoleksi oleh para miner yang memasukkan transaksi tersebut ke dalam blockchain. Transaksi bitcoin terlihat sebagai daftar pada buku catatan transaksi <<transaction-double-entry>>.
+
+Transaaksi tersebut juga mengandung bukti kepemilikan atas setiap bitcoin (input) yang akan ditransaksikan, dalam bentuk tanda tangan digital dari pemiliknya, yang bisa divalidasi secara independen oleh semua orang. ((("spending bitcoin", "defined")))Dalam kosakata bitcoin, "spending" atau membelanjakan bitcoin adalah menandatangani transaksi yang mentransfer nilai dari pemilik sebelumnya ke pemilik yang baru yang bisa diidentifikasi dengan alamat bitcoin.
+
+[[transaction-double-entry]]
+Transaksi sebagai pencatatan dua sisi
+image::images/mbc2_0203.png["Transaction Double-Entry"]
+
+==== Rantai Transaksi
+
+((("chain of transactions")))Pembayaran Alice ke Kafe Bob menggunakaan output transaksi sebelumya sebagai input. Di bagian sebelumnya, Alice menerima bitcoin dari Joe. Transaksi tersebut menghasilkan nilai bitcoin yang terkunci dengan kunci yang Alice punyai. Transaksi Alice yang baru ke Kafe Bob menggunakaan transaksi sebelumnya sebagai referensi input dan membuat output baru untuk membayar secangkir kopi dan membuat kembalian. Transaksi tersebut membuat suatu rangkaian, di mana input dari transaksi terakhir sesuai dengan output transaksi sebelumnya. Kunci Alice menyediakan tanda tangan yang bisa membuka output transaksi sebelumnya, sehingga menjadi bukti bahwa dia menjadi pemilik uang tersebut.  Dia menambahkan pembayaran untuk Kafe Bob, sehingga membuat nilai tersebut hanya bisa digunakan oleh Bob dengan tanda tangan tertentu. Hal ini mewakili transaksi nilai di antara Alice dan Bob. Rantai transaksi ini, dari Joe ke Alice ke Bob, digambarkan di <<blockchain-mnemonic>>.
+
+[[blockchain-mnemonic]]
+.Rantai transaksi, di mana output salah satu transaksi merupakan input transaksi berikutnya
+image::images/mbc2_0204.png["Transaction chain"]
+
+==== Membuat Kembalian
+
+((("change, making")))((("change addresses")))((("addresses", "change addresses")))Banyak transaksi bitcoin yang akan memiliki output yang mereferensikan alamat pengirim saat ini yang disebut dengan _change address_ dan juga alamat yang dikirim. Hal ini disebabkan karena input transaksi, seperti mata uang kertas, tidak bisa dipecah. Apabila kamu membeli benda seharga $5 tapi memakai uang $20 untuk membayarnya, kamu pasti beranggapan akan mendapat $15 sebagai kembaliannya. Konsep ini juga berlaku ke input transaksi bitcoin. Apabila kamu membeli barang seharga 5 bitcoin tapi hanya punya 20 bitcoin untuk dipakai, kamu harus mengirim 5 bitcoin ke pemilik toko dan 15 sisanya ke dirimu sendiri sebagai kembalian (tidak termasuk biaya transaksi). Alamat kembalian tidak mesti sama sesuai dengan alamat input dan seringkali merupakan alamat baru dari dompet pemilik tersebut untuk alasan privasi.
+
+Dompet yang berbeda mungkin akan menggunakan strategi yang berbeda ketika menjumlahkan input untuk membuat pembayaran. Mereka mungkin menjumlahkan banyak input kecil, atau menggunakan satu yang setara atau lebih besar dari pembayaran yang diperlukan. Selama dompet itu belum bisa menjumlahkan input agar sesuai dengan jumlah pembayaran yang dibutuhkan dan biaya transaksi, wallet tersebut harus membuat kembalian. Hal ini sangat mirip dengan bagaimana orang-orang mengelola uang kertas. Apabila kamu terus menggunakan uang terbesar di dompetmu, maka uang kecil akan semakin banyak memenuhi dompetmu. Apabila hanya memakai uang kecil tersebut, maka yang tersisa hanya uang dengan nominal yang besar. Secara tidak sadar orang-orang menemukan keseimbangan di antara dua sisi ini, dan pengembang wallet bitcoin berupaya untuk memprogram keseimbangan ini.
+
+((("transactions", "defined")))((("outputs and inputs", "defined")))((("inputs", see="outputs and inputs")))Bisa disimpulkan bahwa, _transaksi_ memindahkan nilai dari _input transaksi_ ke _output transaksi_. Input merupakan referensi dari output transaksi sebelumnya, memperlihatkan darimana nilainya berasal. Output transaksi memindahkan kepemilikan nilai ke pemilik alamat tertentu dan bisa meliputi kembalian ke pemilik sebelumnya. Output dari transaksi bisa dipakai sebagai input transaksi baru, sehingga membuat rantai kepemilikian karena nilai dipindahkan dari pemilik ke pemilik yang lain. (lihat <<blockchain-mnemonic>>).
+
+==== Bentuk Transaksi Pada Umumnya
+
+Bentuk paling umum dari suatu transaksi adalah pembayaran dari satu alamat ke alamat yang lain, yang seringkali melibatkan kembalian ke pengirim. Bentuk transaksi ini memiliki satu input dan dua output sebagaimana terlihat di <<transaction-common>>.
+
+[[transaction-common]]
+.Transaksi paling umum
+image::images/mbc2_0205.png["Common Transaction"]
+
+Bentuk lain yang sering ditemui adalah transaksi yang menjumlahkan beberapa input ke satu output (lihat <<transaction-aggregating>>). Transaksi ini mewakili bagaimana penukaran beberapa koin dan uang kertas tertentu menjadi satu uang kertas dengan nilai yang lebih besar. Transaksi seperti ini seringkali dibuat oleh wallt untuk membersihkan jumlah-jumlah kecil yang diterima sebagai kembalian.
+
+[[transaction-aggregating]]
+.Penjumlahan transaksi
+image::images/mbc2_0206.png["Aggregating Transaction"]
+
+Selanjutnya, bentuk transaksi lain yang sering terlihat di catatan transaksi bitcoin adalah transaksi yang mendistribusikan satu input ke berbagai macam output mewakili berbagai macam penerima (lihat <<transaction-distributing>>). Jenis transaksi ini kadang digunakan oleh pihak komersial tertentu untuk mendistribusikan dana, seperti saat memproses pembayaran gaji ke berbagai pegawai.((("", startref="Tover02")))
+
+[[transaction-distributing]]
+.Distribusi transaksi
+image::images/mbc2_0207.png["Distributing Transaction"]
+
+=== Membuat sebuah Transaksi
+
+((("transactions", "constructing", id="Tconstruct02")))((("wallets", "constructing transactions")))Aplikasi wallet Alice mengandung semua logika untuk memiliki input dan output yang sesuai untuk membua transaksi yang sesuai dengan spesifikasi Alice. Dia hanya perlu mengisi alamat tujuan dan jumlahnya, sisanya akan terjadi di aplikasi tersebut tanpa perlu melihat detailnya. Selain itu, aplikasi wallet juga bisa membua transaksi meskipun offline. Seperti menulis cek di rumah dan kemudian mengirimnya ke bank dengan sebuah amplop, transaksi tidak perlu dibuat dan ditandatangani ketika terhubung ke jaringan bitcoin.
+
+==== Mendapatkan Input yang Tepat
+
+((("outputs and inputs", "locating and tracking inputs")))Aplikasi wallet Alice harus terlebih dahulu menemukan input yang bisa membayar yang dia inginkan ke Bob. Kebanyakan wallet mencatat seluruh dana yang tersedia pada dompet tersebut. Oleh karena itu, dompet Alice akan mengandung salinan output transaksi dari Joe, yang dibuat sebelumya untuk membeli bictoin dengan uang (lihat <<getting_first_bitcoin>>). Aplikasi wallet bitcoin yang berjalan sebagai klien node penuh sebenarnya mengandung seluruh salinan output yang belum digunakan dari semua transaksi di dalam blockchain. Hal ini membuat wallet bisa membuat input transaksi dan juga memverifikasi transaksi yang datang dengan cepat. AKan tetapi, karena klien node penuh memerlukan banyak ruang harddisk, kebanyakan pengguna menggunakan klien ringan yang hanya melacak output pemilik yang belum dipakai.
+
+Jika aplikasi dompet tidak menyimpan salinan output transaksi yang tidak terpakai, aplikasi itu bisa meminta jaringan bitcoin untuk mengambil informasi ini menggunakan berbagai API yang disediakan oleh banyak provider atau dengan meminta pada klien full ndoe melalui penggunaan fungsi API tertentu. <<example_2-2>>menunjukkan permintaan API, yang dibuat sebagai perintah HTTP GET ke URL tertentu. URL ini akan mengembalikan semua output transaksi yang tidak terpakai untuk sebuah alamat, memberikan informasi apa pun yang dibutuhkan aplikasi untuk membangun input transaksi untuk melakukan embelanjaan. Kita akan menggunakan klien HTTP comand-line sederhana _cURL_ untuk menerima responsnya.
+
+[[example_2-2]]
+.Lihat semua output yang tidak terpakai untuk alamat bitcoin Alice
+====
+[source,bash]
+----
+$ curl https://blockchain.info/unspent?active=1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK
+----
+====
+
+[source,json]
+----
+{
+
+	"unspent_outputs":[
+
+		{
+			"tx_hash":"186f9f998a5...2836dd734d2804fe65fa35779",
+			"tx_index":104810202,
+			"tx_output_n": 0,
+			"script":"76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac",
+			"value": 10000000,
+			"value_hex": "00989680",
+			"confirmations":0
+		}
+
+	]
+}
+----
+
+
+Tanggapan yang terlihat pada <<example_2-2>> menunjukkan satu output yang belum terpakai (salah satu yang belum digunakan) di bawah kepemilikan alamat Alice + 1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK +. Responsnya meliputi referensi untuk transaksi di mana output yang tidak terpakai ini ada (pembayaran dari Joe) dan nilainya dalam satoshi, sejumlah 10 juta, yang setara dengan 0,10 bitcoin. Dengan informasi ini, aplikasi dompet Alice dapat membangun transaksi untuk mentransfer nilai tersebut ke alamat pemilik baru.
+
+[TIP]
+====
+Lihat https://www.blockchain.com/btc/tx/7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18[transaksi dari Joe ke Alice].
+====
+
+Seperti yang bisa kamu lihat lihat, dompet Alice mengandung cukup banyak bitcoin dalam satu output yang tidak terpakai untuk membayar secangkir kopi. Seandainya ini tidak terjadi, aplikasi dompet Alice mungkin harus "menggeledah" melalui setumpuk output tidak terpakai yang lebih kecil, seperti mengambil koin dari dompet sampai bisa menemukan cukup uang untuk membayar kopi. Dalam kedua kasus, mungkin ada kebutuhan untuk mendapatkan beberapa kembalian, yang akan kita lihat di bagian selanjutnya, seiring wallet tersebut menciptakan output transaksi (pembayaran).
+
+
+==== Menciptakan Output
+
+((("outputs and inputs", "creating outputs")))A transaction output is created in the form of a script that creates an encumbrance on the value and can only be redeemed by the introduction of a solution to the script. In simpler terms, Alice's transaction output will contain a script that says something like, "This output is payable to whoever can present a signature from the key corresponding to Bob's address." Because only Bob has the wallet with the keys corresponding to that address, only Bob's wallet can present such a signature to redeem this output. Alice will therefore "encumber" the output value with a demand for a signature from Bob.
+
+Transaksi ini juga akan meliputi output kedua, karena dana Alice dalam bentuk output 0,10 BTC, terlalu banyak hanya untuk membayar secangkir kopi seharga 0,015 BTC. Alice akan membutuhkan 0,085 BTC sebagai kembaliannya. Kembalian Alice dibuat oleh dompet Alice sebagai output dalam transaksi yang sama dengan pembayaran ke Bob. Pada dasarnya, wallet Alice menghancurkan dana miliknya menjadi dua pembayaran: satu untuk Bob dan satu lagi untuk dirinya sendiri. Setelah itu dia bisa menggunakan (membelanjakan) output kembalian dalam transaksi berikutnya.
+
+Akhirnya, agar transaksi bisa diproses oleh jaringan tepat waktu, aplikasi dompet Alice akan menambah sedikit biaya. Biaya itu tidak eksplisit dijelaskan di dalam transaksi; tetapi tersirat dalam perbedaan antara input dan output. Apabila alih-alih mengambil 0,085 dalam kembalian, Alice hanya menciptakan 0,0845 sebagai output kedua, maka berarti ada 0,0005 BTC (setengah milibitcoin) yang tersisa. Input 0,10 BTC tidak sepenuhnya dihabiskan dengan dua output, karena masih kurang dari 0,10. Perbedaan yang dihasilkan adalah biaya _transaksi_ yang dikumpulkan oleh penambang sebagai biaya untuk memvalidasi dan memasukkan transaksi dalam blok untuk dicatat pada blockchain.
+
+Transaksi yang dihasilkan dapat dilihat menggunakan aplikasi web explorer blockchain, seperti yang ditunjukkan dalam <<transaction-alice>>.
+
+[[transaction-alice]]
+[role="smallerseventyfive"]
+.Transaksi Alice ke Kafe Bob
+image::images/mbc2_0208.png["Alice Coffee Transaction"]
+
+[[transaction-alice-url]]
+[TIP]
+====
+Lihat https://www.blockchain.com/btc/tx/0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2[transaksi dari Alice ke Kafe milik Bob].
+====
+
+==== Menambahkan Transaksi ke Buku Besar
+
+Transaksi yang dibuat oleh aplikasi dompet Alice memiliki panjang 258 byte dan mengandung semua yang diperlukan untuk mengkonfirmasi kepemilikan dana dan menetapkan pemilik baru. Sekarang, transaksi harus ditransmisikan ke jaringan bitcoin di mana ia akan menjadi bagian dari blockchain. Di bagian selanjutnya kita akan melihat bagaimana transaksi menjadi bagian dari blok baru dan bagaimana blok itu "ditambang". Akhirnya, kita akan melihat bagaimana blok baru, setelah ditambahkan ke blockchain, semakin dipercaya oleh jaringan karena semakin banyak blok yang ditambahkan.
+
+===== Mentransmisikan transaksi
+
+((("propagation", "process of"))) Oleh karena transaksi berisi semua informasi yang diperlukan untuk memproses, tidak masalah bagaimana atau di mana ia ditransmisikan ke dalam jaringan bitcoin. Jaringan bitcoin adalah jaringan peer-to-peer, dengan setiap klien bitcoin berpartisipasi dengan berhubungan ke beberapa klien bitcoin lainnya. Tujuan dari jaringan bitcoin adalah untuk menyebarkan transaksi dan blok ke semua peserta.
+
+===== Bagaimana transaksi disebarkan
+
+((("bitcoin nodes", "defined")))((("nodes", see="bitcoin nodes")))Sistem apapun, seperti server, aplikasi desktop atau wallet, yang berpartisipasi dalam jaringan bitcoin dengan "berbicara" protokol bitcoin disebut dengan _node bitcoin. Aplikasi wallet Alice bisa mengirim transaksi baru ke node yang manapun melalui berbagai macam jaringain: kabel, WiFi, mobile dst. Alamat bitcoinnya tidak harus terhubung ke wallet Bob secara langsung dan dia tidak perlu menggunakan koneksi internet yang disediakan di kafe, walaupun keduanya bisa dilakukan.((("propagation", "flooding technique")))((("flooding technique")))Semua bitcoin node yang mendapatkan transaksi valid yang belum dilihat sebelumnya akan secepat mungkin mengirimkan ke node yang lain yang terhubung dengannya, sebuah teknik penyebaran yang dikenal dengan nama _flooding_. Oleh karena itulah transaksi menyebar dengan cepat ke jaringan peer-to-peer, mencapai banyak node dalam beberapa detik.
+
+===== Sudut pandang Bob
+
+Jika aplikasi wallet bitcoin milik Bob terhubung langsung ke aplikasi wallet milik Alice, maka bisa jadi aplikasi wallet Bob akan menjadi node pertama yang menerima transaksi tersebut. Namun, walaupun wallet Alice mengirim transaksi melalui node lain, transaksi tetap akan sampai ke wallet Bob dalam beberapa detik. Wallet Bob akan langsung mengenal transaksi Alice sebagai pembayaran masuk karena hanya kunci milik Bob yang bisa mengakses hasil transaksinya. Aplikasi wallet Bob juga akan memverifikasi secara independen bahwa transaksi tersebut bersifat final, menggunakan output yang belum digunakan, dan memakai biaya transaksi yang cukup untuk dimasukkan ke dalam blok berikutnya. Di saat ini Bob bisa menganggap, dengan resiko rendah, bahwa transaksi ini sebentar lagi akan dimasukkan kedalam block dan dikonfirmasi.
+
+[TIP]
+====
+((("confirmations", "of small-value transactions", secondary-sortas="small-value transactions")))Kesalahan pemahaman yang sering terjadi mengenai transaksi bitcoin adalah bahwa mereka harus dikonfirmasi dengan menunggu 10 menit untuk sebuah blok baru, atau sampai 60 menit untuk konfirmasi seutuhnya. Walaupun konfirmasi memastikan bahwa transaksi telah diterima oleh seluruh jaringan, keterlambatan selama itu tidak diperlukan untuk barang-barang bernilai kecil seperti secangkir kopi. Penjual bisa saja menerima transaksi dengan tanpa konfirmasi, tanpa risiko lebih besar dari pembayaran kartu kredit yang dibuat tanpa ID atau tanda tangan, layaknya yang terjadi saat ini.((("", startref="Tconstruct02")))
+====
+
+=== Penambangan Bitcoin
+
+((("mining and consensus", "overview of", id="MACover02")))((("blockchain (the)", "overview of mining", id="BToverview02")))Transaksi Alice saat ini telah tersebar ke jaringan bitcoin. Transaksi itu tidak menjadi bagian dari _blockchain_ sampai diverifikasi dan dimasukkan ke dalam sebuah block melalui proses yang disebut mining atau penambangan. Lihat <<mining>> untuk penjelasan yang lebih detail.
+
+Sistem kepercayaan bitcoin didasarkan pada perhitungan. Transaksi dipaketkan ke dalam _block_, yang memerlukan sejumlah besar komputasi untuk dibuktikan, tetapi membutuhkan komputasi yang ringan untuk agar bisa diverifikasi. Proses penambangan melayani dua tujuan dalam bitcoin:
+
+* ((("mining and consensus", "consensus rules", "security provided by")))((("consensus", see="mining and consensus")))Node penambangan memvalidasi semua transaksi dengan memakai referensi ke _peraturan konsensus_ bitcoin. Oleh krena itu, penambangan menyediakan keamanan untuk transaksi bitcoin dengan menolak transaksi yang tidak valid atau cacat.
+* Penambangan menciptakan bitcoin baru di setiap blok, seperti bank sentral mencetak uang baru. Jumlah bitcoin yang dibuat per blok terbatas dan berkurang seiring waktu, mengikuti jadwal penerbitan yang telah ditetapkan sebelumnya.
+
+
+Penambangan mencapai keseimbangan yang baik antara biaya dan imbalan. Penambangan menggunakan listrik untuk memecahkan masalah matematika. Penambang yang berhasil akan mengumpulkan _reward_ dalam bentuk bitcoin baru dan biaya transaksi. Namun, hadiah hanya akan dikumpulkan jika penambang telah memvalidasi semua transaksi dengan benar, sesuai dengan aturan _konsensus_. Keseimbangan yang rumit ini memberikan keamanan untuk bitcoin tanpa perlu otoritas pusat.
+
+Cara yang baik untuk menggambarkan penambangan adalah seperti permainan sudoku kompetitif raksasa yang diatur ulang setiap kali seseorang menemukan solusi dan kesulitannya secara otomatis menyesuaikan sehingga dibutuhkan sekitar 10 menit untuk menemukan solusi. Bayangkan puzzle sudoku raksasa, beberapa ribu baris dan kolom dalam ukuran tertentu. Jika saya menunjukkan kepada Anda teka-teki yang sudah selesai, Anda dapat memverifikasinya cukup cepat. Namun, jika teka-teki memiliki beberapa kotak yang terisi dan sisanya kosong, dibutuhkan banyak pekerjaan untuk dipecahkan! Kesulitan sudoku dapat disesuaikan dengan mengubah ukurannya (lebih banyak atau lebih sedikit baris dan kolom), tetapi masih dapat diverifikasi dengan mudah bahkan jika sangat besar. "Teka-teki" yang digunakan dalam bitcoin didasarkan pada hash kriptografi dan menunjukkan karakteristik yang serupa: sulit untuk dipecahkan secara asimetris tetapi mudah diverifikasi, dan kesulitannya dapat disesuaikan.
+
+((("mining and consensus", "mining farms and pools"))) Dalam <<user-stories>>, kita memperkenalkan ((("use cases", "mining for bitcoin"))) Jing, seorang pengusaha di Shanghai. Jing menjalankan _mining farm_, yang merupakan bisnis menjalankan ribuan komputer penambangan khusus, bersaing untuk mendapatkan hadiah penambangan. Setiap 10 menit atau lebih, komputer mining Jing bersaing dengan ribuan sistem serupa dalam perlombaan global untuk menemukan solusi untuk blok transaksi. ((("Proof-of-Work algorithm"))) ((("mining and consensus", "Proof-of-Work algorithm"))) Menemukan solusi semacam itu, yang disebut _Proof-of-Work_ (PoW ), membutuhkan ribuan juta operasi hashing per detik di seluruh jaringan bitcoin. Algoritma untuk Proof-of-Work melibatkan proses hashing header berulang-ulang dari blok dan nomor acak dengan algoritma kriptografis SHA256 sampai solusi yang cocok dengan pola yang telah ditentukan muncul. Penambang pertama yang menemukan solusi tersebut memenangkan kompetisi dan akan menerbitkan blok ke dalam blockchain.
+
+Jing started mining in 2010 using a very fast desktop computer to find a suitable Proof-of-Work for new blocks. As more miners started joining the bitcoin network, the difficulty of the problem increased rapidly. Soon, Jing and other miners upgraded to more specialized hardware, with high-end dedicated graphical processing units (GPUs), often used in gaming desktops or consoles. At the time of this writing, the difficulty is so high that it is profitable only to mine with ((("application-specific integrated circuits (ASIC)")))application-specific integrated circuits (ASIC), essentially hundreds of mining algorithms printed in hardware, running in parallel on a single silicon chip. ((("mining pools", "defined")))Jing's company also participates in a _mining pool_, which much like a lottery pool allows several participants to share their efforts and rewards. Jing's company now runs a warehouse containing thousands of  ASIC miners to mine for bitcoin 24 hours a day. The company pays its electricity costs by selling the bitcoin it is able to generate from mining, creating some income from the profits.
+
+=== Menambang Transaksi di dalam Blok
+
+((("blocks", "mining transactions in"))) Transaksi baru terus mengalir ke jaringan dari dompet pengguna dan aplikasi lain. Ketika mereka dilihat oleh node jaringan bitcoin, mereka ditambahkan ke pool sementara dari transaksi yang belum diverifikasi yang dikelola oleh setiap node. Ketika penambang membangun blok baru, mereka menambahkan transaksi yang belum diverifikasi dari kumpulan atau pool tadi ke blok baru dan kemudian mencoba untuk membuktikan validitas blok baru tersebut, dengan algoritma penambangan (Proof-of-Work). Proses penambangan dijelaskan secara rinci di <<mining>>.
+
+Transaksi ditambahkan ke blok baru, dengan prioritas transaksi dengan biaya tertinggi dan beberapa kriteria lainnya. Setiap penambang memulai proses penambangan blok transaksi baru segera setelah ia menerima blok sebelumnya dari jaringan, setelah mengetahui bahwa mereka telah kalah pada kompetisi sebelumnya. Mereka segera membuat blok baru, mengisinya dengan transaksi dan sidik jari dari blok sebelumnya, dan mulai menghitung PoW untuk blok baru. Setiap penambang memasukkan transaksi khusus dalam bloknya, salah satunya sebagai alamat pembayaran sebagai hadiah blok (saat ini berjumlah 12,5 bitcoin baru) ditambah jumlah biaya transaksi dari semua transaksi yang termasuk dalam blok tersebut. Jika dia menemukan solusi yang membuat blok itu valid, dia "memenangkan" hadiah ini karena bloknya sukses ditambahkan ke blockchain global dan transaksi hadiah yang dia masukkan bisa dibelanjakan. ((("mining pools", "operation of"))) Jing, yang berpartisipasi dalam penambangan, telah menyiapkan perangkat lunaknya untuk membuat blok baru yang menetapkan hadiah ke alamat pool. Dari sana, bagian dari hadiah dibagikan kepada Jing dan penambang lain secara proporsional dengan jumlah pekerjaan yang mereka kontribusikan dalam putaran terakhir.
+
+((("candidate blocks")))((("blocks", "candidate blocks"))) Transaksi Alice diambil oleh jaringan dan dimasukkan dalam kumpulan transaksi yang belum diverifikasi. Setelah divalidasi oleh perangkat lunak pertambangan transaksi tersebut dimasukkan dalam blok baru, yang disebut _candidate block_, yang dihasilkan oleh pool penambang yang dimiliki Jing. Semua penambang yang berpartisipasi dalam pool tersebu  mulai menghitung Proof-of-Work untuk blok kandidat tadi. Sekitar lima menit setelah transaksi pertama kali ditransmisikan oleh dompet Alice, salah satu penambang ASIC Jing menemukan solusi untuk blok kandidat dan mengumumkannya ke jaringan. Setelah penambang lain memvalidasi blok pemenang, mereka memulai perlombaan untuk membuat blok berikutnya.
+
+Blok yang dimenangkan oleh Jing menjadi bagian dari blockchain sebagai blok #277316, yang berisi 419 transaksi, termasuk transaksi Alice. Blok yang berisi transaksi Alice dihitung sebagai satu "konfirmasi" dari transaksi tersebut.
+
+[TIP]
+====
+You can see the block that includes https://blockchain.info/btc/block/277316[Alice's transaction].
+====
+
+((("confirmations", "role in transactions"))) Sekitar 19 menit kemudian, blok baru, # 277317, ditambang oleh penambang lain. Karena blok baru ini dibangun di atas blok # 277316 yang berisi transaksi Alice, blok tersebut menambahkan lebih banyak perhitungan ke blockchain, sehingga memperkuat kepercayaan dalam transaksi tersebut. Setiap blok yang ditambang di atas transaksi tertentu berperan sebagai konfirmasi tambahan untuk transaksi Alice. Ketika blok-blok tersebut saling bertumpukan atas satu sama lain, maka akan sangat sulit untuk membalikkan transaksi, sehingga membuatnya lebih dipercaya oleh jaringan.
+
+<mining>((("genesis block")))((("blocks", "genesis block")))((("blockchain (the)", "genesis block"))) Dalam diagram <<block-alice1>>, kita bisa melihat blok #277316, yang berisi transaksi Alice. Di bawahnya terdapat277,316 blok (termasuk blok #0), yang terhubung satu sama lain dalam rantai blok (blockchain) sepanjang waktu kembali ke blok #0, yang dikenal sebagai _genesis block_. Seiring waktu, ketika "tinggi" blok meningkat, begitu juga kesulitan perhitungan untuk setiap blok dan rantai secara keseluruhan. Blok yang ditambang setelah blok yang berisi transaksi Alice bertindak sebagai jaminan lebih lanjut, karena mereka menumpuk lebih banyak perhitungan dalam rantai yang lebih panjang. Berdasarkan kesepakatan, setiap blok dengan lebih dari enam konfirmasi dianggap tidak dapat dibatalkan, karena akan memerlukan perhitungan yang sangat besar untuk membatalkan dan menghitung ulang enam blok. Kita akan memeriksa proses penambangan dan cara membangun kepercayaan lebih detail di <>. ((("", Startref = "BToverview02"))) ((("", startref = "MACover02")) )
+
+[[block-alice1]]
+Transaksi Alice dimasukkan dalam blok #277316
+image::images/mbc2_0209.png["Alice's transaction included in a block"]
+
+=== Menggunakan Transaksi
+
+((("spending bitcoin", "simple-payment-verification (SPV)")))((("simple-payment-verification (SPV)"))) Sekarang transaksi Alice telah tertanam di dalam blockchain sebagai bagian dari blok, yang menjadi bagian dari buku besar bitcoin yang terdistribusi dan bisa dilihat untuk semua aplikasi bitcoin. Setiap klien bitcoin dapat memverifikasi transaksi dengan independen sebagai transaksi yang valid dan dapat dibelanjakan. Klien full-node dapat melacak sumber dana dari saat bitcoin pertama kali dihasilkan di blok, secara bertahap dari transaksi ke transaksi, sampai mereka mencapai alamat Bob. Klien yang ringan dapat melakukan apa yang disebut verifikasi pembayaran yang disederhanakan (lihat <<spv_nodes>>) dengan mengonfirmasi bahwa transaksi ada di dalam blockchain dan memiliki beberapa blok yang ditambang setelahnya, sehingga memberikan jaminan bahwa para penambang menerimanya sebagai transaksi yang valid.
+
+Bob sekarang dapat menggunakan output dari transaksi tersebut dan transaksi lainnya. Misalnya, Bob dapat membayar kontraktor atau pemasok dengan mentransfer nilai dari pembayaran cangkir kopi Alice kepada pemilik baru tersebut. Kemungkinan besar, aplikasi bitcoin milik Bob akan mengumpulkan banyak pembayaran kecil ke pembayaran yang lebih besar, mungkin memusatkan semua pendapatan bitcoin dalam satu hari ke dalam satu transaksi. Hal tersebut akan menggabungkan berbagai pembayaran ke dalam satu output (dan satu alamat). Untuk diagram penjumlahan transaksi, lihat <<transaction-aggregating>>.
+
+As Bob spends the payments received from Alice and other customers, he extends the chain of transactions. Let's assume that Bob pays his web designer Gopesh((("use cases", "offshore contract services"))) in Bangalore for a new web page. Now the chain of transactions will look like <<block-alice2>>.
+
+[[block-alice2]]
+.Transaksi Alice sebagai bagian dari rantai transaksi dari Joe ke Gopesh
+image::images/mbc2_0210.png["Alice's transaction as part of a transaction chain"]
+
+Dalam bab ini, kita melihat bagaimana transaksi membangun rantai yang memindahkan nilai dari pemilik ke pemilik yang lain. Kita juga melacak transaksi Alice, mulai dari saat ia diciptakan di dompetnya, melalui jaringan bitcoin dan kepada para penambang yang mencatatnya di blockchain. Dalam sisa pembahasan buku ini, kita akan memeriksa teknologi spesifik di balik dompet, alamat, tanda tangan, transaksi, jaringan, dan akhirnya penambangan bitcoin. ((("", Startref = "BCover02"))) ((("", startref = "DCSover02"))) ((("", startref = "UCcoffee02")))

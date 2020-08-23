@@ -1,0 +1,250 @@
+[preface]
+== Szójegyzék
+
+A lenti szómagyarázatban a bitcoinnal kapcsolatos szavak, kifejezések vannak, melyek nagyon sokszor előfordulnak ebben a könyvben. Tegyen ide egy könyvjelzőt, hogy gyorsan megtalálhassa és tisztázhassa a kérdéses kifejezéseket.
+
+cím::
+    Egy bitcoin cím a következőképpen néz ki: +1DSrfJdB2AnWaFNgSbv3MZC2m74996JafV+. A bitcoin cím betűkből és számokból áll. Valójában egy publikus kulcs 160 bites hashének base58check kódolt formája. Egy bitcoin címen bitcoinok fogadhatók, pont úgy, ahogy egy email címmel elektronikus leveleket lehet fogadni.
+
+bip::
+    Bitcoin Improvement Proposals (a bitcoin tökéletesítésére tett javaslatok). Olyan javaslatok, melyeket a bitcoin közösség tagjai tettek a bitcoin javítása, tökéletesítése érdekében. Például a BIP-21 a bitcoin URI sémájának tökéletesítésére tett javaslat.
+
+bitcoin::
+    A pénzegység (érme), a hálózat és a szoftver neve.
+
+blokk::
+    Tranzakciók csoportja, mely egy időbélyeget, valamint az előző blokk ujjlenyomatát tartalmazza. A blokk blokkfejlécének hashelése révén áll elő a munkabizonyíték (proof-of-work), és válnak érvényessé a tranzakciók. Az érvényes blokkok a hálózati konszenzus alapján bekerülnek a fő blokkláncba.
+
+blokklánc::
+	Érvényesített blokkok listája, amelyben mindegyik blokk kapcsolódik az előzőhöz, egészen a genezis blokkig visszamenőleg.
+
+Bizánci tábornokok problémája::
+    Egy megbízható számítógépes rendszernek képesnek kell lennie megbirkózni egy vagy több komponens meghibásodásával. Egy hibás komponens olyan viselkedést mutathat, amelyet gyakran figyelmen kívül hagynak – nevezetesen, hogy egymásnak ellentmondó információkat küldhet a rendszer különböző részeihez. Az ilyen típusú meghibásodás megoldásának problémája bizánci tábornokok problémájaként ismert.
+
+coinbase::
+	Egy speciális mező, amelyet a coinbase tranzakciók egyetlen bemeneteként használnak. A coinbase lehetővé teszi a blokkjutalom tulajdonba vételét, és maximum 100 bájtot biztosít tetszőleges adatok számára.
+	Nem összetévesztendő a Coinbase tranzakcióval.
+
+coinbase tranzakció::
+	Egy blokk első tranzakciója. Minden esetben egy bányász hozza létre, egyetlen coinbase-t tartalmaz.
+	Nem összetévesztendő a Coinbase-szel.
+
+hideg tárolás::
+	Bitcoin offline tárolására utal. A hideg tárolás a titkos kulcsok biztonságos offline környezetben való létrehozásával és tárolásával érhető el. A hideg tárolás mindenki számára fontos, aki bitcoin befektetéssel rendelkezik. Az online számítógépek ki vannak téve hackertámadásnak, és nem ajánlatos rajtuk nagyobb mennyiségű bitcoint tárolni.
+
+megerősítések::
+	Ha egy tranzakció bekerült egy blokkba, akkor "egy megerősítéssel rendelkezik". Ha már egy _újabb_ blokk is előállt ugyanezen a blokkláncon, akkor a tranzakciónak két megerősítése van, és így tovább. Hat vagy még több megerősítés már elégséges bizonyítéknak tekinthető arra nézve, hogy a tranzakciót nem lehet visszafordítani.
+
+konszenzus::
+    Amikor számos csomópont, általában a legtöbb csomópont helyileg ellenőrzött, legjobbnak választott blokkláncai ugyanazokat a blokkokat tartalmazzák.
+    Nem összetévesztendő a konszenzus szabályokkal.
+
+konszenzus szabályok::
+    A blokk ellenőrzési szabályok, amelyeket a teljes csomópontok követnek, hogy konszenzus maradjon a többi csomóponttal.
+    Nem összetévesztendő a konszenzussal.
+
+nehézségi szint::
+	Egy hálózati beállítás, amely azt határozza meg, hogy mennyi számítási munkára van szükség egy munkabizonyíték (proof-of-work) előállításához.
+
+nehézségi szint újraszámítás::
+	A nehézségi szint újraszámítása, amely 2016 blokkonként az egész hálózatban megtörténik, és az előző 2016 blokk előállításához használt hash kapacitást/teljesítményt veszi figyelembe.
+
+cél nehézségi szint::
+    Az a nehézségi szint, amely mellett a hálózat kb. 10 percenként fog egy blokkot találni.
+
+kettős költés::
+    Kettős költésről beszélünk, ha egy bizonyos pénzt kétszer költöttek el. Azáltal, hogy a bitcoin minden blokklánchoz adott tranzakciót ellenőrzi, hogy a tranzakció bemenetei ne lehessenek korábban elköltöttek, védelmet nyújt a kettős költéssel szemben.
+
+ECDSA::
+    Az elliptikus görbe digitális aláírási algoritmus vagy az ECDSA egy kriptográfiai algoritmus, amelyet a Bitcoin használ annak biztosítására, hogy a pénzeket csak jogszerű tulajdonosai költhessék el.
+
+extra nonce::
+    Ahogy a nehézség növekedett, a bányászok gyakran mind a 4 milliárd nonce értéket végigpróbálták, blokk találása nélkül. Mivel a coinbase script 2 és 100 bájt közötti adatot tud tárolni, a bányászok elkezdték ezt a teret extra nonce térnek használni, ami lehetővé tette, hogy érvényes blokk megtalálása érdekében sokkal nagyobb tartományban tudjanak blokkfejléc értékeket számolni.
+
+díjak::
+	A tranzakció küldője által megfizetett díj, amelyet a hálózat kap a tranzakció feldolgozásáért. A legtöbb tranzakcióhoz min. 0,5 mBTC díjra van szükség.
+
+elágazás::
+    Elágazás, más néven nem tervezett elágazás, akkor fordul elő, amikor két vagy több blokk azonos blokkmagassággal rendelkezik, elágazást hozva létre a blokkláncban. Általában akkor fordul elő, amikor két vagy több bányász közel azonos időben talál blokkot, de megtörténhet egy támadás részeként is.
+
+genezis blokk::
+	A blokklánc első blokkja, mely a digitális pénz inicializálására szolgál.
+
+kemény elágazás::
+    A kemény elágazás, más néven Hard-Forking Change, a blokklánc végleges szétválása. Általában akkor fordul elő, amikor nem frissített csomópontok nem képesek ellenőrizni a frissített csomópontok által létrehozott blokkokat, amelyek az újabb konszenzusszabályokat követik.
+    Nem összetévesztendő az elágazással, puha elágazással, szoftver elágazással vagy Git elágazással.
+
+hardver pénztárca::
+    A hardver pénztárca speciális bitcoin pénztárca, amely a felhasználó titkos kulcsait biztonságos hardver eszközön tárolja.
+
+hash::
+    Valamilyen bináris bemenet digitális ujjlenyomata. Magyarul néha zanzának is nevezik, de ez nem terjedt el.
+
+hashzárak::
+    A hashlock is a type of encumbrance that restricts the spending of an output until a specified piece of data is publicly revealed. Hashlocks have the useful property that once any hashlock is opened publicly, any other hashlock secured using the same key can also be opened. This makes it possible to create multiple outputs that are all encumbered by the same hashlock and which all become spendable at the same time.
+
+HD protokoll::
+    A hierarchikus determinisztikus (HD) kulcs létrehozási és átviteli protokoll (BIP32), amely lehetővé teszi gyermek kulcsok szülő kulcsokból való hierarchikus létrehozását.
+
+HD pénztárca::
+    Hierarchikus determinisztikus (HD protokoll) kulcs létrehozást, és átviteli protokollt (BIP32) használó pénztárcák.
+
+HD pénztárca mag::
+    A HD pénztárca mag vagy a gyökérmag olyan rövid érték, amelyet magként használnak a titkos mesterkulcs és a fő lánc kód generálására egy HD pénztárcában.
+
+HTLC::
+    A Hashed TimeLock Contract or HTLC is a class of payments that use hashlocks and timelocks to require that the receiver of a payment either acknowledge receiving the payment prior to a deadline by generating cryptographic proof of payment or forfeit the ability to claim the payment, returning it to the payer.
+
+KYC::
+    Az Know your customer (ismerje meg ügyfelét) vagy KYC olyan céges eljárás, amely azonosítja és ellenőrzi ügyfelei személyazonosságát. A kifejezés arra a bankszabályozásra is utal, amely ezeket a tevékenységeket szabályozza.
+
+LevelDB::
+    LevelDB is an open source on-disk key-value store. LevelDB is a light-weight, single-purpose library for persistence with bindings to many platforms.
+
+Lightning Networks::
+    Lightning Network is an implementation of Hashed Timelock Contracts (HTLCs) with bi-directional payment channels which allows payments to be securely routed across multiple peer-to-peer payment channels. This allows the formation of a network where any peer on the network can pay any other peer even if they don't directly have a channel open between each other.
+
+Locktime::
+    Locktime, or more technically nLockTime, is the part of a transaction which indicates the earliest time or earliest block when that transaction may be added to the block chain.
+
+mempool::
+    A bitcoin mempool (memory pool vagy tranzakció pool) a bitcoin csomópontok által ellenőrzött, de még nem megerősített összes (blokkban szereplő) tranzakciós adatok gyűjteménye.
+
+Merkle gyökér::
+    Egy Merkle fa gyökere, amely a fában lévő összes hashelt pár leszármazottja. A blokkfejlécnek tartalmaznia kell egy érvényes Merkle gyökeret, amely a blokk összes tranzakciójából van leszármaztatva.
+
+Merkle fa::
+    A tree constructed by hashing paired data (the leaves), then pairing and hashing the results until a single hash remains, the merkle root. In Bitcoin, the leaves are almost always transactions from a single block.
+
+bányász::
+    Egy olyan hálózati csomópont, amely új blokkok előállítása érdekében, ismételten végrehajtott hash számítás segítségével munkabizonyítékot (proof-of-work) keres.
+
+multisignature::
+    A multisignature (multisig) arra utal, hogy egynél több kulcsra van szükség egy bitcoin tranzakció engedélyezéséhez.
+
+hálózat::
+    Egyenrangú csomópontokból álló, peer-to-peer hálózat, amely a hálózatban lévő összes többi bitcoin csomópontnak továbbítja a tranzakciókat és a blokkokat.
+
+nonce::
+    A bitcoin blokkban a "nonce" egy 32 bites (4 bájtos) mező, amelynek értékét úgy állítják be, hogy a blokk hashe egy sorozat nullával kezdődjön. A mezők többi részét nem lehet megváltoztatni, mivel azok meghatározott jelentéssel bírnak.
+
+láncon kívüli tranzakciók::
+    A láncon kívüli tranzakció az érték blokkláncon kívüli mozgását jelenti. Míg egy láncon belüli tranzakció – amelyet többnyire egyszerűen _tranzakciónak_ neveznek – módosítja a blokkláncot, és érvényességének meghatározása a blokkláncra épül, addig a láncon kívüli tranzakció más módszerekre támaszkodik a tranzakció rögzítésére és ellenőrzésére.
+
+műveleti kód (opcode)::
+    A Bitcoin Script nyelvből származó műveleti kódok, amelyek adatokat tesznek a verembe, vagy függvényeket hajtanak végre egy pubkey szkriptben vagy aláírási szkriptben.
+
+Open Assets protocol::
+    The Open Assets Protocol is a simple and powerful protocol built on top of the bitcoin blockchain. It allows issuance and transfer of user-created assets.
+
+OP_RETURN::
+    An opcode used in one of the outputs in an OP_RETURN transaction. Not to be confused with OP_RETURN transaction.
+
+OP_RETURN tranzakció::
+    A transaction type that adds arbitrary data to a provably unspendable pubkey script that full nodes don’t have to store in their UTXO database. Not to be confused with OP_RETURN opcode.
+
+árva blokk::
+    Blocks whose parent block has not been processed by the local node, so they can’t be fully validated yet. Not to be confused with stale block.
+
+árva tranzakció::
+    Tranzakciók, amelyek egy vagy több hiányzó bemeneti tranzakció miatt nem kerülhetnek be a poolba.
+
+kimenet::
+    A kimenet, tranzakciókimenet vagy TxOut egy tranzakció kimenete, amely két mezőt tartalmaz: egy értékmezőt nulla vagy több satoshi átutalásához, és egy pubkey szkriptet annak leírására, hogy milyen feltételeknek kell teljesülniük ahhoz, hogy ezek a satoshik elkölthetők legyenek.
+
+P2PKH::
+    Bitcoin címre fizető tranzakciók P2PKH vagy Pay To PubKey Hash szkripteket tartalmaznak. A P2PKH szkript által zárolt kimenet feloldható (elkölthető) egy nyilvános kulcs és a megfelelő titkos kulcs által létrehozott digitális aláírás bemutatásával.
+
+P2SH::
+    A P2SH vagy a Pay-to-Script-Hash egy hatékony új típusú tranzakció, amely jelentősen megkönnyíti a komplex tranzakciós szkriptek használatát. A P2SH esetén a kimeneti elköltési feltételeket részletező komplex szkript (beváltási szkript) nem szerepel a zároló szkriptben. Ehelyett csak a hashe található a zárolási szkriptben.
+
+P2SH cím::
+    A P2SH címek a szkript 20 bájtos hashének Base58Check kódolásai. A P2SH címek az "5" verzió előtagot használják, amelynek eredményeként a Base58Check kódolt címek "3"-mal kezdődnek. A P2SH címek elrejtik az összes komplexitást, így a fizetést teljesítő személy nem látja a szkriptet.
+
+P2WPKH::
+    Egy P2WPKH (Pay-to-Witness-Public-Key-Hash) aláírása ugyanazt az információt tartalmazza, mint a P2PKH elköltés, de a tanú mezőben található, a scriptSig mező helyett. A scriptPubKey szintén módosult.
+
+P2WSH::
+    The difference between P2SH and P2WSH (Pay-to-Witness-Script-Hash) is about the cryptographic proof location change from the scriptSig field to the witness field and the scriptPubKey that is also modified.
+
+papír pénztárca::
+    A legpontosabb meghatározás szerint a papír pénztárca olyan dokumentum, amely tartalmazza az összes adatot, amely tetszőleges számú Bitcoin titkos kulcs létrehozásához szükséges, és így kulcstárcát alkot. Azonban gyakran használják a kifejezést bármilyen fizikai dokumentumként tárolt bitcoin megnevezésére. Ez a második meghatározás magában foglalja a papírkulcsokat és a beváltható kódokat is.
+
+fizetési csatorna::
+    A micropayment channel or payment channel is class of techniques designed to allow users to make multiple bitcoin transactions without committing all of the transactions to the bitcoin blockchain. In a typical payment channel, only two transactions are added to the block chain but an unlimited or nearly unlimited number of payments can be made between the participants.
+
+bányatársaság::
+    A banyatársaság olyan bányászati megoldás, ahol több generáló kliens járul hozzá egy blokk előállításához, majd megosztják a blokkjutalmat aszerint, hogy milyen arányban járultak hozzá a feldolgozási teljesítményhez.
+
+érdekeltségbizonyíték (Proof-of-Stake)::
+    A Proof-of-Stake (PoS) olyan módszer, amellyel egy kriptopénz blokklánc-hálózata elosztott konszenzust ér el. A Proke-of-Stake arra kéri fel a felhasználókat, hogy bizonyítsák bizonyos mennyiségű pénz (érdekeltségük) tulajdonjogát.
+
+munkabizonyíték (Proof-of-Work)::
+    Egy olyan számérték, melynek előállítása jelentős számítási kapacitást igényel. A bitcoin esetében a bányászok az SHA256 algoritmust használják arra, hogy egy olyan hasht találjanak, amely megfelel a hálózat egészében fennálló cél nehézségi szintnek.
+
+jutalom::
+    Az új blokkokban szereplő pénzösszeg, melyet a hálózat annak a bányásznak ad, aki megtalálta a blokkhoz a munkabizonyítékot. A jutalom jelenleg 12,5 BTC/blokk.
+
+RIPEMD-160::
+    A RIPEMD-160 egy 160 bites kriptográfiai hash függvény. A RIPEMD-160 a RIPEMD továbbfejlesztett változata, amely 160 bites hasht produkál, és várhatóan biztonságos lesz még a következő tíz évben.
+
+satoshi::
+    A satoshi a blokkláncon rögzíthető legkisebb bitcoin mértékegység, amely 0,00000001 bitcoinnal egyenlő. A Bitcoin alkotójáról, Satoshi Nakamotóról kapta nevét.((("satoshi")))
+
+Satoshi Nakamoto::
+    Satoshi Nakamoto azon személy vagy személyek nevek, akik tervezték a Bitcoint, és létrehozták az eredeti referencia implementációt, a Bitcoin Core-t. Az implementáció részeként kidolgozták az első blokklánc adatbázist. Ennek során elsőként oldották meg a digitális pénzek kettős költés problémáját. Valódi személyazonosságuk máig ismeretlen.
+
+Script::
+    A Bitcoin szkriptrendszert használ tranzakciókhoz. A Forth-szerű Script egyszerű, verem-alapú, balról jobbra feldolgozott szkriptnyelv. Szándékosan nem Turing-teljes, ciklusokat nem támogat.
+
+ScriptPubKey (más néven: pubkey script)::
+    A ScriptPubKey vagy pubkey szkript egy kimenetekbe beépített szkript, amely meghatározza azokat a feltételeket, amelyeknek teljesülniük kell annak érdekében, hogy ezek a satoshisk elkölthetők legyenek. A feltételek teljesítéséhez szükséges adatokat egy aláírási szkriptben lehet megadni.
+
+ScriptSig (más néven aláírási szkript)::
+    A ScriptSig vagy aláírási szkript egy elköltő által generált adat, amelyet szinte mindig változóként használnak a pubkey szkript kielégítésére.
+
+titkos kulcs (azaz privát kulcs)::
+	A titkos szám, amely feloldja a neki megfelelő címre küldött bitcoint. pass:[<span class="keep-together">Egy titkos</span>] kulcs a következőképpen néz ki:
++
+----
+5J76sF8L5jTtzE96r66Sf8cka9y44wdpJjMwCxR3tzLh3ibVPxh
+----
+
+Segregated Witness::
+    Segregated Witness is an upgrade to the Bitcoin protocol in which signature ("witness") data is separated from sender/receiver data to further optimize the structure of transactions. Segregated Witness was implemented as a soft fork; a change that technically makes Bitcoin’s protocol rules more restrictive.
+
+SHA::
+    A Secure Hash Algorithm vagy SHA kriptográfiai hash függvények egy családja, amelyet az Egyesült Államok Nemzeti Szabványügyi és Technológia Hivatala (NIST) bocsátott ki.
+
+Egyszerűsített fizetés ellenőrzés (SPV)::
+    SPV or simplified payment verification is a method for verifying that particular transactions were included in a block, without downloading the entire block. This method of verification is often used by lightweight Bitcoin clients.
+
+puha elágazás::
+    A puha elágazás vagy a Soft-Forking Change egy ideiglenes elágazás a blokkláncban, amely általában akkor fordul elő, amikor nem frissített csomópontokat használó bányászok nem követnek egy új konszenzusszabályt, amelyről a csomópontjaik nem tudnak.
+    Nem összetévesztendő az elágazással, kemény elágazással, szoftver elágazással vagy Git elágazással.
+
+stale block::
+    Block that was successfully mined but that isn’t included on the current best block chain, likely because some other block at the same height had its chain extended first. Not to be confused with orphan block.
+
+timelocks::
+    A timelock is a type of encumbrance that restricts the spending of some bitcoin until a specified future time or block height. Timelocks feature prominently in many Bitcoin contracts, including payment channels and hashed timelock contracts.
+
+tranzakció::
+    Egyszerűen bitcoin küldés az egyik címről a másikra. Pontosabban, a tranzakció egy aláírással rendelkező adatstruktúra, amely értéktovábbításnak felel meg. A tranzakciókat a bitcoin hálózat továbbítja, a bányászok blokkokba foglalják őket, és ezáltal bekerülnek a blokkláncba.
+
+tranzakció pool::
+    Tranzakciók rendezetlen gyűjteménye, amelyek nem fő láncbeli blokkban vannak, de amelyekhez bemeneti tranzakciók állnak rendelkezésre.
+
+Turing-teljesség::
+    Egy programozási nyelvet "Turing-teljesnek" nevezünk, ha bármely Turing gép által futtatható program futtatására képes, amennyiben elegendő idő és memória áll rendelkezésre.
+
+elköltetlen tranzakció kimenet (UTXO)::
+    A UTXO egy elköltetlen tranzakció kimenet, amely egy új tranzakcióban bemenetként elkölthető.
+
+pénztárca::
+    Egy szoftver, amely a felhasználó bitcoin címeit és titkos kulcsait kezeli. A pénztárca bitcoinok küldésére, fogadására és tárolására használható.
+
+Wallet Import Format (WIF)::
+    WIF or Wallet Import Format is a data interchange format designed to allow exporting and importing a single private key with a flag indicating whether or not it uses a compressed public key.
+
+Néhány definíció a https://en.bitcoin.it/wiki/Main_Page[bitcoin Wiki]-ből, vagy más nyílt forrású dokumentációs forrásból származik. Ezek a CC-BY licencet használják.

@@ -1,0 +1,210 @@
+[role="pagenumrestart"]
+[[ch01_intro_what_is_bitcoin]]
+== Introducere
+
+=== Ce este Bitcoin?
+
+((("bitcoin", "defined", id="GSdefine01"))) Bitcoin este o colecție de concepte și tehnologii care formeaza bazele unui ecosistem monetar digital. Unități monetare numite bitcoin sunt folosite pentru a stoca și transmite valoare între participanții rețelei bitcoin. Utilizatorii bitcoin comunică unii cu alții folosind protocolul bitcoin în principal via internet, deși alte rețele de transport pot fi deasemenea folosite. Stiva de protocol bitcoin, disponibilă ca software open source, poate fi rulată pe o gamă largă de dispozitive de calcul, incluzând laptop-uri si smartphone-uri, făcând tehnologia ușor de accesat.
+
+Utilizatorii pot transfera bitcoin în rețea pentru a face aproape tot ce se poate face cu monede convenționale, inclusiv să cumpere și să vândă bunuri, să trimită bani către persoane sau organizații, sau să acorde credite. Bitcoin se poate achiziționa, vinde, precum și schimba pentru alte valute la case de schimb valutar de specialitate. Bitcoin este într-un sens, forma perfectă de bani pentru internet, pentru că este rapid, sigur și nu are granițe.
+
+Spre deosebire de valutele tradiționale, bitcoin este în întregime virtual. Nu există monede fizice și nici monede digitale în sine. Monedele sunt implicite în tranzacțiile care transferă valoare de la expeditor la destinatar. Utilizatorii de bitcoin dețin chei care le permit să dovedească deținerea de bitcoin in rețeaua bitcoin. Cu aceste chei utilizatorii pot semna tranzacții pentru a debloca valoarea si a o cheltui prin transferul la un nou proprietar. Cheile sunt adesea stocate intr-un portofel digital pe calculatorul sau smartphone-ul fiecărui utilizator. Posesia cheii care poate semna o tranzacție este singura precondiție pentru a cheltui bitcoin, controlul fiind în întregime în mâinile fiecărui utilizator.
+
+Bitcoin este un sistem de-la-egal-la-egal (peer-to-peer) distribuit. Prin urmare, nu există un server ”central” sau un punct de control. Bitcoin sunt creați printr-un proces numit ”minerit”, care implică o competiție pentru a găsi soluții la o problemă matematică în timp ce se procesează tranzacții bitcoin. Orice participant în rețeaua bitcoin poate opera ca miner (i.e. oricine folosește un dispozitiv care rulează în întregime stiva de protocol bitcoin), folosind puterea de procesare a calculatorului lui pentru a verifica și înregistra tranzacții. La fiecare 10 minute, in medie, un miner bitcoin reușește sa valideze tranzacțiile ultimelor 10 minute si este recompensat cu bitcoin noi creați. Practic, mineritul de bitcoin descentralizează emiterea de monedă și funcțiile de compensare ale unei bănci centrale și înlocuieste nevoia existenței unei bănci centrale.
+
+Protocolul bitcoin include algoritmi încorporați care reglementează funcțiile de minerit în rețea. Dificultatea sarcinii de procesare pe care minerii trebuie să o efectueze este ajustată dinamic astfel încât, în medie, cineva reușește la fiecare 10 minute indiferent de câți mineri (și cât de multă putere de procesare) concureaza în orice moment. Protocolul înjumătățește la fiecare 4 ani rata la care bitcoin noi sunt creați, și limitează numărul total de bitcoin care vor fi creati la un total puțin sub 21 de milioane de monede. Rezultatul este că numărul total de bitcoin în circulație urmează indeaproape o linie curbă ușor predictibilă care se apropie de 21 de milioane in anul 2140. Datorită diminuării ratei de emitere de bitcoin, pe termen lung, moneda bitcoin este deflaționistă. În plus, bitcoin nu poate fi umflat prin ”tiparirea” de bani noi peste nivelul anticipat de emitere.
+
+În culise, bitcoin este de asemenea numele protocolului, o rețea de-la-egal-la-egal, si o inovație în calcul distribuit. Moneda bitcoin este in realitate doar prima aplicație a acestei invenții. Bitcoin reprezintă punctul culminant al deceniilor de cercetare in criptografie si sisteme distribuite si include patru inovații cheie reunite intr-o combinație unică si puternică. Bitcoin este format din:
+
+* O rețea de-la-egal-la-egal (peer-to-peer) descentralizată (protocolul bitcoin)
+* Un registru de tranzacții public (lanțul-de-blocuri sau blockchain)
+* ((("minerit și consens", "reguli de consens", "satisfacere")))Un set de reguli pentru validarea independentă a tranzacțiilor și emitere de monedă (reguli de consens)
+* Un mecanism pentru atingerea unui consens global descentralizat asupra lanțului-de-blocuri (blockchain) valid (algoritmul Dovadă-de-Lucru)
+
+Ca programator, văd bitcoin asemănător unui internet al banilor, o rețea care propagă valoare si securizează deținerea de active digitale folosind calculul distribuit. Bitcoin este mai mult decât pare la prima vedere.
+
+În acest capitol vom începe să explicăm unele dintre principalele concepte si termeni, obținerea software-ului necesar si folosirea bitcoin pentru tranzacții simple. În următoarele capitole vom începe să analizăm straturile tehnologiei care fac ca bitcoin să fie posibil și vom examina mecanismele interne ale rețelei și ale protocolului bitcoin.((("", startref="GSdefine01")))
+
+[role="pagebreak-before less_space"]
+.Monede Digitale Înainte De Bitcoin
+****
+
+((("monede digitale", "înainte de bitcoin")))Apariția de monede digitale viabile este strâns legată de evoluțiile in domeniul criptografiei. Acest lucru nu este surprinzător dacă se iau în considerare provocările fundamentale implicate în utilizarea biților pentru a reprezenta valoare care poate fi schimbată pentru bunuri și servicii. Trei întrebări de bază pentru oricine acceptă monede digitale sunt:
+
+1. Pot să am încredere că banii sunt autentici și nu contrafăcuți?
+2.    Pot să am încredere că banii digitali pot fi cheltuiți doar o singură dată (cunoscută ca problema ”cheltuirii duble”)?
+3.     Pot să fiu sigur ca nimeni altcineva nu poate pretinde că banii le aparțin lor si nu mie?
+
+Emitenții de monedă de hârtie se luptă constant cu problema contrafacerii utilizând hârtii si tehnologii de tipărire din ce în ce mai sofisticate. Banii fizici abordează chestiunea cheltuirii-duble ușor pentru că aceeași bancnotă de hârtie nu poate fi în două locuri simultan. Desigur, banii convenționali sunt, de asemenea, de multe ori stocați și transmiși digital. În aceste cazuri, problemele de contrafacere și cheltuire dublă sunt gestionate prin compensarea tuturor tranzacțiilor electronice prin intermediul autorităților centrale care au o imagine de ansamblu asupra monedei în circulație. Pentru banii digitali, care nu pot profita de cerneluri ezoterice sau benzi holografice, criptografia oferă baza pentru încrederea in legitimitatea revendicării valorii de către un utilizator. Mai exact, semnăturile digitale criptografice permit unui utilizator să semneze un activ digital sau o tranzacție care atestă dreptul de proprietate asupra activului. Cu arhitectura potrivită, semnăturile digitale pot fi folosite de asemenea pentru a rezolva problema cheltuirii duble.
+
+Când criptografia a început să devină mai larg accesibilă și înțeleasă la sfârșitul anilor 1980, multi cercetători au inceput să încerce utilizarea criptografiei pentru a construi valute digitale. Aceste proiecte timpurii de valute digitale au emis bani digitali, de obicei, susținuți de o monedă națională sau de metale prețioase, cum ar fi aurul.
+
+((("sisteme descentralizate", "vs. centralizate", secondary-sortas="centralizat")))Deși aceste valute digitale timpurii funcționau, ele erau centralizate si, prin urmare, ușor de atacat de către guverne si hackeri. Monedele digitale timpurii foloseau un centru de compensare pentru decontarea tuturor tranzacțiilor la intervale regulate, la fel ca un sistem bancar tradițional. Din păcate, în cele mai multe cazuri aceste monede în curs de formare au fost vizate de guverne îngrijorate și în cele din urmă contestate până la dispariție. Unele au eșuat în prăbușiri spectaculoase atunci când societatea-mamă a fost lichidată brusc. Pentru a fi robust împotriva intervențiilor antagonice, fie ele guverne legitime sau elemente criminale, o monedă digitală _descentralizată_ a fost necesară pentru a evita existența unui singur punct de atac.  Bitcoin este un astfel de sistem, proiectat să fie _descentralizat_ și liber de orice autoritate centrală sau punct de control care poate fi atacat sau corupt.
+
+****
+
+=== Istoria Bitcoin
+
+((("Nakamoto, Satoshi")))((("calcul distribuit")))((("bitcoin", "istoria")))Bitcoin a fost inventat în 2008 prin publicarea unei lucrări intitulată "Bitcoin: A Peer-to-Peer Electronic Cash System,"footnote:["Bitcoin: A Peer-to-Peer Electronic Cash System," Satoshi Nakamoto (https://bitcoin.org/bitcoin.pdf).] scrisă sub pseudonimul de Satoshi Nakamoto (vezi <<satoshi_whitepaper>>). Nakamoto a combinat câteva invenții anterioare, cum ar fi b-money și HashCash pentru a creea un sistem electronic de numerar complet descentralizat care nu se bazează pe nicio autoritate centrală pentru emiterea de monedă sau pentru decontarea și validarea tranzacțiilor. ((("algoritm Dovadă-de-Lucru")))((("sisteme descentralizate", "consens")))((("minerit și consens", "algoritm Dovadă-de-lucru"))) Inovația cheie a fost să folosească un sistem de calcul distribuit (denumit ”Dovadă-de-Lucru”) care să realizeze o ”alegere” globală la fiecare 10 minute, permițând rețelei descentralizate să ajungă la un _consens_ privind starea tranzacțiilor. ((("problema dublei-cheltuiri")))((("cheltuire bitcoin", "problema dublei-cheltuiri")))Aceasta rezolvă elegant problema dublei cheltuiri unde o singura unitate monetară poate fi cheltuită de două ori. Anterior, problema dublei-cheltuiri era o slăbiciune a monedelor digitale și fusese abordată prin compensarea tuturor tranzacțiilor prin intermediul unui centru de compensare.
+
+Rețeaua bitcoin a inceput in 2009, bazată pe o implementare de referință publicată de Nakamoto și revizuită de atunci de mulți alți programatori. Implementarea algoritmului Dovadă-de-Lucru (minerit) care oferă securitate și rezistență pentru bitcoin a crescut exponențial în putere, și acum depăsește puterea de calcul combinată a celor mai puternice super-calculatoare din lume. Valoarea totală de piață a bitcoin a depăsit în unele momente 135 de miliarde de dolari, depinzând de cursul de schimb bitcoin-dolar. Cea mai mare tranzacție procesată până acum a fost de 400 de milioane de dolari, transmisă instant si procesată pentru un comision de sub 1 dolar.
+
+Satoshi Nakamto s-a retras din spațiul public in aprilie 2011, lasând în seama unui grup înfloritor de voluntari responsabilitatea dezvoltării codului si a rețelei. Identitatea persoanei sau persoanelor aflate în spatele bitcoin este încă necunoscută. ((("licențe open source")))Cu toate acestea, nici Satoshi Nakamoto nici altcineva nu exercită control individual asupra sistemului bitcoin, care operează în baza unor principii matematice complet transparente, cod open source, și consens între participanți. Invenția în sine este revoluționară și deja a dat naștere unei noi discipline în domeniile calculului distrbuit, al economiei si al econometriei.
+
+
+.O Soluție la o Problemă de Calcul Distribuit
+****
+((("Problema Generalilor Bizantini")))Invenția lui Satoshi Nakamoto este de asemenea o solutie nouă și practică la o problemă de calcul distribuit, cunoscută sub denumirea de "Problema Generalilor Bizantini". Pe scurt, problema constă în încercarea de a conveni asupra unui plan de acțiune sau asupra stării unui sistem prin schimbul de informații intr-o rețea nesigură și potențial compromisă. ((("autoritate centrală de încredere")))Soluția lui Statoshi Nakamoto, care folosește conceptul de Dovadă-de-Lucru pentru a ajunge la consens _fără o autoritate centrală de încredere_, reprezintă o descoperire în domeniul calculului distribuit și are o aplicare largă dincolo de monedă. Poate fi folosită pentru a ajunge la consens în rețele descentralizate pentru a dovedi corectitudinea scrutinelor (alegerilor), loteriilor, registrelor de active, notariatelor digitale, si multe altele.
+****
+
+
+[[user-stories]]
+=== Utilizările Bitcoin, Utilizatorii, și Poveștile Lor
+
+((("bitcoin", "utilizări", id="GSuses01")))Bitcoin este o inovație în problema antică a banilor. La fundația lor, banii pur și simplu facilitează schimbul de valoare între oameni. Prin urmare, pentru a înțelege în întregime bitcoin si utilizările sale, îl vom examina din perspectiva oamenilor care îl folosesc. Fiecare dintre oameni si poveștile lor, cum sunt expuse aici, ilustrează una sau mai multe utilizări. Le vom vedea pe parcursul cărții:
+
+Comerț cu amănuntul de valoare redusă în America de Nord::
+((("utilizări", "comerț cu amănuntul")))Alice locuiește în nordul Californiei în zona Bay Area. A auzit de bitcoin de la prietenii ei mai tehnici si vrea să înceapă să îl folosească. Îi vom urmări povestea pe parcurs ce învață despre bitcoin, dobândește câțiva, și apoi cheltuiește o parte din ei ca să cumpere o ceașcă de cafea la cafeneaua lui Bob din Palo Alto. Această poveste ne va face cunoștință cu software-ul, casele de schimb, și tranzacțiile de bază din perspectiva unui consumator obișnuit.
+
+Comerț cu amănuntul de mare valoare în America de Nord::
+Carol este proprietara unei galerii de artă din San Francisco. Ea vinde tablouri scumpe pentru bitcoin. Această poveste ne va familiariza cu riscurile unui atac de tip consens "51%" în cazul comercianților cu amănuntul de produse de mare valoare.
+
+Servicii contractuale offshore::
+((("servicii de contractare offshore")))((("utilizări", "servicii contractuale offshore")))Bob, proprietarul cafenelei din Palo Alto, își construiește un site web nou. El a contractat un dezvoltator web indian, Gopesh, care locuiește în Bangalore, India. Gopesh a fost de acord să fie plătit în bitcoin. Această poveste va examina utilizarea bitcoin pentru externalizare, servicii de contractare, și transferuri internaționale.
+
+Magazin Online::
+((("utilizări", "magazin online")))Gabriel este un adolescent întreprinzător din Rio de Janeiro. El deține un magazin online care vinde tricouri, cești de cafea si stickere brand-uite cu bitcoin. Gabriel este prea tânăr pentru a avea un cont bancar, dar părinții îi încurajează spiritul antreprenorial.
+
+Donații caritabile::
+((("donații caritabile")))((("utilizări", "donații caritabile")))Eugenia este directorul unei organizații caritabile pentru copii în Filipine. Recent, ea a descoperit bitcoin și vrea să-l folosească pentru a accesa un întreg nou grup de donatorii străini și interni în scopul de a atrage fonduri pentru activitatile ei de caritate. Ea investighează, de asemenea, moduri de a folosi bitcoin pentru a distribui rapid fonduri în zonele in care este nevoie. Această poveste va exemplifica utilizarea bitcoin pentru strângerea de fonduri la nivel global dincolo de valute și frontiere, precum și utilizarea unui registru deschis pentru transparență în organizațiile caritabile.
+
+Import/export::
+((("utilizări", "import/export")))Mohammed este un importator de electronice din Dubai. El încearcă să folosească bitcoin pentru a cumpăra electronice din Statele Unite și China pentru importul în Emiratele Arabe Unite pentru a accelera procesul de plăți pentru importuri. Această poveste va arăta cum bitcoin poate fi folosit pentru plăți internaționale mari business-to-business legate de bunuri fizice.
+
+Mineritul de bitcoin ::
+((("utilizări", "mineritul pentru bitcoin")))Jing este un student la ingineria calculatoarelor din Shanghai. El a construit o instalație de ”minerit” bitcoin folosind abilitățile sale inginerești pentru a-și suplimenta veniturile. Această poveste va examina baza "industrială" a bitcoin:  echipamentele specializate utilizate pentru a securiza rețeaua bitcoin și pentru emiterea de monedă nouă.
+
+Fiecare dintre aceste povesti se bazează pe oameni reali și industrii reale care în prezent folosesc bitcoin pentru a crea noi piețe, noi industrii, și soluții inovatoare la problemele economice globale.((("", startref="GSuses01")))
+
+=== Noțiuni de bază
+
+((("noțiuni de bază", "secțiunea pentru portofel", id="GSwallet01")))((("portofele", "selectare", id="Wselect01")))((("bitcoin", "noțiuni de bază", id="BCbasic01")))Bitcoin este un protocol care poate fi accesat folosind o aplicație client care înțelege protocolul. Un ”portofel bitcoin” este cea mai comună interfață a utilizatorilor cu sistemul bitcoin, la fel cum un browser web este cea mai comună interfață a utilizatorilor pentru protocolul HTTP. Există multe implementări și branduri de portofele bitcoin, la fel cum există multe branduri de browsere web (e.g., Chrome, Safari, Firefox, și Internet Explorer). Și la fel cum cu toții avem browser-ul nostru preferat (Mozilla Firefox, Yay!) și detestat (Internet Explorer, Yuck!), portofelele bitcoin variază în calitate, performanță, securitate, protecția identității si robustețe. Există și o implementare de referință a protocolului bitcoin care include un portofel, cunoscut drept ”Clientul Satoshi” sau ”Bitcoin Core”, care este derivată din implementarea originală scrisă de Satoshi Nakamoto.
+
+==== Alegerea unui Portofel Bitcoin
+
+((("security", "secțiunea pentru portofel")))Portofelele bitcoin sunt unele dintre cele mai dezvoltate aplicații din ecosistemul bitcoin. Există o competiție intensă: în timp ce un nou portofel probabil e dezvoltat în acest moment, câteva portofele de anul trecut nu mai sunt menținute activ. Multe portofele sunt centrate pe anumite platforme sau pe anumite utilizări. Unele sunt mai potrivite pentru începători, în timp ce altele sunt dotate cu funcționalități pentru utilizatori avansați. Alegerea unui portofel este foarte subiectivă și depinde de modul de utilizare si de experiența utilizatorului. Prin urmare este imposibil să recomandăm un brand sau un portofel anume. În orice caz, putem să categorizăm portofelele bitcoin după platformă si funcționalitate. Astfel putem oferi o anumită claritate asupra tuturor tipurilor de portofele existente. Chiar mai mult, mutarea cheilor sau a semințelor (seeds) între portofele se realizează relativ ușor, deci merită să încercați câteva portofele până îl găsiți pe cel care se potrivește nevoilor dumneavoastră.
+
+[role="pagebreak-before"]
+Portofelele bitcoin pot fi categorisite după cum urmează, conform platformei:
+
+Portofel desktop:: Portofelul desktop a fost primul tip de portofel bitcoin creat ca implementare de referință și mulți utilizatori rulează portofele desktop pentru funcționalitățile, autonomia, și controlul pe care îl oferă. Rularea pe sisteme de operare pentru publicul larg, cum ar fi Windows sau Mac OS are însă cu siguranță unele dezavantaje, deoarece aceste platforme sunt adesea nesigure și slab configurate.
+
+Portofel pentru mobil:: Portofelul pentru mobil este cel mai întâlnit tip de portofel bitcoin. Rulând pe sisteme de operare pentru smart-phone-uri precum Apple iOS și Android, aceste portofele sunt adesea o alegere bună pentru utilizatorii noi. Multe sunt gândite pentru simplitate si ușurință în utilizare, dar există si portofele pentru mobil complet echipate pentru utilizatorii avansați.
+
+Portofel Web:: Portofelele web sunt accesate folosind un browser web si stochează portofelul utilizatorului pe un server deținut de un terț. Este similar cu un webmail în sensul că se bazează în întregime pe un server terț. Unele din aceste servicii operează folosind cod client care rulează în browser-ul utilizatorului, ceea ce păstrează controlul cheilor în mâinile utilizatorului. Multe, totuși, oferă un compromis luând controlul cheilor de la utilizator în schimbul unei utilizări mai ușoare. Nu este recomandat să fie stocate cantitați mari de bitcoin pe sisteme terțe.
+
+Portofel hardware:: Portofelele hardware sunt dispozitive care rulează un portofel bitcoin independent și securizat pe un hardware dedicat. Ele sunt folosite prin USB cu un browser web pentru desktop sau prin near-field-communication (NFC) pentru un dispozitiv mobil. Controlând toate operațiunile bitcoin pe hardware-ul specializat, aceste portofele sunt considerate foarte sigure si potrivite pentru a stoca cantități mari de bitcoin.
+
+Portofel de hârtie::  ((("stocare la rece", seealso="stocare")))((("stocare", "stocare la rece"))) Cheile care controlează bitcoin pot de asemenea să fie printate pentru stocare pe termen lung. Acestea sunt cunoscute ca portofele de hârtie, deși alte materiale (lemn, metal, etc.) pot fi folosite. Portofelele de hârtie oferă o metodă low-tech, dar foarte sigură pentru a stoca bitcoin pe termen lung. Stocarea offline este adesea numită și _stocare la rece_.
+
+Un alt mod de a categorisi portofelele bitcoin este după gradul de autonomie și după cum interacționează cu rețeaua bitcoin:
+
+Client nod-complet:: ((("clienți nod-complet")))Un client complet, sau ”nod complet,” este un client care stochează întreaga istorie a tranzacțiilor bitcoin (fiecare tranzacție a fiecarui utilizator, dintotdeauna), administrează portofelele utilizatorului, si poate să inițieze tranzacții direct în rețeaua bitcoin. Un nod complet tratează toate aspectele protocolului și poate să valideze independent întregul lanț-de-blocuri (blockchain) și orice tranzacție. Un client nod-complet consumă resurse substanțiale (e.g., mai mult de 125 GB de disk, 2 GB de RAM) dar oferă autonomie completă și verificare independentă a tranzacțiilor.
+
+Client suplu::  ((("clienți supli")))((("verificarea-simplă-a-plății (SPV)")))Un client suplu (lightweight), cunoscut sub denumirea de client pentru verificarea-simplă-a-plății (simple-payment-verification - SPV), se conectează la noduri-complete bitcoin (menționate anterior) pentru a accesa informații privind tranzacțiile bitcoin, dar stochează portofelul utilizatorului local și creează, validează și transmite tranzacții independent. Clienții supli interacționează direct cu reteaua bitcoin, fără indermediari.
+
+Client pentru API terț:: ((("Clienți pentru API terț")))Un client pentru API (application programming interfaces) terț e un client care interacționează cu bitcoin prin intermediul unui sistem terț de interfețe de programare a aplicațiilor, în loc să se conecteze direct la rețeaua bitcoin. Portofelul poate fi stocat de către utilizator sau de un server terț, dar toate tranzacțiile trec printr-un terț.
+
+Prin combinarea acestor categorisiri, mai multe portofele bitcoin se încadreaza în câteva grupuri, cele mai comune trei fiind client-complet desktop, portofel suplu pentru mobil, și portofel web la terț. Demarcarea între diferite categorii e adesea ambiguă, deoarece multe portofele ruleaza pe platforme multiple și pot interacționa cu rețeaua în moduri diferite.
+
+Pentru scopul acestei cărți, vom demonstra folosirea unei varietăți de clienți bitcoin ce pot fi downloadați, de la implementarea referință (Bitcoin Core) la portofele pentru mobil si web. Unele dintre exemple vor necesita folosirea Bitcoin Core, care pe lângă faptul că este un client-complet, expune de asemenea API-uri pentru portofel, rețea si serviciile pentru tranzacții. Dacă aveți de gând să explorați interfețele programatice pentru rețeaua bitcoin, va trebui să rulați Bitcoin Core, sau unul dintre clienții alternativi (vezi <<alt_libraries>>).((("", startref="GSwallet01")))((("", startref="Wselect01")))
+
+==== Pornire Rapidă
+
+((("noțiuni de bază", "exemplu pornire rapidă", id="GSquick01")))((("portofele", "exemplu pornire rapidă", id="Wquick01")))((("utilizări", "cumpărarea de cafea", id="aliceone")))Alice, pe care am introdus-o în <<user-stories>>,  nu este un utilizator tehnic și a auzit doar recent de bitcoin de la prietenul ei Joe. Când erau la o petrecere, Joe explica din nou entuziast despre bitcoin tuturor celor din jurul lui si a oferit o demonstrație. Intrigată, Alice întreabă cum poate să înceapă să folosească bitcoin. Joe spune că un portofel mobil este cel mai potrivit pentru utilizatorii noi și îi recomandă câteva dintre portofelele lui preferate. Alice descarcă "Mycelium" pentru Android și îl instalează pe mobilul ei.
+
+Când Alice rulează Mycelium pentru prima dată, cum este cazul cu multe portofele bitcoin, aplicația creează automat un portofel nou pentru ea. Alice vede portofelul pe ecran, după cum se vede în <<mycelium-welcome>> (atenție: _nu_ trimiteți bitcoin la această adresă exemplu, vor fi pierduți definitiv).
+
+[[mycelium-welcome]]
+.Portofelul Mycelium pentru Mobil
+image::images/mbc2_0101.png["MyceliumWelcome"]
+
+((("adrese", "pornire rapidă portofel bitcoin")))((("cod QR", "pornire rapidă portofel bitcoin")))((("adrese", see="also keys and addresses")))Cea mai importantă parte a acestui ecran este _adresa bitcoin_ a lui Alice. Pe ecran apare ca un șir lun de litere și numere: _1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK_. Lângă adresa bitcoin a portofelului este un cod QR, o formă de cod de bare care conține aceeași informație într-un format care poate fi scanat de camera unui telefon inteligent. Codul QR este pătratul cu un model de puncte albe și negre. Alice poate să copieze adresa bitcoin sau codul QR atingând codul QR sau butonul Receive. În cele mai multe portofele, atingerea codului QR îl va mări, astfel încât să poată fi mai ușor scanat de camera telefonului inteligent.
+
+[TIP]
+====
+((("adrese", "securitatea")))((("securitate", "adrese bitcoin")))Adresele bitcoin încep cu un 1 sau cu un 3. La fel ca adresele de email, pot fi prezentate altor utilizatori bitcoin care le pot folosi ca să trimită bitcoin direct în portofelul dumneavoastră. Nu este nimic sensibil la o adresă bitcoin din perspectiva securității. Ea poate fi postată oriunde fără a pune în pericol securitatea contului. Spre deosebire de adresele de email, puteți crea noi adrese bitcoin cât de des doriți, toate acestea vor directa fondurile către portofelul dumneavoastră. De fapt, multe portofele moderne crează automat adrese noi la fiecare tranzacție pentru a maximiza anonimitatea. Un portofel este pur și simplu o colecție de adrese si de chei care deblochează fondurile conținute.
+====
+
+Alice este acum pregătită să primească fonduri. Portofelul ei a generat aleator o cheie privată (descrisă mai în detaliu in <<private_keys>>) împreună cu adresa bitcoin corespunzătoare. În acest punct, adresa ei bitcoin nu este cunoscută în rețeaua bitcoin si nici nu este ”înregistrată” în sistemul bitcoin. Adresa ei bitcoin e pur și simplu un număr care corespunde unei chei pe care ea o poate folosi să controleze accesul la fonduri. Adresa a fost generată independent de către portofelul ei fără vreo referință sau înregistrare la vreun serviciu. De fapt, la majoritatea portofelelor, nu există nici o asociere între adresa bitcoin și orice informație identificabilă extern, inclusiv identitatea utilizatorului. Până în momentul când la această adresă se face referință ca fiind destinatarul unei valori într-o tranzacție publicată în registrul bitcoin, adresa bitcoin este doar parte din numărul imens de adrese posibile care sunt valide în rețeaua bitcoin. Ea devine parte a adreselor cunoscute din rețea doar după ce a fost asociată cu o tranzacție.
+
+Alice este acum pregătită să folosească noul ei portofel bitcoin.((("", startref="GSquick01")))((("", startref="Wquick01")))
+
+[[getting_first_bitcoin]]
+==== Obținerea Primului Dumneavoastră Bitcoin
+
+((("getting started", "obținerea de bitcoin"))) Prima și adesea cea mai dificilă sarcină pentru un utilizator nou este să obțină niște bitcoin. Spre deosebire de alte valute, încă nu puteți cumpăra bitcoin de la bancă sau de la o casă de schimb valutar.
+
+Tranzacțiile bitcoin sunt ireversibile. În majoritatea rețelelor de plăți electronice, precum carduri de credit, carduri de debit, PayPal, si conturile bancare tranzacțiile sunt reversibile. Pentru cineva care vinde bitcoin, aceast diferență introduce un risc foarte ridicat in cazul în care cumpărătorul va anula plata electronică după ce a primit bitcoin, practic înșelând vânzătorul. Pentru atenuarea acestui risc, companiile care acceptă plăți electronice tradiționale în schimbul bitcoin de obicei solicită cumpărătorilor să se supună verificării identității și verificărilor de valabilitate ale creditului, ceea ce poate dura câteva zile sau săptămâni. Ca utilizator nou, asta înseamna că nu puteți cumpăra bitcoin instant cu un card de credit. Totuși, cu puțină răbdare și gândire creativă nici nu va trebui.
+
+[role="pagebreak-before"]
+Iată câteva metode pentru a obține bitcoin ca utilizator nou:
+
+* Găsiți un prieten care are bitcoin și cumpărați de la el sau ea direct. Mulți utilizatori bitcoin încep astfel. Această metodă este cea mai puțin complicată. O modalitate de a cunoaște persoane cu bitcoin este să participați la o întâlnire locală bitcoin listată la https://bitcoin.meetup.com/[Meetup.com].
+* Utilizați un serviciu clasificat, cum ar fi pass:[<a class="orm:hideurl" href="https://localbitcoins.com/">localbitcoins.com</a>] pentru a găsi un vânzător din zona dumneavoastră pentru a cumpăra bitcoin în numerar într-o tranzacție personală.
+* Câștigați bitcoin vânzând un produs sau serviciu pentru bitcoin. Daca sunteți programator, vindeți-vă abilitățile de programare. Daca sunteți frizer, tundeți pentru bitcoin.
+* ((("Coin ATM Radar")))((("bancomate, localizare")))Folosiți bancomatele bitcoin din orașul dumneavoastră. Un bancomat bitcoin este un aparat care acceptă numerar și trimite bitcoin către portofelul bitcoin al smartphone-ului dumneavoastră. Găsiți un bancomat bitcoin aproape de dumneavoastră folosind o hartă online de la https://coinatmradar.com/[Coin ATM Radar].
+* ((("rate de schimb", "servicii de listare")))Folosiți o casă de schimb bitcoin legată la contul dumneavoastră bancar. Multe țări au acum case de schimb care oferă o piață unde cumpărătorii și vânzătorii pot schimba bitcoin în moneda locală. Serviciile de listare a cursului de schimb, cum ar fi https://bitcoinaverage.com/[BitcoinAverage], prezintă adesea o listă de case de schimb bitcoin pentru fiecare țară.
+
+[TIP]
+====
+((("confidențialitate, menținere")))((("securitate", "menținerea confidențialității")))((("monede digitale", "case de schimb")))((("case de schimb")))((("monede digitale", "beneficiile bitcoin")))((("bitcoin", "beneficiile")))Unul dintre avantajele bitcoin față de alte sisteme de plată este că oferă utilizatorilor mult mai multă confidențialitate atunci când este folosit corect. Achiziționarea, deținerea și cheltuirea de bitcoin nu necesită divulgarea către terți de informații sensibile sau care vă pot identifica personal. Totuși, în punctele în care bitcoin intră în contact cu sistemele tradiționale, cum ar fi casele de schimb, se aplică adesea reglementările naționale și internaționale. Pentru a putea schimba bitcoin pentru moneda dumneavoastră națională, vi se va solicita adesea să furnizați dovada identității și a informațiilor bancare. Utilizatorii ar trebui să știe că, odată ce o adresă bitcoin este atașată la o identitate, toate tranzacțiile bitcoin asociate sunt ușor de identificat și de urmărit. Acesta este unul dintre motivele pentru care mulți utilizatori aleg să mențină conturile de la casele de schimb online neconectate cu portofelele lor.
+====
+
+Alice a intrat în contact cu bitcoin prin intermediul unui prieten, astfel că are o modalitate ușoară de a achiziționa primul ei bitcoin.  În continuare, vom analiza cum cumpără bitcoin de la prietenul său Joe și cum Joe trimite bitcoin în portofelul ei.
+
+[[bitcoin_price]]
+==== Găsirea Prețului Curent al Bitcoin
+
+((("noțiuni de bază", "curs de schimb")))((("cursuri de schimb", "determinare")))Înainte ca Alice să poată cumpăra bitcoin de la Joe, trebuie să se pună de acord asupra _cursului de schimb_ între bitcoin și dolarul american. Astfel apare o întrebare comuna pentru cei noi cu bitcoin: ”Cine stabilește prețul bitcoin?” Răspunsul scurt este că prețul este stabilit de piețe. 
+
+((("curs de schimb", "fluctuant")))((("curs de schimb fluctuantă")))Bitcoin, la fel ca majoritatea altor monede, are un _curs de schimb fluctuant_. Asta înseamnă că valoarea bitcoin față de orice altă monedă fluctuează în funcție de cerere și ofertă pe diferitele piețe unde este tranzacționată. De exemplu ”prețul” bitcoin în dolari americani este calculat pe fiecare piață în baza celui mai recent schimb între bitcoin și dolari americani. Ca atare, prețul tinde să fluctueze de mai multe ori pe secundă. Un serviciu de stabilire a prețurilor va agrega prețurile de pe mai multe piețe și va calcula o medie ponderată în volum care reprezintă în mare cursul de schimb pe piață a unei perechi de valute (de exemplu, BTC/USD).
+
+Există sute de aplicații si site-uri web care pot oferi cursul curent de schimb. Iată câteva dintre cele mai populare:
+
+https://bitcoinaverage.com/[Bitcoin Average]:: ((("BitcoinAverage")))Un site care oferă o vizualizare simplă a mediei ponderate în volum pentru fiecare monedă.
+https://coincap.io/[CoinCap]:: Un serviciu care listează capitalizarea de piață și cursul de schimb a sute de cripto-monede, inclusiv bitcoin.
+https://bit.ly/cmebrr[Chicago Mercantile Exchange Bitcoin Reference Rate]:: Un curs de referință care poate fi folosit ca referință instituțională și contractuală, furnizat ca parte a fluxurilor de date privind investițiile de către CME.
+
+Pe lângă aceste diverse site-uri și aplicații, majoritatea portofelelor bitcoin vor converti automat sumele între bitcoin și alte monede. Joe își va folosi portofelul pentru a converti automat prețul înainte de a trimite bitcoin către Alice.
+
+[[sending_receiving]]
+==== Trimiterea și Primirea Bitcoin
+
+
+((("noțiuni de bază", "trimiterea și primirea bitcoin", id="GSsend01")))((("cheltuirea bitcoin", "exemplu pornire rapidă portofel bitcoin")))((("cheltuirea bitcoin", see="also transactions")))Alice a decis să schimbe 10 dolari americani pentru bitcoin, pentru a nu risca prea mulți bani cu această nouă tehnologie. Ea îi dă 10 dolari în numerar lui Joe, deschide aplicația portofel Mycelium, și selectează Receive (Primește). Aplicația afișează un cod QR cu prima adresă bitcoin a lui Alice.
+
+Apoi Joe selectează Send (Trimite) pe portofelul smartphone-ului său și îi este afișat un ecran care conține două intrări:
+
+* O adresă bitcoin de destinație
+* Suma de trimis, în bitcoin (BTC) sau în moneda sa locală (USD)
+
+În câmpul pentru adresa bitcoin, există o pictogramă mică care arată ca un cod QR. Acest lucru îi permite lui Joe să scaneze codul de bare cu camera smartphone-ului său, astfel încât să nu fie necesar să introducă adresa bitcoin a lui Alice, care este destul de lungă și dificil de tastat. Joe atinge pictograma codului QR și activează camera smartphone-ului, apoi scanează codul QR afișat pe smartphone-ul lui Alice.
+
+Joe are acum setată adresa bitcoin a lui Alice ca destinatar. Joe introduce suma în valoare de 10 dolari americani, iar portofelul său o convertește accesând cel mai recent curs de schimb de la un serviciu online. Cursul de schimb la momentul respectiv este de 100 USD per bitcoin, deci 10 USD valorează 0.10 bitcoin (BTC), sau 100 milibitcoin (mBTC) așa cum se vede în captura de ecran a portofelului lui Joe (vezi <<airbitz-mobile-send>>).
+
+[[airbitz-mobile-send]]
+[role="smallereighty"]
+.Ecranul de trimitere al portofelului mobil bitcoin Airbitz
+image::images/mbc2_0102.png["ecranul de trimitere al portofelului mobil airbitz"]
+
+Joe verifică apoi cu atenție pentru a se asigura că a introdus suma corectă, pentru că urmează să transmită bani, iar greșelile sunt ireversibile. După ce verifică de două ori adresa și suma, el apasă Send (Trimite) pentru a transmite tranzacția. Portofelul bitcoin mobil al lui Joe construiește o tranzacție care atribuie 0,10 BTC adresei furnizate de Alice, achiziționând fondurile din portofelul lui Joe și semnând tranzacția cu cheile private ale lui Joe. Acest lucru spune rețelei bitcoin că Joe a autorizat un transfer de valoare la noua adresă a lui Alice. Deoarece tranzacția este transmisă prin protocolul de-la-egal-la-egal (peer-to-peer), aceasta se propagă rapid în toată rețeaua bitcoin. În mai puțin de o secundă, majoritatea nodurilor bine conectate din rețea primesc tranzacția și văd adresa lui Alice pentru prima dată.
+
+Între timp, portofelul lui Alice ”ascultă” în mod constant tranzacțiile publicate în rețeaua bitcoin, căutând orice tranzacție care se potrivește cu adresele din portofelul ei. La câteva secunde după ce portofelul lui Joe transmite tranzacția, portofelul lui Alice va indica că a primit 0.10 BTC.
+
+.Confirmări
+****
+((("noțiuni de bază", "confirmări")))((("confirmări", "pornire rapidă portofel bitcoin")))((("confirmări", see="also mining and consensus; transactions")))((("compensare", seealso="confirmations")))La început, adresa lui Alice va arăta tranzacția de la Joe drept ”Neconfirmată”. Aceasta înseamnă că tranzacția a fost propagată în rețea, dar încă nu a fost înregistrată în registrul de tranzacții bitcoin, cunoscut sub numele de blockchain (lanț-de-blocuri). Pentru a fi confirmată, o tranzacție trebuie inclusă într-un bloc și adăugată la lanțul-de-blocuri (blockchain), ceea ce se întâmplă în medie la fiecare 10 minute. În termeni financiari tradiționali, acest lucru este cunoscut sub numele de _compensare_. Pentru mai multe detalii despre propagarea, validarea și compensarea (confirmarea) tranzacțiilor bitcoin, consultați <<mining>>.
+****
+
+Alice este acum deținătoarea a 0.10 BTC pe care îi poate cheltui. În capitolul următor, vom analiza prima ei achiziție cu bitcoin si vom examina mai în detaliu tehnologiile care stau la baza tranzacțiilor și propagării.((("", startref="BCbasic01")))((("utilizări", "cumpărat cafea", startref="aliceone")))

@@ -1,0 +1,409 @@
+[[ch12]]
+== Aplicații Lanț-de-Blocuri
+
+Să construim pe cunoștințele noastre despre bitcon din perspectiva unei platforme pentru aplicații. În zilele noastre, multe persoane folosesc termenul ”blockchain” pentru a face referire la orice platformă de aplicații care împărtășește principiile de design ale bitcoin. Termenul este adesea folosit greșit și aplicat la multe lucruri care nu reușesc să furnizeze funcționalitățile principale pe care le oferă lanțul-de-blocuri (blockchain-ul) bitcoin.
+
+În acest capitol vom analiza caracteristicile oferite de lanțul-de-blocuri bitcoin, ca platformă de aplicații. Vom lua în considerare dezvoltarea de aplicații _primitive_, care formează elementele de bază ale oricărei aplicații blockchain. Vom analiza mai multe aplicații importante care utilizează aceste elemente primitive, precum canale de plată (cu stare) și canale de plată rutate (Lightning Network).
+
+== Introducere
+
+(((”aplicații blockchain”, ”beneficii ale sistemului bitcoin”)))Sistemul bitcoin a fost conceput ca un sistem de plată și monedă descentralizată. Cu toate acestea, cea mai mare parte a funcționalității sale este derivată din componente de nivel mult mai scăzut, care pot fi utilizate pentru aplicații mult mai largi. Bitcoin nu a fost construit cu componente precum conturi, utilizatori, solduri și plăți. În schimb, folosește un limbaj de scriptare tranzacțional cu funcții criptografice de nivel scăzut, așa cum am văzut în <<transactions>>. La fel cum conceptele de nivel superior precum conturi, solduri și plăți pot fi derivate din aceste elemente de bază, la fel și multe alte aplicații complexe. Astfel, lanțul-de-blocuri bitcoin poate deveni o platformă de aplicații care oferă servicii de încredere pentru aplicații, cum ar fi contractele inteligente, depășind cu mult scopul inițial al monedei digitale și al plăților.
+
+=== Pietre de Temelie (primitive)
+
+((("aplicații blockchain", "blocurile de construit (primitive)")))((("primitive")))Când funcționează corect și pe termen lung, sistemul bitcoin oferă anumite garanții, care pot fi utilizate ca pietre de temelie pentru a crea aplicații. Acestea includ:
+
+Fără Cheltuire-Dublă:: Cea mai fundamentală garanție a algoritmului de consens descentralizat al bitcoin asigură că nici un UTXO nu poate fi cheltuit de două ori.
+
+Imutabilitate:: Odată ce o tranzacție este înregistrată în lanțul-de-blocuri și s-au adăugat suficiente blocuri ulterioare, datele tranzacției devin imutabile. Imutabilitatea este subscrisă de energie, deoarece rescrierea lanțului-de-blocuri necesită cheltuirea de energie pentru a produce Dovadă-de-Lucru. Energia necesară și, prin urmare, gradul de imutabilitate crește odată cu cantitatea de muncă depusă deasupra blocului care conține o tranzacție.
+
+Neutralitate:: Rețeaua descentralizată bitcoin propagă tranzacții valide indiferent de originea sau conținutul tranzacțiilor respective. Acest lucru înseamnă că oricine poate crea o tranzacție validă cu suficient comision poate avea încredere că va putea transmite acea tranzacție și că va fi inclusă în lanțul-de-blocuri la orice moment.
+
+Marcă de timp securizată (timestamp):: Regulile de consens resping orice bloc al cărui marcă de timp este prea departe în trecut sau în viitor. Acest lucru asigură că mărcile de timp de pe blocuri pot fi de încredere. Marca de timp de pe un bloc implică o garanție necheltuită-înainte pentru intrările tuturor tranzacțiilor incluse.
+
+Autorizare:: Semnăturile digitale, validate într-o rețea descentralizată, oferă garanții de autorizare. Scripturile care conțin o cerință pentru o semnătură digitală nu pot fi executate fără autorizarea titularului cheii private implicate în script.
+
+Auditabilitate:: Toate tranzacțiile sunt publice și pot fi auditate. Toate tranzacțiile și blocurile pot fi legate într-un lanț neîntrerupt până la blocul geneză.
+
+Contabilitate:: În orice tranzacție (cu excepția tranzacției coinbase), valoarea intrărilor este egală cu valoarea ieșirilor plus a comisioanelor. Nu este posibilă crearea sau distrugerea valorii bitcoin într-o tranzacție. Ieșirile nu pot depăși intrările.
+
+Nonexpirare:: O tranzacție validă nu expiră. Dacă este validă astăzi, va fi validă în viitorul apropiat, atâta timp cât intrările rămân necheltuite iar regulile de consens nu se modifică.
+
+Integritate:: O tranzacție bitcoin semnată cu `SIGHASH_ALL` sau părți ale unei tranzacții semnate de un alt tip `SIGHASH` nu pot fi modificate fără a invalida semnătura, invalidând astfel tranzacția în sine.
+
+Atomicitate tranzacție:: Tranzacțiile Bitcoin sunt atomice. Sunt valide și confirmate (minate) sau nu. Tranzacțiile parțiale nu pot fi minate și nu există o stare provizorie pentru o tranzacție. În orice moment, o tranzacție este minată sau nu.
+
+Unități de Valoare Discrete (indivizibile):: Ieșirile tranzacției sunt unități de valoare discrete și indivizibile. Pot fi fie cheltuite, fie necheltuite integral. Nu pot fi divizate sau cheltuite parțial.
+
+Cvorumul de Control:: Constrângerile _multisig_ în scripturi impun un cvorum de autorizare, predefinit în schema multisemnătură. Cerința M-din-N este impusă de regulile de consens.
+
+Timpi de Blocare/ Îmbătrânire:: Orice clauză de script care conține un timp de blocare (timelock) relativ sau absolut poate fi executată numai după ce vârsta sa depășește timpul specificat.
+
+Replicare:: Stocarea descentralizată a lanțului-de-blocuri asigură că atunci când o tranzacție este minată, după confirmări suficiente, aceasta este replicată în rețea și devine durabilă și rezistentă la pierderi de energie, pierderi de date etc.
+
+Pretecție Anti-Falsificare:: O tranzacție poate cheltui numai ieșiri existente, validate. Nu este posibilă crearea sau contrafacerea valorii.
+
+Consistență:: În absența partiționarii minerilor, blocurile care sunt înregistrate în lanțul-de-blocuri sunt supuse reorganizării sau dezacordului cu o probabilitate în scădere exponențială, pe baza adâncimii la care sunt înregistrate. Odată înregistrat în profunzime, calculul și energia necesară pentru schimbare fac ca schimbarea să fie practic imposibilă.
+
+Înregistrarea Stării Externe:: O tranzacție poate comite o valoare a datelor, prin `OP_RETURN`, reprezentând o tranziție de stare într-o mașină de stare externă.
+
+Emitere Previzibilă:: Vor fi emise mai puțin de 21 de milioane de bitcoin, într-un ritm previzibil.
+
+Lista pietrelor de temelie nu este completă și sunt adăugate mai multe cu fiecare funcționalitate nou-introdusă în bitcoin.
+
+=== Aplicații Construite pe baza Pietrelor de Temelie
+
+((("aplicații blockchain", "exemple de")))Pietrele de temelie oferite de bitcoin sunt elemente ale unei platforme de încredere care pot fi utilizate pentru compunerea aplicațiilor. Iată câteva exemple de aplicații care există astăzi și pietrele de temelie pe care le folosesc:
+
+Dovada-de-Existență (notar digital):: ((("servicii notariale digitale")))((("Dovada-de-Existență")))Imutabilitate + Marcă de Timp + Durabilitate. O amprentă digitală poate fi consemnată cu o tranzacție în lanțul-de-blocuri, dovedind că un document a existat (marca-de-timp) la momentul înregistrării. Amprenta nu poate fi modificată ex-post-facto (Imutabilitate) și dovada va fi păstrată permanent (Durabilitate).
+
+Kickstarter (Lighthouse):: Consistență + Atomicitate + Integritate. Dacă semnați o intrare și ieșirea (Integritatea) unei tranzacții de strângere de fonduri, alții pot contribui la strângerea de fonduri, dar fondurile nu pot fi cheltuite (Atomicitate) până când obiectivul (valoarea de ieșire) este finanțat (consecvență).
+
+Canale de plată:: ((("canale de plată (cu stare)", "blocuri de construit (primitive) folosite în")))Cvorum de Control + Timpi de Blocare + Fără Cheltuiri Duble + Nonexpirare + Rezistență la Cenzură + Autorizare. O multisemnătură 2-din-2 (Cvorum) cu un timp-de-blocare (Timelock) folosită ca tranzacție de ”decontare” a unui canal de plată poate fi păstrată (Nonexpirare) și cheltuită în orice moment (Rezistența de Cenzură) de către oricare parte (Autorizare). Cele două părți pot apoi să creeze tranzacții de angajament care să cheltuiască-dublu (Fără Cheltuiri-Duble) decontarea într-un interval mai scurt (Timelock).
+
+=== Contrapartida
+
+((("aplicații blockchain", "Contrapartida")))((("Contrapartida")))((("contracte inteligente")))((("Mașina Virtuală Ethereum (EVM)")))((("gestionarea extinsică de active")))((("gestionarea virtuală a activelor")))Contrapartida este un strat de protocol construit peste bitcoin. Protocolul de contrapartidă oferă posibilitatea de a crea și de a tranzacționa active și tokeni virtuali. În plus, contrapartida oferă un schimb descentralizat pentru active. Contrapartida implementează, de asemenea, contracte inteligente, bazate pe Mașina Virtuală Ethereum (EVM).
+
+Contrapartida include metadate în tranzacțiile bitcoin, folosind operatorul `OP_RETURN` sau adresele multisemnătură 1-din-N care codifică metadatele în locul cheilor publice. Folosind aceste mecanisme, Contrapartida implementează un strat de protocol codat în tranzacții bitcoin. Stratul suplimentar de protocol poate fi interpretat de aplicații care sunt conștiente de contrapartidă, cum ar fi portofelele și exploratorii lanț-de-blocuri, sau orice aplicație construită folosind bibliotecile contrapartidei.
+
+(((”proprietate digitală”)))Contrapartida poate fi folosită ca o platformă pentru alte aplicații și servicii. De exemplu, Tokenly este o platformă construită peste Contrapartidă care permite creatorilor de conținut, artiștilor și companiilor să emită tokeni care exprimă proprietatea digitală și poate fi folosită pentru închiriere, acces, comerț sau cumpărături pentru conținut, produse și servicii. Alte aplicații care folosesc contrapartida includ jocuri (Spells of Genesis) și proiecte de calcul grilă (Folding Coin).
+
+Mai multe detalii despre Contrapartidă pot fi găsite la https://counterparty.io. Proiectul open source poate fi găsit la https://github.com/CounterpartyXCP[].
+
+[[state_channels]]
+=== Canale de Plată și Canale de Stare
+
+_Canalele de plată_ ((("aplicații blockchain", "canale de plată (cu stare)", id="BCApayment12")))((("canale de plată (cu stare)", "definite")))sunt un mecanism fără încredere (în terți) pentru schimbul de tranzacții bitcoin între două părți, în afara lanțului-de-blocuri bitcoin. Aceste tranzacții, care ar fi valide dacă ar fi decontate pe lanțul-de-blocuri bitcoin, sunt în schimb păstrate în afara lanțului, acționând ca _bilete la ordin_ pentru eventuala decontare. Deoarece tranzacțiile nu sunt decontate, ele pot fi trimise fără latența de decontare (settlement latency) obișnuită, permițând o viteză extrem de ridicată a tranzacțiilor, latență scăzută (submillisecunde) și granularitate fină (la nivel de satoshi).
+
+De fapt, termenul _canal_ este o metaforă. Canalele cu stare sunt construcții virtuale reprezentate de schimbul de stare între două părți, în afara lanțului-de-blocuri. Nu există ”canale” în sine, iar mecanismul de transport al datelor de bază nu este canalul. Folosim termenul canal pentru a reprezenta relația și starea comună între două părți, în afara lanțului-de-blocuri.
+
+((("canale de plată (cu stare)", "conceptul de")))Pentru a explica în continuare acest concept, gândiți-vă la un flux TCP. Din perspectiva protocoalelor la nivel superior, este o ”mufă” care conectează două aplicații pe internet. Dar dacă te uiți la traficul de rețea, un flux TCP este doar un canal virtual peste pachetele IP. Fiecare extremitate a unui flux TCP pune în ordine și asamblează pachete IP pentru a crea iluzia unui flux de octeți. Dedesubt, toate pachetele sunt deconectate. În mod similar, un canal de plată este doar o serie de tranzacții. Dacă sunt ordonate și conectate corespunzător, acestea creează obligații de răscumpărare în care puteți avea încredere, chiar dacă nu aveți încredere în cealaltă parte a canalului.
+
+În această secțiune vom analiza diverse forme de canale de plată. În primul rând, vom examina mecanismele utilizate pentru a construi un canal de plată unidirecțional pentru un serviciu de microplată contorizat, cum ar fi streaming video. Apoi, vom extinde acest mecanism și vom introduce canale de plată bidirecționale. În cele din urmă, vom analiza modul în care canalele bidirecționale pot fi conectate de la un capăt la altul pentru a forma canale multihop într-o rețea rutată, propusă prima dată sub denumirea de _Lightning Network_.
+
+Canalele de plată fac parte din conceptul mai larg de _canal cu stare_, care reprezintă o modificare a stării în-afara-lanțului, securizată prin eventuala decontare într-un lanț-de-blocuri. Un canal de plată este un canal cu stare în care starea modificată este balanța unei monede virtuale.
+
+==== Canale cu Stare - Concepte de Bază și Terminologie
+
+((("canale de plată (cu stare)", "terminologie")))Un canal cu stare se stabilește între două părți, printr-o tranzacție care blochează o stare comună pe lanțul-de-blocuri. Aceasta se numește _tranzacție de finanțare_ (funding transaction) sau _tranazacție ancoră_. Această tranzacție unică trebuie transmisă în rețea și minată pentru a înfiinţa canalul. În exemplul unui canal de plată, starea blocată este soldul inițial (în monedă virtuală) al canalului.
+
+Cele două părți schimbă apoi tranzacții semnate, numite _tranzacții de angajament_ (commitment transactions), care modifică starea inițială. Aceste tranzacții sunt tranzacții valide, prin faptul că ele pot fi trimise spre soluționare de către oricare dintre părți, dar mai degrabă sunt ținute în afara lanțului de către fiecare parte în așteptarea închiderii canalului. Actualizările de stare pot fi create cât de repede fiecare parte poate crea, semna și transmite o tranzacție celeilalte părți. În practică, aceasta înseamnă că se pot schimba mii de tranzacții pe secundă.
+
+Atunci când fac schimb de tranzacții de angajament, cele două părți invalidează de asemenea stările anterioare, astfel încât cea mai curentă tranzacție de angajament este întotdeauna singura care poate fi răscumpărată. Acest lucru împiedică oricare dintre părți să înșele prin închiderea unilaterală a canalului cu o stare anterioară expirată care le este mai favorabilă decât starea curentă. Vom examina diferitele mecanisme care pot fi utilizate pentru a invalida starea anterioară în restul acestui capitol.
+
+În cele din urmă, canalul poate fi închis fie în mod cooperant, prin trimiterea unei tranzacții de decontare finală către lanțul-de-blocuri, sau unilateral, de oricare dintre părți care transmite ultima tranzacție de angajament către lanțul-de-blocuri. O opțiune de închidere unilaterală este necesară în cazul în care una dintre părți se deconectează în mod neașteptat. Tranzacția de decontare reprezintă starea finală a canalului și este decontată pe lanțul-de-blocuri.
+
+Pe întreaga durată de viață a canalului, doar două tranzacții trebuie depuse pentru minare pe lanțul-de-blocuri: tranzacțiile de finanțare (funding) și decontare (settlement). Între aceste două stări, cele două părți pot schimba orice număr de tranzacții de angajament care nu sunt niciodată văzute de nimeni altcineva și nici transmise către lanțul-de-blocuri.
+
+<<payment_channel>> ilustrează un canal de plată între Bob și Alice, arătând tranzacțiile de finanțare, angajament și decontare.
+
+[[payment_channel]]
+.Un canal de plată între Bob și Alice, care arată tranzacțiile de finanțare, angajament și decontare
+image::images/mbc2_1201.png["Un canal de plată între Bob și Alice, care arată tranzacțiile de finanțare, angajament și decontare"]
+
+==== Exemplu de Canal de Plată Simplu
+
+((("canale de plată (cu stare)", "examplu de", id="PSCexample12")))Pentru a explica canalele cu stare, începem cu un exemplu foarte simplu. Demonstrăm un canal unidirecțional, ceea ce înseamnă că valoarea circulă într-o singură direcție. De asemenea, vom începe cu presupunerea naivă că nimeni nu încearcă să înșele, pentru a menține lucrurile simple. După ce am explicat ideea de bază a canalului, vom analiza de ce anume este nevoie pentru a-l face să nu necesite încredere in terți, astfel încât niciuna dintre părți nu poate înșela, chiar dacă încearcă.
+
+Pentru acest exemplu vom presupune doi participanți: Emma și Fabian. Fabian oferă un serviciu de streaming video care este facturat la secundă folosind un canal de microplăți. Fabian taxează 0,01 milibit (0,00001 BTC) pe secundă de videoclip, echivalentul a 36 milibiți (0,036 BTC) pe oră video. Emma este un utilizator care achiziționează acest serviciu de video streaming de la Fabian. <<emma_fabian_streaming_video>> o arată pe Emma care cumpără serviciul de streaming video de la Fabian folosind un canal de plată.
+
+[[emma_fabian_streaming_video]]
+.Emma achiziționează streaming video de la Fabian folosind un canal de plată, plătind pentru fiecare secundă a videoclipului
+image::images/mbc2_1202.png["Emma achiziționează streaming video de la Fabian folosind un canal de plată, plătind pentru fiecare secundă a videoclipului"]
+
+În acest exemplu, Fabian și Emma folosesc un software special care se ocupă atât de canalul de plată, cât și de transmisia video. Emma rulează software-ul în browserul său, Fabian îl rulează pe un server. Software-ul include funcționalitatea de bază unui portofel bitcoin și poate crea și semna tranzacții. Atât conceptul, cât și termenul ”canal de plată” sunt ascunse complet utilizatorilor. Ceea ce văd ei este un videoclip pentru care este plătit la secundă.
+
+Pentru a configura canalul de plată, Emma și Fabian stabilesc o adresă multisemnătură 2-din-2, fiecare dintre ei deținând una dintre chei. Din perspectiva Emmei, software-ul din browserul său afișează un cod QR cu o adresă P2SH (care începe cu ”3”) și îi cere să depună un ”depozit de garantare” pentru maxim o oră de videoclip. Adresa este apoi finanțată de Emma. Tranzacția Emmei, plătită la adresa multisemnătură, este tranzacția de finanțare sau ancoră pentru canalul de plată.
+
+Pentru acest exemplu, să spunem că Emma finanțează canalul cu 36 de milibiți (0,036 BTC). Acest lucru îi va permite Emmei să consume _până la_ o oră de transmisie video. În acest caz, tranzacția de finanțare stabilește suma maximă care poate fi transmisă în acest canal, setând _capacitatea canalului_.
+
+Tranzacția de finanțare consumă una sau mai multe intrări din portofelul Emmei, furnizând fonduri. Creează o ieșire cu o valoare de 36 de milibiți plătită adresei multisemnătură 2-din-2 controlată în comun de Emma și Fabian. Este posibil să aibă ieșiri suplimentare pentru rest înapoi în portofelul Emmei.
+
+Odată confirmată tranzacția de finanțare, Emma poate începe să streaming-ul video. Software-ul Emmei creează și semnează o tranzacție de angajament care schimbă soldul canalului pentru a credita 0,01 milibit la adresa lui Fabian și a restitui 35,99 milibit înapoi către Emma. Tranzacția semnată de Emma consumă ieșirea de 36 de milibiți creată de tranzacția de finanțare și creează două ieșiri: una pentru rambursarea către ea, cealaltă pentru plata către Fabian. Tranzacția este doar parțial semnată - necesită două semnături (2-din-2), dar are doar semnătura Emmei. Când serverul lui Fabian primește această tranzacție, acesta adaugă a doua semnătură (pentru intrarea 2-din-2) și o returnează Emmei, împreună cu o secundă de videoclip. Acum, ambele părți au o tranzacție de angajament complet semnată pe care oricare o poate răscumpăra, reprezentând soldul corect actualizat al canalului. Niciuna dintre părți nu a transmis această tranzacție în rețeaua bitcoin.
+
+În următoarea rundă, software-ul Emmei creează și semnează o altă tranzacție de angajament (angajamentul #2) care consumă _aceeași_ ieșire 2-din-2 din tranzacția de finanțare. Cea de-a doua tranzacție de angajament alocă o ieșire de 0,02 milibiți la adresa lui Fabian și o ieșire de 35,98 milibiți înapoi la adresa Emmei. Această nouă tranzacție este plata pentru două secunde cumulate de videoclip. Software-ul lui Fabian semnează și returnează a doua tranzacție de angajament, împreună cu o altă secundă a videoclipului.
+
+În acest fel, software-ul Emmei continuă să trimită tranzacții de angajament la serverul lui Fabian în schimbul streamingului video. Bilanțul canalului se acumulează treptat în favoarea lui Fabian, deoarece Emma consumă mai multe secunde de videoclip. Să zicem că Emma vizionează 600 de secunde (10 minute) de videoclip, creând și semnând 600 de tranzacții de angajament. Ultima tranzacție de angajament (#600) va avea două ieșiri, împărțind balanța canalului, 6 milibiți la Fabian și 30 milibiți la Emma.
+
+În cele din urmă, Emma dă clic pe ”Stop” pentru a opri transmiterea videoclipului. Fie Fabian, fie Emma pot transmite acum starea finală a tranzacției pentru decontare. Această ultimă tranzacție este ”tranzacția de decontare” și îi plătește lui Fabian pentru tot ce a consumat Emma, restituind restul tranzacției de finanțare către Emma.
+
+<<video_payment_channel>> arată canalul dintre Emma și Fabian și tranzacțiile de angajament care actualizează balanța canalului.
+
+La final, doar două tranzacții sunt înregistrate pe lanțul-de-blocuri: tranzacția de finanțare care a stabilit canalul și o tranzacție de decontare care a alocat corect soldul final între cei doi participanți.((("", startref="PSCexample12")))
+
+[[video_payment_channel]]
+.Canalul de plată al Emmei cu Fabian, care arată tranzacțiile de angajament care actualizează soldul canalului
+image::images/mbc2_1203.png["Canalul de plată al Emmei cu Fabian, care arată tranzacțiile de angajament care actualizează soldul canalului"]
+
+==== Realizarea Canalelor fără Încredere
+
+((("canale de plată (cu stare)", "realizarea de canale fără încredere", id="PSCtrust12")))Canalul pe care tocmai l-am descris funcționează, dar numai dacă ambele părți cooperează, fără erori sau încercări de a înșela. Să ne uităm la unele dintre scenariile care pot strica acest canal și să vedem ce este necesar pentru a le remedia:
+
+* Odată ce tranzacția de finanțare are loc, Emma are nevoie de semnătura lui Fabian pentru a obține bani înapoi. Dacă Fabian dispare, fondurile Emmei sunt blocate într-un contract 2-din-2 și se pierd efectiv. Acest canal, în felul în care este construit, duce la o pierdere de fonduri dacă una dintre părți se deconectează înainte de a exista cel puțin o tranzacție de angajament semnată de ambele părți.
+
+* În timp ce canalul rulează, Emma poate să ia oricare dintre tranzacțiile de angajament pe care Fabian le-a contrasemnat și să transmită una dintre ele către lanțul-de-blocuri. De ce să plătească 600 de secunde de videoclip, dacă ea poate transmite tranzacția de angajament #1 și să plătească doar 1 secundă de videoclip? Canalul eșuează, deoarece Emma poate înșela prin difuzarea unui angajament anterior care este în favoarea ei.
+
+Ambele probleme pot fi rezolvate folosind timpi-de-blocare (timelocks) - să ne uităm la modul în care am putea utiliza timpii-de-blocare la nivel de tranzacție (`nLocktime`).
+
+Emma nu poate risca să finanțeze o multisemnătură 2-din-2 decât dacă are o rambursare garantată. Pentru a rezolva această problemă, Emma construiește în același timp tranzacția de finanțare și rambursare. Ea semnează tranzacția de finanțare, dar nu o transmite nimănui. Emma transmite numai tranzacția de rambursare lui Fabian și obține semnătura sa.
+
+Tranzacția de rambursare (refund) acționează ca prima tranzacție de angajament (commitment), iar timpul-de-blocare al acesteia stabilește limita superioară pentru viața canalului. În acest caz, Emma ar putea seta `nLocktime` la 30 de zile sau 4320 blocuri în viitor. Toate tranzacțiile de angajament ulterioare trebuie să aibă un interval de timp mai scurt, pentru a putea fi răscumpărate înainte de tranzacția de rambursare.
+
+Acum, când Emma are o tranzacție de rambursare complet semnată, poate transmite cu încredere tranzacția de finanțare semnată știind că, în cele din urmă, după expirarea perioadei de timp-de-blocare, poate răscumpăra tranzacția de rambursare chiar dacă Fabian dispare.
+
+Fiecare tranzacție de angajament pe care părțile o schimbă pe parcursul vieții canalului va avea timp-de-blocare în viitor. Dar întârzierea va fi puțin mai scurtă pentru fiecare angajament, astfel încât angajamentul cel mai recent poate fi răscumpărat înaintea angajamentul anterior pe care îl invalidează. Datorită `nLockTime`, niciuna dintre părți nu poate propaga cu succes vreuna din tranzacțiile de angajament până la expirarea timpului-de-blocare. Dacă totul merge bine, vor coopera și vor închide canalul în pace cu o tranzacție de decontare, ceea ce face inutilă transmiterea unei tranzacții de angajament intermediar. Dacă nu, cea mai recentă tranzacție de angajament poate fi propagată pentru a deconta contul și a invalida toate tranzacțiile de angajament anterioare.
+
+De exemplu, dacă tranzacția de angajament #1 are timp-de-blocare peste 4320 de blocuri în viitor, atunci tranzacția de angajament #2 are timp de blocare 4319 blocuri în viitor. Tranzacția de angajament #600 poate fi cheltuită cu 600 de blocuri înainte ca tranzacția de angajament #1 să devină validă.
+
+<<timelocked_commitments>> arată fiecare tranzacție de angajament care stabilește un timp-de-blocare mai scurt, permițând să fie cheltuită înainte ca angajamentele anterioare să devină valide.
+
+[[timelocked_commitments]]
+.Fiecare angajament stabilește un timp-de-blocare mai scurt, ceea ce îi permite să fie cheltuit înainte ca angajamentele anterioare să devină valide
+image::images/mbc2_1204.png["Fiecare angajament stabilește un timp-de-blocare mai scurt, ceea ce îi permite să fie cheltuit înainte ca angajamentele anterioare să devină valide"]
+
+Fiecare tranzacție de angajament ulterioară trebuie să aibă un timp-de-blocare mai scurt, astfel încât să poată fi difuzată (broadcast) înaintea predecesorilor săi și înaintea tranzacției de rambursare. Capacitatea de a difuza un angajament mai devreme asigură că va putea cheltui ieșirea de finanțare și va exclude ca orice altă tranzacție de angajament să fie răscumpărată prin cheltuirea ieșirii. Garanțiile oferite de lanțul-de-blocuri bitcoin (prevenind cheltuirea-dublă și impunând timpi-de-blocare) permit în mod efectiv fiecărei tranzacții de angajament să-și invalideze predecesorii.
+
+Canalele cu stare folosesc timpi-de-blocare pentru a aplica contractele inteligente pe o anumită dimensiune. În acest exemplu am văzut cum dimensiunea timpului garantează că cea mai recentă tranzacție de angajament devine validă înainte de orice angajamente anterioare. Astfel, cea mai recentă tranzacție de angajament poate fi transmisă, cheltuind intrările și invalidând tranzacțiile anterioare de angajament. Executarea contractelor inteligente cu timpi-de-blocare absoluți protejează împotriva înșelăciunii uneia dintre părți. Această implementare nu are nevoie decât de timpi-de-blocare absoluți la nivel de tranzacție (`nLocktime`). În continuare, vom vedea cum pot fi utilizați timpii-de-blocare la nivel de script, `CHECKLOCKTIMEVERIFY` și `CHECKSEQUENCEVERIFY` pentru a construi canale de stare mai flexibile, utile și mai sofisticate.
+
+Prima formă de canal de plată unidirecțională a fost demonstrată ca o aplicație prototip de streaming video în 2015 de o echipă de dezvoltatori argentinieni. O puteți vedea în continuare la  pass:[<a href="https://streamium.io/" class="orm:hideurl"><em>streamium.io</em></a>].
+
+Timpii-de-blocare nu sunt singura cale de a invalida tranzacțiile anterioare de angajament. În secțiunile următoare vom vedea cum poate fi folosită o cheie de revocare pentru a obține același rezultat. Timpii-de-blocare sunt eficienți, dar au două dezavantaje distincte. Stabilind un interval de timp maxim atunci când canalul este deschis pentru prima dată, acestea limitează durata de viață a canalului. Mai rău, timpii-de-blocare forțează implementările canalelor să ajungă la un echilibru între permiterea canalelor cu durată lungă de viață și obligarea unuia dintre participanți să aștepte foarte mult timp pentru o rambursare în cazul închiderii premature. De exemplu, dacă permiteți ca un canal să rămână deschis timp de 30 de zile, setând termenul de restituire la 30 de zile, dacă una dintre părți dispare imediat, cealaltă parte trebuie să aștepte 30 de zile pentru o rambursare. Cu cât închiderea canalului este mai îndepărtată, cu atât restituirea este mai îndepărtată.
+
+A doua problemă este că, deoarece fiecare tranzacție de angajament ulterioară trebuie să diminueze timpul-de-blocare, există o limită explicită a numărului de tranzacții de angajament care pot fi schimbate între părți. De exemplu, un canal de 30 de zile, care stabilește o un timp-de-blocare de 4320 de blocuri în viitor, poate găzdui doar 4320 de tranzacții de angajament intermediar înainte de a fi închis. Există un pericol în setarea timpului-de-blocare al tranzacției de angajamentului la 1 bloc. Prin setarea timpului-de-blocare dintre tranzacțiile de angajament la 1 bloc, un dezvoltator creează o povară foarte mare pentru participanții la canal, care trebuie să fie vigilenți, să rămână online să monitorizeze și să fie gata să transmită în orice moment tranzacția de angajament potrivită.
+
+Acum că am înțeles cum pot fi utilizați timpii-de-blocare pentru a invalida angajamentele anterioare, putem vedea diferența dintre închiderea canalului în mod cooperativ și închiderea sa unilaterală prin difuzarea unei tranzacții de angajament. Toate tranzacțiile de angajament au timp-de-blocare, prin urmare, difuzarea unei tranzacții de angajament va implica întotdeauna așteptarea până la expirarea termenului. Însă, dacă cele două părți sunt de acord cu privire la soldul final și știu că ambele dețin tranzacții de angajament care vor face ca acel sold să devină realitate, ele pot construi o tranzacție de decontare (settlement) fără timp-de-blocare reprezentând același sold. Într-o încheiere de comun acord, oricare dintre părți ia cea mai recentă tranzacție de angajament și construiește o tranzacție de decontare care este identică în toate felurile, cu excepția faptului că omite timpul-de-blocare. Ambele părți pot semna această tranzacție de decontare știind că nu există nicio modalitate de a înșela și de a obține un sold mai favorabil. Prin semnarea și transmiterea în mod cooperativ a tranzacției de decontare pot închide canalul și își pot răscumpăra soldul imediat. În cel mai rău caz, una dintre părți poate fi meschină, să refuze să coopereze și să forțeze cealaltă parte să facă o închidere unilaterală cu cea mai recentă tranzacție de angajament. Dar dacă fac asta, trebuie să aștepte și ca fondurile lor să fie deblocate.((("", startref="PSCtrust12")))
+
+==== Angajamente Revocabile Asimetric
+
+(((”canale de plată (cu stare)”, ”angajamente revocabile asimetrice”, id="PSCaymetric12")))O modalitate mai bună de a gestiona stările angajamentelor anterioare este de a le revoca în mod explicit. Totuși, acest lucru nu este ușor de realizat. O caracteristică cheie a bitcoin este că, odată ce o tranzacție este validă, aceasta rămâne validă și nu expiră. Singura modalitate de a anula o tranzacție este de a cheltui dublu intrările sale cu o altă tranzacție înainte de a fi minată. De aceea, am folosit timpi-de-blocare în exemplul canalului de plată simplu de mai sus pentru a ne asigura că angajamentele mai recente ar putea fi cheltuite înainte ca angajamentele mai vechi să fie valide. Cu toate acestea, ordonarea angajamentelor în timp creează o serie de constrângeri care fac dificilă utilizarea canalelor de plată.
+
+Chiar dacă o tranzacție nu poate fi anulată, ea poate fi construită astfel încât să fie indezirabilă de folosit. Modul în care facem acest lucru este oferind fiecărei părți o _cheie de revocare_ care poate fi folosită pentru pedepsirea celeilalte părți dacă încearcă să trișeze. Acest mecanism de revocare a tranzacțiilor anterioare de angajament a fost propus pentru prima dată ca parte a Lightning Network.
+
+Pentru a explica cheile de revocare, vom construi un canal de plată mai complex între două burse-de-chimb administrate de Hitesh și Irene. Hitesh și Irene gestionează burse de bitcoin în India și, respectiv, în SUA. Clienții bursei din India trimit adesea plăți către clienții bursei din SUA și invers. În prezent, aceste tranzacții apar pe lanțul-de-blocuri bitcoin, dar asta înseamnă că trebuie să plătească comisioane și să aștepte mai multe blocuri pentru confirmare. Configurarea unui canal de plată între burse va reduce semnificativ costurile și va accelera fluxul tranzacțiilor.
+
+Hitesh și Irene inițiază canalul prin construirea în colaborare a unei tranzacții de finanțare, fiecare finanțând canalul cu 5 bitcoin.
+Soldul inițial este de 5 bitcoin pentru Hitesh și 5 bitcoin pentru Irene. Tranzacția de finanțare blochează starea canalului într-o semnătură 2-din-2, la fel ca în exemplul unui canal simplu.
+
+Tranzacția de finanțare poate avea una sau mai multe intrări de la Hitesh (adăugând până la 5 bitcoin sau mai mult) și una sau mai multe intrări de la Irene (adăugând până la 5 bitcoin sau mai mult). Intrările trebuie să depășească ușor capacitatea canalului pentru a acoperi comisioanele de tranzacție. Tranzacția are o ieșire care blochează un total de 10 bitcoin pe o adresă multisemnătură 2-din-2 controlată atât de Hitesh cât și de Irene. Tranzacția de finanțare poate avea, de asemenea, una sau mai multe ieșiri care returnează restul către Hitesh și Irene dacă contribuțiile lor au depășit contribuția prevăzută pentru canal. Aceasta este o singură tranzacție cu intrări oferite și semnate de două părți. Trebuie să fie construită în colaborare și semnată de fiecare parte înainte de a fi transmisă.
+
+Acum, în loc să creeze o singură tranzacție de angajament pe care ambele părți o semnează, Hitesh și Irene creează două tranzacții de angajament diferite, care sunt _asimetrice_.
+
+Hitesh are o tranzacție de angajament cu două ieșiri. Prima ieșire îi plătește _imediat_ lui Irene cei 5 bitcoin care îi sunt datorați. Cea de-a doua ieșire îi plătește lui Hitesh 5 bitcoin care îi sunt datorați, dar numai după un timp-de-blocare de 1000 de blocuri. Ieșirile tranzacției arată astfel:
+
+----
+Input: 2-of-2 funding output, signed by Irene
+
+Output 0 <5 bitcoin>:
+    <Irene's Public Key> CHECKSIG
+
+Output 1:
+    <1000 blocks>
+    CHECKSEQUENCEVERIFY
+    DROP
+    <Hitesh's Public Key> CHECKSIG
+----
+
+Irene are o tranzacție de angajament diferită cu două ieșiri. Prima ieșire îi plătește _imediat_ lui Hitesh cei 5 bitcoin care îi sunt datorați. Cea de-a doua ieșire îi plătește lui Irene cei 5 bitcoin care îi sunt datorați, dar numai după un timp-de-blocare de 1000 de blocuri. Tranzacția de angajament deținută de Irene (semnată de Hitesh) arată astfel:
+
+----
+Input: 2-of-2 funding output, signed by Hitesh
+
+Output 0 <5 bitcoin>:
+    <Hitesh's Public Key> CHECKSIG
+
+Output 1:
+    <1000 blocks>
+    CHECKSEQUENCEVERIFY
+    DROP
+    <Irene's Public Key> CHECKSIG
+----
+
+În acest fel, fiecare parte are o tranzacție de angajament, cheltuind cele 2-din-2 ieșiri de finanțare. Această intrare este semnată de către partea _cealaltă_. În orice moment, partea care deține tranzacția poate, de asemenea, să semneze (completând 2-din-2) și să o difuzeze. Cu toate acestea, dacă difuzează tranzacția de angajament, aceasta plătește celeilalte părți imediat, în timp ce trebuie să aștepte expirarea timpului-de-blocare. Impunând o întârziere la răscumpărarea uneia dintre ieșiri, punem fiecare parte într-un ușor dezavantaj atunci când aleg să difuzeze unilateral o tranzacție de angajament. Dar doar o întârziere nu este suficientă pentru a încuraja o conduită corectă.
+
+<<asymmetric_commitments>> prezintă două tranzacții de angajament asimetrice, în care ieșirea care plătește titularul angajamentului este întârziată.
+
+[[asymmetric_commitments]]
+.Două tranzacții de angajament asimetrice cu plata întârziată pentru partea care deține tranzacția
+image::images/mbc2_1205.png["Două tranzacții de angajament asimetrice cu plata întârziată pentru partea care deține tranzacția"]
+
+Acum introducem elementul final al acestei scheme: o cheie de revocare care împiedică un trișor să transmită un angajament expirat. Cheia de revocare permite părții nedreptățite să pedepsească trișorul prin luarea întregii sume a canalului.
+
+Cheia de revocare (revocation key) este compusă din două secrete, fiecare jumătate generată independent de fiecare participant la canal. Este similar cu o multisemnătură 2-din-2, dar construită folosind aritmetica curbei eliptice, astfel încât ambele părți cunosc cheia publică de revocare, dar fiecare parte cunoaște doar jumătate din cheia secretă de revocare.
+
+În fiecare rundă, ambele părți își dezvăluie jumătatea secretului de revocare celeilalte părți, oferind astfel celeilalte părți (care are acum ambele jumătăți) mijloacele de a solicita ieșirea de penalizare dacă această tranzacție revocată este transmisă vreodată.
+
+Fiecare tranzacție de angajament are o ieșire ”întârziată”. Scriptul de răscumpărare pentru acea ieșire permite unei părți să o răscumpere după 1000 de blocuri, _sau_ cealaltă parte să o răscumpere dacă are o cheie de revocare, penalizând transmiterea unui angajament revocat.
+
+Așadar, atunci când Hitesh creează o tranzacție de angajament pentru ca Irene să o semneze, el face ca a doua ieșire să fie plătită lui însuși după 1000 de blocuri sau la cheia publică de revocare (despre care știe doar jumătate din secret). Hitesh construiește această tranzacție. El își va dezvălui jumătatea secretului de revocare lui Irene doar atunci când va fi pregătit să tranziționeze la o nouă stare a canalului și dorește să revoce acest angajament.
+
+Scriptul celei de-a doua ieșiri arată astfel:
+
+----
+Output 0 <5 bitcoin>:
+    <Irene's Public Key> CHECKSIG
+
+Output 1 <5 bitcoin>:
+IF
+    # Revocation penalty output
+    <Revocation Public Key>
+ELSE
+    <1000 blocks>
+    CHECKSEQUENCEVERIFY
+    DROP
+    <Hitesh's Public Key>
+ENDIF
+CHECKSIG
+----
+
+Irene poate semna cu încredere această tranzacție, deoarece, dacă este transmisă, îi va plăti imediat ceea ce i se cuvine. Hitesh deține tranzacția, dar știe că, dacă o transmite într-o închidere de canal unilaterală, va trebui să aștepte 1000 de blocuri pentru a fi plătit.
+
+Când canalul avansează la următoarea stare, Hitesh trebuie să _revoce_ această tranzacție de angajament înainte ca Irene să fie de acord să semneze următoarea tranzacție de angajament. Pentru a face asta, tot ce trebuie să facă este să-i trimită jumătate lui din _cheia de revocare_ lui Irene. După ce Irene are ambele jumătăți ale cheii secrete de revocare pentru acest angajament, ea poate semna cu încredere următorul angajament. Știe că, dacă Hitesh încearcă să înșele publicând angajamentul anterior, ea poate utiliza cheia de revocare pentru a răscumpăra rezultatul întârziat al lui Hitesh. _Dacă Hitesh trișează, Irene obține cele două ieșiri_. Între timp, Hitesh are doar jumătatea secretului de revocare pentru acea cheie publică de revocare și nu poate răscumpăra ieșirea până ce trec 1000 de blocuri. Irene va putea răscumpăra ieșirea și să îl sancționeze pe Hitesh înainte de trecerea celor 1000 de blocuri.
+
+Protocolul de revocare este bilateral, ceea ce înseamnă că în fiecare rundă, pe măsură ce starea canalului avansează, cele două părți schimbă noi angajamente, schimbând secrete de revocare pentru angajamentele anterioare și își semnează reciproc noi tranzacții de angajament. Deoarece acceptă o nouă stare, ei fac imposibil de utilizat starea anterioară, oferindu-și reciproc secretele de revocare necesare pentru a sancționa orice înșelăciune.
+
+Să ne uităm la un exemplu de funcționare. Unul dintre clienții lui Irene vrea să trimită 2 bitcoin unuia dintre clienții lui Hitesh. Pentru a transmite 2 bitcoin pe canal, Hitesh și Irene trebuie să avanseze starea canalului pentru a reflecta noul sold. Ei se vor angaja într-o nouă stare (starea numărul 2), în care cei 10 bitcoin ai canalului sunt împărțiți, 7 bitcoin la Hitesh și 3 bitcoin la Irene. Pentru a avansa starea canalului, fiecare va crea noi tranzacții de angajament care reflectă noul bilanț al canalului.
+
+Ca mai înainte, aceste tranzacții de angajament sunt asimetrice, astfel încât tranzacția de angajament pe care fiecare parte o deține o obligă să aștepte dacă o răscumpără. Foarte important, înainte de a semna noi tranzacții de angajament, trebuie să schimbe mai întâi cheile de revocare pentru a invalida angajamentul anterior. În acest caz particular, interesele lui Hitesh sunt conforme cu starea reală a canalului și, prin urmare, el nu are motive să transmită o stare anterioară. Cu toate acestea, lui Irene, starea numărul 1 îi lasă un sold mai mare decât starea 2. Atunci când Irene îi oferă lui Hitesh cheia de revocare a tranzacției sale anterioare de angajament (starea numărul 1), ea își revocă efectiv capacitatea de a profita de regresarea canalului către o stare anterioară, deoarece cu cheia de revocare, Hitesh poate răscumpăra fără întârziere ambele ieșiri ale tranzacției de angajament anterior. Adică dacă Irene transmite starea anterioară, Hitesh își poate exercita dreptul de a lua toate ieșirile.
+
+Important, revocarea nu se produce automat. În timp ce Hitesh are capacitatea de a o pedepsi pe Irene pentru înșelăciune, el trebuie să urmărească cu diligență lanțul-de-blocuri pentru a descoperi semne de înșelăciune. Dacă vede o tranzacție de angajament anterioară difuzată, el are 1000 de blocuri pentru a acționa și pentru a utiliza cheia de revocare pentru a contracara înșelăciunea lui Irene și a o pedepsi luând întregul sold, toți cei 10 bitcoin.
+
+Angajamentele revocabile asimetrice cu timpi-de-blocare relativi (CSV) reprezintă o modalitate mult mai bună de a implementa canale de plată și o inovație foarte semnificativă în această tehnologie. Cu această construcție, canalul poate rămâne deschis la nesfârșit și poate avea miliarde de tranzacții cu angajamente intermediare. În implementarea prototipurilor din Lightning Network, starea de angajament este identificată printr-un indice de 48 de biți, care permite mai mult de 281 trilioane (2,8 x 10^14^) tranziții de stare în orice canal!((("", startref="PSCaymetric12")))
+
+==== Contracte cu Rezumat și Timp-de-Blocare (Hash Time Lock Contracts - HTLC)
+
+((("Contracte cu Rezumat și Timp-de-Blocare (HTLC)")))((("canale de plată (cu stare)", "Contracte cu Rezumat și Timp-de-Blocare  (HTLC)")))Canalele de plată pot fi extinse în continuare cu un tip special de contract inteligent care permite participanților să angajeze fonduri (commit funds) într-un secret rambursabil, cu un termen de expirare. Această caracteristică se numește _Contract cu Timp-de-Blocare_ (Hash Time Lock Contract), sau _HTLC_ și este utilizată atât în canale de plată bidirecționale, cât și în cele rutate.
+
+Să explicăm mai întâi partea de ”rezumat” a HTLC. Pentru a crea un HTLC, destinatarul intenționat al plății va crea mai întâi un secret _R_. Apoi calculează rezumatul acestui secret _H_:
+
+----
+H = Hash(R)
+----
+
+Această funcție produce un rezumat _H_ care poate fi inclus în scriptul de blocare al unei ieșiri. Cine știe secretul îl poate folosi pentru a răscumpăra rezultatul. Secretul _R_ este denumit și _preimagine_ pentru funcția de rezumare. Preimaginea reprezintă doar datele care sunt utilizate ca intrare pentru o funcție de rezumare.
+
+A doua parte a unui HTLC este componenta ”timp-de-blocare”. Dacă secretul nu este dezvăluit, plătitorul HTLC poate primi o ”rambursare” după ceva timp. Acest lucru se realizează cu un timp-de-blocare absolut folosind `CHECKLOCKTIMEVERIFY`.
+
+Scriptul care implementează un HTLC ar putea arăta astfel:
+
+----
+IF
+    # Payment if you have the secret R
+    HASH160 <H> EQUALVERIFY
+ELSE
+    # Refund after timeout.
+    <locktime> CHECKLOCKTIMEVERIFY DROP
+    <Payer Public Key> CHECKSIG
+ENDIF
+----
+
+Oricine cunoaște secretul _R_, care atunci când este rezumat este egal cu _H_, poate răscumpăra această ieșire exercitând prima clauză `IF`.
+
+Dacă secretul nu este dezvăluit și HTLC-ul revendicat, după un anumit număr de blocuri, plătitorul poate solicita o rambursare folosind a doua clauză din `IF`.
+
+Aceasta este o implementare de bază a unui HTLC. Acest tip de HTLC poate fi răscumpărat de către _oricine_ are secretul _R_. Un HTLC poate lua multe forme diferite, cu ușoare variații asupra scriptului. De exemplu, adăugarea unui operator `CHECKSIG` și o cheie publică în prima clauză restricționează răscumpărarea la un destinatar anume, care trebuie să cunoască și secretul _R_((("", startref="BCApayment12")))
+
+[[lightning_network]]
+=== Canale de Plată Rutate (Lightning Network)
+
+((("aplicații blockchain", "canale de plată rutate", seealso="Lightning Network", id="BCAlightning12")))((("canale de plată rutate", see="Lightning Network")))((("Lightning Network", "definit")))Lightning Network este o rețea de rutare de canale de plată bidirecționale conectate de-la-un-capăt-la-altul. O rețea ca aceasta poate permite oricărui participant să direcționeze o plată de la canal la canal fără să aibă încredere în niciunul dintre intermediari. Lightning Network a fost https://lightning.network/lightning-network-paper.pdf[descrisă prima dată de Joseph Poon și Thadeus Dryja în februarie 2015], bazându-se pe conceptul de canale de plată așa cum a fost propus și elaborat de mulți alții.
+
+"Lightning Network" se referă la o proiectare specifică pentru o rețea de canale de plată rutate, care a fost implementată până acum de cel puțin cinci echipe open source diferite. ((("Basics of Lightning Technology (BOLT)")))Implementările independente sunt coordonate de un set de standarde de interoperabilitate descrise în lucrarea https://bit.ly/2rBHeoL[_Basics of Lightning Technology (BOLT)_ paper].
+
+Implementări prototip pentru Lightning Network au fost lansate de mai multe echipe.
+
+Lightning Network este unul din modurile posibile de implementare a canalelor de plată rutate. Există câteva alte modele care urmăresc atingerea unor scopuri similare, cum ar fi Teechan și Tumblebit.
+
+==== Exemplu  Lightning Network Simplu
+
+((("Lightning Network", ”exemplu simplu”)))Să vedem cum funcționează.
+
+În acest exemplu, avem cinci participanți: **A**lice, **B**ob, **C**arol, **D**iana și **E**ric. Acești cinci participanți și-au deschis canale de plată între ei, în perechi. Alice are un canal de plată cu Bob. Bob este conectat la Carol, Carol la Diana, iar Diana la Eric. Pentru simplitate, să presupunem că fiecare canal este finanțat cu 2 bitcoin de fiecare participant, pentru o capacitate totală de 4 bitcoin în fiecare canal.
+
+<<lightning_network_fig>> arată cinci participanți la o rețea Lightning, conectați prin canale de plată bidirecționale care pot fi legate pentru a efectua o plată de la Alice la Eric (<<lightning_network>>).
+
+[[lightning_network_fig]]
+.O serie de canale de plată bidirecționale legate pentru a forma o rețea Lightning care poate direcționa o plată de la Alice la Eric
+image::images/mbc2_1206.png["O serie de canale de plată bidirecționale legate pentru a forma o rețea Lightning"]
+
+Alice vrea să îi plătească lui Eric 1 bitcoin. Cu toate acestea, Alice nu este conectată la Eric printr-un canal de plată. Crearea unui canal de plată necesită o tranzacție de finanțare, care trebuie angajată (committed) în lanțul-de-blocuri bitcoin. Alice nu vrea să deschidă un nou canal de plată și să aloce mai multe fonduri. Există o modalitate de a-l plăti pe Eric, indirect?
+
+<<ln_payment_process>> prezintă procesul pas cu pas de direcționare a unei plăți de la Alice către Eric, printr-o serie de angajamente HTLC pe canalele de plată care leagă participanții.
+
+[[ln_payment_process]]
+.Rutarea pas-cu-pas printr-o rețea Lightning
+image::images/mbc2_1207.png["Rutarea pas-cu-pas printr-o rețea Lightning"]
+
+Alice rulează un nod Lightning Network (LN) care menține canalul de plată cu Bob și are capacitatea de a descoperi rute între canalele de plată. Nodul LN al lui Alice are, de asemenea, capacitatea de a se conecta prin internet la nodul LN al lui Eric. Nodul LN al lui Eric creează un secret _R_ folosind un generator de numere aleatoare. Nodul lui Eric nu dezvăluie nimănui acest secret. În schimb, nodul lui Eric calculează un rezumat _H_ al secretului _R_ și transmite acest rezumat către nodul lui Alice (vezi <<ln_payment_process>> pasul 1).
+
+Acum, nodul LN al lui Alice construiește o rută între nodul LN lui Alice și nodul LN al lui Eric. Algoritmul de rutare utilizat va fi examinat mai în detaliu mai târziu, dar deocamdată să presupunem că nodul lui Alice poate găsi o rută eficientă.
+
+Nodul lui Alice construiește apoi un HTLC, plătibil rezumatului _H_, cu un interval de timp de restituire de 10 blocuri (bloc curent + 10), pentru o sumă de 1,003 bitcoin (a se vedea <<ln_payment_process>> pasul 2). Cei 0,003 suplimentari vor fi utilizați pentru a compensa nodurile intermediare pentru participarea lor la această rută de plată. Alice oferă acest HTLC lui Bob, deducând 1,003 bitcoin din soldul canalului său cu Bob și alocându-l la HTLC. HTLC-ul are următoarea semnificație: _”Alice alocă 1,003 din soldul canalului său care trebuie plătit lui Bob dacă Bob cunoaște secretul sau restituie soldul lui Alice dacă trec 10 blocuri.”_ Bilanțul canalului dintre Alice și Bob este acum exprimat prin tranzacții de angajament cu trei ieșiri: 2 bitcoin pentru Bob, 0,997 sold bitcoin pentru Alice, 1,003 bitcoin alocați în HTLC-ul lui Alice. Soldul lui Alice este redus cu suma alocată în HTLC.
+
+Bob are acum un angajament că, dacă este capabil să obțină secretul _R_ în următoarele 10 blocuri, poate solicita cei 1,003 blocați de Alice. Cu acest angajament în mână, nodul lui Bob construiește un HTLC pe canalul său de plată cu Carol. HTLC-ul lui Bob alocă 1,002 bitcoin pentru rezumatul _H_ pentru 9 blocuri, pe care Carol le poate răscumpăra dacă obține secretul _R_ (vezi <<ln_payment_process>> pasul 3). Bob știe că, dacă Carol își poate revendica HTLC-ul, ea trebuie să obțină _R_. Dacă Bob are _R_ în nouă blocuri, îl poate folosi pentru a solicita HTLC-ul lui Alice. De asemenea, el câștigă 0,001 bitcoin pentru alocarea soldului canalului său pentru nouă blocuri. Dacă Carol nu poate revendica HTLC-ul lui, iar Bob nu poate revendica HTLC-ul lui Alice, totul revine la soldurile anterioare ale canalului și nimeni nu este în pierdere. Bilanțul canalului dintre Bob și Carol este acum: 2 la Carol, 0,998 la Bob, 1,002 alocat de Bob în HTLC.
+
+Carol are acum un angajament că, dacă primește _R_ în următoarele nouă blocuri, poate solicita 1,002 bitcoin blocați de Bob. Acum ea poate face un angajament HTLC pe canalul ei cu Diana. Ea alocă un HTLC de 1,001 bitcoin pentru rezumatul _H_, pentru opt blocuri, pe care Diana îi poate răscumpăra dacă are secretul _R_ (vezi <<ln_payment_process>> pasul 4). Din perspectiva lui Carol, dacă aceasta funcționează, ea câștigă 0,001 bitcoin iar dacă nu, nu pierde nimic. HTLC-ul ei către Diana este viabil numai dacă _R_ este dezvăluit, moment în care ea poate solicita HTLC de la Bob. Bilanțul canalului dintre Carol și Diana este acum: 2 la Diana, 0,999 la Carol, 1,001 alocați de Carol în HTLC.
+
+În cele din urmă, Diana poate oferi un HTLC către Eric, angajând 1 bitcoin către rezumatul _H_ pentru șapte blocuri (vezi <<ln_payment_process>> pasul 5). Bilanțul canalului dintre Diana și Eric este acum: 2 la Eric, 1 la Diana, 1 angajat de Diana în HTLC.
+
+Cu toate acestea, la acest hop în rută, Eric _are_ secretul _R_. Prin urmare, el poate revendica HTLC-ul oferit de Diana. El trimite _R_ către Diana și solicită 1 bitcoin, adăugându-l la soldul canalului său (vezi <<ln_payment_process>> pasul 6). Bilanțul canalului este acum: 1 la Diana, 3 la Eric.
+
+Acum, Diana are secretul _R_. Prin urmare, acum poate solicita HTLC-ul de la Carol. Diana transmite _R_ lui Carol și adaugă 1,001 bitcoin la soldul canalului său (vezi <<ln_payment_process>> pasul 7). Acum, soldul canalului dintre Carol și Diana este: 0,999 la Carol, 3,001 la Diana. Diana a ”câștigat” 0,001 pentru participarea la această rută de plată.
+
+În sens invers pe rută, secretul _R_ permite fiecărui participant să revendice HTLC-urile restante. Carol cere 1.002 de la Bob, modificând soldul pe canalul lor la: 0.998 la Bob, 3.002 la Carol (vezi <<ln_payment_process>> pasul 8). În cele din urmă, Bob revendică HTLC de la Alice (vezi <<ln_payment_process>> pasul 9). Soldul canalului lor este actualizat la: 0,997 la Alice, 3,003 la Bob.
+
+Alice a plătit lui Eric 1 bitcoin fără a deschide un canal către Eric. Niciuna dintre părțile intermediare din ruta de plată nu a trebuit să aibă încredere una în cealaltă. Pentru angajamentul pe termen scurt al fondurilor lor în canal, aceștia reușesc să câștige un mic comision, singurul risc fiind o mică întârziere în rambursare în cazul în care canalul a fost închis sau plata rutată a eșuat.
+
+==== Transport și Rutare în Lightning Network
+
+((("Lightning Network", "transport și rutare")))Toate comunicațiile dintre nodurile LN sunt criptate punct-la-punct. În plus, nodurile au o cheie publică pe termen lung pe care o folosesc ca identificator și pentru a se autentifica reciproc.
+
+Ori de câte ori un nod dorește să trimită o plată către un alt nod, trebuie mai întâi să construiască o _cale_ prin rețea prin conectarea canalelor de plată cu o capacitate suficientă. Nodurile fac cunoscute informațiile lor de rutare, inclusiv canalele deschise, capacitatea pe care o are fiecare canal și ce comisione percep pentru plățile de rutare. Informațiile de rutare pot fi împărtășite într-o varietate de moduri și este posibil să apară diferite protocoale de rutare pe măsură ce tehnologia Lightning Network avansează. Unele implementări ale rețelei Lightning folosesc protocolul IRC ca un mecanism convenabil pentru noduri pentru anunțarea informațiilor de rutare. O altă implementare de descoperire a rutelor folosește un model P2P (de-la-egal-la-egal) în care nodurile propagă anunțuri despre canal către semenii lor, într-un model de ”inundare”, similar cu modul în care bitcoin propagă tranzacțiile. Planurile de viitor includ o propunere numită http://bit.ly/2r5TACm[Flare], care este un model de rutare hibrid cu noduri locale ”cartiere” și noduri ”far” cu rază mai lungă.
+
+În exemplul nostru anterior, nodul lui Alice folosește unul dintre aceste mecanisme de descoperire a rutei pentru a găsi una sau mai multe căi care leagă nodul ei la nodul lui Eric. După ce nodul lui Alice a construit o cale, ea va inițializa acea cale prin rețea, prin propagarea unei serii de instrucțiuni criptate și imbricate pentru a conecta fiecare dintre canalele de plată adiacente.
+
+Important este că această cale este cunoscută doar de nodul lui Alice. Toți ceilalți participanți la ruta de plată văd numai nodurile adiacente. Din perspectiva lui Carol, această plată arată ca o plată de la Bob la Diana. Carol nu știe că Bob transmite de fapt o plată de la Alice. De asemenea, nu știe că Diana va transmite o plată către Eric.
+
+Aceasta este o caracteristică critică a Lightning Network, deoarece asigură confidențialitatea plăților și face foarte dificilă aplicarea supravegherii, cenzurii sau listelor negre. Dar cum stabilește Alice această cale de plată, fără să dezvăluie nimic nodurilor intermediare?
+
+Lightning Network implementează un protocol de rutare (onion-routed) bazat pe o schemă numită https://bit.ly/2q6ZDrP[Sphinx]. Acest protocol de rutare asigură că un expeditor de plată poate construi și comunica o cale prin Lightning Network, astfel încât:
+
+* Nodurile intermediare pot verifica și decripta porțiunea lor de informații despre rută și pot găsi următorul hop.
+
+* Cu excepția hopurilor anterior și următor, nu pot afla despre alte noduri care fac parte din traseu.
+
+* Nu pot identifica lungimea căii de plată sau poziția proprie din calea respectivă.
+
+* Fiecare parte a căii este criptată astfel încât un atacator la nivel de rețea nu poate asocia între ele pachetele din diferite părți ale căii.
+
+* Spre deosebire de Tor (un protocol de rutare cu anonimizare pe internet), nu există ”noduri de ieșire” care să poată fi puse sub supraveghere. Plățile nu trebuie transmise către lanțul-de-blocuri bitcoin; nodurile actualizează doar soldurile canalelor.
+
+Utilizând acest protocol de rutare (onion-routed), Alice ambalează (wraps) fiecare element al căii într-un strat de criptare, începând de la sfârșit și mergând înapoi. Ea criptează un mesaj către Eric cu cheia publică a lui Eric. Acest mesaj este ambalat într-un mesaj criptat către Diana, identificându-l pe Eric drept următorul destinatar. Mesajul către Diana este ambalat într-un mesaj criptat cu cheia publică a lui Carol și identificând-o pe Diana drept următorul destinatar. Mesajul către Carol este criptat pentru cheia lui Bob. Astfel, Alice a construit această ”ceapă” (onion) de mesaje multistrat criptată. Ea trimite ”ceapa de mesaje” lui Bob, care poate decripta și desface doar stratul exterior. În interior, Bob găsește un mesaj adresat lui Carol pe care îl poate transmite lui Carol, dar pe care nu îl poate descifra. Urmând calea, mesajele sunt redirecționate, decriptate, redirecționate etc., până la Eric. Fiecare participant cunoaște doar nodul anterior și următor din fiecare hop.((("", startref="alicetwelve")))
+
+Fiecare element al căii conține informații despre HTLC-ul care trebuie extins până la următorul hop, suma care este trimisă, comisionul care este inclus și expirarea CLTV locktime (în blocuri) a HTLC. Pe măsură ce informațiile de rută se propagă, nodurile își asumă angajamente HTLC către următorul hop.
+
+În acest moment, s-ar putea să vă întrebați cum este posibil ca nodurile să nu cunoască lungimea căii și poziția lor în acea cale. La urma urmei, primesc un mesaj și îl transmit către următorul hop. Nu se face mai scurt, permițându-le să deducă dimensiunea căii și poziția lor? Pentru a preveni acest lucru, calea este întotdeauna fixată la 20 de hopuri și umplută cu date aleatorii. Fiecare nod vede următorul salt și un mesaj criptat de lungime fixă de redirecționat. Doar destinatarul final vede că nu există următorul hop. Pentru toți ceilalți, pare fi mereu încă 20 de hopuri.
+
+==== Beneficiile Lightning Network
+
+((("Lightning Network", "beneficii ale")))O rețea Lightning este o tehnologie de rutare din stratul al doilea (second layer). Poate fi aplicat oricărui lanț-de-blocuri care acceptă unele funcții de bază, cum ar fi tranzacții multisemnătură, timpi-de-blocare și contracte inteligente simple.
+
+Dacă o rețea Lightning este stivuită deasupra rețelei bitcoin, rețeaua bitcoin poate obține o creștere semnificativă a capacității, a confidențialității, a granularității și a vitezei, nesacrificând principiile de funcționare fără încredere în intermediari:
+
+Confidențialitate:: Plățile Lightning Network sunt mult mai private decât plățile pe lanțul-de-blocuri bitcoin, întrucât nu sunt publice. În timp ce participanții la o rută pot vedea propagarea plăților pe canalele lor, ei nu cunosc expeditorul sau destinatarul.
+
+Fungibilitate:: O rețea Lightning face mult mai dificilă aplicarea supravegherii și listelor negre pe bitcoin, crescând fungibilitatea monedei (monedele pot fi usor interschimbabile).
+
+Viteza:: Tranzacțiile bitcoin care folosesc Lightning Network sunt decontate în milisecunde, în loc de minute, deoarece HTLC-urile sunt aprobate fără a adăuga tranzacții la un bloc.
+
+Granularitate:: O rețea Lightning poate permite plăți cel puțin la fel de mici ca limita ”prafului” bitcoin, poate chiar mai mici. Unele propuneri permit unități de subsatoshi.
+
+Capacitate:: O rețea Lightning crește capacitatea sistemului bitcoin cu mai multe ordine de mărime. Nu există o valoare practică superioară a numărului de plăți pe secundă care să poată fi rutată printr-o rețea Lightning, deoarece depinde doar de capacitatea și de viteza fiecărui nod.
+
+Funcționare Fără Încredere (Trustless):: O rețea Lightning folosește tranzacții bitcoin între noduri care funcționează ca semeni, fără a avea încredere reciprocă. Astfel, o rețea Lightning păstrează principiile sistemului bitcoin, extinzând semnificativ parametrii de funcționare.
+
+Desigur, după cum am menționat anterior, protocolul Lightning Network nu este singura modalitate de a implementa canale de plată rutate. Alte sisteme propuse includ Tumblebit și Teechan. În acest moment, însă, Lightning Network a fost deja implementată pe testnet. Mai multe echipe diferite au dezvoltat implementări concurente ale LN și lucrează la un standard comun de interoperabilitate (numit BOLT). Este probabil ca Lightning Network să fie prima rețea de canale de plată rutate care să fie implementată în producție.((("", startref="BCAlightning12")))
+
+=== Concluzie
+
+Am examinat doar câteva dintre aplicațiile emergente care pot fi construite folosind lanțul-de-blocuri bitcoin ca platformă de încredere. Aceste aplicații extind domeniul de aplicare bitcoin dincolo de plăți și dincolo de instrumentele financiare, pentru a cuprinde multe alte aplicații în care încrederea este critică. Prin descentralizarea bazei de încredere, lanțul-de-blocuri bitcoin este o platformă care va genera multe aplicații revoluționare într-o mare varietate de industrii.

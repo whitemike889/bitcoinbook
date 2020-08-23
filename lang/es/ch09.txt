@@ -1,0 +1,390 @@
+[[blockchain]]
+== La Cadena de Bloques
+
+=== Introducción
+
+((("(la) cadena de bloques", "visión general de")))La estructura de datos de la cadena de bloques (en inglés, "blockchain") es una lista ordenada, enlazada hacia atrás en el tiempo, de bloques de transacciones. La cadena de bloques se puede almacenar como un archivo plano, o en una base de datos simple. El Cliente Principal, Bitcoin Core almacena los metadatos de la cadena de bloques usando la base de datos LevelDB de Google. Los bloques están enlazados "hacia atrás en el tiempo", cada uno referenciando al bloque anterior de la cadena. ((("bloques", "altura de bloque"))) La cadena de bloques a menudo se visualiza como una pila vertical, con los bloques en capas uno encima de otro, sirviendo el primer bloque como la base de la pila. La visualización de bloques apilados unos encima de otros resulta en el uso de términos como "altura" para referirse a la distancia desde el primer bloque, y "arriba" o "punta" para referirse al bloque añadido más recientemente.
+
+((("bloques", "hash de bloque")))((("bloques", "bloque génesis")))((("bloques", "bloques padre")))((("bloque génesis")))((("bloques padre")))Cada bloque dentro de la cadena de bloques se identifica mediante un hash, generado utilizando el algoritmo de hash criptográfico SHA256 en la cabecera de bloque. Cada bloque también hace referencia a un bloque anterior, conocido como el bloque _padre_, a través del campo "hash de bloque anterior" en la cabecera del bloque. En otras palabras, cada bloque contiene el hash de su padre dentro de su propio encabezado. La secuencia de valores hash que une cada bloque a su padre crea una cadena que se remonta hasta el primer bloque creado, conocido como _bloque génesis_.
+
+Aunque un bloque solo tiene un padre, puede tener temporalmente varios hijos. Cada uno de los hijos tiene una referencia al mismo bloque, al que consideran su padre, y cada uno de los hijos contiene también el mismo hash (de padre) en el campo "hash de bloque anterior". Los hijos múltiples surgen durante una bifurcación (en inglés, "fork") de la cadena de bloques, una situación temporal que se produce cuando se descubren diferentes bloques casi simultáneamente por diferentes mineros (ver <<forks>>). Con el tiempo, un bloque hijo se convierte en parte de la cadena de bloques y la "bifurcación" se resuelve. A pesar de que un bloque puede tener más de un hijo, cada bloque solo puede tener un padre. Esto se debe a que un bloque tiene un solo campo "hash de bloque anterior" que hace referencia a su único padre.
+
+El campo "hash de bloque anterior" está dentro de la cabecera de bloque y por lo tanto afecta al hash del bloque actual. La identidad propia del hijo cambia si la identidad de los padres cambia. Cuando el padre se modifica de alguna manera, los cambios de hash de los padres tambien cambian. Cuando el hash del padre cambia requiere un cambio en el puntero "hash de bloque anterior" del hijo. Esto a su vez hace que el hash del hijo cambie, lo que requiere un cambio en el puntero del nieto, que a su vez cambia el nieto, y así sucesivamente. Este efecto cascada asegura que, una vez que un bloque tiene muchas generaciones siguientes, no puede ser cambiado sin forzar un nuevo cálculo de todos los bloques siguientes. Debido a que tal recálculo requeriría un cálculo enorme (y, por lo tanto, consumo de energía), la existencia de una larga cadena de bloques hace que la historia profunda de la cadena de bloques sea inmutable, lo que es una característica clave de la seguridad de Bitcoin.
+
+Una forma de pensar en la cadena de bloques es considerándola como una serie de capas en una formación geológica o como una  muestra de núcleo de glaciar. Las capas superficiales pueden cambiar con las estaciones o incluso volar, antes de que tengan tiempo de asentarse. Pero una vez que nos adentramos unos centímetros de profundidad, las capas geológicas se vuelven cada vez más estables. Cuando miramos unos cientos de pies hacia abajo, estamos mirando una instantánea del pasado que ha permanecido intacta durante millones de años. En la cadena de bloques, los pocos bloques más recientes podrían revisarse, en caso de haber un recálculo de la cadena debido a una bifurcación. Los seis bloques superiores son como unas pocas pulgadas de tierra vegetal. Pero una vez que profundizamos en la cadena de bloques, más allá de seis bloques, los bloques tienen cada vez menos probabilidades de cambiar. ((("transacciones", "transacciones de coinbase")))(((("transacciones de coinbase")))Más allá de 100 bloques de profundidad, hay tanta estabilidad que es posible gastarse la transacción coinbase, ‒la transacción que contiene los bitcoins recién minados‒. A más de unos miles de bloques de profundidad (es decir, lo que sucedió hace un mes) y la cadena de bloques es un historial establecido, a todos los efectos prácticos. Si bien el protocolo siempre permite que una cadena se deshaga en pos de otra cadena más larga, y si bien existe la posibilidad de revertir cualquier bloque, la probabilidad de tal evento disminuye a medida que pasa el tiempo hasta que se vuelve infinitesimal.
+
+=== Estructura de un Bloque
+
+((("bloques", "estructura de")))((("(la) cadena de bloques", "estructura de bloque")))Un bloque es una estructura de datos contenedor que agrupa las transacciones para su inclusión en el libro de contabilidad público, la cadena de bloques. El bloque se compone de una cabecera, que contiene metadatos, seguido por una larga lista de operaciones que componen la mayor parte de su tamaño. La cabecera de bloque es de 80 bytes, mientras que la transacción promedio es de al menos 400 bytes y el bloque promedio contiene más de 1900 transacciones. Un bloque completo, con todas las transacciones, por lo tanto, es 10.000 veces más grande que la cabecera de bloque. <<block_structure1>> describe la estructura de un bloque.
+
+[[block_structure1]]
+[role="pagebreak-before"]
+.La estructura de un bloque
+[opciones="título"]
+|=======
+|Tamaño| Campo | Descripción
+| 4 bytes | Tamaño de Bloque | El tamaño del bloque en bytes después de este campo
+| 80 bytes | Cabecera de Bloque | Varios campos componen la cabecera del bloque
+| 1&#x2013;9 bytes (VarInt) | Contador de Transacciones | Cuántas transacciones siguen
+| Variable | Transacciones | Las transacciones registradas en este bloque
+|=======
+
+[[block_header]]
+=== Cabecera de Bloque
+
+((("bloques", "cabeceras")))((("(la) cadena de bloques", "cabeceras de bloque")))((("cabeceras")))La cabecera de bloque se compone de tres conjuntos de metadatos de bloque. En primer lugar, hay una referencia a un hash de bloque anterior, que conecta este bloque al bloque anterior en la cadena de bloques. El segundo conjunto de metadatos, concretamente, _dificultad_, _sello de tiempo_ y _nonce_, están relacionados con la competencia en la minería, como se detalla en <<mining>>. La tercera parte de los metadatos es la raíz del árbol de merkle, una estructura de datos utilizada para resumir de manera eficiente todas las transacciones en el bloque. <<block_header_structure_ch09>> describe la estructura de una cabecera de bloque.
+
+
+[[block_header_structure_ch09]]
+.La estructura de la cabecera de bloque
+[opciones="título"]
+|=======
+|Tamaño| Campo | Descripción
+| 4 bytes | Versión | Un número de versión para seguir las actualizaciones de software y protocolo
+| 32 bytes | Hash del Bloque Anterior | Una referencia al hash del bloque anterior (padre) en la cadena
+| 32 bytes | Raíz Merkle | Un hash de la raíz del árbol merkle de las transacciones de este bloque
+| 4 bytes | Sello de Tiempo | El tiempo de creación aproximada de este bloque (segundos desde Unix Epoch)
+| 4 bytes | Objetivo de Dificultad | El objetivo de dificultad del algoritmo de Prueba-de-Trabajo para este bloque
+| 4 bytes | Nonce | Un contador usado para el algoritmo de Prueba-de-Trabajo
+|=======
+
+El nonce, objetivo de dificultad y sello de tiempo son usados en el proceso de minería y serán analizados en mayor detalle en <<mining>>.
+
+[[block_hash]]
+=== Identificadores de Bloque: Hash de Cabecera de Bloque y Altura de Bloque
+
+((("(la) cadena de bloques", "identificadores de bloque")))((("bloques", "altura de bloque")))((("bloques", "hash de bloque")))El identificador primario de un bloque es su hash criptográfico, una huella digital, que se obtiene al hacer hash de la cabecera de bloque dos veces a través del algoritmo SHA256. El hash de 32 bytes resultante se llama el _hash de bloque_  pero es más preciso llamarlo el _hash de cabecera de bloque_, pass:[<span role="keep-together"> porque solo se usa la cabecera de bloque para calcularlo. Por ejemplo, </span>] +000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f+ es el hash de bloque del primer bloque de bitcoin jamás creado. El hash de bloque identifica un bloque de forma única e inequívoca y se puede derivar de forma independiente por cualquier nodo simplemente haciendo hash de la cabecera de bloque.
+
+Ten en cuenta que el hash de bloque no está realmente incluido dentro de la estructura de datos del bloque, ni cuando el bloque es transmitido en la red, ni cuando se guarda en el almacenamiento persistente de un nodo como parte de la cadena de bloques. En cambio, cada nodo calcula el hash de bloque cuando recibe el bloque de la red. El hash de bloque podría ser almacenado en una tabla separada de la base de datos como parte de los metadatos del bloque, para facilitar la indexación y hacer más rápida la recuperación de los bloques desde el disco.
+
+Una segunda manera de identificar un bloque es por su posición en la cadena de bloques, denominada la pass:[<span role="keep-together"><em>altura de bloque</em>. El primer bloque jamás creado está a la altura de bloque 0 (cero) y es el </span>] pass:[<span role="keep-together"> mismo bloque que se ha referenciado anteriormente con el siguiente hash de bloque</span>] +000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f+. Así, un bloque se puede identificar de dos maneras: haciendo referencia al hash de bloque o haciendo referencia a la altura de bloque. Cada bloque posterior que se añade "encima" de ese primer bloque está en una posición "superior" en la cadena de bloques, como cajas apiladas una encima de la otra. El 1 de enero de 2017 la altura de bloque era 446.000 aproximadamente, lo que significa que había 446.000 bloques apilados en la parte superior del primer bloque creado en enero de 2009.
+
+A diferencia del hash de bloque, la altura de bloque no es un identificador único. Aunque cada bloque siempre tendrá una altura de bloque específica e invariante, lo contrario no es cierto—la altura de bloque no siempre identifica a un solo bloque. Dos o más bloques que compiten por la misma posición en la cadena de bloques podrían tener la misma altura de bloque. Este escenario se discute en detalle en la sección <<forks>>. Además, la altura de bloque no forma parte de la estructura de datos del bloque; no se almacena dentro del bloque. Cada nodo identifica dinámicamente la posición de un bloque (altura) en la cadena de bloques cuando se recibe desde la red bitcoin. La altura de bloque también podría almacenarse como metadatos en una tabla indexada de base de datos para recuperarlo más rápidamente.
+
+[TIP]
+====
+El _hash de bloque_ de un bloque siempre identifica un bloque de forma única. Un bloque también tiene siempre una _altura de bloque_ específica. Sin embargo, no siempre una altura de bloque concreta identifica a un único bloque. Más bien, dos o más bloques pueden competir por una misma posición en la cadena de bloques.
+====
+
+=== El Bloque Génesis
+
+((("bloques", "bloque génesis")))((("(la) cadena de bloques", "bloque génesis")))El primer bloque en la cadena de bloques se llama el bloque génesis y fue creado en 2009. Es el ancestro común de todos los bloques en la cadena de bloques, lo que significa que si comienzas en cualquier bloque y sigues la cadena hacia atrás en el tiempo, finalmente llegarás al bloque génesis.
+
+Cada nodo siempre comienza con una cadena de bloques de al menos un bloque ya que el bloque génesis está codificado de forma estática en el software del cliente bitcoin, de forma que no pueda ser alterado. Cada nodo siempre "sabe" el hash y estructura del bloque génesis, la fecha fija en que fue creado, e incluso la única transacción contenida en él. Por lo tanto, cada nodo tiene el punto de partida para la cadena de bloques, una "raíz" segura desde la que construir una cadena de bloques de confianza.
+
+Mira el bloque génesis codificado estáticamente dentro del Cliente Principal, Bitcoin Core, en http://bit.ly/1x6rcwP[_chainparams.cpp_].
+
+El siguiente identificador de hash pertenece al bloque génesis:
+
+----
+000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+----
+
+Puedes buscar ese hash de bloque en cualquier sitio web de explorador de bloques, como _blockchain.info_, y te llevará a una página que describe el contenido de este bloque, con una dirección URL que contiene ese hash:
+
+https://blockchain.info/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+
+Usando el cliente de referencia Bitcoin Core en la línea de comandos:
+
+----
+$ bitcoin-cli getblock 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+----
+[source,json]
+----
+{
+    "hash" : "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+    "confirmations" : 308321,
+    "size" : 285,
+    "height" : 0,
+    "version" : 1,
+    "merkleroot" : "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+    "tx" : [
+        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
+    ],
+    "time" : 1231006505,
+    "nonce" : 2083236893,
+    "bits" : "1d00ffff",
+    "difficulty" : 1.00000000,
+    "nextblockhash" : "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048"
+}
+----
+
+El bloque génesis contiene un mensaje oculto en su interior. La entrada de transacción coinbase contiene el texto "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks." (traducido al español: "The Times 03/Ene/2009 Canciller preparado para segundo rescate a los bancos."). Este mensaje tenía la intención de ofrecer la prueba de la fecha más antigua en la que este bloque fue creado, haciendo referencia al titular del periódico británico _The Times_. También sirve como un recordatorio irónico de la importancia de un sistema monetario independiente, precisamente cuando el lanzamiento de bitcoin coincide en el tiempo con una crisis monetaria mundial sin precedentes. El mensaje se registró en el primer bloque por Satoshi Nakamoto, creador de bitcoin.
+
+=== Enlazando Bloques en la Cadena de Bloques
+
+((("bloques", "enlazando bloques en la cadena de bloques")))((("cadena de bloques (la)", "enlazando bloques en la cadena de bloques")))Los nodos completos de bitcoin mantienen una copia local de la cadena de bloques, comenzando en el bloque génesis. La copia local de la cadena de bloques se actualiza constantemente a medida que se encuentran y se utilizan nuevos bloques para extender la cadena. A medida que un nodo recibe bloques entrantes desde la red, validará estos bloques y luego los enlazará a la cadena de bloques existente. Para establecer un enlace, un nodo examinará la cabecera de bloque entrante buscando el "hash de bloque anterior."
+
+Supongamos, por ejemplo, que un nodo tiene 277.314 bloques en la copia local de la cadena de bloques. El último bloque que el nodo conoce es el bloque 277.314, con un hash de cabecera de bloque de:
+
+----
+00000000000000027e7ba6fe7bad39faf3b5a83daed765f05f7d1b71a1632249
+----
+
+El nodo bitcoin recibe después un nuevo bloque de la red, que se analiza de la siguiente manera:
+
+[source,json]
+----
+{
+    "size" : 43560,
+    "version" : 2,
+    "previousblockhash" :
+        "00000000000000027e7ba6fe7bad39faf3b5a83daed765f05f7d1b71a1632249",
+    "merkleroot" :
+        "5e049f4030e0ab2debb92378f53c0a6e09548aea083f3ab25e1d94ea1155e29d",
+    "time" : 1388185038,
+    "difficulty" : 1180923195.25802612,
+    "nonce" : 4215469401,
+    "tx" : [
+        "257e7497fb8bc68421eb2c7b699dbab234831600e7352f0d9e6522c7cf3f6c77",
+
+ #[... muchas otras transacciones omitidas ...]
+
+        "05cfd38f6ae6aa83674cc99e4d75a1458c165b7ab84725eda41d018a09176634"
+    ]
+}
+----
+
+Interpretando este nuevo bloque, el nodo encuentra el campo +previousblockhash+, que contiene el hash de su bloque padre. Es un hash que el nodo ya conocía, y que corresponde al último bloque en la cadena, a la altura de 277.314. Por lo tanto, este nuevo bloque es un hijo del último bloque de la cadena y extiende la cadena de bloques existente. El nodo añade este nuevo bloque al final de la cadena, añadiendo a la cadena de bloques una nueva altura de 277.315. <<chain_of_blocks>> muestra la cadena de tres bloques, enlazados por referencias en el campo +previousblockhash+.
+
+
+[[merkle_trees]]
+=== Árboles Merkle
+
+((("árboles merkle", id="merkle09")))((("cadena de bloques (la)", "árboles merkle", id="BCTmerkle09")))Cada bloque en la cadena de bloques bitcoin contiene un resumen de todas las transacciones en el bloque, utilizando un _árbol merkle_.
+
+((("árboles de hash binarios", see="árboles merkle")))Un _árbol merkle_, también conocido como un _árbol hash binario_, es una estructura de datos que se usa para resumir y verificar de manera eficiente la integridad de grandes conjuntos de datos. Los árboles merkle son árboles binarios que contienen hashes criptográficos. El término "árbol" se usa en informática para describir una estructura de datos de ramificación, pero estos árboles por lo general aparecen al revés, con la "raíz" en la parte superior y las "hojas" en la parte inferior de un diagrama, como se verá en los ejemplos que siguen.
+
+[[chain_of_blocks]]
+[role="smallerfourtyfive"]
+.Bloques enlazados en una cadena, por referencia al hash de la cabecera de bloque anterior
+image::images/mbc2_0901.png[]
+
+Los árboles de merkle se usan en bitcoin para resumir todas las transacciones en un bloque, produciendo una huella digital completa de todo el conjunto de transacciones, proporcionando un proceso muy eficiente para verificar si una transacción está incluida en un bloque. Un árbol de merkle se construye mediante la ejecución de una función de hash en pares de nodos de forma recursiva hasta que solo queda un único hash, al que se le llama _raíz_ o _raíz merkle_. El algoritmo de hash criptográfico utilizado en los árboles de merkle de bitcoin es SHA256 aplicado dos veces, también conocido como doble SHA256.
+
+Cuando se toman N elementos de datos, se hace hash de cada uno de ellos y se resumen en un árbol merkle, se puede comprobar si cualquier elemento de datos está incluido en el árbol con un máximo de +2*log~2~(N)+ cálculos, convirtiéndolo en una estructura de datos muy eficiente.
+
+El árbol de merkle se construye de abajo hacia arriba. En el siguiente ejemplo, comenzamos con cuatro transacciones, A, B, C y D, que forman la _hojas_ del árbol de merkle, como se muestra en <<simple_merkle>>. Las transacciones no se almacenan en el árbol de merkle; más bien, se hace hash de sus datos y el hash resultante se almacena en cada nodo hoja como H~A~, H~B~, H~C~, y H~D~:
+
+++++
+<pre data-type="codelisting">
+H<sub>A</sub> = SHA256(SHA256(Transaction A))
+</pre>
+++++
+
+Después, los pares consecutivos de nodos hoja se resumen en un nodo padre, concatenando los dos hashes y haciendo hash de ese dato concatenado. Por ejemplo, para construir el nodo padre H~AB~, los dos valores hash de 32 bytes de los hijos se concatenan para crear una cadena de 64 bytes. Se hace entonces un doble-hash de esa cadena para producir el hash del nodo padre:
+
+++++
+<pre data-type="codelisting">
+H<sub>AB</sub> = SHA256(SHA256(H<sub>A</sub> + H<sub>B</sub>))
+</pre>
+++++
+
+El proceso continúa hasta que solo hay un nodo en la parte superior, el nodo conocido como la raíz merkle. Ese hash de 32 bytes se almacena en la cabecera de bloque y resume todos los datos de las cuatro transacciones. <<simple_merkle>> muestra cómo la raíz se calcula mediante hashes por pares de los nodos.
+
+[[simple_merkle]]
+.Calculando los nodos en un árbol merkle
+image::images/mbc2_0902.png["merkle_tree"]
+
+((("árboles balanceados")))Debido a que el árbol de merkle es un árbol binario, necesita un número par de nodos hoja. Si hay un número impar de transacciones para resumir, el último hash de transacción se duplicará para crear un número par de nodos hoja, también conocido como _árbol balanceado_. Esto se muestra en <<merkle_tree_odd>>, donde se duplica la transacción C.
+
+[[merkle_tree_odd]]
+.Duplicando un elemento de datos para alcanzar un número par de elementos de datos
+image::images/mbc2_0903.png["merkle_tree_odd"]
+
+El mismo método para la construcción de un árbol de cuatro transacciones se puede generalizar para construir árboles de cualquier tamaño. En bitcoin es común tener de varios cientos a más de mil transacciones en un solo bloque, que se resumen de la misma forma, produciendo solo 32 bytes de datos en una única raíz merkle. En <<merkle_tree_large>>, verás un árbol construido a partir de 16 transacciones. Ten en cuenta que, aunque la raíz se ve más grande que los nodos hoja en el diagrama, tiene exactamente el mismo tamaño, solo 32 bytes. Independientemente de si existe una transacción o cien mil transacciones en el bloque, la raíz merkle siempre los resume en 32 bytes.
+
+((("caminos de autenticación")))Para demostrar que una transacción específica está incluida en un bloque, un nodo solo necesita producir +log~2~(N)+ hashes de 32 bytes, elaborando un _camino de autenticación_ o _camino merkle_ que conecte la transacción específica a la raíz del árbol. Esto es especialmente importante a medida que el número de transacciones aumenta, porque el logaritmo en base-2 del número de transacciones aumenta mucho más lentamente. Esto permite que los nodos bitcoin produzcan eficientemente caminos de 10 o 12 hashes (320-384 bytes), que pueden proporcionar la prueba de la existencia de una sola transacción entre más de mil transacciones en un bloque de un megabyte de tamaño.
+
+[[merkle_tree_large]]
+.Un árbol merkle resumiendo muchos elementos de datos
+image::images/mbc2_0904.png["merkle_tree_large"]
+
+En <<merkle_tree_path>>, un nodo puede demostrar que una transacción K está incluida en el bloque mediante la producción de un ruta de merkle que ocupa solo cuatro hashes de 32-bytes de largo (128 bytes en total). El camino consta de los cuatro hashes (señalados en fondo sombreado en <<merkle_tree_path>>) H~L~, H~IJ~, H~MNOP~ y H~ABCDEFGH~. Con esos cuatro hashes suministrados a modo de ruta de autenticación, cualquier nodo puede demostrar que H~K~ (con un fondo negro en la parte inferior del diagrama) está incluido en la raíz de merkle mediante el cálculo de cuatro hashes adicionales por pares H~KL~, H~IJKL~, H~IJKLMNOP~, y la raíz del árbol de merkle (descrito en una línea de puntos en el diagrama).
+
+[[merkle_tree_path]]
+.Una ruta de merkle utilizado para probar la inclusión de un elemento de datos
+image::images/mbc2_0905.png["merkle_tree_path"]
+
+
+El código en <<merkle_example>> demuestra el proceso de crear un árbol merkle desde el hash del nodo hoja hasta la raíz, utilizando la biblioteca libbitcoin para algunas funciones auxiliares.
+
+[[merkle_example]]
+[role="pagebreak-before"]
+.Construyendo un árbol merkle
+====
+[source, cpp]
+----
+include::code/merkle.cpp[]
+----
+====
+
+<<merkle_example_run>> muestra el resultado de compilar y ejecutar el código merkle.
+
+[[merkle_example_run]]
+.Compilando y ejecutando el código de ejemplo merkle
+====
+[source,bash]
+----
+$ # Compilar el código merkle.cpp
+$ g++ -o merkle merkle.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # Ejecutar el ejecutable merkle
+$ ./merkle
+Lista actual de hash merkle:
+  32650049a0418e4380db0af81788635d8b65424d397170b8499cdc28c4d27006
+  30861db96905c8dc8b99398ca1cd5bd5b84ac3264a4e1b3e65afa1bcee7540c4
+
+Lista actual de hash merkle:
+  d47780c084bad3830bcdaf6eace035e4c6cbf646d103795d22104fb105014ba3
+
+Result: d47780c084bad3830bcdaf6eace035e4c6cbf646d103795d22104fb105014ba3
+
+----
+====
+
+La eficiencia de los árboles de merkle se hace evidente a medida que aumenta la escala. <<block_structure2>> muestra la cantidad de datos que necesitan intercambiarse como un ruta de merkle para demostrar que una transacción está incluida en un bloque.
+
+[[block_structure2]]
+.Eficiencia de un árbol merkle
+[opciones="título"]
+|=======
+|Número de transacciones| Tamaño aprox. del bloque | tamaño de camino (hashes) | Tamaño de camino (bytes)
+| 16 transacciones | 4 kilobytes | 4 hashes | 128 bytes
+| 512 transacciones | 128 kilobytes | 9 hashes | 288 bytes
+| 2048 transacciones | 512 kilobytes | 11 hashes | 352 bytes
+| 65.535 transacciones | 16 megabytes | 16 hashes | 512 bytes
+|=======
+
+Como se puede ver en la tabla, mientras que el tamaño de bloque aumenta rápidamente, de 4 KB con 16 transacciones a un tamaño de bloque de 16 MB para incluir a 65.535 transacciones, la ruta de merkle requerido para demostrar la inclusión de una transacción aumenta mucho más lentamente, de 128 bytes a solo 512 bytes. Con árboles de merkle, un nodo puede descargar solo las cabeceras de bloque (80 bytes por bloque) y aún así ser capaz de identificar la inclusión de una transacción en un bloque mediante la recuperación de una ruta de merkle pequeña de un nodo completo, sin almacenar o transmitir la gran mayoría de la cadena de bloques, que puede ser de varios gigabytes de tamaño. Los nodos que no mantienen una cadena de bloques completa, llamados nodos de verificación de pago simplificado (nodos SPV), usan rutas de merkle para verificar las transacciones sin necesidad de descargar bloques completos .
+
+=== Árboles Merkle y Verificación de Pago Simplificada (SPV)
+
+((("verificación de pago simplificado (SPV)")))((("nodos bitcoin", "nodos SPV")))Los árboles de merkle son ampliamente utilizados por los nodos SPV. Los nodos SPV no tienen todas las transacciones y no descargan bloques completos, solo las cabeceras de bloque. Con el fin de verificar que una transacción está incluida en un bloque sin tener que descargar todas las transacciones del bloque, utilizan una ruta de autenticación, o ruta de merkle.
+
+Consideremos, por ejemplo, un nodo SPV que esté interesado en los pagos entrantes a una dirección incluida en su cartera. El nodo SPV establecerá un filtro de bloom en sus conexiones con sus compañeros para limitar las transacciones recibidas a solo aquellas que contengan direcciones de interés. Cuando un compañero vea una transacción que coincida con el filtro de bloom (ver <<bloom_filters>>), enviará ese bloque usando un mensaje +merkleblock+. El mensaje +merkleblock+ contiene la cabecera de bloque, así como una ruta de merkle que vincula la transacción de interés con la raíz de merkle en el bloque. El nodo SPV puede utilizar esta ruta de merkle para conectar la transacción con el bloque y verificar que la transacción está incluida en el bloque. El nodo SPV también utiliza la cabecera de bloque para vincular el bloque con el resto de la cadena de bloques. La combinación de estos dos enlaces, entre la transacción y bloque, y entre el bloque y la cadena de bloques, prueba que la transacción está registrada en la cadena de bloques. Con todo, el nodo SPV habrá recibido menos de un kilobyte de datos para la cabecera de bloque y la ruta de merkle, una cantidad de datos que es más de mil veces menor que un bloque completo (aproximadamente 1 megabyte actualmente).((("", startref="BCTmerkle09")))((("", startref="merkle09")))
+
+=== Cadenas de Bloques de Test Bitcoin
+
+((("(la) cadena de bloques", "cadenas de bloques de prueba", id="BCTtest09")))((("mainnet", seealso="cadena de bloques (la)")))Es posible que te sorprenda saber que hay más de una cadena de bloques de bitcoin. La cadena de bloques de bitcoin "principal", la creada por Satoshi Nakamoto el 3 de enero de 2009, la que tiene el bloque génesis que estudiamos en este capítulo, se llama _mainnet_. Hay otras cadenas de bloques de bitcoin que se utilizan para fines de pruebas: en este momento _testnet_, _segnet_ y _regtest_. Echemos un vistazo a cada una de ellas.((("testnet", id="testnet09")))
+
+
+==== Testnet&#x2014;La Zona de Pruebas de Bitcoin
+
+Testnet es el nombre de la cadena de bloques de prueba, la red y la moneda que se utiliza para fines de prueba. Testnet es una red P2P viva con todas las funciones, con carteras, bitcoins de prueba (monedas de testnet), minería y todas las demás funciones de mainnet. En realidad, solo hay dos diferencias: las monedas de testnet no tienen valor y la dificultad de minería debe ser lo suficientemente baja para que cualquiera pueda extraer monedas de la testnet con relativa facilidad (manteniéndolas sin valor) .
+
+Cualquier desarrollo de software que esté destinado al uso en producción en la red principal de bitcoin (en inglés, mainnet), debe probarse primero en la red de pruebas (en inglés, testnet) con monedas de prueba. Esto protege tanto a los desarrolladores de pérdidas monetarias debido a errores, como a la red del comportamiento no deseado debido a errores.
+
+Sin embargo, mantener las monedas sin valor y la minería fácil no es tarea fácil. A pesar de las peticiones de los desarrolladores, algunas personas utilizan equipos de minería avanzados (GPU y ASIC) para minar en testnet. Esto aumenta la dificultad, hace que sea imposible minar con una CPU y, finalmente, hace que sea lo suficientemente difícil obtener monedas de prueba para que la gente comience a valorarlas, por lo que no son totalmente sin valor. Como resultado, de vez en cuando, el testnet debe desecharse y reiniciarse desde un nuevo bloque génesis, restableciendo la dificultad.
+
+El testnet actual se llama _testnet3_, la tercera iteración de testnet, que se reinició en febrero de 2011 para restablecer la dificultad del testnet anterior.
+
+Ten en cuenta que testnet3 es una gran cadena de bloques, que supera los 20 GB a principios de 2017. Tardarás aproximadamente un día en sincronizarse por completo y utilizar los recursos de tu computadora. No tanto como mainnet, pero tampoco exactamente "ligero". Una buena manera de ejecutar un nodo de testnet es como una imagen de máquina virtual (por ejemplo, VirtualBox, Docker, Cloud Server, etc.) dedicada para ese propósito.
+
+===== Usando testnet
+
+Bitcoin Core, como casi todos los demás programas de bitcoin, tiene soporte completo para la operación en testnet en lugar de mainnet. Todas las funciones de Bitcoin Core funcionan en testnet, incluida la cartera, la minería de monedas de testnet y la sincronización de un nodo de testnet completo.
+
+Para iniciar Bitcoin Core en testnet en lugar de mainnet, usa la opción +testnet+:
+
+----
+$ bitcoind -testnet
+----
+
+En los logs, deberías ver que bitcoind está creando una nueva cadena de bloques en el subdirectorio +testnet3+ del directorio de bitcoind predeterminado:
+
+----
+bitcoind: Using data directory /home/username/.bitcoin/testnet3
+----
+
+Para conectarse a bitcoind, usa la herramienta de línea de comandos +bitcoin-cli+, pero también debes marcarlo al modo testnet:
+
+----
+$ bitcoin-cli -testnet getblockchaininfo
+{
+  "chain": "test",
+  "blocks": 1088,
+  "headers": 139999,
+  "bestblockhash": "0000000063d29909d475a1c4ba26da64b368e56cce5d925097bf3a2084370128",
+  "difficulty": 1,
+  "mediantime": 1337966158,
+  "verificationprogress": 0.001644065914099759,
+  "chainwork": "0000000000000000000000000000000000000000000000000000044104410441",
+  "pruned": false,
+  "softforks": [
+
+  [...]
+----
+
+También puedes ejecutar en testnet3 con otras implementaciones de nodo completo, como +btcd+ (escrito en Go) y +bcoin+ (escrito en JavaScript), para experimentar y aprender otros lenguajes de programación y frameworks.
+
+A principios de 2017, testnet3 es compatible con todas las funciones de mainnet, incluido Segregated Witness (ver <<segwit>>). Por lo tanto, testnet3 también se puede utilizar para probar las características de Segregated Witness.((("", startref="testnet09")))
+
+==== Segnet&#x2014;El Testnet de Segregated Witness
+
+
+((("segnet")))En 2016, se lanzó una red de prueba de propósito especial para ayudar en el desarrollo y prueba de Segregated Witness (también conocido como segwit; ver <<segwit>>). Esta cadena de bloques de prueba se llama +segnet+ y te puedes unir a ella ejecutando una versión especial (rama) de Bitcoin Core.
+
+((("segwit (Segregated Witness)")))Desde que se agregó segwit a testnet3, ya no es necesario usar segnet para probar las funciones de segwit.
+
+En el futuro, es probable que veamos otras cadenas de bloques de testnet que estén diseñadas específicamente para probar una característica única o un cambio arquitectónico importante, como segnet.
+
+==== Regtest&#x2014;La Cadena de Bloques Local
+
+((("regtest (Regression Testing)")))Regtest, que significa "Pruebas de Regresión", es una característica de Bitcoin Core que permite crear una cadena de bloques local para fines de prueba. A diferencia de testnet3, que es una cadena de bloques de prueba pública y compartida, las cadenas de bloques de regtest se ejecutan como sistemas cerrados para pruebas locales. Lanzas una cadena de bloques regtest desde cero, creando un bloque génesis local. Puedes agregar otros nodos a la red, o ejecutar la cadena con un solo nodo para probar únicamente el software de Bitcoin Core.
+
+Para comenzar Bitcoin Core en modo regtest, se usar la opción +regtest+:
+
+----
+$ bitcoind -regtest
+----
+
+Al igual que con testnet, Bitcoin Core inicializará una nueva cadena de bloques en el subdirectorio _regtest_ de tu directorio predeterminado de bitcoind:
+
+----
+bitcoind: Using data directory /home/username/.bitcoin/regtest
+----
+
+Para utilizar la herramienta de línea de comandos, también debes especificar la opción +regtest+. Probemos el comando +getblockchaininfo+ para inspeccionar la cadena de bloques regtest:
+
+----
+$ bitcoin-cli -regtest getblockchaininfo
+{
+  "chain": "regtest",
+  "blocks": 0,
+  "headers": 0,
+  "bestblockhash": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
+  "difficulty": 4.656542373906925e-10,
+  "mediantime": 1296688602,
+  "verificationprogress": 1,
+  "chainwork": "0000000000000000000000000000000000000000000000000000000000000002",
+  "pruned": false,
+  [...]
+----
+
+Como puedes ver, todavía no hay bloques. Vamos a minar algunos (500 bloques) y ganar la recompensa:
+
+----
+$ bitcoin-cli -regtest generate 500
+[
+  "7afed70259f22c2bf11e406cb12ed5c0657b6e16a6477a9f8b28e2046b5ba1ca",
+  "1aca2f154a80a9863a9aac4c72047a6d3f385c4eec5441a4aafa6acaa1dada14",
+  "4334ecf6fb022f30fbd764c3ee778fabbd53b4a4d1950eae8a91f1f5158ed2d1",
+  "5f951d34065efeaf64e54e91d00b260294fcdfc7f05dbb5599aec84b957a7766",
+  "43744b5e77c1dfece9d05ab5f0e6796ebe627303163547e69e27f55d0f2b9353",
+   [...]
+  "6c31585a48d4fc2b3fd25521f4515b18aefb59d0def82bd9c2185c4ecb754327"
+]
+----
+
+Solo tomará unos segundos minar todos estos bloques, lo que ciertamente facilita la prueba. Si verificas el saldo de tu cartera, verás que ganaste la recompensa por los primeros 400 bloques (las recompensas de coinbase deben tener una profundidad de 100 bloques antes de poder gastarlas):
+
+----
+$ bitcoin-cli -regtest getbalance
+12462.50000000
+----
+
+=== Usando Cadenas de Bloques de Prueba para Desarrollo
+
+((("entorno de desarrollo", "cadenas de bloques de pruebas y")))Las diversas cadenas de bloques de bitcoin (+regtest+, +segnet+, +testnet3+, +mainnet+) ofrecen un rango de entornos de prueba para el desarrollo de bitcoin. Usa las cadenas de bloques de prueba si estás desarrollando para Bitcoin Core u otro cliente de consenso de nodo completo; una aplicación como una cartera, casa de intercambio, sitio de comercio electrónico; o incluso desarrollando nuevos contratos inteligentes y scripts complejos.
+
+Puedes utilizar las cadenas de bloques de prueba para establecer un procedimiento de desarrollo. Prueba tu código localmente en +regtest+ a medida que lo vas desarrollando. Una vez que esté listo para probarlo en una red pública, cambia a +testnet+ para exponer tu programa a un entorno más dinámico con más diversidad de códigos y aplicaciones. Finalmente, una vez que estés seguro de que tu código funciona como se esperaba, cambia a +mainnet+ para implementarlo en producción. A medida que realices cambios, mejoras, correcciones de errores, etc., vuelve a iniciar el procedimiento, implementando cada cambio primero en +regtest+, después en +testnet+, y finalmente en producción.((("", startref="BCTtest09")))

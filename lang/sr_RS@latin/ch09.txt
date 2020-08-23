@@ -1,0 +1,390 @@
+[[blockchain]]
+== Blokčejn
+
+=== Uvod
+
+((("blockchain (the)", "overview of")))Struktura podataka blokčejna je uređena lista unazad povezanih blokova transakcija. Blokčejn može da se sačuva kao ravni fajl (slično CSV formatu) ili u jednostavnoj bazi podataka. Bitcoin Core klijent čuva metapodatke blokčejna koristeći Google-ovu LevelDB bazu podataka. Blokovi su povezani "unazad", a svaki se odnosi na prethodni blok u lancu.((("blocks", "block height")))Blokčejn se često predstavlja kao vertikalni stub (stack), sa blokovima poslaganim jedan preko drugog, a prvi blok služi kao temelj stuba. Takvo predstavljanje blokova postavljenih jedne na druge dovodi do upotrebe izraza kao što su "visina", za udaljenost od prvog bloka i "vrh", za označavanje bloka koji je poslednji dodat.
+
+((("blocks", "block hash")))((("blocks", "genesis block")))((("blocks", "parent blocks")))((("genesis block")))((("parent blocks")))Svaki blok u blokčejnu identifikuje se pomoću heša, generisanog pomoću algoritma kriptografskog heša SHA256 na zaglavlju bloka. Svaki blok takođe referencira prethodni blok, poznat kao _prethodni/roditeljski (parent)_ blok, kroz polje "prethodni heš bloka" u zaglavlju bloka. Drugim rečima, svaki blok sadrži heš prethodnog u svom zaglavlju. Sekvenca hešova koja povezuje svaki blok sa njegovim roditeljem stvara lanac koji se vraća sve do prvog stvorenog bloka, poznatog kao _ genezni blok (genesis block)_.
+
+Iako blok ima samo jednog roditelja, on može privremeno imati više dece. Svako dete upućuje na isti blok kao na svog roditelja i sadrži isti (roditeljski) heš u polju „prethodni heš bloka“. Više dece nastaje tokom "forka" ("račvanja"), privremene situacije koja nastaje kada različiti rudari nađu gotovo istovremeno različite blokove (videti <<forks>>). Na kraju, samo jedan dečji blok postaje deo blokčejna i "fork" je rešen. Iako blok može imati više od jednog deteta, svaki blok može imati samo jednog roditelja. To je zato što blok ima jedno jedino polje "prethodnog heša bloka" koje upućuje na njegovog roditelja.
+
+Polje "prethodni heš bloka" nalazi se u zaglavlju bloka i time utiče na heš _current_ (sadašnjeg) bloka. Dečji identitet se menja ako se promeni identitet roditelja. Kada se roditelj na bilo koji način modifikuje, heš roditelja se menja. Izmenjeni heš roditelja zahteva promenu reference "prethodnog heš bloka". To zauzvrat ima efekat da se detetov heš promeni, što zahteva promenu referenci unuka, što zauzvrat menja unuka, i tako dalje. Ovaj kaskadni efekat osigurava da, kada blok ima mnogo generacija koje slede posle njega, on se ne može menjati bez prisiljavanja na ponovno izračunavanje svih narednih blokova. Pošto bi za takvo ponovno izračunavanje bilo potrebno ogromno računanje (a samim tim i potrošnja energije), postojanje dugog lanca blokova čini duboku istoriju blokčejna nepromenjivom, što je ključna karakteristika sigurnosti bitkoina.
+
+Jedan od načina da se zamisli blokčejn je u obliku slojeva u geološkoj formaciji ili uzorka dubine glečera. Površinski slojevi se mogu menjati sa godišnjim dobima, ili čak biti oduvani pre nego što stignu da se slegnu. Ali čim krenete par centimetara u dubinu, geološki slojevi postaju sve stabilniji. Kad stignete do nekoliko stotina metara u dubinu, ono što vidite je snimak prošlosti koji je ostao netaknut milionima godina. U blokčejnu, može da dođe do revizije par najskorijih blokova, ukoliko dođe do ponovnog izračunavanja lanca zbog forka. Gornjih šest blokova predstavlja nekoliko centimetara površinskog tla. Ali kada siđete dublje u blokčejn, posle tih šest blokova, sve je manja verovatnoća da će se blokovi promeniti. ((("transactions", "coinbase transactions")))((("coinbase transactions")))Posle 100 blokova unazad, stabilnost je tolika da transakcija sa zajedničkom bazom podataka - transakcija koja sadrži tek izrudareni bitkoin - može biti potrošena. Nekoliko hiljada blokova unazad (mesec dana) i blokčejn je utvrđena istorija, za sve praktične svrhe. Iako protokol uvek omogućava da se lanac otkači dužim lancem i iako uvek postoji mogućnost da se bilo koji blok preokrene, verovatnoća takvog događaja opada kako vreme prolazi dok ne postane beskonačno mala.
+
+=== Struktura bloka
+
+((("blocks", "structure of")))((("blockchain (the)", "block structure")))Jedan blok je kontejner strukture podataka koji objedinjuje transakcije za uključivanje u javnu knjigu zvanom blokčejn. Blok počinje od zaglavlja, koji sadrži metapodatke, nakon čega sledi dugačka lista transakcija koje čine većinu njegovih podataka. Zaglavlje bloka je 80 bajtova, dok prosečna transakcija iznosi najmanje 400 bajtova, a prosečni blok sadrži više od 1900 transakcija. Kompletan blok, sa svim transakcijama, prema tome je 10.000 puta veći od zaglavlja bloka. <<block_structure1>> opisuje strukturu bloka.
+
+[[block_structure1]]
+[role="pagebreak-before"]
+.Struktura bloka
+[options="header"]
+|=======
+| Veličina | Polje | Opis
+| 4 bajta | Veličina bloka | Veličina bloka, u bajtovima, nakon ovog polja
+| 80 bajtova | Zaglavlje bloka | Nekoliko polja formiraju zaglavlje bloka
+| 1&#x2013;9 bajta (VarInt) | Brojač transakcija | Koliko transakcija sledi
+| Promenljiva | Transakcije | Transakcije zabeležene u ovom bloku
+|=======
+
+[[block_header]]
+=== Zaglavlje bloka
+
+(("blocks", "headers")))((("blockchain (the)", "block headers")))((("headers")))Zaglavlje bloka sastoji se od tri skupa metapodataka bloka. Prvo, tu je referenca na heš prethodnog bloka, koji ovaj blok povezuje sa prethodnim blokom u blokčejnu. Drugi skup metapodataka, tj. _difficulty_, _timestamp_, i _nonce_, odnose se na takmičenje u rudarenju, kao što je detaljnije opisano u <<mining>>. Treći deo metapodataka je koren Merkleovog stabla, struktura podataka koja se koristi za efikasno rezimiranje svih transakcija u bloku. <<block_header_structure_ch09>> opisuje strukturu zaglavlja bloka.
+
+
+[[block_header_structure_ch09]]
+.Struktura zaglavlja bloka
+[options="header"]
+|=======
+| Veličina | Polje | Opis
+| 4 bajta | Verzija | Broj verzije za praćenje nadogradnje softvera/protokola
+| 32 bajta | Heš prethodnog bloka | Upućivanje/referenciranje na heš prethodnog (roditeljskog) bloka u lancu
+| 32 bajta | Merkleov koren | Heš korena Merkleovog stabla transakcije ovog bloka
+| 4 bajta | Vremenski pečat | Približno vreme kreiranja ovog bloka (sekunde od Unix Epoch-a)
+| 4 bajta | Ciljna težina | Ciljna tažina algoritma Proof-of-Work za ovaj blok
+| 4 bajta | Nonce | Brojač korišćen za algoritam Proof-of-Work
+|=======
+
+Nonce, ciljna težina i vremenski pečat koriste se u procesu rudarenja i detaljnije će se raspravljati u <<mining>>.
+
+[[block_hash]]
+=== Identifikatori bloka: Heš zaglavlja bloka i visina bloka
+
+((("blockchain (the)", "block identifiers")))((("blocks", "block height")))((("blocks", "block hash")))Primarni identifikator bloka je njegov kriptografski heš, digitalni otisak prsta napravljen tako što se dvaput hešuje zaglavlje bloka pomoću algoritma SHA256. Rezultirajući 32-bajtni heš se zove _heš bloka (block hash)_, ali je tačnije _heš zaglavlja bloka (block header hash)_, pass:[<span role="keep-together">jer se za njegovo izračunavanje koristi samo zaglavlje bloka. Na primer,</span>]  +000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f+ je blok heš prvog bitkoin bloka ikada stvorenog. Blok heš identifikuje blok jedinstveno i nedvosmisleno i može ga samostalno izvesti bilo koji čvor jednostavnim hešovanjem zaglavlja bloka.
+
+Imajte na umu da blok heš nije u stvari uključen u strukturu podataka bloka, ni kada se blok prenosi putem mreže, ni kada se čuva u stalnoj memoriji čvora kao deo blokčejna. Umesto toga, heš bloka izračunava svaki čvor dok se blok prima od mreže. Blok heš se može staviti u posebnu tabelu baze podataka kao deo metapodataka bloka, kako bi se olakšalo indeksiranje i brže preuzimanje blokova sa diska.
+
+Drugi način za prepoznavanje bloka je njegov položaj u blokčejnu, nazvan pass:[<span role="keep-together"><em>visina bloka</em>. Prvi blok ikada stvoren je na visini bloka 0 (nula) i</span>] pass:[<span role="keep-together">isti blok na koji se prethodno pozivao sledeći blok heš</span>]+000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f+. Blok se na taj način može identifikovati na dva načina: referenciranjem blok heša ili referenciranjem visine bloka. Svaki naredni blok dodat "povrh" tog prvog bloka je za jednu poziciju "viši" u blokčejnu, kao kutije naslagane jedna na drugu. Visina bloka 1. januara 2017. iznosila je približno 446.000, što znači da je bilo 446.000 blokova naslaganih povrh prvog bloka kreiranog u januaru 2009. godine.
+
+Za razliku od blok heša, visina bloka nije jedinstveni identifikator. Iako će jedan blok uvek imati određenu i invarijantnu visinu bloka, obrnuto nije tačno. Visina bloka ne identifikuje uvek jedan blok. Dva ili više bloka mogu imati istu visinu bloka, takmičite se za istu poziciju u blokčejnu. O ovom scenariju detaljno se govori u odeljku <<forks>>. Visina bloka takođe nije deo strukture podataka bloka; ne čuva se unutar bloka. Svaki čvor dinamički identifikuje poziciju bloka (visinu) u blokčejnu kada je primljen iz bitkoin mreže. Visina bloka se takođe može čuvati kao metapodatak u indeksiranoj tabeli baze podataka radi bržeg pronalaženja.
+
+[TIP]
+====
+_Blok heš_ jednog bloka uvek jedinstveno identifikuje jedan blok. Blok takođe uvek ima određenu _visinu blokova_. Međutim, nije uvek slučaj da određena visina bloka može identifikovati jedan blok. Umesto toga, dva ili više bloka mogu se takmičiti za jednu poziciju u blokčejnu.
+====
+
+=== Genezni blok
+
+((("blocks", "genesis block")))((("blockchain (the)", "genesis block")))Prvi blok u blokčejnu zove se genezni blok i kreiran je 2009. godine. Zajednički je predak svih blokova u blokčejnu, što znači da ako započnete sa bilo kojim blokom i pratite lanac unazad u vremenu, na kraju ćete stići do geneznog bloka.
+
+Svaki čvor uvek započinje blokčejnom od bar jednog bloka, jer je genezni blok statički kodiran u bitkoin klijent softver, tako da se ne može izmeniti. Svaki čvor uvek "zna" heš i strukturu geneznog bloka, fiksno vreme kada je stvoren, pa čak i jednu transakciju u njemu. Dakle, svaki čvor ima početnu tačku za blokčejn, siguran "koren" iz kojeg može izgraditi pouzdan blokčejn.
+
+Pogledajte statično kodirani genezni blok u Bitcoin Core klijentu, http://bit.ly/1x6rcwP[_chainparams.cpp_].
+
+Sledeći heš identifikator pripada geneznom bloku:
+
+----
+000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+----
+
+Možete potražiti taj blok heš na bilo kom web pretraživaču bloka, kao što je _blockchain.info_, i pronaći ćete stranicu koja opisuje sadržaj ovog bloka, sa URL adresom koja sadrži taj heš:
+
+https://blockchain.info/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+
+Korišćenje Bitcoin Core referentnog klijenta u komandnoj liniji:
+
+----
+$ bitcoin-cli getblock 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+----
+[source,json]
+----
+{
+    "hash" : "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+    "confirmations" : 308321,
+    "size" : 285,
+    "height" : 0,
+    "version" : 1,
+    "merkleroot" : "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+    "tx" : [
+        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
+    ],
+    "time" : 1231006505,
+    "nonce" : 2083236893,
+    "bits" : "1d00ffff",
+    "difficulty" : 1.00000000,
+    "nextblockhash" : "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048"
+}
+----
+
+Genezni blok sadrži skrivenu poruku u sebi. Ulaz transakcije coinbase-a sadrži tekst "The Times, 3. januar 2009.  Kancelarka na ivici drugog spasavanja banaka". Ova poruka je imala za cilj da pruži dokaz o najranijem datumu nastanka ovog bloka, pozivanjem na naslov iz britanskih novina _The Times_. Takođe služi kao ironični podsetnik o važnosti nezavisnog monetarnog sistema, pri čemu se lansiranje bitkoina dešava istovremeno sa do tada neviđenom svetskom monetarnom krizom. Poruku je u prvi blok ubacio Satoši Nakamoto, kreator bitkoina.
+
+=== Povezivanje blokova u blokčejnu
+
+((("blocks", "linking blocks in the blockchain")))((("blockchain (the)", "linking blocks in the blockchain")))Bitkoinovi puni čvorovi održavaju lokalnu kopiju blokčejna, počevši od geneznog bloka. Lokalna kopija blokčejna se stalno ažurira jer se pronalaze novi blokovi i koriste za produženje lanca. Dok čvor prima dolazne blokove iz mreže, on će ove blokove potvrditi i povezati ih sa postojećim lancem blokova. Da bi uspostavio vezu, čvor će ispitati zaglavlje dolaznog bloka i potražiti "heš prethodnog bloka".
+
+Pretpostavimo, na primer, da čvor ima 277.314 blokova u lokalnoj kopiji blokčejna. Poslednji blok za koji čvor zna je blok 277.314, sa hešom zaglavlja bloka od:
+
+----
+00000000000000027e7ba6fe7bad39faf3b5a83daed765f05f7d1b71a1632249
+----
+
+Bitkoin čvor zatim prima novi blok od mreže koji analizira na sledeći način:
+
+[source,json]
+----
+{
+    "size" : 43560,
+    "version" : 2,
+    "previousblockhash" :
+        "00000000000000027e7ba6fe7bad39faf3b5a83daed765f05f7d1b71a1632249",
+    "merkleroot" :
+        "5e049f4030e0ab2debb92378f53c0a6e09548aea083f3ab25e1d94ea1155e29d",
+    "time" : 1388185038,
+    "difficulty" : 1180923195.25802612,
+    "nonce" : 4215469401,
+    "tx" : [
+        "257e7497fb8bc68421eb2c7b699dbab234831600e7352f0d9e6522c7cf3f6c77",
+
+ #[... mnogo više transakcija je izostavljeno ...]
+
+        "05cfd38f6ae6aa83674cc99e4d75a1458c165b7ab84725eda41d018a09176634"
+    ]
+}
+----
+
+Gledajući ovaj novi blok, čvor nalazi polje +previousblockhash+, koje sadrži heš nadređenog bloka. To je heš koji je poznat čvoru, onaj poslednjeg bloka u lancu na visini 277.314. Zato je ovaj novi blok dete poslednjeg bloka u lancu i proširuje postojeći lanac blokova. Čvor dodaje ovaj novi blok na kraj lanca, čineći blokčejn dužim sa novom visinom od 277.315. <<chain_of_blocks>> prikazuje lanac od tri bloka povezanih referencama u polju +previousblockhash+.
+
+
+[[merkle_trees]]
+=== Merkleova stabla
+
+((("merkle trees", id="merkle09")))((("blockchain (the)", "merkle trees", id="BCTmerkle09")))Svaki blok u bitkoin blokčejnu sadrži rezime svih transakcija u bloku pomoću _Merkleovog stabla (merkle tree)_.
+
+((("binary hash trees", see="merkle trees"))) _Merkleovo stablo__, takođe poznato i kao _binarno heš stablo_, je struktura podataka koja se koristi za efikasno rezimiranje i verifikaciju integriteta velikih skupova podataka. Merkleovo stablo je binarno stablo koje sadrži kriptografske hešove. Izraz "stablo" koristi se u računarskoj nauci za opisivanje strukture podataka grananja, ali ova se stabla obično prikazuju naglavačke, sa "korenom" na vrhu i "lišćem" na dnu dijagrama, kao što ćete videti u sledećem primeru.
+
+[[chain_of_blocks]]
+[role="smallerfourtyfive"]
+.Blokovi povezani u lancu u odnosu na prethodni heš zaglavlja bloka
+image::images/mbc2_0901.png[]
+
+Merkleova stabla se koriste u bitkoinu za rezimiranje svih transakcija u bloku, proizvodeći ukupni digitalni otisak (fingerprint) čitavog skupa transakcija, pružajući vrlo efikasan proces za proveru da li je transakcija uključena u blok. Merkleovo stablo je konstruisano rekurzivno raspršivanjem parova čvorova sve dok ne bude samo jedan heš, nazvan _koren_, ili _Merkleov koren (Merkle Root)_. Kriptografski heš algoritam koji se koristi u bitkoin Merkleovim stablima je SHA256 koji se primjenjuje dva puta, takođe poznat kao dvostruki SHA256.
+
+Kada se N elemenata podataka hešuje i rezimira u Merkleovom stablu, možete proveriti da li je neki element podatka uključen u stablu sa najviše +2*log~2~(N)+ izračunavanja, čineći ih vrlo efikasnim strukturnim podacima.
+
+Merkleovo stablo je izgrađeno odozdo nagore. U sledećem primeru započinjemo sa četri transakcije, A, B, C i D, koje predstavljaju _listove (leaves)_ Merkleovog stabla, kao što je prikazano u <<simple_merkle>>. Transakcije se ne čuvaju u Merkleovom stablu; nego se njihovi podaci hešuju i nastali hešovi se čuvaju u svakom čvoru lista kao H~A~, H~B~, H~C~, i H~D~:
+
+++++
+<pre data-type="codelisting">
+H<sub>A</sub> = SHA256(SHA256(Transaction A))
+</pre>
+++++
+
+Uzastopni parovi list čvorova izvode se u roditeljski (ili prethodni) čvor povezivanjem dva heša i njihovim ponovnim zajedničkim hešovanjem. Na primer, da bi se konstruisao roditeljski čvor H~AB~, dva 32-bajtna heša dece se spajaju da bi stvorili 64-bajtni string. Taj se string zatim dvostruko hešuje da bi se stvorio heš nadređenog čvora:
+
+++++
+<pre data-type="codelisting">
+H<sub>AB</sub> = SHA256(SHA256(H<sub>A</sub> + H<sub>B</sub>))
+</pre>
+++++
+
+Proces se nastavlja sve dok na vrhu ne ostane još samo jedan čvor, čvor poznat kao Merkleov koren. Taj 32-bajtni heš se čuva u zaglavlju bloka i rezimira sve podatke iz sve četiri transakcije. <<simple_merkle>> pokazuje kako se koren izračunava pomoću hešovanja parova čvorova.
+
+[[simple_merkle]]
+.Izračunavanje čvorova u Merkleovom stablu
+image::images/mbc2_0902.png["merkle_tree"]
+
+((("balanced trees")))Pošto je Merkleovo stablo binarno stablo, potreban mu je jednak broj list čvorova. Ako postoji neparan broj transakcija koje se sumiraju, poslednji heš transakcije će se duplirati da bi se stvorio parni broj list čvorova, takođe poznat kao _balansirano stablo_. Ovo je prikazano u <<merkle_tree_odd>>, gde je transakcija C duplirana.
+
+[[merkle_tree_odd]]
+.Dupliranjem jednog elementa podatka postiže se parni broj elemenata podatka
+image::images/mbc2_0903.png["merkle_tree_odd"]
+
+Ista metoda za konstrukciju stabla iz četiri transakcije može se generalizovati za izgradnju stabala bilo koje veličine. U bitkoinu je uobičajeno da u jednom bloku ima nekoliko stotina do više hiljada transakcija koje se rezimiraju na potpuno isti način, stvarajući samo 32 bajta podataka kao i jedan jedini Merkleov koren. U <<merkle_tree_large>>, videćete stablo izgrađeno iz 16 transakcija. Imajte na umu da, iako koren izgleda veći od list čvorova na dijagramu, to je iste veličine, samo 32 bajta. Bilo da postoji jedna transakcija ili stotine hiljada transakcija u bloku, Merkleov koren ih uvek rezimira u 32 bajta.
+
+((("authentication paths")))Da bi se dokazalo da je određena transakcija uključena u bloku, čvor treba samo da proizvede +log~2~(N)+ 32-bajtnih hešova, što predstavlja _autentifikacionu putanju_ ili _Merkleovu putanju_ koja povezuje specifične transakcije sa korenom stabla. Ovo je posebno važno jer se broj transakcija povećava, pošto se logaritam sa bazom 2 od broja svih transakcija znatno sporije povećava. To omogućava bitkoin čvorovima da efikasno proizvedu putanje od 10 ili 12 hešova (320–384 bajta), što može pružiti dokaz o jednoj transakciji od više od hiljadu transakcija u bloku veličine jednog megabajta.
+
+[[merkle_tree_large]]
+.Merkleovo stablo koje rezimira mnogo elemenata podataka
+image::images/mbc2_0904.png["merkle_tree_large"]
+
+U <<merkle_tree_path>>, čvoru se može dokazati da je transakcija K uključena u blok stvarajući Merkleovu putanju koja je dugačka samo četiri 32-bajtna heša (ukupno 128 bajtova). Putanja se sastoji od četiri heša (prikazanih na tamno sivoj pozadini u <<merkle_tree_path>>) H~L~, H~IJ~, H~MNOP~ i H~ABCDEFGH~. Sa ova četiri heša koja su data kao putanja za autentifikaciju, bilo koji čvor može dokazati da je H~K~ (sa crnom pozadinom na dnu dijagrama) uključen u Merkleov koren računanjem četiri dodatna heša u paru H~KL~, H~IJKL~, H~IJKLMNOP~ i koren Merkleovog stabla (prikazan isprekidanom linijom na dijagramu).
+
+[[merkle_tree_path]]
+.Merkleova putanja koja se koristi za dokazivanje uključivanja elementa podataka
+image::images/mbc2_0905.png["merkle_tree_path"]
+
+
+Kod u <<merkle_example>> pokazuje proces kreiranja Merkleovog stabla sa heša listova i korena, koristeći biblioteku libbitcoin za neke pomoćne funkcije.
+
+[[merkle_example]]
+[role="pagebreak-before"]
+.Građenje Merkleovog stabla
+====
+[source, cpp]
+----
+include::code/merkle.cpp[]
+----
+====
+
+<<merkle_example_run>> prikazuje rezultat sastavljanja i pokretanja Merkleovog koda.
+
+[[merkle_example_run]]
+.Kompajliranje i pokretanje Merkleovog primer koda 
+====
+[source,bash]
+----
+$ # Compile the merkle.cpp code
+$ g++ -o merkle merkle.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # Run the merkle executable
+$ ./merkle
+Trenutna Merkleova heš lista:
+  32650049a0418e4380db0af81788635d8b65424d397170b8499cdc28c4d27006
+  30861db96905c8dc8b99398ca1cd5bd5b84ac3264a4e1b3e65afa1bcee7540c4
+
+Trenutna Merkleova heš lista:
+  d47780c084bad3830bcdaf6eace035e4c6cbf646d103795d22104fb105014ba3
+
+Rezultat: d47780c084bad3830bcdaf6eace035e4c6cbf646d103795d22104fb105014ba3
+
+----
+====
+
+Efikasnost Merkleovog stabla postaje očigledna kako se povećava broj čvorova. <<block_structure2>> prikazuje količinu podataka koju je potrebno razmeniti kao Merkleovu putanju da bi se dokazalo da je transakcija deo bloka.
+
+[[block_structure2]]
+.Efikasnost Merkleovog stabla
+[options="header"]
+|=======
+| Broj transakcija | Približna veličina bloka | Veličina putanje (heša) | Veličina putanje (bajtovi)
+| 16 transakcija | 4 kilobajta | 4 heša | 128 bajta
+| 512 transakcija | 128 kilobajta | 9 heša | 288 bajta
+| 2048 transakcija | 512 kilobajta | 11 heša | 352 bajta
+| 65.535 transakcija | 16 megabajta | 16 heša | 512 bajta
+|=======
+
+Kao što vidite iz tabele, dok se veličina bloka brzo povećava, na 4 KB sa 16 transakcija na veličinu bloka od 16 MB kako bi se uklopilo 65.535 transakcija, Merkleova putanja potrebna za dokazivanje da je transakcija uključena raste mnogo sporije, od 128 bajta na samo 512 bajta. Sa Merkleovim stablom čvor može preuzeti samo zaglavlje bloka (80 bajta po bloku) i još uvek biti u stanju da identifikuje uključene transakcije u bloku, povratom malog dela Merkleove putanje iz punog čvora, bez skladištenja ili prenošenja velike većine blokčejna, koji može imati veličinu od nekoliko gigabajta. Čvorovi koji ne održavaju puni blokčejn, koji se nazivaju čvorovima pojednostavljene verifikacije plaćanja (simplified payment verification - SPV), koriste Merkleove putanje za verifikaciju transakcija bez preuzimanja punih blokova.
+
+=== Merkleova stabla i pojednostavljena verifikacija plaćanja (SPV)
+
+((("simple-payment-verification (SPV)")))((("bitcoin nodes", "SPV nodes")))SPV čvorovi upotrebljavaju u velikoj meri Merkleova stabla. SPV čvorovi nemaju sve transakcije i ne skidaju pune blokove sa mreže, samo zaglavlja blokova. Da bi proverili da li je transakcija uključena u blok, a da ne morataju da preuzmu sve transakcije u bloku, koriste putanje autentifikacije ili Merkleove putanje.
+
+Razmotrimo, na primer, SPV čvor koji je zainteresovan za dolazne uplate na adresu koja se nalazi u njegovom novčaniku. SPV čvor će uspostaviti Blumov filter (vidi <<bloom_filters>>) na svojim vezama sa vršnjacima da bi ograničio primljene transakcije samo na one koje sadrže adrese koje ga interesuju. Kada vršnjak vidi transakciju koja se podudara sa Blumovim filterom, poslaće taj blok koristeći +merkleblock+ poruku. Poruka +merkleblock+ sadrži zaglavlje bloka, kao i Merkleovu putanju koja povezuje transakciju od interesa sa Merkleovim korenom u bloku. SPV čvor može koristiti tu Merkleovu putanju za povezivanje transakcije sa blokom i proveru da li je transakcija uključena u blok. SPV čvor koristi i zaglavlje bloka da poveže blok sa ostatkom blokčejna. Kombinacija ove dve veze, između transakcije i bloka, i između bloka i blokčejna, dokazuje da je transakcija zabeležena u blokčejnu. Sve u svemu, SPV čvor će dobiti manje od kilobajta podataka za zaglavlje bloka i Merkleovu putanju, za količinu podataka koja je više od hiljadu puta manja od punog bloka (trenutno oko 1 megabajta).((("", startref="BCTmerkle09")))((("", startref="merkle09")))
+
+=== Bitkoinov blokčejn za testiranje
+
+((("blockchain (the)", "test blockchains", id="BCTtest09")))((("mainnet", seealso="blockchain (the)")))Možda ćete biti iznenađeni kada saznate da postoji više od jednog bitkoin blokčejna. "Glavni" bitkoin blokčejn, onaj koji je stvorio Satoši Nakamoto 3. januara 2009, onaj sa geneznim (početnim) blokom koji smo proučavali u ovom poglavlju, zove se _mainnet_. Postoje i drugi bitkoin blokčejnovi koji se koriste za testiranja: u ovom trenutku _testnet_, _segnet_ i _regtest_. Pogledajmo ih sve, jedan za drugim.((("testnet", id="testnet09")))
+
+
+==== Testnet&#x2014;Bitkoin igralište za testiranje
+
+Testnet je naziv test blokčejna, mreže i valute koji se koriste za testiranja. Testnet je potpuno opremljena P2P mreža sa novčanikom, test bitkoinima (testnet kovanicama), rudarenjem i svim ostalim karakteristikama mainneta. Zaista postoje samo dve razlike: testnet kovanice su predviđene da budu beskorisne, a težina rudarenja treba da bude dovoljno niska da svako može relativno lako rudariti testnet kovanice (što ih održava bezvrednim).
+
+Svaki razvoj softvera koji je namenjen za proizvodnju na bitkoinovom mainnet-u prvo treba testirati na testnet-u sa kovanicama za testiranje. Ovo štiti i programere od novčanih gubitaka zbog greška i mrežu od nenamernih grešaka.
+
+Održavanje kovanica bezvrednim, a rudarenje lakšim, nikako nije lako. Uprkos molbama programera, neki ljudi koriste naprednu rudarsku opremu (GPU-e i ASIC-ove) da rudare na testnetu. To povećava težinu, onemogućava rudarenje CPU-om, i na kraju čini dobijanje test kovanica dovoljno teškim da ljudi počinju da ih cene, pa više nisu bezvredne. Kao rezultat, s vremena na vreme, testnet mora da se ukloni i ponovo pokrene sa novim geneznim blokom, resetujući težinu.
+
+Trenutni testnet naziva se _testnet3_, treća iteracija testneta, koja je ponovo pokrenuta u februaru 2011. kako bi se resetovala težina prethodnog testneta.
+
+Imajte na umu da je testnet3 veliki blokčejn, veći od 20 GB početkom 2017. Trebaće otprilike jedan dan da biste se u potpunosti sinhronizovali i koristili resurse na računaru. Ne toliko kao mainnet, ali ni baš "lagano". Jedan dobar način za pokretanje testnet čvora je image virtuelne mašine (npr. VirtualBox, Docker, Cloud Server itd.) namenjena za tu svrhu.
+
+===== Korišćenje testneta
+
+Bitcoin Core, kao i skoro svaki drugi bitkoin softver, ima punu podršku za rad na testnetu umesto mainneta. Sve funkcije Bitcoin Core-a rade na testnetu, uključujući novčanik, rudarenje testnet kovanica i sinhronizaciju punog testnet čvora.
+
+Da biste pokrenuli Bitcoin Core na testnetu umesto mainnet-a, koristite opciju +testnet+:
+
+----
+$ bitcoind -testnet
+----
+
+U logovima bi trebalo da vidite da bitcoind gradi novi blokčejn u +testnet3+ poddirektorijumu default bitcoind direktorijuma:
+
+----
+bitcoind: Korišćenje direktorijuma podataka /home/username/.bitcoin/testnet3
+----
+
+Da biste se povezali sa bitcoind-om, koristite alat komandne linije +bitcoin-cli+, ali ga morate prebaciti i na testnet modus:
+
+----
+$ bitcoin-cli -testnet getblockchaininfo
+{
+  "chain": "test",
+  "blocks": 1088,
+  "headers": 139999,
+  "bestblockhash": "0000000063d29909d475a1c4ba26da64b368e56cce5d925097bf3a2084370128",
+  "difficulty": 1,
+  "mediantime": 1337966158,
+  "verificationprogress": 0.001644065914099759,
+  "chainwork": "0000000000000000000000000000000000000000000000000000044104410441",
+  "pruned": false,
+  "softforks": [
+
+  [...]
+----
+
+Takođe možete pokrenuti na testnet3 sa drugim implementacijama punog čvora, kao što su +btcd+ (napisano u Go jeziku) i +bcoin+ (napisanim u JavaScript-u), da eksperimentišete i učite u drugim programskim jezicima i okvirima.
+
+Početkom 2017. testnet3 podržava sve funkcije mainneta, uključujući odvojenog svedoka (vidi <<segwit>>). Zbog toga se testnet3 takođe može koristiti za testiranje funkcije odvojenog svedoka. ((("", startref="testnet09")))
+
+==== Segnet&#x2014;Testnet odvojenih svedoka
+
+
+((("segnet")))2016. godine je pokrenut specijalni testnet za pomoć razvoju i ispitivanju odvojenog svedoka (aka segwit; vidi <<segwit>>). Ovaj test blokčejn se zove +segnet+ i može mu se pridružiti pokretanjem posebne verzije (branch) Bitcoin Core-a.
+
+((("segwit (Segregated Witness)")))Pošto je segwit dodat u testnet3, više nije potrebno koristiti segnet za testiranje segwit funkcije.
+
+U budućnosti ćemo verovatno videti druge testnet blokčejnove koji su posebno dizajnirani za testiranje jedne karakteristike ili velike arhitektonske promene, poput segneta.
+
+==== Regtest&#x2014;Lokalni blokčejn
+
+((("regtest (Regression Testing)")))Regtest, što znači "regresiono testiranje", je karakteristika Bitcoin Core-a koja vam omogućava da kreirate lokalni blokčejn u svrhu testiranja. Za razliku od testnet3, koji je javni i zajednički test blokčejn, regtest blokčejn je namenjen za pokretanje u zatvorenom sistemu za lokalno testiranje. Pokrećete regtest blokčejn od nule, kreirajući lokalni genezni blok. Možete dodati druge čvorove u mrežu ili ih pokrenuti jednim čvorom samo za testiranje Bitcoin Core softvera.
+
+Da biste pokrenuli Bitcoin Core u regtest modusu, koristite +regtest+ opciju:
+
+----
+$ bitcoind -regtest
+----
+
+Baš kao kod testneta, Bitcoin Core će inicijalizovati novi blokčejn u _regtest_ poddirektorijumu vašeg default bitcoind direktorijuma:
+
+----
+bitcoind: Korišćenje direktorijuma podataka /home/username/.bitcoin/regtest
+----
+
+Da biste koristili alat komandne linije, morate da navedete i +regtest+ opciju. Pokušaćemo sa naredbom +getblockchaininfo+ da proverimo regtest blokčejn:
+
+----
+$ bitcoin-cli -regtest getblockchaininfo
+{
+  "chain": "regtest",
+  "blocks": 0,
+  "headers": 0,
+  "bestblockhash": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
+  "difficulty": 4.656542373906925e-10,
+  "mediantime": 1296688602,
+  "verificationprogress": 1,
+  "chainwork": "0000000000000000000000000000000000000000000000000000000000000002",
+  "pruned": false,
+  [...]
+----
+
+Kao što vidite, blokova još nema. Pokušajte da rudarite malo (500 blokova) i zaradite nagradu:
+
+----
+$ bitcoin-cli -regtest generate 500
+[
+  "7afed70259f22c2bf11e406cb12ed5c0657b6e16a6477a9f8b28e2046b5ba1ca",
+  "1aca2f154a80a9863a9aac4c72047a6d3f385c4eec5441a4aafa6acaa1dada14",
+  "4334ecf6fb022f30fbd764c3ee778fabbd53b4a4d1950eae8a91f1f5158ed2d1",
+  "5f951d34065efeaf64e54e91d00b260294fcdfc7f05dbb5599aec84b957a7766",
+  "43744b5e77c1dfece9d05ab5f0e6796ebe627303163547e69e27f55d0f2b9353",
+   [...]
+  "6c31585a48d4fc2b3fd25521f4515b18aefb59d0def82bd9c2185c4ecb754327"
+]
+----
+
+Potrebno je samo nekoliko sekundi za rudarenje svih tih blokova, što svakako olakšava testiranje. Ako proverite stanje u novčaniku, videćete da ste zaradili nagradu za prvih 400 blokova (nagrade na bazi kovanica moraju biti duboke 100 blokova pre nego što možete da ih potrošite):
+
+----
+$ bitcoin-cli -regtest getbalance
+12462.50000000
+----
+
+=== Korišćenje test blokčejnova za razvijanje
+
+((("development environment", "test blockchains and")))Bitkoini različitih blokčejnova (+regtest+, +segnet+, +testnet3+, +mainnet+) nude niz okruženja za testiranje za razvijanje bitkoina. Koristite test blokčejne bilo da razvijate Bitcoin Core ili drugi konsenzusni klijent sa punim čvorom; aplikaciju kao što je novčanik, berza, e-trgovina; ili čak razvijanje novih pametnih (smart) ugovora i složenih skripti.
+
+Možete koristiti testnet blokčejnove da biste uspostavili development pipeline. Testirajte svoj kod lokalno na +regtest+-u dok ga razvijate. Jednom kada ste spremni da ga isprobate na javnoj mreži, prebacite se na +testnet+ i izložite svoj kod dinamičnijem okruženju sa većom raznolikošću koda i aplikacija. Konačno, nakon što ste sigurni da vaš kod radi kako ste očekivali, prebacite se na +mainnet+ da biste ga pustili u proizvodnju. Dok unosite izmene, poboljšanja, ispravke grešaka, itd., Ponovo pokrenite pipeline, primenivši svaku promenu prvo na +regtest+, zatim na +testnet+, i na kraju u proizvodnju.((("", startref="BCTtest09")))

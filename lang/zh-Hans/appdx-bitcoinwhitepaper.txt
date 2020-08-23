@@ -1,0 +1,247 @@
+[[聪_白皮书]]
+[附录]
+== 中本聪的比特币白皮书
+
+[注意]
+====
+((("whitepaper", id="whitethirteen")))((("bitcoin whitepaper", id="BCwhitethirteen")))((("Nakamoto, Satoshi", id="nakamatothirteen")))This is the original whitepaper, reproduced in its entirety exactly as it was published by Satoshi Nakamoto in October 2008.
+====
+
+===比特币-点对点电子现金系统
+
+中本聪
+
+_satoshin@gmx.com_
+
+pass:[<a href="https://bitcoin.org/en/" class="orm:hideurl"><em>www.bitcoin.org</em></a>]
+
+*摘要。*纯粹的点对点版本的电子现金可以将在线支付直接从一方发送到另一方，而无需通过金融机构。数字签名提供了解决方案的一部分，但是如果仍然需要可信任的第三方来防止重复支出，则主要的好处就会丧失。我们提出了一种使用对等网络解决双花问题的解决方案。网络通过将事务散列到正在进行的基于散列的工作量证明链中来对事务进行时间戳记，从而形成一条记录，除非重新做工作量证明，否则该记录是无法更改的。最长的链不仅可以证明所见证事件的顺序，还可以证明它来自最大的CPU能力。只要大多数CPU能力由不合作攻击网络的节点控制，它们将产生最长的链并超过攻击者。网络本身需要最小的结构。消息以尽力而为的方式广播，节点可以随意离开并重新加入网络，并接受最长的工作量证明链作为消息消失时发生的证据。
+
+==== 引言
+互联网上的商务几乎已经完全依赖作为可信赖的第三方的金融机构来处理电子支付。尽管该系统对于大多数事务而言都运行良好，但仍然遭受基于信任模型的固有弱点的困扰。由于金融机构无法避免调解纠纷，因此完全不可能进行完全不可逆的交易。调解的成本增加了交易成本，限制了最小的实际交易规模，并切断了小额临时交易的可能性，并且损失了不可逆服务不可逆支付能力的代价。有了逆转的可能性，信任的需求就会扩散。商家必须警惕他们的顾客，向他们讨价还价，以获取更多的信息。一定比例的欺诈行为是不可避免的。通过使用实物货币可以亲自避免这些成本和付款不确定性，但是在没有受信方的情况下，不存在通过通信渠道进行付款的机制。
+
+所需要的是基于密码证明而不是信任的电子支付系统，该系统允许任意两个愿意的一方直接彼此进行交易，而无需受信任的第三方。在计算上不可行进行逆转的交易将保护卖方免受欺诈，并且可以容易地实施常规托管机制来保护买方。在本文中，我们提出了一种使用对等分布式时间戳服务器生成交易时间顺序的计算证明的双花问题的解决方案。只要诚实节点集体控制比任何协作的攻击者节点组都更多的CPU能力，系统就是安全的。
+
+==== 交易
+我们将电子硬币定义为数字签名链。每个所有者通过对上次交易的哈希值和下一个所有者的公钥进行数字签名并将它们添加到硬币的末尾，将硬币转移到下一个硬币。收款人可以验证签名以验证所有权链。
+
+image::images/mbc2_abin01.png["Transactions"]
+
+当然，问题在于收款人无法验证其中一位所有者没有两次花费硬币。常见的解决方案是引入受信任的中央机构（mint），该机构检查每笔交易是否存在双重支出。每次交易后，必须将硬币退还给铸币厂发行新的硬币，并且仅相信直接从铸币厂发行的硬币不会被重复使用。这种解决方案的问题在于，整个货币体系的命运取决于经营铸币厂的公司，每笔交易都必须像银行一样通过铸币厂。
+
+我们需要一种让收款人知道以前的所有者未签署任何较早交易的方法。就我们的目的而言，最早的交易才是最重要的交易，因此我们不在乎以后进行双倍支出的尝试。确认没有交易的唯一方法是知道所有交易。在基于造币厂的模型中，造币厂知道所有交易，并确定哪个先到。为了在没有受信任方的情况下完成此任务，必须公开宣布交易[1]，并且我们需要参与者可以就单一订单接收历史达成一致的系统。收款人需要证明在每次交易时，大多数节点都同意这是第一个收到的。
+
+====时间戳服务器
+我们建议的解决方案始于时间戳服务器。时间戳服务器通过对要打时间戳的项目区块进行散列并广泛发布散列来工作，例如在报纸或Usenet帖子中[2-5]。时间戳证明，为了进入哈希表，数据必须在当时已经存在。每个时间戳在其哈希中都包含前一个时间戳，形成一个链，每个附加时间戳都会增强之前的时间戳。
+
+image::images/mbc2_abin02.png["timestamp server"]
+
+====工作量证明
+为了实现对等的分布式时间戳服务器，我们将需要使用类似于Adam Back的Hashcash [6]的工作量证明系统，而不是报纸或Usenet帖子。工作量证明涉及扫描一个值，该值在进行散列处理时（例如使用SHA-256），散列以零位开始。所需的平均功在所需的零位数上是指数级的，可以通过执行单个哈希来验证。对于我们的时间戳网络，我们通过增加区块中的随机数来实现工作量证明，直到找到一个值，该值为区块的哈希提供所需的零位。一旦花费了CPU工作量来满足工作量证明，就不能在不重做工作的情况下更改该区块。当后面的区块链接到其后时，更改该区块的工作将包括重做其后的所有区块。
+
+image::images/mbc2_abin03.png["pow"]
+
+工作量证明还解决了在多数决策中确定代表制的问题。如果大多数基于一个IP地址一票，那么任何能够分配许多IP的人都可以颠覆它。工作量证明实质上是一个CPU一票。多数决策由最长的链代表，而链上投入的工作量最大。如果大多数CPU功能由诚实节点控制，那么诚实链将以最快的速度增长，并超越任何竞争链。要修改过去的区块，攻击者必须重做该区块及其后所有区块的工作量证明，然后赶上并超越诚实节点的工作。稍后我们将说明，随着添加后续区块，较慢的攻击者追赶的概率将呈指数下降。
+
+为了补偿硬件速度的提高和随着时间的推移对运行节点的兴趣的不断变化，工作证明的难度由确定为每小时平均块数的移动平均值确定。如果生成速度太快，难度会增加。
+
+==== 网络
+
+运行网络的步骤如下：
+
+1.新交易将广播到所有节点。
+2.每个节点将新交易收集到一个区块中。
+3.每个节点都在努力为其区块查找困难的工作量证明。
+4.当节点找到工作量证明时，它将区块广播到所有节点。
+5. Nodes accept the block only if all transactions in it are valid and not already spent.
+6. Nodes express their acceptance of the block by working on creating the next block in the chain, using the hash of the accepted block as the previous hash.
+
+Nodes always consider the longest chain to be the correct one and will keep working on extending it. If two nodes broadcast different versions of the next block simultaneously, some nodes may receive one or the other first. In that case, they work on the first one they received, but save the other branch in case it becomes longer. The tie will be broken when the next proof-of-work is found and one branch becomes longer; the nodes that were working on the other branch will then switch to the longer one.
+
+New transaction broadcasts do not necessarily need to reach all nodes. As long as they reach many nodes, they will get into a block before long. Block broadcasts are also tolerant of dropped messages. If a node does not receive a block, it will request it when it receives the next block and realizes it missed one.
+
+==== Incentive
+By convention, the first transaction in a block is a special transaction that starts a new coin owned by the creator of the block. This adds an incentive for nodes to support the network, and provides a way to initially distribute coins into circulation, since there is no central authority to issue them. The steady addition of a constant of amount of new coins is analogous to gold miners expending resources to add gold to circulation. In our case, it is CPU time and electricity that is expended.
+
+The incentive can also be funded with transaction fees. If the output value of a transaction is less than its input value, the difference is a transaction fee that is added to the incentive value of the block containing the transaction. Once a predetermined number of coins have entered circulation, the incentive can transition entirely to transaction fees and be completely inflation free.
+
+The incentive may help encourage nodes to stay honest. If a greedy attacker is able to assemble more CPU power than all the honest nodes, he would have to choose between using it to defraud people by stealing back his payments, or using it to generate new coins. He ought to find it more profitable to play by the rules, such rules that favour him with more new coins than everyone else combined, than to undermine the system and the validity of his own wealth.
+
+==== Reclaiming Disk Space
+
+++++
+<p>Once the latest transaction in a coin is buried under enough blocks, the spent transactions before it can be discarded to save disk space. To facilitate this without breaking the block's hash, transactions are hashed in a Merkle Tree <a href="#ref_seven">[7]</a> <a href="#ref_two">[2]</a> <a href="#ref_five">[5]</a>, with only the root included in the block's hash. Old blocks can then be compacted by stubbing off branches of the tree. The interior hashes do not need to be stored.</p>
+++++
+
+image::images/mbc2_abin04.png["disk"]
+
+A block header with no transactions would be about 80 bytes. If we suppose blocks are generated every 10 minutes, +80 bytes * 6 * 24 * 365 = 4.2MB+ per year. With computer systems typically selling with 2GB of RAM as of 2008, and Moore's Law predicting current growth of 1.2GB per year, storage should not be a problem even if the block headers must be kept in memory.
+
+==== Simplified Payment Verification
+It is possible to verify payments without running a full network node. A user only needs to keep a copy of the block headers of the longest proof-of-work chain, which he can get by querying network nodes until he's convinced he has the longest chain, and obtain the Merkle branch linking the transaction to the block it's timestamped in. He can't check the transaction for himself, but by linking it to a place in the chain, he can see that a network node has accepted it, and blocks added after it further confirm the network has accepted it.
+
+image::images/mbc2_abin05.png["spv"]
+
+As such, the verification is reliable as long as honest nodes control the network, but is more vulnerable if the network is overpowered by an attacker. While network nodes can verify transactions for themselves, the simplified method can be fooled by an attacker's fabricated transactions for as long as the attacker can continue to overpower the network. One strategy to protect against this would be to accept alerts from network nodes when they detect an invalid block, prompting the user's software to download the full block and alerted transactions to confirm the inconsistency. Businesses that receive frequent payments will probably still want to run their own nodes for more independent security and quicker verification.
+
+==== Combining and Splitting Value
+Although it would be possible to handle coins individually, it would be unwieldy to make a separate transaction for every cent in a transfer. To allow value to be split and combined, transactions contain multiple inputs and outputs. Normally there will be either a single input from a larger previous transaction or multiple inputs combining smaller amounts, and at most two outputs: one for the payment, and one returning the change, if any, back to the sender.
+
+image::images/mbc2_abin06.png["combining-splitting"]
+
+It should be noted that fan-out, where a transaction depends on several transactions, and those transactions depend on many more, is not a problem here. There is never the need to extract a complete standalone copy of a transaction's history.
+
+==== Privacy
+The traditional banking model achieves a level of privacy by limiting access to information to the parties involved and the trusted third party. The necessity to announce all transactions publicly precludes this method, but privacy can still be maintained by breaking the flow of information in another place: by keeping public keys anonymous. The public can see that someone is sending an amount to someone else, but without information linking the transaction to anyone. This is similar to the level of information released by stock exchanges, where the time and size of individual trades, the "tape", is made public, but without telling who the parties were.
+
+image::images/mbc2_abin07.png["privacy"]
+
+As an additional firewall, a new key pair should be used for each transaction to keep them from being linked to a common owner. Some linking is still unavoidable with multi-input transactions, which necessarily reveal that their inputs were owned by the same owner. The risk is that if the owner of a key is revealed, linking could reveal other transactions that belonged to the same owner.
+
+==== Calculations
+We consider the scenario of an attacker trying to generate an alternate chain faster than the honest chain. Even if this is accomplished, it does not throw the system open to arbitrary changes, such as creating value out of thin air or taking money that never belonged to the attacker. Nodes are not going to accept an invalid transaction as payment, and honest nodes will never accept a block containing them. An attacker can only try to change one of his own transactions to take back money he recently spent.
+
+The race between the honest chain and an attacker chain can be characterized as a Binomial Random Walk. The success event is the honest chain being extended by one block, increasing its lead by +1, and the failure event is the attacker's chain being extended by one block, reducing the gap by -1.
+
+++++
+<p>The probability of an attacker catching up from a given deficit is analogous to a Gambler's Ruin problem. Suppose a gambler with unlimited credit starts at a deficit and plays potentially an infinite number of trials to try to reach breakeven. We can calculate the probability he ever reaches breakeven, or that an attacker ever catches up with the honest chain, as follows <a href="#ref_eight">[8]</a>:</p>
+++++
+
+p = probability an honest node finds the next block
+
+q = probability the attacker finds the next block
+
+q~z~ = probability the attacker will ever catch up from z blocks behind
+
+image::images/mbc2_abin08.png["eq1"]
+
+在我们假设p> q的情况下，随着攻击者必须赶上的块数增加，概率呈指数下降。面对他的机会很大，如果他不及早地向前走，那么随着他的落后，他的机会就会越来越小。
+
+现在，我们考虑新交易的接收者需要等待多长时间，才能确定发送者无法更改交易。我们假设发件人是攻击者，他想让收件人相信他已经付款了一段时间，然后在一段时间后将其切换为还钱。发生这种情况时会通知接收方，但发送方希望为时已晚。
+
+接收者生成一个新的密钥对，并在签名前不久将公共密钥提供给发送者。这可以防止发件人通过不断地进行处理，直到他有幸能够取得足够的进展，然后再执行交易，从而提前准备区块链。一旦发送了交易，不诚实的发送者就开始在包含他交易的备用版本的并行链上秘密工作。
+
+接收者等待，直到将事务添加到一个区块中，然后再链接z个区块。他不知道攻击者所取得的确切进展量，但是假设诚实的区块花费了每个区块的平均预期时间，则攻击者的潜在进度将是具有预期值的泊松分布：
+
+image::images/mbc2_abin09.png["eq2"]
+
+为了获得攻击者现在仍然可以追上的可能性，我们将泊松密度乘以他可以取得的每一个进展量，乘以他从该点可以追上的可能性：
+
+image::images/mbc2_abin10.png["eq3"]
+
+Rearranging to avoid summing the infinite tail of the distribution...
+
+image::images/mbc2_abin11.png["eq4"]
+
+Converting to C code...
+
+[source,c]
+----
+#include <math.h>
+double AttackerSuccessProbability(double q, int z)
+{
+    double p = 1.0 - q;
+    double lambda = z * (q / p);
+    double sum = 1.0;
+    int i, k;
+    for (k = 0; k <= z; k++)
+    {
+        double poisson = exp(-lambda);
+        for (i = 1; i <= k; i++)
+            poisson *= lambda / i;
+        sum -= poisson * (1 - pow(q / p, z - k));
+    }
+    return sum;
+}
+----
+
+运行一些结果，我们可以看到概率随z呈指数下降。
+----
+q=0.1
+z=0 P=1.0000000
+z=1 P=0.2045873
+z=2 P=0.0509779
+z=3 P=0.0131722
+z=4 P=0.0034552
+z=5 P=0.0009137
+z=6 P=0.0002428
+z=7 P=0.0000647
+z=8 P=0.0000173
+z=9 P=0.0000046
+z=10 P=0.0000012
+----
+----
+q=0.3
+z=0 P=1.0000000
+z=5 P=0.1773523
+z=10 P=0.0416605
+z=15 P=0.0101008
+z=20 P=0.0024804
+z=25 P=0.0006132
+z=30 P=0.0001522
+z=35 P=0.0000379
+z=40 P=0.0000095
+z=45 P=0.0000024
+z=50 P=0.0000006
+----
+解决P小于0.1％...
+----
+P < 0.001
+q=0.10 z=5
+q=0.15 z=8
+q=0.20 z=11
+q=0.25 z=15
+q=0.30 z=24
+q=0.35 z=41
+q=0.40 z=89
+q=0.45 z=340
+----
+
+====结论
+我们提出了一种不依赖信任的电子交易系统。我们从数字签名制成的硬币的通常框架开始，该框架提供了对所有权的强大控制，但是如果没有防止双重支出的方法，它是不完整的。为了解决这个问题，我们提出了一种使用工作量证明的对等网络来记录交易的公共历史记录，如果诚实的节点控制了大多数CPU能力，则对于攻击者而言，更改记录很快就在计算上变得不切实际。该网络的非结构化简单性十分强大。节点几乎不需要协调就可以全部工作。由于消息不会路由到任何特定的地方，只需要尽最大的努力进行传递，因此不需要标识它们。节点可以随意离开并重新加入网络，接受工作量证明链作为它们离开时发生的事情的证明。他们以CPU能力投票，通过扩展有效区块来表示接受有效区块，并通过拒绝对其进行操作来拒绝无效区块。任何需要的规则和激励措施都可以通过这种共识机制来实施。
+
+==== References
+++++
+<p>
+<span id="ref_one">[1]</span> W. Dai, "b-money," <a href="http://www.weidai.com/bmoney.txt"><em>http://www.weidai.com/bmoney.txt</em></a>, 1998.
+</p>
+<p>
+<span id="ref_two">[2]</span> H. Massias, X.S. Avila, and J.-J. Quisquater, "Design of a secure timestamping service with minimal trust requirements," In 20th Symposium on Information Theory in the Benelux, May 1999.
+</p>
+<p>
+<span id="ref_three">[3]</span> S. Haber, W.S. Stornetta, "How to time-stamp a digital document," In Journal of Cryptology, vol 3, no 2, pages 99-111, 1991.
+</p>
+
+<p>
+<span id="ref_four">[4]</span> D. Bayer, S. Haber, W.S. Stornetta, "Improving the efficiency and reliability of digital time-stamping," In Sequences II: Methods in Communication, Security and Computer Science, pages 329-334, 1993.
+</p>
+
+<p>
+<span id="ref_five">[5]</span>S. Haber，W.S.Stornetta，“为串的安全名称”，在第四届ACM计算机和通信安全会议论文集中，第28-35页，1997年4月
+</p>
+
+<p>
+<span id="ref_six">[6]</span> A. Back，“ Hashcash-拒绝服务对策”，<a href="http://www.hashcash.org/papers/hashcash.pdf"><em>http：//www.hashcash.org/papers/hashcash.pdf</em></a>，2002年。
+</p>
+
+<p>
+<span id="ref_seven">[7] </span>R.C.Merkle，Proc中的“公共密钥密码系统的协议”。1980年IEEE安全与隐私研讨会，IEEE计算机协会，第122-133页，1980年4月。
+</p>
+
+<p>
+<span id="ref_eight">[8]</span>W. Feller，“概论及其应用简介”，1957年。
+</p>
+++++
+
+===许可证
+
+该白皮书由中本聪于2008年10月发布。后来（2009年）作为支持文档添加到了比特币软件中，并带有相同的MIT许可证。根据MIT许可的条款，本书已复制了该文档，没有进行任何格式化（格式除外）：
+
+The MIT License (MIT)
+版权(c)2008中本聪
+
+特此免费授予获得此软件和相关文档文件（“软件”）副本的任何人无限制使用软件的权利，包括但不限于使用，复制，修改，合并的权利，发布，分发，再许可和/或出售本软件的副本，并允许具备软件的人员这样做，但须满足以下条件：
+
+以上版权声明和此许可声明应包含在本软件的所有副本或大部分内容中。
+
+本软件按“原样”提供，不提供任何形式的明示或暗示担保，包括但不限于对适销性，特定目的的适用性和非侵权性的担保。无论是由于本软件引起的，出于本软件的使用或与本软件的使用或其他处理有关的合同，侵权或其他形式的损害或其他责任。((("", startref="whitethirteen")))((("", startref="nakamatothirteen")))((("", startref="BCwhitethirteen")))

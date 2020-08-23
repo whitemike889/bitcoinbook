@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[ملحق]
+== مُعامِلات لغة خط التعاملات، الثوابت، والرموز
+
+[ملاحظة]
+====
+Tables and descriptions sourced from https://en.bitcoin.it/wiki/Script[].
+====
+
+<<tx_script_ops_table_pushdata>> shows operators for pushing values onto the stack.((("transactions", "scripts and Script language", id="TRlang14")))((("scripting", "Script language operators, constants, and symbols", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+. إضافة القيم إلى المكدسة
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| OP_0 أو OP_FALSE | 0x00 | تتم إضافة مصوفة فارغة إلى المكدسة 
+| 1 to 75 | 0x01 to 0x4b | Push the next N bytes onto the stack, where N is 1 to 75 bytes
+| OP_PUSHDATA1 | 0x4c | البايت التالي يحتوي على ع، قم بإضافة البايتات الـ ع التالية إلى المكدسة
+| OP_PUSHDATA2 | 0x4d | البايتين التاليين من المخطوطة يحتويان على ع، قم بإضافة الـ ع بايت التالية إلى المكدسة
+| OP_PUSHDATA4 | 0x4e | البايت التالي من المخطوطة يحتوي على ع، قم بإضافة الـ ع بايت التالية إلى المكدسة
+| OP_1NEGATE | 0x4f | يضيف القيمة "–1" إلى قمة المكدسة
+| OP_RESERVED | 0x50 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_1 or OP_TRUE| 0x51 | يقوم بإضافة القيمة "1" إلى قمة المكدسة
+| OP_2 to OP_16 | 0x52 to 0x60 |  For OP_N, push the value "N" onto the stack, e.g., OP_2 pushes "2"
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> shows conditional flow control operators.
+
+[[tx_script_ops_table_control]]
+. الانسياب الشرطي للتحكم
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| OP_NOP | 0x61 | لا تقم بشيء (Do nothing)
+| OP_VER | 0x62 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_IF | 0x63 | قم بتنفيذ الجُمَل التالية إذا كان العنصر الأعلى في المكدسة ليس هو العدد 0
+| OP_NOTIF | 0x64 | قم بتنفيذ الجُمَل التالية إذا كان العنصر الأعلى في المكدسة ليس هو العدد 0
+| OP_VERIF | 0x65 | Halt&#x2014;Invalid transaction
+| OP_VERNOTIF | 0x66 | Halt&#x2014;Invalid transaction
+| OP_ELSE | 0x67 | قم بالتنفيذ فقط إذا كانت الجملة السابقة لم يتم تنفيذها
+| OP_ENDIF | 0x68 | إنهِ كتلة OP_IF، OP_NOTIF، OP_ELSE 
+| OP_VERIFY | 0x69 | تتحقق من العنصر الأعلى في المكدسة، تقوم بإيقاف التعامل وجعله غير صالح إذا لم تكن قيمة العنصر الأعلى هي القيمة صواب TRUE
+| OP_RETURN | 0x6a | تقوم بإيقاف التعامل وجعله غير صالح
+|=======
+
+<<tx_script_ops_table_timelock>> shows operators used for timelocks.
+
+[[tx_script_ops_table_timelock]]
+.Timelock operations
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| OP_CHECKLOCKTIMEVERIFY (previously OP_NOP2) | 0xb1 | Marks transaction as invalid if the top stack item is greater than the transaction's nLockTime field, otherwise script evaluation continues as though an OP_NOP was executed. Transaction is also invalid if 1. the stack is empty; or 2. the top stack item is negative; or 3. the top stack item is greater than or equal to 500000000 while the transaction's nLockTime field is less than 500000000, or vice versa; or 4. the input's nSequence field is equal to 0xffffffff. The precise semantics are described in BIP-65 
+| OP_CHECKSEQUENCEVERIFY (previously OP_NOP3) | 0xb2 | Marks transaction as invalid if the relative lock time of the input (enforced by BIP 0068 with nSequence) is not equal to or longer than the value of the top stack item. The precise semantics are described in BIP-112|
+|=======
+
+<<tx_script_ops_table_stack>> shows operators used to manipulate the stack.
+
+[[tx_script_ops_table_stack]]
+. عمليات المكدسة
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| OP_TOALTSTACK | 0x6b | تقوم بحذف العنصر الأعلى من مكدسة وأضافته إلى مكدسة بديلة
+| OP_FROMALTSTACK | 0x6c | تقوم بحذف العنصر الأعلى من مكدسة بديلة وأضافته إلى مكدسة
+| OP_2DROP | 0x6d | تقوم بحذف العنصرين الأعليين من المكدسة
+| OP_2DUP | 0x6e | تقوم بتكرار العنصرين الأعليين من عناصر المكدسة
+| OP_3DUP | 0x6f | تقوم بتكرار العناصر الثلاثة العليا من عناصر المكدسة
+| OP_2OVER | 0x70 | تقوم بنسخ العنصرين الثالث والرابع من عناصر المكدسة إلى قمتها
+| OP_2ROT | 0x71 | تنقل العنصرين الخامس والسادس من عناصر المكدسة إلى قمتها
+| OP_2SWAP | 0x72 | تقوم بتبديل الزوجين الأعليين من عناصر المكدسة
+| OP_IFDUP | 0x73 | تقوم بتكرار العنصر الأعلى في المكدسة إذا لم يكن صفراً 0
+| OP_DEPTH | 0x74 | تقوم بعد العناصر الموجودة في المكدسة وتضيف ناتج العد كعنصر أعلى في المكدسة
+| OP_DROP | 0x75 | تقوم بحذف العنصر الأعلى من المكدسة
+| OP_DUP | 0x76 | تقوم بتكرار العنصر الأعلى في المكدسة
+| OP_NIP | 0x77 | تقوم بحذف العنصر الثاني في المكدسة
+| OP_OVER | 0x78 | تقوم بنسخ العنصر الثاني في المكدسة وأضافته إلى أعلى المكدسة
+| OP_PICK | 0x79 | تقوم بحذف القيمة ع من قمة المكدسة، وتقوم بعد ذلك بنسخ العنصر الذي ترتيبه ع من عناصر المكدسة إلى قمة المكدسة
+| OP_ROLL | 0x7a | تقوم بحذف القيمة ع من القمة، وتقوم بعدها بنقل العنصر الذي ترتيبة ع إلى قمة المكدسة
+| OP_ROT | 0x7b | تقوم بتدوير (Rotate) العناصر الثلاثة الموجودة في قمة المكدسة
+| OP_SWAP | 0x7c | Swap the top two items on the stack
+| OP_TUCK | 0x7d | Copy the top item and insert it between the top and second item
+|=======
+
+<<tx_script_ops_table_splice>> shows string operators.
+
+[[tx_script_ops_table_splice]]
+. العمليات الخاصة بوصل السلاسل
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| _OP_CAT_ | 0x7e | هذا المعامل معطل (يقوم بضم العنصرين الأعليين في المكدسة)
+| _OP_SUBSTR_ | 0x7f | معطل (يعيد جزء من الجملة substring)
+| _OP_LEFT_ | 0x80 | معطل (يعيد جزء أيسر من الجملة left substring)
+| _OP_RIGHT_ | 0x81 | معطل (يعيد جزء أيمن من الجملة right substring)
+| OP_SIZE | 0x82 | يحسب طول السلسلة بالنسبة للعنصر الأعلى ويقوم بإضافة النتيجة إلى المكدسة 
+|=======
+
+<<tx_script_ops_table_binmath>> shows binary arithmetic and boolean logic operators.
+
+[[tx_script_ops_table_binmath]]
+. العمليات الحسابية الثنائية والشرطية
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| _OP_INVERT_ | 0x83 | معطل (يقوم بعكس الخانات الثنائية للعنصر الأعلى في المكدسة)
+| _OP_AND_ | 0x84 | معطل (يقوم بعمل عملية "و" بالمنطق الثنائي Boolean AND على العنصرين الأعليين في المكدسة)
+| _OP_OR_ | 0x85 | معطل (يقوم بعمل عملية "أو" بالمنطق الثنائي Boolean OR على العنصرين الأعليين في المكدسة)
+| _OP_XOR_ | 0x86 | معطل (يقوم بعمل عملية "أو الحصرية" بالمنطق الثنائي Boolean XOR على العنصرين الأعليين في المكدسة)
+| OP_EQUAL | 0x87 | يقوم بإضافة القيم صواب (١) TRUE (1) إذا كان العنصرين الأعليين متساويين تماماً، يضيف القيمة خطأ (٠) FALSE (0) عدا ذلك
+| OP_EQUALVERIFY | 0x88 | مثل المعامل OP_EQUAL، ولكن يقوم بتشغيل المعامل OP_VERIFY من بعده ليتم إيقاف التعامل إذا لم تكن القيمة الناتجة هي صواب TRUE
+| OP_RESERVED1 | 0x89 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_RESERVED2 | 0x8a | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>> shows numeric (arithmetic) operators.
+
+[[tx_script_ops_table_numbers]]
+. المعاملات العددية
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| OP_1ADD | 0x8b | يضيف القيمة ١ إلى العنصر الأعلى   
+| OP_1SUB | 0x8c | يطرح القيمة ١ من العنصر الأعلى
+| _OP_2MUL_ | 0x8d | معطل (يقوم بضرب العنصر الأعلى في القيمة ٢)
+| _OP_2DIV_ | 0x8e | معطل (يقوم بقسمة العنصر الأعلى على القيمة ٢)
+| OP_NEGATE | 0x8f | يقوم بعكس إشارة العنصر الأعلى
+| OP_ABS | 0x90 | يغير إشارة العنصر الأعلى إلى موجب 
+| OP_NOT | 0x91 |إذا كان العنصر الأعلى ٠ ثنائي أو ١ ثنائي يقوم بتحويله إلى نقيضه الثنائي وإلا يعيد القيمة ٠ 
+| OP_0NOTEQUAL | 0x92 |إذا كان العنصر الأعلى هو ٠ يعيد القيمة ٠، عدا ذلك يعيد القيمة ١
+| OP_ADD | 0x93 | يقوم بحذف العنصرين الأعليين، يضيفهما لبعضهما ويقوم بإضافة الناتج للمكدسة
+| OP_SUB | 0x94 | يقوم بحذف العنصرين الأعليين، يطرح الأول من الثاني ويقوم بإضافة الناتج للمكدسة
+| _OP_MUL_ | 0x95 | Disabled (multiply top two items)
+| _OP_DIV_ | 0x96 | Disabled (divide second item by first item)
+| _OP_MOD_ | 0x97 | Disabled (remainder divide second item by first item)
+| _OP_LSHIFT_ | 0x98 | Disabled (shift second item left by first item number of bits)
+| _OP_RSHIFT_ | 0x99 | Disabled (shift second item right by first item number of bits)
+| OP_BOOLAND | 0x9a | يقوم بتشغيل المعامل الثنائي المنطقي "و" Boolean AND على العنصرين الأعليين 
+| OP_BOOLOR | 0x9b | يقوم بتشغيل المعامل الثنائي المنطقي "أو" Boolean OR على العنصرين الأعليين
+| OP_NUMEQUAL | 0x9c | يعيد القيمة صواب TRUE إذا كان العنصرين الأعليين عبارة عن عددين متساويين
+| OP_NUMEQUALVERIFY | 0x9d | مثل المعامل NUMEQUAL، ولكن يقوم بتشغيل المعامل OP_VERIFY من بعده ليتم إيقاف التعامل إذا لم تكن القيمة الناتجة هي صواب TRUE
+| OP_NUMNOTEQUAL | 0x9e | يعيد القيمة صواب TRUE إذا كان العنصرين الأعليين عبارة عن عددين غير متساويين
+| OP_LESSTHAN | 0x9f | يعيد القيمة صواب TRUE إذا كان العنصر الثاني أقل من العنصر الأعلى
+| OP_GREATERTHAN | 0xa0 | يعيد القيمة صوابTRUE إذا كان العنصر الثاني أكبر من العنصر الأعلى
+| OP_LESSTHANOREQUAL | 0xa1 | يعيد القيمة صواب TRUE إذا كان العنصر الثاني أقل من أو يساوي العنصر الأعلى
+| OP_GREATERTHANOREQUAL | 0xa2 |يعيد القيمة صواب TRUE إذا كان العنصر الثاني أكبر من أو يساوي العنصر الأعلى
+| OP_MIN | 0xa3 | يعيد العنصر الأصغر من بين العنصرين الأعليين 
+| OP_MAX | 0xa4 | يعيد العنصر الأكبر من بين العنصرين الأعليين
+| OP_WITHIN | 0xa5 | يعيد القيمة صواب TRUE إذا كان العنصر الثالث تقع قيمته في المدى بين قيمة العنصر الثاني (أو كان مساوياً له) والعنصر الأول
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> shows cryptographic function operators.
+
+[[tx_script_ops_table_crypto]]
+. المعاملات الخاصة بالتشفير والمزج
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| OP_RIPEMD160 | 0xa6 | يعيد رقم المزج RIPEMD160 للعنصر الأعلى
+| OP_SHA1 | 0xa7 | يعيد رقم المزج SHA1 للعنصر الأعلى
+| OP_SHA256 | 0xa8 | يعيد رقم المزج SHA256 للعنصر الأعلى
+| OP_HASH160 | 0xa9 | يعيد رقم المزج الناتج من تطبيق RIPEMD160(SHA256(x)) للعنصر الأعلى
+| OP_HASH256 | 0xaa | يعيد رقم المزج الناتج من تطبيق SHA256(SHA256(x)) للعنصر الأعلى
+| OP_CODESEPARATOR | 0xab | يقوم بوضع علامة على بداية البيانات التي تم التحقق من توقيعها
+| OP_CHECKSIG | 0xac | يقوم بحذف المفتاح العام والتوقيع من المكدسة ويتحقق من صحة التوقيع بالنسبة لبيانات التعامل الممزوجة، يعيد القيمة صواب TRUE إذا تطابقا
+| OP_CHECKSIGVERIFY | 0xad | مثل المعامل CHECKSIG، مُطبقاً من بعده المعامل  OP_VERIFY لإيقاف التعامل إذا لم يكن الناتج هو صواب TRUE
+| OP_CHECKMULTISIG | 0xae |  يقوم بتشغيل المعامل CHECKSIG على كل زوج توقيع-مفتاح عام معطى. يجب أن يحدث تطابق في كل الأزواج. توجد عله حدثت عندما تم القيام بعمل تنفيذ لشفرة تقوم بهذا المعامل فحواها أن المعامل أصبح يقوم بسحب قيمة إضافية من المكدسة، تستطيع التغلب على هذه العلة بوضع المعامل OP_NOP قبل المعامل OP_CHECKMULTISIG
+| OP_CHECKMULTISIGVERIFY | 0xaf | مثل المعامل CHECKMULTISIG، متبوعاً بالمعامل OP_VERIFY للإيقاف إذا لم يكن الناتج صواب TRUE
+|=======
+
+<<tx_script_ops_table_nop>> shows nonoperator symbols.
+
+[[tx_script_ops_table_nop]]
+.Nonoperators
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| OP_NOP1 to OP_NOP10 | 0xb0 to 0xb9 | Does nothing, ignored
+|=======
+
+
+<<tx_script_ops_table_internal>> shows operator codes reserved for use by the internal script parser.((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+.رموز المعاملات المحجوزة للاستخدام الداخلي من قِبَل المحلل النحوي
+[options="header"]
+|=======
+| الرمز | القيمة (بالستعشري) | وصف
+| OP_SMALLDATA | 0xf9 | يمثل حقل بيانات صغير 
+| OP_SMALLINTEGER | 0xfa | يمثل حقل بيانات رقمي صغير 
+| OP_PUBKEYS | 0xfb | يمثل حقول مفتاح عام
+| OP_PUBKEYHASH | 0xfd | يمثل حقل رقم مزج مفتاح عام
+| OP_PUBKEY | 0xfe | يمثل حقل مفتاح عام
+| OP_INVALIDOPCODE | 0xff | يمثل أي رمز لمعامل غير مخصص حالياً
+|=======

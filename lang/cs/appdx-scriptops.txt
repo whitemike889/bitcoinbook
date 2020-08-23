@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[appendix]
+== Operátory, konstanty a symboly transakčního skryptovacího jazyka
+
+[NOTE]
+====
+Tables and descriptions sourced from https://en.bitcoin.it/wiki/Script[].
+====
+
+<<tx_script_ops_table_pushdata>> shows operators for pushing values onto the stack.((("transactions", "scripts and Script language", id="TRlang14")))((("scripting", "Script language operators, constants, and symbols", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+.Vkládání hodnot na zásobník
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| OP_0 nebo OP_FALSE | 0x00 | Na zásobník je vloženo prázdné pole
+| 1 to 75 | 0x01 to 0x4b | Push the next N bytes onto the stack, where N is 1 to 75 bytes
+| OP_PUSHDATA1 | 0x4c | Další byte skryptu obsahuje N. Na zásobník je vloženo následujících N bytů.
+| OP_PUSHDATA2 | 0x4d | Následující dva byty skriptu obsahují N. Na zásobník je vloženo následujících N bytů.
+| OP_PUSHDATA4 | 0x4e | Následující čtyři byty skriptu obsahují N. Na zásobník je vloženo následujících N bytů.
+| OP_1NEGATE | 0x4f | Na zásobník je vložena hodnota "–1".
+| OP_RESERVED | 0x50 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_1 or OP_TRUE| 0x51 | Na zásobník je vložena hodnota "1"
+| OP_2 to OP_16 | 0x52 to 0x60 |  For OP_N, push the value "N" onto the stack, e.g., OP_2 pushes "2"
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> shows conditional flow control operators.
+
+[[tx_script_ops_table_control]]
+.Podmíněné řízení toku
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| OP_NOP | 0x61 | Nedělá nic
+| OP_VER | 0x62 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_IF | 0x63 | Pokud není na vrcholu zásobníku 0 vykoná následující příkazy
+| OP_NOTIF | 0x64 | Pokud je na vrcholu zásobníku 0 vykoná následující příkazy
+| OP_VERIF | 0x65 | Halt&#x2014;Invalid transaction
+| OP_VERNOTIF | 0x66 | Halt&#x2014;Invalid transaction
+| OP_ELSE | 0x67 | Vykoná se pouze pokud předchozí příkaz nebyl vykonán
+| OP_ENDIF | 0x68 | Ukončuje blok OP_IF, OP_NOTIF, OP_ELSE
+| OP_VERIFY | 0x69 | Zkontroluje vrchol zásobníku, pokud na něm není TRUE, výpočet se zastaví, transakce je neplatná. 
+| OP_RETURN | 0x6a | Zastaví výpočet  - Neplatná transakce
+|=======
+
+<<tx_script_ops_table_timelock>> shows operators used for timelocks.
+
+[[tx_script_ops_table_timelock]]
+.Timelock operations
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| OP_CHECKLOCKTIMEVERIFY (previously OP_NOP2) | 0xb1 | Marks transaction as invalid if the top stack item is greater than the transaction's nLockTime field, otherwise script evaluation continues as though an OP_NOP was executed. Transaction is also invalid if 1. the stack is empty; or 2. the top stack item is negative; or 3. the top stack item is greater than or equal to 500000000 while the transaction's nLockTime field is less than 500000000, or vice versa; or 4. the input's nSequence field is equal to 0xffffffff. The precise semantics are described in BIP-65 
+| OP_CHECKSEQUENCEVERIFY (previously OP_NOP3) | 0xb2 | Marks transaction as invalid if the relative lock time of the input (enforced by BIP 0068 with nSequence) is not equal to or longer than the value of the top stack item. The precise semantics are described in BIP-112|
+|=======
+
+<<tx_script_ops_table_stack>> shows operators used to manipulate the stack.
+
+[[tx_script_ops_table_stack]]
+.Zásobníkové operace
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| OP_TOALTSTACK | 0x6b | Odebere položku zvrcholu z zásobníku a vloží ji do alternativního zásobníku
+| OP_FROMALTSTACK | 0x6c | Odebere položku z vrcholu alternativního zásobníku a vloží ji do zásobníku
+| OP_2DROP | 0x6d | Odebere z vrcholu zásobníku dvě položky.
+| OP_2DUP | 0x6e | Zdvojí dvě položky na vrcholu zásobníku
+| OP_3DUP | 0x6f | Zdvojí tři položky na vrcholu zásobníku
+| OP_2OVER | 0x70 | Okopíruje třetí a čtvrtou položku v zásobníku na jeho vrchol
+| OP_2ROT | 0x71 | Okopíruje pátou a šestou položku v zásobníku na jeho vrchol
+| OP_2SWAP | 0x72 | Prohodí dvě položky na vrcholu zásobníku
+| OP_IFDUP | 0x73 | Zdvojí položku na vrcholu zásobníku, pokud není 0
+| OP_DEPTH | 0x74 | Na vrchol zásobníku vloží počet položek v zásobníku
+| OP_DROP | 0x75 | Odebere položku z vrcholu zásobníku
+| OP_DUP | 0x76 | Zdvojí položku na vrcholu zásobníku
+| OP_NIP | 0x77 | Odebere druhou položku z vrcholu zásobníku
+| OP_OVER | 0x78 | Okopíruje druhou položku z vrcholu zásobníku a vloží ji na vrchol
+| OP_PICK |  0x79 | Odebere hodnotu N z vrcholu zásobníku, poté okopíruje N-tou položku od vrcholu zásobníku na jeho vrchol
+| OP_ROLL | 0x7a | Odebere hodnotu N z vrcholu zásobníku, poté přesune N-tou položku od vrcholu zásobníku na jeho vrchol
+| OP_ROT | 0x7b | Provede rotaci tří prvků na vrcholu zásobníku (123 na 231)
+| OP_SWAP | 0x7c | Swap the top two items on the stack
+| OP_TUCK | 0x7d | Copy the top item and insert it between the top and second item
+|=======
+
+<<tx_script_ops_table_splice>> shows string operators.
+
+[[tx_script_ops_table_splice]]
+.Řetězcové spojovací operace
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| _OP_CAT_ | 0x7e | Neplatné (spojí dvě položky z vrcholu zásobníku)
+| _OP_SUBSTR_ | 0x7f | Neplatné (vrátí podřetězec)
+| _OP_LEFT_ | 0x80 | Neplatné (vrátí levý podřetězec)
+| _OP_RIGHT_ | 0x81 | Neplatné (vrátí pravý podřetězec)
+| OP_SIZE | 0x82 | Spočte délku řetězce na vrcholu zásobníku a výsledek vloží na vrchol 
+|=======
+
+<<tx_script_ops_table_binmath>> shows binary arithmetic and boolean logic operators.
+
+[[tx_script_ops_table_binmath]]
+.Binární aritmetika a podmínky
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| _OP_INVERT_ | 0x83 | Neplatné (neguje bity v položce na vrcholu zásobníku)
+| _OP_AND_ | 0x84 | Neplatné (bitový AND vrchních dvou položek zásobníku)
+| _OP_OR_ | 0x85 | Neplatné (bitový OR vrchních dvou položek zásobníku)
+| _OP_XOR_ | 0x86 | Neplatné (bitový XOR vrchních dvou položek zásobníku)
+| OP_EQUAL | 0x87 | Pokud se vrchní dvě položky na zásobníku rovnají vloží na vrchol zásobníku TRUE (1), jinak FALSE (0) 
+| OP_EQUALVERIFY | 0x88 | Stejné jako OP_EQUAL, ale navíc spustí OP_VERIFY
+| OP_RESERVED1 | 0x89 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_RESERVED2 | 0x8a | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>> shows numeric (arithmetic) operators.
+
+[[tx_script_ops_table_numbers]]
+.Aritmetické operátory
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| OP_1ADD | 0x8b | Přičte 1 k položce na vrcholu zásobníku   
+| OP_1SUB | 0x8c | Odečte 1 od položky na vrcholu zásobníku
+| _OP_2MUL_ | 0x8d | Neplatné (vynásobí položku na vrcholu zásobníku hodnotou 2)
+| _OP_2DIV_ | 0x8e | Neplatné (vydělí položku na vrcholu zásobníku hodnotou 2)
+| OP_NEGATE | 0x8f | Obrátí znaménko položky na vrcholu zásobníku
+| OP_ABS | 0x90 | Změní znaménko položky na vrcholu zásobníku na kladné
+| OP_NOT | 0x91 | Pokud je položka na vrcholu zásobníku 0 nebo 1, prohodí je, jinak vrátí 0.
+| OP_0NOTEQUAL | 0x92 | Pokud položka na vrcholu zásobníku je 0 vrátí 0, jinak vrátí 1.
+| OP_ADD | 0x93 | Vyzvedne dvě vrchní položky ze zásobníku, sečte je a výsledek vloží na vrchol zásobníku
+| OP_SUB | 0x94 | Vyzvedne dvě vrchní položky ze zásobníku, odečte první od druhé a výsledek vloží na vrchol zásobníku
+| _OP_MUL_ | 0x95 | Disabled (multiply top two items)
+| _OP_DIV_ | 0x96 | Disabled (divide second item by first item)
+| _OP_MOD_ | 0x97 | Disabled (remainder divide second item by first item)
+| _OP_LSHIFT_ | 0x98 | Disabled (shift second item left by first item number of bits)
+| _OP_RSHIFT_ | 0x99 | Disabled (shift second item right by first item number of bits)
+| OP_BOOLAND | 0x9a | Výsledek logického AND dvou položek z vrcholu zásobníku
+| OP_BOOLOR | 0x9b | Výsledek logického OR dvou položek z vrcholu zásobníku
+| OP_NUMEQUAL | 0x9c | Vrací TRUE, pokud dvě položky na vrcholu zásobníku mají shodné číselné hodnoty
+| OP_NUMEQUALVERIFY | 0x9d | Stejné jako NUMEQUAL, ale následně zavolá OP_VERIFY
+| OP_NUMNOTEQUAL | 0x9e | Vrací TRUE pokud dvě položky na vrcholu zásobníku nemají shodné číselné hodnoty
+OP_LESSTHAN | 0x9f | Vrací TRUE pokud druhá položka z vrcholu zásobníku je menší než první
+| OP_GREATERTHAN | 0xa0 | Vrací TRUE pokud druhá položka z vrcholu zásobníku je větší než první
+| OP_LESSTHANOREQUAL | 0xa1 | Vrací TRUE pokud druhá položka z vrcholu zásobníku je menší nebo rovna než první
+| OP_GREATERTHANOREQUAL | 0xa2 | Vrací TRUE pokud druhá položka z vrcholu zásobníku je větší nebo rovna než první
+| OP_MIN | 0xa3 | Vrátí menší z dvou vrchních položek na zásobníku 
+| OP_MAX | 0xa4 | Vrátí větší z dvou vrchních položek na zásobníku
+| OP_WITHIN | 0xa5 |  Vrací TRUE pokud třetí položka z vrcholu zásobníku je mezi druhou položkou (nebo jí rovna) a první položkou.
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> shows cryptographic function operators.
+
+[[tx_script_ops_table_crypto]]
+.Kryptografické a hašovací operace
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| OP_RIPEMD160 | 0xa6 | Vrací RIPEMD160 haš položky z vrcholu zásobníku
+| OP_SHA1 | 0xa7 | Vrací  SHA1 haš položky z vrcholu zásobníku
+| OP_SHA256 | 0xa8 | Vrací SHA256 haš položky z vrcholu zásobníku
+| OP_HASH160 | 0xa9 | Vrací RIPEMD160(SHA256(x)) haš položky z vrcholu zásobníku
+| OP_HASH256 | 0xaa | Vrací SHA256(SHA256(x)) haš položky z vrcholu zásobníku
+| OP_CODESEPARATOR | 0xab | Označí začátek dat, která budou kontrolována na jejich podepsanost
+| OP_CHECKSIG | 0xac | Z vrcholu zásobníku odebere veřejný klíč a podpis a ověří, zda podpis odpovídá hašovaným datům transakce, vrací TRUE pokud se shodují
+| OP_CHECKSIGVERIFY | 0xad | Stejné jako CHECKSIG, ale následně zavolá OP_VERIFY 
+| OP_CHECKMULTISIG | 0xae | Zavolá CHECKSIG pro každý poskytnutý pár podpisu a veřejného klíče. Všechny musí souhlasit. Kvůli chybě v implementaci je vrácena přebytečná hodnota označená prefixem ON_NOP.
+| OP_CHECKMULTISIGVERIFY | 0xaf | stejné jako CHECKMULTISIG, ale následně zavolá OP_VERIFY
+|=======
+
+<<tx_script_ops_table_nop>> shows nonoperator symbols.
+
+[[tx_script_ops_table_nop]]
+.Nonoperators
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| OP_NOP1 to OP_NOP10 | 0xb0 to 0xb9 | Does nothing, ignored
+|=======
+
+
+<<tx_script_ops_table_internal>> shows operator codes reserved for use by the internal script parser.((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+. Rezervované OP kódy pro vnitřní použití parserem
+[options="header"]
+|=======
+| Symbol | Hodnota (hex) | Popis
+| OP_SMALLDATA | 0xf9 | Reprezentuje malé datové pole 
+| OP_SMALLINTEGER | 0xfa | Reprezentuje malé číselné datové pole
+| OP_PUBKEYS | 0xfb | Reprezentuje položky veřejného klíče
+| OP_PUBKEYHASH | 0xfd | Reprezentuje položku haše veřejného klíče
+| OP_PUBKEY | 0xfe | Reprezentuje položku veřejného klíče
+| OP_INVALIDOPCODE | 0xff | Reprezentuje jakýkoliv OP kód dosud nepřiřazený
+|=======

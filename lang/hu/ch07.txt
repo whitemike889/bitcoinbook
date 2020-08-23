@@ -1,0 +1,1047 @@
+[[ch07]]
+[[adv_transactions]]
+== Fejlettebb tranzakciók és szkriptek
+
+[[ch07_intro]]
+=== Bevezetés
+
+Az előző fejezetben bemutattuk a bitcoin tranzakciók alapelemeit és megvizsgáltuk a tranzakciók leggyakoribb típusát, a P2PKH szkriptet. Ebben a fejezetben megvizsgáljuk a fejlettebb szkripteket és azt, hogy miként tudjuk őket felhasználni összetett feltételeket megvalósító tranzakciók létrehozására.
+
+Először a több aláírást megkövetelő _multisignature_ szkripteket vizsgáljuk meg. Ezután megvizsgáljuk a második leggyakoribb tranzakciós szkriptet, a _Pay-to-Script-Hash_t, amely komplex szkriptek új világát nyitja meg. Ezután megvizsgáljuk az új szkript műveleteket, amelyek _zárolási idő_ révén idődimenziót adnak a bitcoinhoz. Végül megvizsgáljuk a _Segregated Witness_t, amely a tranzakciók szerkezetének architekturális változása.
+
+[[multisig]]
+=== Multisignature
+
+((("tranzakciók", "haladó", "több aláírást megkövetelő multisig scriptek")))((("tranzakciók", "haladó", id="Tadv07")))((("scriptelés", "több aláírást megkövetelő multisig scriptek", id="Smulti07")))((("több aláírást megkövetelő multisig scriptek")))A több aláírást megkövetelő scriptek az N darab nyilvános kulcsot tartalmazó scriptben úgy állítják be a feltételt, hogy az akadály feloldásához a nyilvános kulcsok közül legalább M darabhoz szerepelnie kell az aláírásnak. Ezt másképp N-ből-M sémának hívják, ahol N az összes kulcs darabszáma, M pedig az ellenőrzéshez szükséges aláírások küszöbszáma. Például egy 3-ból-2 többszörös aláírást megkövetelő script esetén 3 nyilvános kulcs szerepel, mint lehetséges aláíró, és közülük legalább 2-nek kell aláírnia a tranzakciót ahhoz, hogy érvényes legyen, és el lehessen költeni.
+
+A könyv írásának idején a szabványos többszörös aláírást megkövetelő scriptek legfeljebb 3 nyilvános kulcsot sorolhatnak föl, vagyis az 1-ből-1 és a 3-ből-3 közötti bármilyen többszörös aláírást megkövetelő script használható. A 3 kulcsra történő korlátozást lehet, hogy feloldják, mire ez a könyv megjelenik. Az +isStandard()+ függvény hívásával állapítható meg, hogy a hálózat éppen mit fogad el. Megjegyezzük, hogy a 3 kulcsra történő korlátozás csak a szabványos ("csupasz") többszörös aláírást megkövetelő scriptekre vonatkozik, a Pay-to-Script-Hash (P2SH) scriptbe csomagolt multisig scriptekre nem. A P2SH multisig scriptek 15 kulcsra vannak korlátozva, ami megengedi akár a 15-ből-15 multisiget is. A P2SH-ról <<p2sh>>-ben tanulunk majd.
+
+Az N-ből-M többszörös aláírást megkövetelő script zárolási feltételének általános alakja:
+
+----
+M <Public Key 1> <Public Key 2> ... <Public Key N> N CHECKMULTISIG
+----
+
+ahol az N a felsorolt nyilvános kulcsok száma, M pedig a kimenet elkötéséhez minimálisan szükséges aláírások száma.
+
+Egy 3-ból-2 többszörös aláírást megkövetelő script zároló feltétele a következőképpen néz ki:
+
+----
+2 <Public Key A> <Public Key B> <Public Key C> 3 CHECKMULTISIG
+----
+
+A fenti zároló script egy olyan zárolást feloldó scripttel elégíthető ki, amely legalább két aláírást tartalmaz:
+
+----
+<Signature B> <Signature C>
+----
+vagy a három felsorolt nyilvános kulcshoz tartozó  titkos kulcsok közül bármelyik kettő aláírása.
+
+A két script együttesen a lenti egyesített ellenőrző scriptet alkotja:
+
+----
+<Signature B> <Signature C> 2 <Public Key A> <Public Key B> <Public Key C> 3 CHECKMULTISIG
+----
+
+A végrehajtáskor a fenti egyesített script akkor és csak akkor fog IGAZ eredményt adni, ha a zárolást feloldó script megfelel a zároló script által beállított feltételeknek, vagyis esetünkben a zárolást feloldó script tartalmaz két titkos kulccsal két aláírást, és a két titkos kulcs megfelel az akadályként állított három nyilvános kulcs közül kettőnek.
+
+[[multisig_bug]]
+===== Egy hiba a CHECKMULTISIG végrehajtásában
+
+((("szkriptek", "többszörös aláírást megkövetelő szkriptek", "CHECKMULTISIG hiba")))((("CHECKMULTISIG hiba kikerülése")))Van egy hiba a ++CHECKMULTISIG++ végrehajtásában, ami kerülő megoldást tesz szükségessé. Amikor a +CHECKMULTISIG+ végrehajtódik, M+N+2 elemet kellene levennie a veremről paraméterként. A hiba miatt azonban a +CHECKMULTISIG+ egy extra értéket, vagyis a vártnál egyel több értéket vesz le.
+
+Nézzük ezt meg részletesebben az előző ellenőrzési példát használva:
+
+----
+<Signature B> <Signature C> 2 <Public Key A> <Public Key B> <Public Key C> 3 CHECKMULTISIG
+----
+
+Először a +CHECKMULTISIG+ leveszi a legfelső elemet, amely +N+ (ebben a példában "3"). Ezután levesz +N+ elemet, amelyek az aláírni képes nyilvános kulcsok, ebben a példában az A, B és C nyilvános kulcsok. Ezután levesz egy elemet, amely +M+, a minimális létszám (hogy hány aláírás szükséges). Itt M = 2. Ezen a ponton a +CHECKMULTISIG+ az utolsó +M+ elemet kellene hogy levegye, amelyek az aláírások, és ellenőriznie kellene érvényességüket. Sajnálatos módon azonban, egy implementációs hiba folytán a +CHECKMULTISIG+ egyel több elemet (összesen M+1-et) vesz le a kelleténél. Az extra elem az aláírások ellenőrzése során eldobásra kerül, így közvetlen hatása nincs magára a +CHECKMULTISIG+-re. Azonban egy extra értéknek jelen kell lennie, mert ha nincs, az verem hibát és sikertelen szkript futást eredményez, amikor a +CHECKMULTISIG+ üres veremről próbál elemet levenni (ami a tranzakciót érvénytelenné teszi). Mivel az extra elem eldobásra kerül, bármi lehet, de bevett szokásként a +0+-t használják.
+
+Mivel ez a hiba a konszenzusszabályok részévé vált, most már örökre ezt kell használni. Ezért a helyes szkript ellenőrzés így néz ki:
+
+----
+0 <Signature B> <Signature C> 2 <Public Key A> <Public Key B> <Public Key C> 3 CHECKMULTISIG
+----
+
+Így a multisigben ténylegesen használt feloldó szkript nem:
+
+----
+<Signature B> <Signature C>
+----
+
+hanem ehelyett:
+
+----
+0 <Signature B> <Signature C>
+----
+
+Mostantól, ha egy multisig feloldó szkriptet lát, számíthat arra, hogy egy extra +0+-t lát az elején, amelynek egyetlen célja annak a hibának a megkerülése, amely véletlenül konszenzusszabállyá vált.((("", startref="Smulti07")))
+
+[[p2sh]]
+=== Fizetés script hashnek (Pay to Script Hash, P2SH)
+
+((("tranzakciók", "fejlett", "Pay-to-Script-Hash")))((("scripting", "Pay-to-Script-Hash", id="Spay07")))A „fizetés script hashnek” (Pay-to-scipt-hash, P2SH) 2012-ben lett bevezetve. A P2SH egy hatékony új tranzakciótípus, amely nagyban leegyszerűsíti a bonyolult tranzakciós szkriptek használatát. Lássunk egy gyakorlati példát arra, hogy miért van szükség P2SH-ra.
+
+(("felhasználási esetek", "import/export", id="mohamseven")))((("scriptelés", "Pay-to-Script-Hash", "import/export példa")))((("Pay-to-Script-Hash (P2SH)", "import/export példa")))Az <<ch01_intro_what_is_bitcoin>> fejezetben bemutattuk Mohammedet, aki elektronikai termékeket importál Dubaiba. Mohammed cége sokat használja a multisig scipteket a cég számláinál. A multisig scriptek a leggyakrabban használt korszerű bitcoin scriptek, melyek nagyon hatékonyak. Mohammed cége az összes ügyfél befizetésénél multisig scripteket használ, ezt a könyvelők „követelés”-nek hívják. A multisig scriptek használata esetén az ügyfelek befizetései úgy vannak zárolva, hogy a felszabadításukhoz legalább két aláírásra van szükség: Mohammedtől és az egyik üzlettársától, vagy az ügyvédjétől, akinek van egy tartalék kulcsa. Az ilyen multisig tranzakciók lehetővé teszik a cégvezetés számára a felügyeletet, és védenek a lopás, hűtlen kezelés (sikkasztás) és a veszteségek ellen.
+
+Az így kapott script egészen hosszú, és így néz ki:
+
+----
+2 <Mohammed nyilvános kulcsa> <Partner1 Public Key> <Partner2 Public Key> <Partner3 Public Key> <Attorney Public Key> 5 CHECKMULTISIG
+----
+
+Noha a multisig scriptek nagyon hatékonyak, de nehezen használhatók. A fenti script esetén Mohammednek a fizetés előtt mindegyik ügyfélhez el kell juttatnia a fenti scriptet. Mindegyik ügyfélnek különleges bitcoin pénztárcát kell használnia, melynek szoftvere képes egyedi tranzakciós scriptek előállítására, és mindegyik ügyfélnek tudnia kell, hogyan lehet az egyedi scripttel egy tranzakciót létrehozni. Ezen kívül a kapott tranzakció kb. ötször nagyobb lesz, mint egy egyszerű fizetési tranzakció, mivel a script nagyon hosszú nyilvános kulcsokat tartalmaz. Az extra-nagy tranzakció terhét tranzakciós díjak formájában az ügyfél állja. Végül, az ilyen nagy tranzakciós scripteket mindegyik teljes csomópont az UTXO készletben, a RAM-ban tartja mindaddig, amíg el nem költik. Ezen okok miatt a bonyolult zároló scriptek használata a gyakorlatban nehéz.
+
+A „fizetés-script-hasnek” (P2SH, Pay-to-Script-Hash) scripteket azért fejlesztették ki, hogy megoldják ezeket a gyakorlati nehézségeket, és a bonyolult scriptek használatát is olyan egyszerűvé tegyék, mint egy bitcoin címre történő fizetést. A P2SH fizetési mód esetében a zároló scriptet a digitális ujjlenyomata, egy kriptográfiai hash helyettesíti. Amikor utóbb egy olyan tranzakció keletkezik, amely megkísérli elkölteni az UTXO-t, akkor ennek a zárolást feloldó scripten kívül tartalmaznia kell azt a scriptet is, amelynek hashe egyezik az eredetileg megadott hash-sel. A P2SH egyszerűen azt jelenti, hogy „fizess annak a scriptnek, amelynek hashe egyezik ezzel a hash-sel, a script később, a kimenet elköltésekor lesz bemutatva”.
+
+((("redeem script")))((("scriptelés", "redeem script")))A P2SH tranzakciókban a zároló scriptet egy hash helyettesíti, melynek _redeem script_ (beváltási script) a neve, mert a beváltáskor kerül majd bemutatásra a rendszernek. A <<without_p2sh>> P2SH nélkül mutatja a példa scriptet, míg a <<with_p2sh>> ugyanezt a sciptet P2SH kódolással mutatja.
+
+[[without_p2sh]]
+.Egy bonyolult script, P2SH nélkül 
+|=======
+| Zároló script | 2 PubKey1 PubKey2 PubKey3 PubKey4 PubKey5 5 CHECKMULTISIG
+| Zárolást feloldó script | Sig1 Sig2
+|=======
+
+[[with_p2sh]]
+.Egy bonyult script P2SH használatával 
+|=======
+| Beváltási script | 2 PubKey1 PubKey2 PubKey3 PubKey4 PubKey5 5 CHECKMULTISIG
+| Zároló script | HASH160 <a beváltási script 20 bájtos hashe> EQUAL
+| Zárolást feloldó script | Sig1 Sig2 <redeem script>
+|=======
+
+Amint az a fenti táblázatokból látható, a P2SH használatakor a nem jelenik meg az a bonyolult script a kimenetben (redeem script, beváltási script), amely a kimenet elköltésének feltételeit részletezi. Csak a script egy hashe van jelen a zárolást végző scriptben, a beváltási script pedig később, a kimenet elköltésekor, a zárolást feloldó script részeként kerül bemutatásra. Ennek révén a komplexitás és a tranzakciós díjak terhe a tranzakció küldőjéről a címzettre tevődik/tolódik át.
+
+Tekintsük Mohammed cégét, a bonyolult multisig scriptet és az eredményként kapott P2SH scriptet.
+
+Nézzük először azt a multisig scriptet, melyet Mohammed cége az összes bejövő fizetésnél használ:
+
+----
+2 <Mohammed nyilvános kulcsa> <Partner1 Public Key> <Partner2 Public Key> <Partner3 Public Key> <Attorney Public Key> 5 CHECKMULTISIG
+----
+
+Ha a fenti üres helyekre behelyettesítjük a tényleges nyilvános kulcsokat, (melyek 04-gyel kezdődő, 520 bites számok), akkor a script nagyon hosszú lesz:
+
+----
+2
+04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C58704A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D99779650421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800 5 CHECKMULTISIG
+----
+
+Ehelyett az egész script egy 20 bájtos hash-sel ábrázolható, ha először az SHA256 hash algoritmust, majd a RIPEMD160 algoritmust alkalmazzuk a scriptre.
+
+A script hash előállításához a +libbitcoin-explorer+-t (+bx+) használjuk a parancssoron, a következőképpen:
+
+----
+echo \
+2 \
+[04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C587] \
+[04A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49] \
+[047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D9977965] \
+[0421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5] \
+[043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800] \
+5 CHECKMULTISIG \
+| bx script-encode | bx sha256 | bx ripemd160
+54c557e07dde5bb6cb791c7a540e0a4796f5e97e
+----
+
+A fenti összetett parancs Mohammed multisig beváltási szkriptjét először sorosított hexadecimális bitcoin szkriptként kódolja. A következő +bx+ parancs kiszámítja ennek SHA256 hashét. A következő +bx+ parancs újra hash-sel a RIPEMD160-nal, előállítva a végső szkript hasht:
+
+Mohammed redeem scriptjének 20 bájtos hashe:
+
+----
+54c557e07dde5bb6cb791c7a540e0a4796f5e97e
+----
+
+A P2SH tranzakció a kimenetét a hosszabb redeem script helyett a következő scripttel zárolja:
+
+----
+HASH160 54c557e07dde5bb6cb791c7a540e0a4796f5e97e EQUAL
+----
+
+amely láthatóan sokkal rövidebb. Ahelyett, hogy azt mondanánk, „fizess erre az 5 kulcsból álló multisig címre”, az ezzel egyenértékű P2SH tranzakció a következő: „fizess annak a scriptnek, melynek ez és ez a hashe”. Mohammed ügyfeleinek csupán ezt a jóval rövidebb zároló scriptet kell megadniuk. Ha Mohammed el akarja költeni ezt az UTXO-t, akkor be kell mutatnia az eredeti beváltási scriptet (azt, amelynek hashével az UTXO zárolva lett), valamint a zárolást feloldó aláírásokat, pl. így:
+
+----
+<Sig1> <Sig2> <2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG>
+----
+
+A két script összekapcsolása két szakaszban történik. Először a beváltási script hash-e kerül ellenőrzésre, hogy megegyezik-e a zároló scriptben lévő hash-sel:
+
+----
+<2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG> HASH160 <redeem scriptHash> EQUAL
+----
+Ha a beváltási script hashe megegyezik a zároló szkriptben lévő hash-sel, akkor zárolást feloldó szkript egymagában kerül végrehajtásra, hogy megszüntesse a zárolást:
+
+----
+<Sig1> <Sig2> 2 PK1 PK2 PK3 PK4 PK5 5 CHECKMULTISIG
+----
+
+Majdnem az összes ebben a fejezetben tárgyalt szkript csak P2SH szkriptként implementálható. Közvetlenül nem használhatók UTXO zároló szkriptként.((("", startref="mohamseven")))
+
+==== P2SH címek
+
+((("scriptelés", "Pay-to-Script-Hash", "címek")))((("Pay-to-Script-Hash (P2SH)", "címek")))((("bitcoin továbbfejlesztési javaslatok", "P2SH cím formátuma (BIP-13)")))P2SH egy másik fontos jellemzője, hogy a script hash címként is kódolható, amint azt a BIP-13 definiálja. A P2SH címek a script 20 bájtos hashének Base58Check kódolásával állnak elő, pont úgy, ahogy a bitcoin címek a nyilvános kulcs 20 bájtos hashének Base58Check kódolásával. A P2SH címek az „5” verzió előtagot használják, ez pedig „3”-mal kezdődő Base58Check kódolású címeket eredményez. 
+
+Például Mohammed bonyolult scriptjéből hashelés és Base58Check kódolás után a +39RF6JqABiHdYHkfChV6USGMe6Nsr66Gzw+ P2SH cím lesz. Erről a +bx+ paranccsal bizonyosodhatunk meg:
+
+----
+echo \
+'54c557e07dde5bb6cb791c7a540e0a4796f5e97e'\
+ | bx address-encode -v 5
+39RF6JqABiHdYHkfChV6USGMe6Nsr66Gzw
+----
+
+
+Mohammed ezt a „címet” oda tudja adni az ügyfeleinek, ők pedig szinte bármilyen pénztárcát használhatnak, és úgy fizethetnek, mintha egy egyszerű bitcoin címről lenne szó. A 3-as előtag jelzi nekik, hogy különleges címről van szó, ami nem nyilvános kulcshoz, hanem script hash-hez tartozik, egyébként azonban pontosan úgy működik, mint egy bitcoin címre történő kifizetés.
+
+A P2SH címek elrejtik a bonyolultságot, a fizetést végrehajtó személy nem látja a scriptet.
+
+==== A P2SH előnyei
+
+((("scriptelés","Pay-to-script-hash (P2SH)","előnyei")))((("Pay-to-script-hash (P2SH)","előnyei")))A „fizetés script hashnek” a következő előnyökkel rendelkezik a kimenetek zárolására használt bonyolult scriptek közvetlen használatához képest:
+
+* a bonyolult szkripteket a tranzakció kimenetben a rövidebb ujjlenyomatok helyettesítik, ezáltal a tranzakció kisebb lesz
+* a scriptek címként kódolhatók, ezért a küldőnek és a küldő pénztárcájának nincs szüksége a P2SH bonyolult megvalósítására
+* a P2SH a script előállításának a terhét a küldőről a címzettre hárítja át
+* a P2SH a hosszú script adattárolásának a terhét a kimenetről (amit azon kívül, hogy a blokklánc tárol, az UTXO készletben is megtalálható) a bemenetre (amit csak a blokklánc tárol) hárítja át
+* a P2SH a hosszú script adattárolási terhét a jelenből (fizetés) a jövőbe (amikor elköltik) viszi át
+* a P2SH a hosszú script miatti tranzakciós díjat a küldőről a címzettre hárítja, mert a címzettnek kell a hosszú beváltási scriptet bemutatnia, ha el akarja költeni az összeget.
+
+==== A beváltási script és az ellenőrzés
+
+((("pay-to-script-hash (P2SH)","isStandard ellenőrzés")))((("pay-to-script-hash (P2SH)","beváltási script-je")))A Bitcoin Core kliens 0.9.2-es változata előtt a „fizetés script hasnek” (Pay-to-Script-Hash) az +IsStandard()+ függvény által engedélyezett szabványos bitcoin tranzakciós script típusokra korlátozódott. Ez azt jelenti, hogy az összeg elkötésekor bemutatott beváltási script a következő szabványos típusok valamelyike lehetett: P2PK, P2PKH vagy Multi-Sig.
+
+A Bitcoin Core kliens 0.9.2-es verziója óta a P2SH scriptek bármilyen érvényes scriptet tartalmazhatnak, ami a P2SH szabványt sokkal rugalmasabbá teszi, és sok újfajta, összetett tranzakciótípust kipróbálását/használatát teszi lehetővé.
+
+Egy P2SH beváltási szkripten belül nem lehet újabb P2SH szkript, mivel a P2SH specifikáció nem engedi meg a rekurziót. Ezen kívül, bár technikailag lehetséges a +RETURN+ (lásd <<op_return>>) beillesztése egy beváltási szkriptbe (mivel a szabályokban semmi sem akadályozza meg ezt), ennek nincs gyakorlati jelentősége, mivel a +RETURN+ végrehajtása az ellenőrzés során a tranzakciót érvényteleníteni fogja.
+
+Megjegyezzük, hogy mivel a beváltási script addig nem jelenik meg a hálózatban, amíg meg nem próbáljuk meg elkölteni a P2SH kimenetet, ezért ha egy érvénytelen beváltási script hashével zárolunk egy kimenetet, akkor ez feldolgozásra fog kerülni. Az UTXO zárolása sikeres lesz, de a kimenetet nem tudjuk elkölteni, mivel az összeg elköltésekor meg kell adni a beváltási scriptet, ezt viszont a rendszer nem fogja elfogadni, mert nem érvényes. Ez kockázatot jelent, mivel a P2SH-val úgy zárolhatók bitcoinok, hogy később sem lehet elkölteni őket. A hálózat még akkor is elfogadja a P2SH zárolási scriptet, ha az egy érvénytelen beváltási scriptnek felel meg, mert a script hashe semmilyen utalást sem ad arra vonatkozóan, hogy a hash milyen scriptnek felel meg.((("", startref="Spay07")))
+
+[WARNING]
+====
+((("figyelmeztetés és óvatosság", "nem szándékos bitcoin zárolás")))A P2SH zároló scriptek a beváltási script hashét tartalmazzák, ami semmilyen utalást sem ad magára a beváltási scriptre vonatkozóan. A P2SH tranzakció még akkor is érvényes lesz, ha a beváltási script érvénytelen. A P2SH-val véletlenül úgy is zárolhatók a bitcoinok, hogy később sem lesznek elkölthetők.
+====
+
+
+
+[[op_return]]
+=== Adatrögzítő kimenet (RETURN)
+
+((("tranzakciók", "fejlett", "adatrögzítő kimenet")))((("scriptelés", "adatrögzítő kimenet")))((("RETURN művelet")))((("adatrögzítés (nem pénzügyi adat)")))((("nem pénzügyi adat")))((("blokklánc (a)", "nem pénzügyi adat rögzítése")))((("digitális közjegyzői szolgáltatások")))A bitcoin elosztott és időbélyeggel ellátott főkönyvének, a blokkláncnak a pénz továbbításon kívül számos egyéb alkalmazása lehetséges. A bitcoin rendszer biztonságára és ellenálló képességére alapozva sok fejlesztő próbált a script nyelvvel egyéb alkalmazásokat létrehozni, pl. digitális közjegyzői szolgáltatásokat, részvény tanúsítványokat és intelligens szerződéseket. A korai kísérletekben, melyben a bitcoin script nyelvét használták erre célra, ez olyan tranzakciók létrehozásával járt, melyek a blokkláncban egyéb adatokat tároltak, például egy állomány digitális ujjlenyomatát. Ily módon a tranzakció segítségével bárki meg tudta állapítani, hogy létezett-e ez az állomány egy adott időpontban.
+
+((("blokklánc meghízása")))((("meghízás")))((("elköltetlen tranzakció kimenetek (UTXO)")))((("UTXO készletek")))A bitcoin blokkláncának adattárolásra történő használata független a bitcoin pénztovábbítástól, és ellentmondásos terület. Sok fejlesztő az ilyen felhasználást helytelennek tartja és elutasítja. Mások a blokklánc erősségének jelét látják benne, és bátorítani akarják az ilyen kísérletezést. Azok, akik ellenzik a nem pénzügyi adatok kezelését, úgy érvelnek, hogy ez a „blokklánc meghízásához” vezet, és akadályt jelent azok számára, akik teljes bitcoin csomópontokat futtatnak, mert olyan adatok tárolási költségeit kell elviselniük, amelyeknek eredetileg nem a blokkláncban lenne a helye. Még nagyobb gond, hogy az ilyen tranzakciók olyan UTXO-kat hoznak létre, melyek nem költhetők el, mert a címzett bitcoin címét használják, mint szabad formátumú 20 bájtos mezőt. Mivel a címet adatként használják, a cím semmilyen titkos kulcsnak sem felel meg, és az így kapott UTXO soha sem költhető el, a kifizetés nem valós. Ez a gyakorlat okozta a memóriában tartott UTXO készlet méretének megnövekedését, mivel ezek a tranzakciók _sohasem_ költhetők el, emiatt sohasem lesznek eltávolítva az UTXO-k közül, ami azt UTXO adatbázis méretének állandó növekedését, "meghízását" okozza.
+
+A Bitcoin Core kliens 0.9 verziójában a +RETURN+ művelet bevezetésével egy kompromisszumra jutottak. A +RETURN+-nel a fejlesztők 80 bájt nem pénzügyi adatot tárolhatnak a tranzakció kimenetében. Az „ál” UTXO-kkal ellentétben azonban a +RETURN+ művelettel egy _bizonyíthatóan nem elkölthető_ kimenet jön létre, amit nem kell az UTXO készletben tárolni. A +RETURN+ kimenetek a blokkláncban tárolódnak, emiatt tárhelyet foglalnak és hozzájárulnak a blokklánc méretének növekedéséhez, de nem tárolódnak az UTXO készletben, és emiatt nem hizlalják feleslegesen az UTXO memória területet, és a teljes csomópontok RAM költségét sem növelik.
+
+A +RETURN+ script így néz ki:
+
+----
+RETURN <data>
+----
+
+((("Proof of Existence")))((("DOCPROOF prefix")))Az adatrész 80 bájtra van korlátozva, és leggyakrabban egy hash értéknek felel meg, pl. az SHA256 algoritmus kimenetének (32 bájt). Sok alkalmazás egy előtagot helyez az adatok elé, hogy könnyebb legyen az alkalmazás azonosítása. Például a http://proofofexistence.com[Proof of Existence] digitális közjegyzői szolgáltatás a +DOCPROOF+ 8 bájtos előtagot használja, amely hexadecimális alakban +44 4f 43 50 52 4f 4f 46+.
+
+Emlékeztetünk rá, hogy a +RETURN+-höz nem tartozik „zárolás feloldó script”, amellyel „elkölthető” lenne a +RETURN+. A +RETURN+-nek épp az az értelme, hogy nem költhető el az adott kimenetben zárolt pénz, és ezért nem kell a kimenetet az UTXO készletben tartani, mint potenciálisan elkölthető kimenetet – a +RETURN+ _bizonyíthatóan nem elkölthető_. A +RETURN+ általában egy nulla összegű bitcoin kimenet, mivel az ilyen kimenethez rendelt bitcoinok örökre elvesznének. Ha egy +RETURN+-re hivatkozunk egy tranzakció bemenetében, a script ellenőrző motor félbeszakítja az ellenőrző script végrehajtását, és a tranzakciót érvénytelennek tekinti. A +RETURN+ végrehajtása lényegében azt okozza, hogy a script +FALSE+ értékkel „TÉR VISSZA” (RETURN) és leáll. Emiatt ha véletlenül egy +RETURN+ kimenetre hivatkozunk egy tranzakció bemenetében, akkor a tranzakció érvénytelen lesz.
+
+Egy érvényes tranzakciónak (amely megfelel az +IsStandard()+ ellenőrzéseknek) csak egy +RETURN+ kimenete lehet. A +RETURN+ kimenet azonban tetszőleges egyéb kimeneti típusokkal kombinálható.
+
+A Bitcoin Core 0.10.0 verziójában két új parancssori opció használható. A +datacarrier+ a +RETURN+ tranzakciók továbbítását és bányászatát szabályozza: alapértelmezésben "1" az értéke, és engedélyezi őket. A +datacarriersize+ opciónak egy numerikus paramétere van, mellyel a +RETURN+ szkript maximális hossza adható meg bájtokban, és alapértelmezett értéke 83, ami legfeljebb 80 bájt +RETURN+ adatot plusz egy bájt +RETURN+ műveleti kódot és két bájt +PUSHDATA+ műveleti kódot tesz lehetővé.
+
+[NOTE]
+====
+A +RETURN+-nél eredetileg 80 bájtos korlátozást javasoltak, de a korlát 40 bájtra lett csökkentve, mikor ez az új jellemző megjelent. 2015 februárjában a Bitcoin Core 0.10.0-ban a korlátot ismét 80-ra emelték. A csomópontok választhatnak, hogy nem továbbítják vagy nem bányásszák ki a +RETURN+-t tartalmazó tranzakciókat, vagy csak azokat a +RETURN+ tranzakciókat továbbítják és bányásszák ki, mely 80 bájtnál kevesebb adatot tartalmaznak.
+====
+
+=== Záridők
+
+((("tranzakciók", "fejlettebb", "időzárak")))((("szkriptek", "záridők", id="Stimelock07")))((("nLocktime mező")))((("szkriptek", "záridők", "célja")))((("záridők", "célja")))Az záridők olyan korlátozások tranzakciókra vagy kimenetekre, amelyek csak bizonyos időpont után engedik az elköltést. A bitcoin az elejétől kezdve rendelkezett tranzakciós szintű záridő funkcióval, amit a tranzakció +nLocktime+ mezője valósít meg. 2015 vége felé és 2016 közepén két új záridő funkciót vezettek be, amelyek UTXO szintű záridőket kínálnak. Ezek a +CHECKLOCKTIMEVERIFY+ és +CHECKSEQUENCEVERIFY+.
+
+Az záridők hasznosak tranzakciók antedatálására, és a pénz jövőbeli dátumhoz való zárolására. Ennél is fontosabb, hogy az záridők kiterjesztik a bitcoin szkripteket az idő dimenziójába, megnyitva az ajtót az összetett többlépcsős intelligens szerződések előtt.
+
+[[transaction_locktime_nlocktime]]
+==== Tranzakció zárolási idő (nLocktime)
+
+((("szkriptelés", "zárolási idő", "nLocktime")))((("zárolási idő", "nLocktime")))A bitcoin kezdettől fogva rendelkezik tranzakciós szintű zárolási idő funkcióval. A tranzakció zárolási ideje tranzakciós szintű beállítás (egy mező a tranzakció adatszerkezetében), amely a legkorábbi időt definiálja, amikor a tranzakció érvényes lehet, továbbítható a hálózaton, és hozzáadható a blokklánchoz. A referencia kliens kódjában +nLockTime+ a változó neve, ezért ilyen néven is ismert. A legtöbb tranzakcióban 0 az értéke, ami az azonnali továbbításnak és végrehajtásnak felel meg. Ha az +nLocktime+ nem nulla, és 500 millió alatti szám, akkor blokkmagasságként van értelmezve, és azt jelenti, hogy a tranzakció nem érvényes, és a megadott blokkmagasság elérése előtt nem kerül továbbításra ill. nem kerül be a blokkláncba. Ha az érték 500 millió vagy afeletti, akkor Unix időbélyeget (az 1970. jan. 1. óta eltelt másodpercek számát) jelenti, és a tranzakció a megadott idő előtt nem érvényes. A zárolási idővel rendelkező tranzakciókat, melyekben jövőbe mutató idő vagy jövőbeli blokk szerepel, az őket létrehozó rendszerben kell megőrizni, és csak akkor szabad a bitcoin hálózatba továbbítani, ha már érvényesekké váltak. Ha egy tranzakciót a megadott +nLocktime+ idő előtt továbbítanak a hálózatra, akkor az első csomópont érvénytelennek tekinti, és nem továbbítja azt más csomópontoknak. A zárolási idő megfelel egy papír alapú csekk antedatálásának.
+
+[[locktime_limitations]]
+===== A tranzakció zárolási idő korlátai
+
+Az +nLocktime+ korlátja, hogy bár lehetővé teszi néhány output jövőbeli felhasználását, addig nem teszi lehetetlenné, hogy azokat addig elköltsék. Nézzük meg a következő példát magyarázatként.
+
+((("felhasználási esetek", "kávé vásárlás", id="alicesseven")))Alice aláír egy tranzakciót, amelyben az egyik kimenetét Bob címére küldi, és az +nLocktime+-ot 3 hónappal későbbi időpontra állítja be. Alice elküldi a tranzakciót Bobnak. A tranzakcióval Alice és Bob tudják, hogy:
+
+* Bob nem válthatja be a tranzakciót, amíg 3 hónap el nem telt.
+* Bob 3 hónap elteltével továbbíthatja a tranzakciót.
+
+Azonban:
+
+* Alice újabb tranzakciót készíthet, ugyanazon bemenetek kettős költésével, zárolási idő nélkül. Így Alice ugyanazt az UTXO-t 3 hónap eltelte előtt elköltheti.
+* Bob számára nincs garancia, hogy Alice nem fogja ezt megtenni.
+
+Fontos megérteni a tranzakció +nLocktime+ korlátait. Az egyetlen garancia, hogy Bob 3 hónap eltelte előtt nem tudja beváltani azt. Nincs garancia arra, hogy Bob megkapja a pénzt. Az ilyen garancia elérése érdekében a zárolási idő korlátozást magára az UTXO-ra kell helyezni, és a zárolási szkript részét kell képeznie, nem pedig a tranzakcióét. Ezt az zárolási idő következő formájával, az úgynevezett Check Lock Time Verify-jal lehet elérni.
+
+==== Check Lock Time Verify (CLTV)
+
+((("Check Lock Time Verify (CLTV)", id="cltv07")))((("időzárak", "Check Lock Time Verify (CLTV)")))((("szkriptek", "időzárak", "Check Lock Time Verify (CLTV)")))((("bitcoin továbbfejlesztési javaslatok", "CHECKLOCKTIMEVERIFY (BIP-65)")))2015 decemberben egy újfajta időzárat vezettek be a bitcoinba puha elágazásos frissítéssel. A BIP-65-ben lévő specifikáción alapulva, egy új _CHECKLOCKTIMEVERIFY_ (_CLTV_) szkript műveletet adtak hozzá a szkript nyelvhez. A +CLTV+ kimeneti, nem pedig tranzakciós (mint amilyen az +nLocktime+) időzár. Ez lehetővé teszi az időzárak sokkal rugalmasabb alkalmazását.
+
+Egyszerűen fogalmazva: a kimenet beváltási szkriptjéhez hozzáadva a +CLTV+ műveleti kódot, korlátozza a kimenetet, így azt csak a megadott idő eltelte után lehet felhasználni.
+
+[TIP]
+====
+Míg az +nLocktime+ tranzakciós szintű, addig a +CLTV+ egy kimenet alapú időzár.
+====
+
+A +CLTV+ nem helyettesíti az +nLocktime+ funkciót, hanem korlátoz bizonyos UTXO-kat úgy, hogy azok csak későbbi tranzakciókban költhetők el, ahol az +nLocktime+ értéke nagyobb vagy egyenlő értékre van beállítva.
+
+A +CLTV+ műveleti kód egy paramétert vesz bemenetként, számként kifejezve, ugyanolyan formátumban, mint az +nLocktime+ (akár blokkmagasság, akár Unix-idő). Amint azt a +VERIFY+ utótag jelzi, a +CLTV+ az a fajta műveleti kód, amely leállítja a szkript végrehajtását, ha az eredmény +FALSE+. Ha TRUE-t eredményez, a végrehajtás folytatódik.
+
+Annak érdekében, hogy egy kimenetet zároljon a +CLTV+ segítségével, beillesztheti azt a kimenet beváltási szkriptjébe, abban a tranzakcióban, amely létrehozza a kimenetet. Például, ha Alice Bob címére fizet, a kimenet általában egy P2PKH szkriptet tartalmaz, mint például:
+
+----
+DUP HASH160 <Bob' publikus kulcsának hashe> EQUALVERIFY CHECKSIG
+----
+
+Egy, mondjuk 3 hónappal későbbi időponthoz történő zároláshoz, a tranzakció P2SH tranzakció lenne, a következő beváltási szkripttel:
+
+----
+<now + 3 months> CHECKLOCKTIMEVERIFY DROP DUP HASH160 <Bob' publikus kulcsának hashe> EQUALVERIFY CHECKSIG
+----
+
+ahol +<now {plus} 3 months>+ a blokkmagasság vagy az időérték, amely a tranzakció kibányászásától számított kb. 3 hónap: az aktuális blokkmagasság {plusz} 12 960 (blokk), vagy az aktuális Unix-idő {plusz} 7 760 000 (másodperc). Egyelőre ne aggódjon a +DROP+ műveleti kód miatt, amely a +CHECKLOCKTIMEVERIFY+-t követi; hamarosan elmagyarázzuk.
+
+Amikor Bob megpróbálja elkölteni ezt az UTXO-t, egy tranzakciót készít, amely hivatkozik az UTXO-ra, mint bemenetre. Az aláírását és a nyilvános kulcsát használja az adott bemenet feloldó szkriptében, és beállítja, hogy a tranzakció +nLocktime+-ja legyen egyenlő vagy nagyobb, mint a +CHECKLOCKTIMEVERIFY+-ban lévő zárolási idő, melyet Alice állított be. Ezután Bob továbbítja a tranzakciót a bitcoin hálózatra.
+
+Bob tranzakciója a következőképpen értékelődik ki. Ha az Alice által beállított +CHECKLOCKTIMEVERIFY+ paraméter kisebb vagy egyenlő az elköltési tranzakció +nLocktime+ paraméterével, akkor a szkript végrehajtása folytatódik (úgy viselkedik, mintha „nincs művelet” vagy NOP műveleti kód lett volna végrehajtva). Ellenkező esetben a szkript végrehajtása leáll, és a tranzakció érvénytelennek minősül.
+
+Pontosabban: a +CHECKLOCKTIMEVERIFY+ sikertelen és leállítja a végrehajtást, ezáltal érvénytelenné téve a tranzakciót, ha (forrás: BIP-65):
+
+1. a verem üres, vagy
+1. a verem tetején lévő elem kisebb, mint 0, vagy
+1. a verem tetején lévő elem zárolási idejének típusa (magasság kontra időbélyeg), és az +nLocktime+ mező nem azonos, vagy
+1. a verem tetején lévő elem nagyobb, mint a tranzakció +nLocktime+ mezője, vagy
+1. a bemenet +nSequence+ mezője 0xffffffff.
+
+[NOTE]
+====
+A +CLTV+ és az +nLocktime+ ugyanazt a formátumot használja a zárolási idő leírására, akár blokkmagassággal, akár Unix-idő szerint másodpercben. Nagyon fontos, hogy ha együttesen használjuk, az +nLocktime+ formátumának meg kell egyeznie a kimenetek +CLTV+ formátumával – mindkettőnek hivatkoznia kell a blokkmagasságra vagy az időre másodpercben.
+====
+
+A végrehajtás után, ha a +CLTV+ feltétel ki lett elégítve, az azt megelőző időparaméter marad a verem tetején, és a következő szkript műveleti kódok helyes végrehajtásához +DROP+ segítségével el kell dobni. Ezért szkriptekben gyakran fogja látni, hogy a +CHECKLOCKTIMEVERIFY+-t egy +DROP+ követi.
+
+By using +nLocktime+ in conjunction with +CLTV+, the scenario described in <<locktime_limitations>> changes. Alice can no longer spend the money (because it's locked with Bob's key) and Bob cannot spend it before the 3-month locktime has expired.((("", startref="alicesseven")))
+
+A zárolási idő funkció szkriptnyelvbe történő közvetlen bevezetésével a +CLTV+ lehetővé teszi érdekes komplex szkriptek fejlesztését.((("", startref="cltv07")))
+
+A szabványt a https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki[BIP-65 (CHECKLOCKTIMEVERIFY)] határozza meg.
+
+==== Relatív időzárak
+
+Mind az +nLocktime+, mind a +CLTV+ ((("időzárak", "relatív időzárak", id="Trelative07")))((("szkriptek", "időzárak", "relatív időzárak")))((("relatív időzárak", id="relativetime07"))) _abszolút időzárak_ abban az értelemben, hogy abszolút időpontot határoznak meg. A következő két időzár funkció, amelyet megvizsgálunk, _relatív időzárak_, mivel a kimenet elköltésének feltételeként a kimenet blokkláncban való megerősítése óta eltelt időt határozzák meg.
+
+A relatív időzárak hasznosak, mert lehetővé teszik két vagy több egymástól függő tranzakció láncon kívül tartását, miközben egy tranzakcióhoz időkorlátot szabnak, amely az előző tranzakció megerősítése óta eltelt időtől függ. Más szóval, az óra nem kezd el ketyegni, amíg az UTXO-t nem rögzítik a blokkláncon. Ez a funkció különösen hasznos a kétirányú állapotcsatornákon és Lightning Networkökön, amint azt az <<state_channels>> részben látni fogjuk.
+
+A relatív időzárakat, az abszolút időzárakhoz hasonlóan, mind tranzakciószintű funkcióval, mind szkript-szintű műveleti kóddal implementálják. A tranzakciószintű relatív időzárat konszenzusszabályként implementálják az +nSequence+ értékére vonatkozóan, amely minden tranzakciós bemeneten be van állítva. A szkript szintű relatív időzítéseket a +CHECKSEQUENCEVERIFY+ (CSV) műveleti kóddal implementálják.
+
+((("bitcoin továbbfejlesztési javaslatok", "Relative lock-time using consensus-enforced sequence numbers (BIP-68)")))((("bitcoin továbbfejlesztési javaslatok", "CHECKSEQUENCEVERIFY (BIP-112)")))A relatív időzárakat a következő specifikációk alapján implementálják: https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki[BIP-68, Relative lock-time using consensus-enforced sequence numbers] és https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki[BIP-112, CHECKSEQUENCEVERIFY].
+
+A BIP-68-at és BIP-112-t 2016 májusban puha elágazásos konszenzusszabály frissítésként aktiválták.
+
+==== Relatív időzárak nSequence-szel
+
+((("nSequence mező")))((("szkriptek", "zárolási idő", "relatív zárolási idő nSequence-szel")))Relatív zárolási idő egy tranzakció minden bemenetére beállítható, a bemenetek +nSequence+ mezőinek beállításával.
+
+===== Az nSequence eredeti jelentése
+
+Az +nSequence+ mező eredeti célja az volt (de soha nem került megvalósításra), hogy lehetővé tegye a mempool tranzakcióinak módosítását. Ebben a felhasználásban egy olyan tranzakció, amelynek +nSequence+ értéke 2^32^ - 1 (0xFFFFFFFF) alatt van, olyan tranzakciót jelez, amelyet még nem véglegesítettek. Egy ilyen tranzakciót a mempoolban tartanak, amíg nem helyettesítik egy másik tranzakcióval, amely ugyanazokat a bemeneteket költi el magasabb +nSequence+ értékkel. Amint megkapnak egy tranzakciót, amelynek bemeneteinek +nSequence+ értéke 0xFFFFFFFF, akkor "véglegesítettnek" tekintik, és kibányásszák.
+
+The original meaning of +nSequence+ was never properly implemented and the value of +nSequence+ is customarily set to 0xFFFFFFFF in transactions that do not utilize timelocks. For transactions with +nLocktime+ or +CHECKLOCKTIMEVERIFY+, the +nSequence+ value must be set to less than 2^31^ for the timelock guards to have an effect, as explained below.
+
+===== nSequence, mint egy konszenzus által érvényre juttatott relatív záridő
+
+A BIP-68 aktiválása óta új konszenzusszabályok vonatkoznak bármely tranzakcióra, amely tartalmaz olyan bemenetet, amelynek +nSequence+ értéke kisebb mint 2^31^ (az 1<<31 bit nincs beállítva). Programozási szempontból ez azt jelenti, hogy ha a legnagyobb helyiértékű bit (1<<31) nincs beállítva, az egy jelzése a "relatív záridőnek". Egyébként (1<<31 be van állítva), az +nSeguence+ értéke más célokra van fenntartva, mint a +CHECKLOCKTIMEVERIFY+, az +nLocktime+, az Opt-In-Replace-By-Fee bekapcsolására, és egyéb jövőbeli fejlesztésekre.
+
+Azokat a tranzakciós bemeneteket, amelyeknek +nSequence+ értéke kisebb, mint 2^31^, relatív záridővel kell értelmezni. Az ilyen tranzakció csak akkor érvényes, ha a bemenet kora a relatív záridő értékével növekszik. Például, egy egy bemenettel rendelkező tranzakció, amelynek +nSequence+ relatív zárideje 30 blokk, csak akkor érvényes, ha legalább 30 blokk telt el attól az időponttól kezdve, amikor a bemeneten hivatkozott UTXO-t kibányászták. Mivel az +nSequence+ egy bemeneti mező, egy tranzakció tetszőleges számú záridővel rendelkező bemenetet tartalmazhat, amelyek mindegyikére elegendő időnek kell eltelnie ahhoz, hogy a tranzakció érvényes legyen. Egy tranzakció egyszerre tartalmazhat záridővel rendelkező bemeneteket (+nSequence+ <2^31^), és relatív záridő nélküli bemeneteket (+nSequence+ >=2^31^).
+
+Az +nSequence+ értékét blokkban vagy másodpercben határozzák meg, de az +nLocktime+-tól kissé eltérő formátumban. Egy típus jelölőt használnak a blokkokat és másodperceket számláló értékek megkülönböztetésére. A típus jelölőt a 23. legkisebb helyiértékű biten (vagyis 1<<22 értékkel) állítják be. Ha a típus jelölő be van állítva, akkor az +nSequence+ értékét 512 másodperc szorzójaként értelmezik. Ha a típus jelölő nincs beállítva, az +nSequence+ értékét blokkok számaként értelmezik.
+
+Amikor az +nSequence+ értékét relatív záridőként értelmezik, csak a 16 legkisebb helyiértékű bitet veszik figyelembe. Miután a jelölőket (32. és 23. biteket) kiértékelték, az +nSequence+ értékét általában egy 16 bites maszkkal "maszkolják" (pl. +nSequence+ & 0x0000FFFF).
+
+<<bip_68_def_of_nseq>> az +nSequence+ érték bináris elrendezését mutatja, ahogy azt a BIP-68 meghatározza.
+
+[[bip_68_def_of_nseq]]
+.Az nSequence kódolás BIP-68 szerinti definíciója (forrás: BIP-68)
+image::images/mbc2_0701.png["Az nSequence kódolás BIP-68 szerinti definíciója"]
+
+
+Az +nSequence+ érték konszenzus alapján történő érvényre juttatásán alapuló relatív záridőket a BIP-68 definiálja.
+
+A szabványt a https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki[BIP-68, konszenzus által érvényre juttatott sorszámokat használó relatív záridő] definiálja.
+
+==== Relatív záridő CSV-vel
+
+((("szkriptek", "záridők", "relatív záridők CHECKSEQUENCEVERIFY-jal")))((("CHECKSEQUENCEVERIFY (CSV)")))Hasonlóan a CLTV-hez és +nLocktime+-hoz, létezik egy szkript műveleti kód azokhoz a relatív záridőkhöz, amelyek a szkriptek +nSequence+ értékét használják. Ez a műveleti kód a +CHECKSEQUENCEVERIFY+, amelyre rövidebben +CSV+-ként hivatkoznak.
+
+A +CSV+ műveleti kód kiértékelése egy UTXO beváltási szkriptében csak olyan tranzakcióbeli eltöltést enged meg, aminek bemeneti +nSequence+ értéke nagyobb vagy egyenlő a +CSV+ paraméterrel. Lényegében, ez korlátozza az UTXO elköltését addig, amíg egy bizonyos számú blokk vagy másodperc eltelt az UTXO kibányászásának idejéhez képest.
+
+Mint a CLTV-nél, a +CSV+-ben lévő érték formátuma meg kell hogy egyezzen a megfelelő +nSequence+ értékével. Ha a +CSV+ blokkokban van meghatározva, akkor az +nSequence+-t is úgy kell meghatározni. Ha a +CSV+ másodpercekben van meghatározva, akkor az +nSequence+-t is úgy kell meghatározni.
+
+A relatív záridők +CSV+-vel különösen hasznosak akkor, amikor több (egymáshoz láncolt) tranzakciót hoznak létre és írnak alá, de nem továbbítják a hálózatra, hanem "láncon kívül" tartják őket. Egy gyermek tranzakciót nem lehet addig felhasználni, amíg a szülő tranzakcióval nem történtek meg a következők: továbbították a hálózatra, kibányászták, és a relatív záridőben meghatározott idő eltelt. Ennek a felhasználásnak egy alkalmazása az <<state_channels>> és <<lightning_network>> részekben látható.((("", startref="relativetime07")))((("", startref="Trelative07")))
+
+A +CSV+-t részletesebben a https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki[BIP-112, CHECKSEQUENCEVERIFY] definiálja.
+
+
+==== Median-Time-Past
+
+((("szkriptek", "záridők", "medián eltelt idő")))((("medián eltelt idő")))((("záridők", "medián eltelt idő")))A relatív záridők aktiválásának részeként megváltozott az "idő"; kiszámításának módja is a záridőkhöz (mind abszolút, mind relatív esetében). A bitcoinban apró, de nagyon jelentős különbség van az óra által mutatott idő és a konszenzusidő között. A bitcoin egy decentralizált hálózat, ami azt jelenti, hogy minden résztvevőnek megvan a saját nézőpontja az időről. A hálózaton zajló események nem történnek meg azonnal mindenütt. A hálózati késleltetést figyelembe kell venni az egyes csomópontok nézőpontjának szempontjából. Végül minden szinkronizálódik, hogy közös főkönyvet hozzon létre. A bitcoin 10 percenként konszenzusra jut a főkönyv állapotáról, ahogy az a _múltban_ létezett.
+
+The timestamps set in block headers are set by the miners. There is a certain degree of latitude allowed by the consensus rules to account for differences in clock accuracy between decentralized nodes. However, this creates an unfortunate incentive for miners to lie about the time in a block so as to earn extra fees by including timelocked transactions that are not yet mature. See the following section for more information.
+
+To remove the incentive to lie and strengthen the security of timelocks, a BIP was proposed and activated at the same time as the BIPs for relative timelocks. This is BIP-113, which defines a new consensus measurement of time called _Median-Time-Past_.
+
+Median-Time-Past is calculated by taking the timestamps of the last 11 blocks and finding the median. That median time then becomes consensus time and is used for all timelock calculations. By taking the midpoint from approximately two hours in the past, the influence of any one block's timestamp is reduced. By incorporating 11 blocks, no single miner can influence the timestamps in order to gain fees from transactions with a timelock that hasn't yet matured.
+
+Median-Time-Past changes the implementation of time calculations for +nLocktime+, +CLTV+, +nSequence+, and +CSV+. The consensus time calculated by Median-Time-Past is always approximately one hour behind wall clock time. If you create timelock transactions, you should account for it when estimating the desired value to encode in +nLocktime+, +nSequence+, +CLTV+, and +CSV+.
+
+Median-Time-Past is specified in https://github.com/bitcoin/bips/blob/master/bip-0113.mediawiki[BIP-113].
+
+[[fee_sniping]]
+==== Timelock Defense Against Fee Sniping
+
+((("scripting", "timelocks", "defense against fee-sniping")))((("timelocks", "defense against fee-sniping")))((("fees", "fee sniping")))((("security", "defense against fee-sniping")))((("sniping")))Fee-sniping is a theoretical attack scenario, where miners attempting to rewrite past blocks "snipe" higher-fee transactions from future blocks to maximize their profitability.
+
+For example, let's say the highest block in existence is block  #100,000. If instead of attempting to mine block #100,001 to extend the chain, some miners attempt to remine  #100,000. These miners can choose to include any valid transaction (that hasn't been mined yet) in their candidate block  #100,000. They don't have to remine the block with the same transactions. In fact, they have the incentive to select the most profitable (highest fee per kB) transactions to include in their block. They can include any transactions that were in the "old" block  #100,000, as well as any transactions from the current mempool. Essentially they have the option to pull transactions from the "present" into the rewritten "past" when they re-create block  #100,000.
+
+Today, this attack is not very lucrative, because block reward is much higher than total fees per block. But at some point in the future, transaction fees will be the majority of the reward (or even the entirety of the reward). At that time, this scenario becomes inevitable.
+
+To prevent "fee sniping," when Bitcoin Core creates transactions, it uses +nLocktime+ to limit them to the "next block," by default. In our scenario, Bitcoin Core would set +nLocktime+ to 100,001 on any transaction it created. Under normal circumstances, this +nLocktime+ has no effect&#x2014;the transactions could only be included in block #100,001 anyway; it's the next block.
+
+But under a blockchain fork attack, the miners would not be able to pull high-fee transactions from the mempool, because all those transactions would be timelocked to block #100,001. They can only remine  #100,000 with whatever transactions were valid at that time, essentially gaining no new fees.
+
+To achieve this, Bitcoin Core sets the +nLocktime+ on all new transactions to <current block # + 1> and sets the +nSequence+ on all the inputs to 0xFFFFFFFE to enable +nLocktime+.((("", startref="Stimelock07")))
+
+=== Szkriptek vezérlési szerkezetekkel (feltételes elágazásokkal)
+
+((("tranzakciók", "fejlettebb", "vezérlésátadásos szkriptek")))((("szkriptek", "vezérlésátadásos szkriptek", id="Sflow07")))((("feltételes elágazások", id="condition07")))((("vezérlésátadás", id="flow07")))A Bitcoin Script egyik leghatékonyabb funkciója a vezérlésátadás, más néven feltételes elágazás. Ön valószínűleg ismeri a vezérlésátadást különböző programnyelvekből, amelyek az +IF...THEN...ELSE+ konstrukciót használják. A bitcoin feltételes elágazások kicsit másképp néznek ki, de lényegében ugyanerről a konstrukcióról van szó.
+
+Elemi szinten, a bitcoin feltételes műveleti kódok lehetővé teszik olyan beváltási szkriptek létrehozását, amelyeket kétféleképp lehet feloldani egy logikai feltétel +TRUE+/+FALSE+ kimenetele alapján. Például, ha x +TRUE+, akkor a beváltási szkript A, és az ELSE beváltási szkript B.
+
+Ezen kívül, a bitcoin feltételes elágazások korlátlanul egymásba ágyazhatók. A Bitcoin Script vezérlésátadás segítségével nagyon komplex szkriptek építhetők, amelyekben akár több száz vagy több ezer végrehajtási útvonal található. Az egymásba ágyazás ugyan korlátlan, de a konszenzusszabályok bizonyos határokat szabnak egy szkript bájtban mért méretére vonatkozóan.
+
+A bitcoin a verzérlésátadást +IF+, +ELSE+, +ENDIF+ és +NOTIF+ műveleti kódokkal implementálja. Ezen kívül, a feltételes elágazások +BOOLAND+, pass:[<span class="keep-together"><code>BOOLOR</code></span>] és +NOT+ boolean operátorokat tartalmazhatnak.
+
+Első látásra a bitcoin vezérlésátadásos szkripteket megtévesztőnek találhatja. Ennek oka, hogy a Bitcoin Script egy verem alapú programozási nyelv. Ugyanúgy ahogy az +1 {plus} 1+ "fordítottnak" néz ki amikor +1 1 ADD+-ként fejezik ki, a bitcoin vezérlésátadásos szerkezetek szintén "fordítottnak" tűnnek.
+
+A legtöbb hagyományos (procedurális) programozási nyelvben a vezérlési szerkezet így néz ki:
+
+.A vezérlési szerkezet pszeudokódja a legtöbb programozási nyelven
+----
+ha (feltétel):
+  futtatandó kód, ha a feltétel igaz
+egyébként:
+  futtatandó kód, ha a feltétel hamis
+futtatandó kód mindkét esetben
+----
+
+Verem alapú programozási nyelvekben, mint a Bitcoin Script, a logikai feltétel az +IF+ elé kerül, ami miatt "fordítottnak" tűnik, vagyis így néz ki:
+
+.Bitcoin Script vezérlésátadás
+----
+feltétel
+IF
+  futtatandó kód, ha a feltétel igaz
+ELSE
+  futtatandó kód, ha a feltétel hamis
+ENDIF
+futtatandó kód mindkét esetben
+----
+
+Bitcoin Script olvasásakor vegye figyelembe, hogy a kiértékelendő feltétel az +IF+ műveleti kód _elé_ kerül.
+
+==== Feltételes elágazások VERIFY műveleti kódokkal
+
+((("VERIFY műveleti kódok")))((("IF elágazások")))((("műveleti kódok", "VERIFY")))A feltételes elágazások másik formája a Bitcoin Scriptben bármely műveleti kód, amely +VERIFY+-jal végződik. A +VERIFY+ utótag azt jelenti, hogy ha a kiértékelt feltétel nem +TRUE+, a szkript végrehajtása azonnal megszakad, és a tranzakció érvénytelen.
+
+((("őr feltételek")))Az +IF+ szerkezettől eltérően, amelyik alternatív végrehajtási útvonalakat kínál, a +VERIFY+ utótag _őr feltétel_-ként szolgál, csak abban az esetben folytatva a futtatást, ha az előfeltétel teljesül.
+
+Például, a következő szkript megköveteli Bob aláírását, és egy pre-image-et (titkot), amely egy konkrét hasht állít elő. Mindkét feltételt ki kell elégíteni a zárolás feloldásához.
+
+.Beváltási szkript +EQUALVERIFY+ őr feltétellel
+----
+HASH160 <expected hash> EQUALVERIFY <Bob's Pubkey> CHECKSIG
+----
+
+Ennek beváltásához Bobnak készítenie kell egy feloldó szkriptet, amelyik egy érvényes pre-image-et mutat be és egy aláírást:
+
+.Egy feloldó szkript, amely kielégíti az előző beváltási szkriptet
+----
+<Bob's Sig> <hash pre-image>
+----
+
+A pre-image bemutatása nélkül Bob nem tud a szkriptnek arra a részére jutni, amelyik ellenőrzi az aláírását.
+
+[role="pagebreak-after"]
+Ez a szkript +IF+ segítségével is megírható:
+
+.Beváltási szkript +IF+ őr feltétellel
+----
+HASH160 <expected hash> EQUAL
+IF
+   <Bob's Pubkey> CHECKSIG
+ENDIF
+----
+
+Bob feloldó szkriptje megegyezik az előzővel:
+
+.Egy feloldó szkript, amely kielégíti az előző beváltási szkriptet
+----
+<Bob's Sig> <hash pre-image>
+----
+
+Az +IF+-et tartalmazó szkript ugyanazt csinálja, mint a műveleti kódot és +VERIFY+ utótagot tartalmazó szkript. Mindkettő őr feltételként működik. Azonban, a +VERIFY+ konstrukció hatékonyabb, mivel kettővel kevesebb műveleti kódot használ.
+
+Tehát, mikor használjuk a +VERIFY+-t, és mikor az +IF+-et? Ha csak egy előfeltételt (őr feltételt) akarunk létrehozni, a +VERIFY+ jobb. Ha több végrehajtási útvonalat (verzérlésátadást) szeretnénk, akkor szükségünk lesz egy +IF...ELSE+ vezérlési szerkezetre.
+
+[TIP]
+====
+((("EQUAL műveleti kód")))((("műveleti kódok", "EQUAL")))((("EQUALVERIFY műveleti kód")))((("műveleti kódok", "EQUALVERIFY")))Egy olyan műveleti kód, mint az +EQUAL+ a verem tetejére helyezi az eredményt (+TRUE+/+FALSE+), így azt a rá következő műveleti kódok ki tudják értékelni. Ezzel szemben, az +EQUALVERIFY+ műveleti kód nem hagy semmit a verem tetején. Azon a műveleti kódok, amelyek +VERIFY+-jal végződnek, nem hagyják az eredményt a verem tetején.
+====
+
+==== Vezérlésátadás használata szkriptekben
+
+A vezérlésátadás egy nagyon gyakori felhasználása a Bitcoin Scriptben olyan beváltási szkript építése, amelyik többféle végrehajtási útvonalat kínál, amelyek az UTXO beváltásának különféle lehetőségeinek felelnek meg.
+
+((("felhasználási esetek", "kávé vásárlás")))Nézzünk egy egyszerű példát, ahol két aláíró van, Alice és Bob, ahol bármelyikük képes beváltani. Multisig használatával ezt egy 2-ből 1 multisig szkripttel fejeznénk ki. A példa kedvéért ugyanezt megcsináljuk +IF+ elágazással:
+
+----
+IF
+ <Alice's Pubkey> CHECKSIG
+ELSE
+ <Bob's Pubkey> CHECKSIG
+ENDIF
+----
+
+Ezen beváltási szkriptet nézegetve felmerülhet önben a kérdés: "Hol van a feltétel? Semmi sem előzi meg az +IF+ elágazást!"
+
+A feltétel nem része a beváltási szkriptnek. Ehelyett a feltételt a feloldó szkript fogja átadni, lehetővé téve Alice és Bob számára a kívánt végrehajtási útvonal "kiválasztását".
+
+Alice a következő feloldó szkripttel tudja beváltani:
+----
+<Alice's Sig> 1
+----
+
+A szkript végi +1+ szolgál feltételként (+TRUE+), amely biztosítja, hogy az +IF+ elágazás első útvonala hajtódik végre, amelyhez Alice-nek kulcsa van.
+
+Ha Bob akarná beváltani, akkor a második végrehajtási útvonalat kellene választania úgy, hogy +FALSE+ értéket ad át az +IF+ elágazásnak:
+
+----
+<Bob's Sig> 0
+----
+
+Bob feloldó szkriptje egy +0+-t tesz a veremre, ezáltal az +IF+ elágazás második (+ELSE+) ága hajtódik végre, amely Bob aláírását követeli meg.
+
+Mivel az +IF+ elágazások egymásba ágyazhatók, végrehajtási útvonalak "útvesztője" képezhető. A feloldó szkript egy "térképet" ad át, amely kiválasztja, hogy melyik ág hajtódjon végre ténylegesen.
+
+----
+IF
+  A szkript
+ELSE
+  IF
+    B szkript
+  ELSE
+    C szkript
+  ENDIF
+ENDIF
+----
+
+In this scenario, there are three execution paths (+script A+, +script B+, and +script C+). The unlocking script provides a path in the form of a sequence of +TRUE+ or +FALSE+ values. To select path +script B+, for example, the unlocking script must end in +1 0+ (+TRUE+, +FALSE+). These values will be pushed onto the stack, so that the second value (+FALSE+) ends up at the top of the stack. The outer +IF+ clause pops the +FALSE+ value and executes the first +ELSE+ clause. Then the +TRUE+ value moves to the top of the stack and is evaluated by the inner (nested) +IF+, selecting the +B+ execution path.
+
+Using this construct, we can build redeem scripts with tens or hundreds of execution paths, each offering a different way to redeem the UTXO. To spend, we construct an unlocking script that navigates the execution path by putting the appropriate +TRUE+ and +FALSE+ values on the stack at each flow control point.((("", startref="Sflow07")))((("", startref="flow07")))((("", startref="condition07")))
+
+=== Példa összetett szkriptre
+
+((("tranzakciók", "fejlettebb", "példa")))((("szkriptek", "példa összetett szkriptre", id="Scomplex07")))Ebben a részben egyetlen összetett példán keresztül mutatjuk be a fejezetben ismertetett technológiákat.
+
+((("felhasználási esetek", "behozatal és kivitel", id="mohamseventwo")))Példánk Mohammed történetét használja, a dubai cégtulajdonosét, aki egy behozatallal és kivitellel foglalkozó vállalatot üzemeltet.
+
+((("transactions", "advanced", "multisignature scripts")))((("scripting", "multisignature scripts", "import/export example")))((("multisignature scripts")))In this example, Mohammed wishes to construct a company capital account with flexible rules. The scheme he creates requires different levels of authorization depending on timelocks. The participants in the multisig scheme are Mohammed, his two partners Saeed and Zaira, and their company lawyer Abdul. The three partners make decisions based on a majority rule, so two of the three must agree. However, in the case of a problem with their keys, they want their lawyer to be able to recover the funds with one of the three partner signatures. Finally, if all partners are unavailable or incapacitated for a while, they want the lawyer to be able to manage the account directly.
+
+Here's the redeem script that Mohammed designs to achieve this (line number prefix as XX):
+
+.Variable Multi-Signature with Timelock
+----
+01  IF
+02    IF
+03      2
+04    ELSE
+05      <30 days> CHECKSEQUENCEVERIFY DROP
+06      <Abdul the Lawyer's Pubkey> CHECKSIGVERIFY
+07      1
+08    ENDIF
+09    <Mohammed's Pubkey> <Saeed's Pubkey> <Zaira's Pubkey> 3 CHECKMULTISIG
+10  ELSE
+11    <90 days> CHECKSEQUENCEVERIFY DROP
+12    <Abdul the Lawyer's Pubkey> CHECKSIG
+13  ENDIF
+----
+
+Mohammed's script implements three execution paths using nested +IF...ELSE+ flow control clauses.
+
+In the first execution path, this script operates as a simple 2-of-3 multisig with the three partners. This execution path consists of lines 3 and 9. Line 3 sets the quorum of the multisig to +2+ (2-of-3). This execution path can be selected by putting +TRUE TRUE+ at the end of the unlocking script:
+
+.Unlocking script for the first execution path (2-of-3 multisig)
+----
+0 <Mohammed's Sig> <Zaira's Sig> TRUE TRUE
+----
+
+
+[TIP]
+====
+The +0+ at the beginning of this unlocking script is because of a bug in +CHECKMULTISIG+ that pops an extra value from the stack. The extra value is disregarded by the +CHECKMULTISIG+, but it must be present or the script fails. Pushing +0+ (customarily) is a workaround to the bug, as described in <<multisig_bug>>.
+====
+
+The second execution path can only be used after 30 days have elapsed from the creation of the UTXO. At that time, it requires the signature of Abdul the lawyer and one of the three partners (a 1-of-3 multisig). This is achieved by line 7, which sets the quorum for the multisig to +1+. To select this execution path, the unlocking script would end in +FALSE TRUE+:
+
+.Unlocking script for the second execution path (Lawyer + 1-of-3)
+----
+0 <Saeed's Sig> <Abdul's Sig> FALSE TRUE
+----
+
+[TIP]
+====
+Why +FALSE TRUE+? Isn't that backward? Because the two values are pushed on to the stack, with +FALSE+ pushed first, then +TRUE+ pushed second. +TRUE+ is therefore popped _first_ by the first +IF+ opcode.
+====
+
+Finally, the third execution path allows Abdul the lawyer to spend the funds alone, but only after 90 days. To select this execution path, the unlocking script has to end in +FALSE+:
+
+.Unlocking script for the third execution path (Lawyer only)
+----
+<Abdul's Sig> FALSE
+----
+
+Try running the script on paper to see how it behaves on the stack.
+
+A few more things to consider when reading this example. See if you can find the answers:
+
+* Why can't the lawyer redeem the third execution path at any time by selecting it with +FALSE+ on the unlocking script?
+
+* How many execution paths can be used 5, 35, and 105 days, respectively, after the UTXO is mined?
+
+* Are the funds lost if the lawyer loses his key? Does your answer change if 91 days have elapsed?
+
+* How do the partners "reset" the clock every 29 or 89 days to prevent the lawyer from accessing the funds?
+
+* Why do some +CHECKSIG+ opcodes in this script have the +VERIFY+ suffix while others don't?((("", startref="Scomplex07")))((("", startref="mohamseventwo")))
+
+[[segwit]]
+=== Segregated Witness
+
+((("segwit (Segregated Witness)", id="Ssegwit07")))A Segregated Witness (segwit) a bitcoin konszenzusszabályok és hálózati protokoll frissítése, amelyet a BIP-9 alapján puha elágazásként javasoltak és valósítottak meg, és amelyet a bitcoin mainneten 2017. augusztus 1-jén aktiváltak.
+
+In cryptography, the term "witness" is used to describe a solution to a cryptographic puzzle. In bitcoin terms, the witness satisfies a cryptographic condition placed on a unspent transaction output (UTXO).
+
+In the context of bitcoin, a digital signature is _one type of witness_, but a witness is more broadly any solution that can satisfy the conditions imposed on an UTXO and unlock that UTXO for spending. The term “witness” is a more general term for an “unlocking script” or “scriptSig.”
+
+Before segwit’s introduction, every input in a transaction was followed by the witness data that unlocked it. The witness data was embedded in the transaction as part of each input. The term _segregated witness_, or _segwit_ for short, simply means separating the signature or unlocking script of a specific output. Think "separate scriptSig," or “separate signature” in the simplest form.
+
+Segregated Witness therefore is an architectural change to bitcoin that aims to move the witness data from the +scriptSig+ (unlocking script) field of a transaction into a separate _witness_ data structure that accompanies a transaction. Clients may request transaction data with or without the accompanying witness data.
+
+Ebben a részben megvizsgáljuk a Segregated Witness néhány előnyét, leírjuk ennek az architektúra-változásnak a telepítéséhez és végrehajtásához használt mechanizmust, és bemutatjuk a Segregated Witness tranzakciókban és címekben való használatát.
+
+A Segregated Witnesst a következő BIP-ek határozzák meg:
+
+https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki[BIP-141] :: A Segregated Witness fő definíciója.
+
+https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki[BIP-143] :: Transaction Signature Verification for Version 0 Witness Program
+
+https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki[BIP-144] :: Peer Services&#x2014;New network messages and serialization formats
+
+https://github.com/bitcoin/bips/blob/master/bip-0145.mediawiki[BIP-145] :: getblocktemplate Updates for Segregated Witness (for mining)
+
+https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki[BIP-173]:: Base32 address format for native v0-16 witness outputs
+
+
+==== Miért van szükség a Segregated Witnessre?
+
+A Segregated Witness olyan architekturális változás, amely számos hatással van a bitcoin skálázhatóságára, biztonságára, gazdasági ösztönzőire és teljesítményére:
+
+Tranzakció-képlékenység :: a tanú tranzakción kívülre helyezésével, az azonosítóként használt tranzakciós hash már nem tartalmazza a tanú adatait. Mivel a tanú adatok a tranzakció egyetlen olyan része, amelyet harmadik fél módosíthat (lásd <<segwit_txid>>), eltávolítása megszünteti a tranzakciók képlékenységéből adódó támadási lehetőségeket is. A Segregated Witness-szel a tranzakció hashek a tranzakció létrehozójának kivételével megváltozhatatlanná válnak, ami jelentősen segíti sok más, összetettebb bitcoin tranzakció-felépítésre támaszkodó protokoll, például a fizetési csatornák, a láncolt tranzakciók és a lightning hálózatok megvalósítását.
+
+Szkript verzió :: A Segregated Witness szkriptek bevezetésével minden zároló szkriptet egy _szkript verziószám_ előz meg, hasonlóan ahhoz, ahogy a tranzakciók és blokkok verziószámmal rendelkeznek. A szkript verziószámának hozzáadása lehetővé teszi a szkriptnyelv visszafele kompatibilis módon történő frissítését (azaz puha elágazás használatát) új szkript operandusok, szintaxis vagy szemantika bevezetéséhez. A szkriptek nyelvének nem elvágólag történő frissítésének képessége jelentősen felgyorsítja a bitcoin innovációs ütemét.
+
+Hálózat és tároló méretezés :: A tanú adatok gyakran nagymértékben hozzájárulnak a tranzakció teljes méretéhez. A bonyolultabb, például a multisig vagy fizetési csatornákhoz használt szkriptek nagyon nagyok. Egyes esetekben ezek a szkriptek a tranzakciók adatainak nagy részét (több mint 75%-át) teszik ki. A tanú adatainak a tranzakción kívül helyezésével a Segregated Witness javítja a bitcoin skálázhatóságát. A csomópontok lemetszhetik a tanú adatokat az aláírások ellenőrzése után, vagy egyszerűen figyelmen kívül hagyhatják azokat, ha egyszerűsített fizetési ellenőrzést végeznek. A tanú adatait nem kell minden csomópontba továbbítani, és nem kell minden csomópont lemezén tárolni.
+
+Aláírás ellenőrzés optimalizálása :: A Segregated Witness továbbfejleszti az aláírási funkciókat (+CHECKSIG+, +CHECKMULTISIG+ stb.) az algoritmus számítási bonyolultságának csökkentése érdekében. A segwit bevezetése előtt az aláírás előállításához használt algoritmus számos hash műveletet igényelt, amely arányos volt a tranzakció méretével. Az adat hashelési számítások O(n^2^) szerint növekedtek az aláírási műveletek számához viszonyítva, ezáltal jelentős számítási terhet róttak az aláírást hitelesítő összes csomópontra. A segwit bevezetésével az algoritmus bonyolultságát O(n)-re csökkentették.
+
+Offline Signing Improvement :: Segregated Witness signatures incorporate the value (amount) referenced by each input in the hash that is signed. Previously, an offline signing device, such as a hardware wallet, would have to verify the amount of each input before signing a transaction. This was usually accomplished by streaming a large amount of data about the previous transactions referenced as inputs. Since the amount is now part of the commitment hash that is signed, an offline device does not need the previous transactions. If the amounts do not match (are misrepresented by a compromised online system), the signature will be invalid.
+
+==== A Segregated Witness működése
+
+At first glance, Segregated Witness appears to be a change to how transactions are constructed and therefore a transaction-level feature, but it is not. Rather, Segregated Witness is a change to how individual UTXO are spent and therefore is a per-output feature.
+
+A transaction can spend Segregated Witness outputs or traditional (inline-witness) outputs or both. Therefore, it does not make much sense to refer to a transaction as a “Segregated Witness transaction.” Rather we should refer to specific transaction outputs as “Segregated Witness outputs."
+
+When a transaction spends an UTXO, it must provide a witness. In a traditional UTXO, the locking script requires that witness data be provided _inline_ in the input part of the transaction that spends the UTXO. A Segregated Witness UTXO, however, specifies a locking script that can be satisfied with witness data outside of the input (segregated).
+
+==== Puha elágazás (visszafele kompatibils)
+
+Segregated Witness is a significant change to the way outputs and transactions are architected. Such a change would normally require a simultaneous change in every bitcoin node and wallet to change the consensus rules&#x2014;what is known as a hard fork. Instead, segregated witness is introduced with a much less disruptive change, which is backward compatible, known as a soft fork. This type of upgrade allows nonupgraded software to ignore the changes and continue to operate without any disruption.
+
+Segregated Witness outputs are constructed so that older systems that are not segwit-aware can still validate them. To an old wallet or node, a Segregated Witness output looks like an output that _anyone can spend_. Such outputs can be spent with an empty signature, therefore the fact that there is no signature inside the transaction (it is segregated) does not invalidate the transaction. Newer wallets and mining nodes, however, see the Segregated Witness output and expect to find a valid witness for it in the transaction’s witness data.
+
+==== Segregated Witness Output and Transaction Examples
+
+Let’s look at some of our example transactions and see how they would change with Segregated Witness. We’ll first look at how a Pay-to-Public-Key-Hash (P2PKH) payment is transformed with the Segregated Witness program. Then, we’ll look at the Segregated Witness equivalent for Pay-to-Script-Hash (P2SH) scripts. Finally, we’ll look at how both of the preceding Segregated Witness programs can be embedded inside a P2SH script.
+
+[[p2wpkh]]
+===== Fizetés nyilvános kulcs tanú hashnek, (P2WPKH, Pay-to-Witness-Public-Key-Hash)
+
+A <<cup_of_coffee>> részben ((("felhasználási esetek", "kávé vásárlás", id="aliced")))Alice tranzakciót hozott létre, hogy Bobnak kifizessen egy csésze kávét. Ez a tranzakció P2PKH kimenetet hozott létre 0,015 BTC értékkel, amelyet Bob elkölthetett. A kimeneti szkript így néz ki:
+
+. Példa P2PKH kimeneti szkript
+----
+DUP HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 EQUALVERIFY CHECKSIG
+----
+
+A Segregated Witness-szel Alice létrehoz egy fizetés nyilvános kulcs tanú hashnek (P2WPKH) szkriptet, amely így néz ki:
+
+.Példa P2WPKH kimeneti szkript
+----
+0 ab68025513c3dbd2f7b92a94e0581f5d50f654e7
+----
+
+As you can see, a Segregated Witness output’s locking script is much simpler than a traditional output. It consists of two values that are pushed on to the script evaluation stack. To an old (nonsegwit-aware) bitcoin client, the two pushes would look like an output that anyone can spend and does not require a signature (or rather, can be spent with an empty signature). To a newer, segwit-aware client, the first number (0) is interpreted as a version number (the _witness version_) and the second part (20 bytes) is the equivalent of a locking script known as a _witness program_. The 20-byte witness program is simply the hash of the public key, as in a P2PKH script.
+
+Now, let’s look at the corresponding transaction that Bob uses to spend this output. For the original script (nonsegwit), Bob’s transaction would have to include a signature within the transaction input:
+
+.Decoded transaction showing a P2PKH output being spent with a signature
+----
+[...]
+“Vin” : [
+"txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+"vout": 0,
+     	 "scriptSig": “<Bob’s scriptSig>”,
+]
+[...]
+----
+
+However, to spend the Segregated Witness output, the transaction has no signature on that input. Instead, Bob’s transaction has an empty +scriptSig+ and includes a Segregated Witness, outside the transaction itself:
+
+.Decoded transaction showing a P2WPKH output being spent with separate witness data
+----
+[...]
+“Vin” : [
+"txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+"vout": 0,
+     	 "scriptSig": “”,
+]
+[...]
+“witness”: “<Bob’ tanú adatai>”
+[...]
+----
+
+===== Wallet construction of P2WPKH
+
+It is extremely important to note that P2WPKH should only be created by the payee (recipient) and not converted by the sender from a known public key, P2PKH script, or address. The sender has no way of knowing if the recipient's wallet has the ability to construct segwit transactions and spend P2WPKH outputs.
+
+Additionally, P2WPKH outputs must be constructed from the hash of a _compressed_ public key. Uncompressed public keys are nonstandard in segwit and may be explicitly disabled by a future soft fork. If the hash used in the P2WPKH came from an uncompressed public key, it may be unspendable and you may lose funds. P2WPKH outputs should be created by the payee's wallet by deriving a compressed public key from their private key.
+
+[WARNING]
+====
+P2WPKH should be constructed by the payee (recipient) by converting a compressed public key to a P2WPKH hash. You should never transform a P2PKH script, bitcoin address, or uncompressed public key to a P2WPKH witness script.
+====
+
+[[p2wsh]]
+===== Pay-to-Witness-Script-Hash (P2WSH)
+
+The ((("use cases", "import/export", id="mohamappd")))second type of witness program corresponds to a Pay-to-Script-Hash (P2SH) script. We saw this type of script in <<p2sh>>. In that example, P2SH was used by Mohammed's company to express a multisignature script. Payments to Mohammed's company were encoded with a locking script like this:
+
+.Example P2SH output script
+----
+HASH160 54c557e07dde5bb6cb791c7a540e0a4796f5e97e EQUAL
+----
+
+This P2SH script references the hash of a _redeem script_ that defines a 2-of-3 multisignature requirement to spend funds. To spend this output, Mohammed's company would present the redeem script (whose hash matches the script hash in the P2SH output) and the signatures necessary to satisfy that redeem script, all inside the transaction input:
+
+.Decoded transaction showing a P2SH output being spent
+----
+[...]
+“Vin” : [
+"txid": "abcdef12345...",
+"vout": 0,
+     	 "scriptSig": “<SigA> <SigB> <2 PubA PubB PubC PubD PubE 5 CHECKMULTISIG>”,
+]
+----
+
+Now, let's look at how this entire example would be upgraded to segwit. If Mohammed's customers were using a segwit-compatible wallet, they would make a payment, creating a Pay-to-Witness-Script-Hash (P2WSH) output that would look like this:
+
+.Példa P2WSH kimeneti szkript
+----
+0 a9b7b38d972cabc7961dbfbcb841ad4508d133c47ba87457b4a0e8aae86dbb89
+----
+
+Again, as with the example of P2WPKH, you can see that the Segregated Witness equivalent script is a lot simpler and omits the various script operands that you see in P2SH scripts. Instead, the Segregated Witness program consists of two values pushed to the stack: a witness version (0) and the 32-byte SHA256 hash of the redeem script.
+
+[TIP]
+====
+While P2SH uses the 20-byte +RIPEMD160(SHA256(script))+ hash, the P2WSH witness program uses a 32-byte +SHA256(script)+ hash. This difference in the selection of the hashing algorithm is deliberate and is used to differentiate between the two types of witness programs (P2WPKH and P2WSH) by the length of the hash and to provide stronger security to P2WSH (128 bits of security in P2WSH versus 80 bits of security in P2SH).
+
+====
+
+Mohammed's company can spend the P2WSH output by presenting the correct redeem script and sufficient signatures to satisfy it. Both the redeem script and the signatures would be segregated _outside_ the spending transaction as part of the witness data. Within the transaction input, Mohammed's ((("", startref="mohamappd")))wallet would put an empty +scriptSig+:
+
+.Decoded transaction showing a P2WSH output being spent with separate witness data
+----
+[...]
+“Vin” : [
+"txid": "abcdef12345...",
+"vout": 0,
+     	 "scriptSig": “”,
+]
+[...]
+“witness”: “<SigA> <SigB> <2 PubA PubB PubC PubD PubE 5 CHECKMULTISIG>”
+[...]
+----
+
+===== A P2WPKH és P2WSH megkülönböztetése
+
+In the previous two sections, we demonstrated two types of witness programs: <<p2wpkh>> and <<p2wsh>>. Both types of witness programs consist of a single byte version number followed by a longer hash. They look very similar, but are interpreted very differently: one is interpreted as a public key hash, which is satisfied by a signature and the other as a script hash, which is satisfied by a redeem script. The critical difference between them is the length of the hash:
+
+* P2WPKH-nál a publikus kulcs hashe 20 bájt
+* P2WSH-nál a szkript hashe 32 bájt
+
+This is the one difference that allows a wallet to differentiate between the two types of witness programs. By looking at the length of the hash, a wallet can determine what type of witness program it is, P2WPKH or P2WSH.
+
+==== Frissítés Segregated Witnessre
+
+As we can see from the previous examples, upgrading to Segregated Witness is a two-step process. First, wallets must create special segwit type outputs. Then, these outputs can be spent by wallets that know how to construct Segregated Witness transactions. In the examples, Alice's wallet was segwit-aware and able to create special outputs with Segregated Witness scripts. Bob's wallet is also segwit-aware and able to spend those outputs. What may not be obvious from the example is that in practice, Alice's wallet needs to _know_ that Bob uses a segwit-aware wallet and can spend these outputs. Otherwise, if Bob's wallet is not upgraded and Alice tries to make segwit payments to Bob, Bob's wallet will not be able to detect these payments.
+
+[TIP]
+====
+For P2WPKH and P2WSH payment types, both the sender and the recipient wallets need to be upgraded to be able to use segwit. Furthermore, the sender's wallet needs to know that the recipient's wallet is segwit-aware.
+====
+
+Segregated Witness will not be implemented simultaneously across the entire network. Rather, Segregated Witness is implemented as a backward-compatible upgrade, where _old and new clients can coexist_. Wallet developers will independently upgrade wallet software to add segwit capabilities. The P2WPKH and P2WSH payment types are used when both sender and recipient are segwit-aware. The traditional P2PKH and P2SH will continue to work for nonupgraded wallets. That leaves two important scenarios, which are addressed in the next section:
+
+* Ability of a sender's wallet that is not segwit-aware to make a payment to a recipient's wallet that can process segwit transactions
+
+* Ability of a sender's wallet that is segwit-aware to recognize and distinguish between recipients that are segwit-aware and ones that are not, by their _addresses_.
+
+===== Embedding Segregated Witness inside P2SH
+
+Let's assume, for example, that Alice's wallet is not upgraded to segwit, but Bob's wallet is upgraded and can handle segwit transactions. Alice and Bob can use "old" non-segwit transactions. But Bob would likely want to use segwit to reduce transaction fees, taking advantage of the discount that applies to witness data.
+
+In this case Bob's wallet can construct a P2SH address that contains a segwit script inside it. Alice's wallet sees this as a "normal" P2SH address and can make payments to it without any knowledge of segwit. Bob's wallet can then spend this payment with a segwit transaction, taking full advantage of segwit and reducing transaction fees.
+
+Both forms of witness scripts, P2WPKH and P2WSH, can be embedded in a P2SH address. The first is noted as P2SH(P2WPKH) and the second is noted as P2SH(P2WSH).
+
+===== Pay-to-Witness-Public-Key-Hash inside Pay-to-Script-Hash
+
+The first form of witness script we will examine is P2SH(P2WPKH). This is a Pay-to-Witness-Public-Key-Hash witness program, embedded inside a Pay-to-Script-Hash script, so that it can be used by a wallet that is not aware of segwit.
+
+Bob's wallet constructs a P2WPKH witness program with Bob's public key. This witness program is then hashed and the resulting hash is encoded as a P2SH script. The P2SH script is converted to a bitcoin address, one that starts with a "3," as we saw in the <<p2sh>> section.
+
+Bob's wallet starts with the P2WPKH witness program we saw earlier:
+
+.Bob's P2WPKH witness program
+----
+0 ab68025513c3dbd2f7b92a94e0581f5d50f654e7
+----
+
+The P2WPKH witness program consists of the witness version and Bob's 20-byte public key hash.
+
+Bob's wallet then hashes the preceding witness program, first with SHA256, then with RIPEMD160, producing another 20-byte hash.
+
+Let's use +bx+ on the command-line to replicate that:
+
+.HASH160 of the P2WPKH witness program
+----
+echo \
+'0 [ab68025513c3dbd2f7b92a94e0581f5d50f654e7]'\
+ | bx script-encode | bx sha256 | bx ripemd160
+3e0547268b3b19288b3adef9719ec8659f4b2b0b
+----
+
+
+Next, the redeem script hash is converted to a bitcoin address. Let's use +bx+ on the command-line again:
+
+.P2SH cím
+----
+echo \
+'3e0547268b3b19288b3adef9719ec8659f4b2b0b' \
+| bx address-encode -v 5
+37Lx99uaGn5avKBxiW26HjedQE3LrDCZru
+----
+
+Now, Bob can display this address for customers to pay for their coffee. Alice's wallet can make a payment to +37Lx99uaGn5avKBxiW26HjedQE3LrDCZru+, just as it would to any other bitcoin address.
+
+To pay Bob, Alice's wallet would lock the output with a P2SH script:
+----
+HASH160 3e0547268b3b19288b3adef9719ec8659f4b2b0b EQUAL
+----
+
+Even though Alice's wallet has no support for segwit, the payment it creates can be spent by Bob with a segwit transaction.((("", startref="aliced")))
+
+===== Pay-to-Witness-Script-Hash inside Pay-to-Script-Hash
+
+Similarly, a P2WSH witness program for a multisig script or other complicated script can be embedded inside a P2SH script and address, making it possible for any wallet to make payments that are segwit compatible.
+
+As we saw in <<p2wsh>>, Mohammed's ((("use cases", "import/export")))company is using Segregated Witness payments with multisignature scripts. To make it possible for any client to pay his company, regardless of whether their wallets are upgraded for segwit, Mohammed's wallet can embed the P2WSH witness program inside a P2SH script.
+
+First, Mohammed's wallet hashes the redeem script with SHA256 (just once). Let's use +bx+ to do that on the command-line:
+
+.Mohammed's wallet creates a P2WSH witness program
+----
+echo \
+2 \ [04C16B8698A9ABF84250A7C3EA7EEDEF9897D1C8C6ADF47F06CF73370D74DCCA01CDCA79DCC5C395D7EEC6984D83F1F50C900A24DD47F569FD4193AF5DE762C587] \
+[04A2192968D8655D6A935BEAF2CA23E3FB87A3495E7AF308EDF08DAC3C1FCBFC2C75B4B0F4D0B1B70CD2423657738C0C2B1D5CE65C97D78D0E34224858008E8B49] \
+[047E63248B75DB7379BE9CDA8CE5751D16485F431E46117B9D0C1837C9D5737812F393DA7D4420D7E1A9162F0279CFC10F1E8E8F3020DECDBC3C0DD389D9977965] \
+[0421D65CBD7149B255382ED7F78E946580657EE6FDA162A187543A9D85BAAA93A4AB3A8F044DADA618D087227440645ABE8A35DA8C5B73997AD343BE5C2AFD94A5] \
+[043752580AFA1ECED3C68D446BCAB69AC0BA7DF50D56231BE0AABF1FDEEC78A6A45E394BA29A1EDF518C022DD618DA774D207D137AAB59E0B000EB7ED238F4D800] \
+5 CHECKMULTISIG \
+| bx script-encode | bx sha256
+9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73
+----
+
+Next, the hashed redeem script is turned into a P2WSH witness program:
+
+----
+0 9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73
+----
+
+Then, the witness program itself is hashed with SHA256 and RIPEMD160, producing a new 20-byte hash, as used in traditional P2SH. Let's use +bx+ on the command-line to do that:
+
+.The HASH160 of the P2WSH witness program
+----
+ echo \
+'0 [9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73]'\
+ | bx script-encode | bx sha256 | bx ripemd160
+86762607e8fe87c0c37740cddee880988b9455b2
+----
+
+Next, the wallet constructs a P2SH bitcoin address from this hash. Again, we use +bx+ to calculate on the command-line:
+
+.P2SH bitcoin cím
+----
+echo \
+'86762607e8fe87c0c37740cddee880988b9455b2'\
+ | bx address-encode -v 5
+3Dwz1MXhM6EfFoJChHCxh1jWHb8GQqRenG
+----
+
+Now, Mohammed's clients can make payments to this address without any need to support segwit. To send a payment to Mohammed, a wallet would lock the output with the following P2SH script:
+
+.P2SH script used to lock payments to Mohammed's multisig
+----
+HASH160 86762607e8fe87c0c37740cddee880988b9455b2 EQUAL
+----
+
+Mohammed's company can then construct segwit transactions to spend these payments, taking advantage of segwit features including lower transaction fees.
+
+===== Segregated Witness címek
+
+Even after segwit activation, it will take some time until most wallets are upgraded. At first, segwit will be embedded in P2SH, as we saw in the previous section, to ease compatibility between segwit-aware and unaware wallets.
+
+However, once wallets are broadly supporting segwit, it makes sense to encode witness scripts directly in a native address format designed for segwit, rather than embed it in P2SH.
+
+A natív segwit címformátumot a BIP-173 definiálja:
+
+https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki[BIP-173]:: Base32 address format for native v0-16 witness outputs
+
+BIP-173 only encodes witness (P2WPKH and P2WSH) scripts. It is not compatible with non-segwit P2PKH or P2SH scripts. BIP-173 is a checksummed Base32 encoding, as compared to the Base58 encoding of a "traditional" bitcoin address. BIP-173 addresses are also called _bech32_ addresses, pronounced "beh-ch thirty two", alluding to the use of a "BCH" error detection algorithm and 32-character encoding set.
+
+BIP-173 addresses use 32 lower-case-only alphanumeric character set, carefully selected to reduce errors from misreading or mistyping. By choosing a lower-case-only character set, bech32 is easier to read, speak, and 45% more efficient to encode in QR codes.
+
+The BCH error detection algorithm is a vast improvement over the previous checksum algorithm (from Base58Check), allowing not only detection but also _correction_ of errors. Address-input interfaces (such as text-fields in forms) can detect and highlight which character was most likely mistyped when they detect an error.
+
+Íme néhány példa bech32 címre a BIP-173 specifikációból:
+
+Mainnet P2WPKH:: bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4
+Testnet P2WPKH:: tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx
+Mainnet P2WSH:: bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3
+Testnet P2WSH:: tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7
+
+Ahogy a fenti példákból látható, egy bech32 segwit string maximum 90 karakter hosszú és három részből áll:
+
+Ember által olvasható rész:: "bc" vagy "tb" előtag, amely a mainnetnek vagy testnetnek felel meg
+
+Szeparátor:: az "1" számjegy, amely nem része a 32 karakteres karakterkészletnek, és csak ebben a pozícióban jelenhet meg mint szeparátor
+
+Adatrész:: minimum 6 alfanumerikus karakter, az ellenőrző összeggel kódolt tanú szkript
+
+Jelenleg csak néhány pénztárca fogad el vagy állít elő natív segwit bech32 címeket, de ahogy a segwit elterjedtsége növekszik, ezeket egyre gyakrabban fogjuk látni.
+
+[[segwit_txid]]
+===== Tranzakcióazonosítók
+
+((("tranzakcióazonosítók (txid)")))A Segregated Witness egyik legnagyobb előnye, hogy kiküszöböli a tranzakciók harmadik fél általi módosíthatóságát (képlékenységét).
+
+A segwit előtt a tranzakciók aláírását harmadik felek kismértékben módosíthatták, megváltoztatva a tranzakcióazonosítójukat (hash) anélkül, hogy megváltoztatták volna a tranzakció alapvető paramétereit (bemenetek, kimenetek, összegek). Ez lehetőséget teremtett szolgáltatásmegtagadási támadásokra, valamint rosszul megírt pénztárca szoftverek elleni támadásokra, amelyek azt feltételezték, hogy a megerősítetlen tranzakciók hashe nem megváltoztatható.
+
+A Segregated Witness bevezetésével a tranzakcióknak két azonosítója lett: +txid+ és +wtxid+. A hagyományos +txid+ tranzakcióazonosító a sorosított tranzakció kettős SHA256 hashe, tanú adatok nélkül. A tranzakció +wtxid+ azonosítója a tranzakció új sorosítási formátumának kettős SHA256 hashe tanú adatokkal.
+
+The traditional +txid+ is calculated in exactly the same way as with a nonsegwit transaction. However, since the segwit transaction has empty ++scriptSig++s in every input, there is no part of the transaction that can be modified by a third party. Therefore, in a segwit transaction, the +txid+ is immutable by a third party, even when the transaction is unconfirmed.
+
+The +wtxid+ is like an "extended" ID, in that the hash also incorporates the witness data. If a transaction is transmitted without witness data, then the +wtxid+ and +txid+ are identical. Note that since the +wtxid+ includes witness data (signatures) and since witness data may be malleable, the +wtxid+ should be considered malleable until the transaction is confirmed. Only the +txid+ of a segwit transaction can be considered immutable by third parties and only if _all_ the inputs of the transaction are segwit inputs.
+
+[TIP]
+====
+Segregated Witness transactions have two IDs: +txid+ and +wtxid+. The +txid+ is the hash of the transaction without the witness data and the +wtxid+ is the hash inclusive of witness data. The +txid+ of a transaction where all inputs are segwit inputs is not susceptible to third-party transaction malleability.
+====
+
+==== Segregated Witness' New Signing Algorithm
+
+Segregated Witness modifies the semantics of the four signature verification functions (+CHECKSIG+, +CHECKSIGVERIFY+, +CHECKMULTISIG+, and +CHECKMULTISIGVERIFY+), changing the way a transaction commitment hash is calculated.
+
+Signatures in bitcoin transactions are applied on a _commitment hash_, which is calculated from the transaction data, locking specific parts of the data indicating the signer's commitment to those values. For example, in a simple +SIGHASH_ALL+ type signature, the commitment hash includes all inputs and outputs.
+
+Unfortunately, the way the commitment hash was calculated introduced the possibility that a node verifying the signature can be forced to perform a significant number of hash computations. Specifically, the hash operations increase in O(n^2^) with respect to the number of signature operations in the transaction. An attacker could therefore create a transaction with a very large number of signature operations, causing the entire bitcoin network to have to perform hundreds or thousands of hash operations to verify the transaction.
+
+Segwit represented an opportunity to address this problem by changing the way the commitment hash is calculated. For segwit version 0 witness programs, signature verification occurs using an improved commitment hash algorithm as specified in BIP-143.
+
+The new algorithm achieves two important goals. Firstly, the number of hash operations increases by a much more gradual O(n) to the number of signature operations, reducing the opportunity to create denial-of-service attacks with overly complex transactions. Secondly, the commitment hash now also includes the value (amounts) of each input as part of the commitment. This means that a signer can commit to a specific input value without needing to "fetch" and check the previous transaction referenced by the input. In the case of offline devices, such as hardware wallets, this greatly simplifies the communication between the host and the hardware wallet, removing the need to stream previous transactions for validation. A hardware wallet can accept the input value "as stated" by an untrusted host. Since the signature is invalid if that input value is not correct, the hardware wallet doesn't need to validate the value before signing the input.
+
+==== Economic Incentives for Segregated Witness
+
+Bitcoin mining nodes and full nodes incur costs for the resources used to support the bitcoin network and the blockchain. As the volume of bitcoin transactions increases, so does the cost of resources (CPU, network bandwidth, disk space, memory). Miners are compensated for these costs through fees that are proportional to the size (in bytes) of each transaction. Nonmining full nodes are not compensated, so they incur these costs because they have a need to run an authoritative fully validating full-index node, perhaps because they use the node to operate a bitcoin business.
+
+Without transaction fees, the growth in bitcoin data would arguably increase dramatically. Fees are intended to align the needs of bitcoin users with the burden their transactions impose on the network, through a market-based price discovery mechanism.
+
+The calculation of fees based on transaction size treats all the data in the transaction as equal in cost. But from the perspective of full nodes and miners, some parts of a transaction carry much higher costs. Every transaction added to the bitcoin network affects the consumption of four resources on nodes:
+
+Disk Space :: Every transaction is stored in the blockchain, adding to the total size of the blockchain. The blockchain is stored on disk, but the storage can be optimized by “pruning” older transactions.
+
+CPU :: Every transaction must be validated, which requires CPU time.
+
+Bandwidth :: Every transaction is transmitted (through flood propagation) across the network at least once. Without any optimization in the block propagation protocol, transactions are transmitted again as part of a block, doubling the impact on network capacity.
+
+Memory :: Nodes that validate transactions keep the UTXO index or the entire UTXO set in memory to speed up validation. Because memory is at least one order of magnitude more expensive than disk, growth of the UTXO set contributes disproportionately to the cost of running a node.
+
+As you can see from the list, not every part of a transaction has an equal impact on the cost of running a node or on the ability of bitcoin to scale to support more transactions. The most expensive part of a transaction are the newly created outputs, as they are added to the in-memory UTXO set. By comparison, signatures (aka witness data) add the least burden to the network and the cost of running a node, because witness data are only validated once and then never used again. Furthermore, immediately after receiving a new transaction and validating witness data, nodes can discard that witness data. If fees are calculated on transaction size, without discriminating between these two types of data, then the market incentives of fees are not aligned with the actual costs imposed by a transaction. In fact, the current fee structure actually encourages the opposite behavior, because witness data is the largest part of a transaction.
+
+The incentives created by fees matter because they affect the behavior of wallets. All wallets must implement some strategy for assembling transactions that takes into consideration a number of factors, such as privacy (reducing address reuse), fragmentation (making lots of loose change), and fees. If the fees are overwhelmingly motivating wallets to use as few inputs as possible in transactions, this can lead to UTXO picking and change address strategies that inadvertently bloat the UTXO set.
+
+Transactions consume UTXO in their inputs and create new UTXO with their outputs. A transaction, therefore, that has more inputs than outputs will result in a decrease in the UTXO set, whereas a transaction that has more outputs than inputs will result in an increase in the UTXO set. Let’s consider the _difference_ between inputs and outputs and call that the “Net-new-UTXO.” That’s an important metric, as it tells us what impact a transaction will have on the most expensive network-wide resource, the in-memory UTXO set. A transaction with positive Net-new-UTXO adds to that burden. A transaction with a negative Net-new-UTXO reduces the burden. We would therefore want to encourage transactions that are either negative Net-new-UTXO or neutral with zero Net-new-UTXO.
+
+Let’s look at an example of what incentives are created by the transaction fee calculation, with and without Segregated Witness. We will look at two different transactions. Transaction A is a 3-input, 2-output transaction, which has a Net-new-UTXO metric of &#x2013;1, meaning it consumes one more UTXO than it creates, reducing the UTXO set by one. Transaction B is a 2-input, 3-output transaction, which has a Net-new-UTXO metric of 1, meaning it adds one UTXO to the UTXO set, imposing additional cost on the entire bitcoin network. Both transactions use multisignature (2-of-3) scripts to demonstrate how complex scripts increase the impact of segregated witness on fees. Let’s assume a transaction fee of 30 satoshi per byte and a 75% fee discount on witness data:
+
+++++
+<dl>
+</dt>Segregated Witness nélkül</dt>
+<dd>
+<p>A tranzakció díja: 25 710 satoshi</p>
+<p>B tranzakció díja: 18 990 satoshi</p>
+</dd>
+
+<dt>Segregated Witness-szel</dt>
+<dd>
+<p>A tranzakció díja: 8 130 satoshi</p>
+<p>B tranzakció díja: 12 045 satoshi</p>
+</dd>
+</dl>
+++++
+
+
+Both transactions are less expensive when segregated witness is implemented. But comparing the costs between the two transactions, we see that before Segregated Witness, the fee is higher for the transaction that has a negative Net-new-UTXO. After Segregated Witness, the transaction fees align with the incentive to minimize new UTXO creation by not inadvertently penalizing transactions with many inputs.
+
+Segregated Witness therefore has two main effects on the fees paid by bitcoin users. Firstly, segwit reduces the overall cost of transactions by discounting witness data and increasing the capacity of the bitcoin blockchain. Secondly, segwit’s discount on witness data corrects a misalignment of incentives that may have inadvertently created more bloat in the UTXO set.((("", startref="Tadv07")))((("", startref="Ssegwit07")))

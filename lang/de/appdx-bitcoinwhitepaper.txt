@@ -1,0 +1,247 @@
+Satoshi Whitepaper
+Anhang
+Das Bitcoin Whitepaper von Satoshi Nakamoto
+
+[NOTE]
+====
+((("whitepaper", id="whitethirteen")))((("bitcoin whitepaper", id="BCwhitethirteen")))((("Nakamoto, Satoshi", id="nakamatothirteen")))Dies ist das ursprüngliche Whitepaper, das in seiner Gesamtheit genau so wiedergegeben wird, wie es im Oktober 2008 von Satoshi Nakamoto veröffentlicht wurde.
+====
+
+=== Bitcoin - A Peer-to-Peer Electronic Cash System
+
+Satoshi Nakamoto
+
+_satoshin@gmx.com_
+
+pass:[<a href="https://bitcoin.org/en/" class="orm:hideurl"><em>www.bitcoin.org</em></a>]
+
+*Zusammenfassung.* Eine reine Peer-to-Peer-Version von Electronic Cash würde es ermöglichen, Online-Zahlungen direkt von einer Partei zur anderen zu senden, ohne ein Finanzinstitut zu kontaktieren. Digitale Signaturen sind ein Teil der Lösung, aber die Hauptvorteile gehen verloren, wenn ein vertrauenswürdiger Dritter weiterhin benötigt wird, um Doppelausgaben zu vermeiden. Wir schlagen eine Lösung für das Problem der doppelten Ausgaben vor, indem wir ein Peer-to-Peer-Netzwerk verwenden. Die Netzwerk-Zeitstempel kennzeichnen Transaktionen, indem sie sie in eine fortlaufende Kette von hash-basierten Proof of Work Versuchen zusammengefügt werden, die einen Datensatz bilden, der nicht geändert werden kann, ohne den Proof of Work erneut durchzuführen. Die längste Kette dient nicht nur als Beweis für den Ablauf der beobachteten Ereignisse, sondern auch als Beweis dafür, dass sie aus dem größten Pool an CPU-Leistung stammt. Solange ein Großteil der CPU-Leistung von Knoten kontrolliert wird, die nicht kooperieren, um das Netzwerk anzugreifen, werden sie die längsten Ketten- und Outpace-Angreifer erzeugen. Das Netzwerk selbst erfordert eine minimale Struktur. Nachrichten werden nach bestem Wissen und Gewissen gesendet, und die Knoten können das Netzwerk nach Belieben verlassen und wieder betreten, indem sie die längste Proof of Work Kette als Beweis dafür akzeptieren, was passiert ist, während sie weg waren.
+
+==== Einführung
+Der Handel im Internet ist fast ausschließlich auf Finanzinstitute angewiesen, die als vertrauenswürdige Dritte für die Abwicklung elektronischer Zahlungen fungieren. Obwohl das System für die meisten Transaktionen gut genug funktioniert, leidet es immer noch unter den inhärenten Schwächen des vertrauensbasierten Modells. Absolut nicht rückgängig zu machende Transaktionen sind nicht wirklich möglich, da Finanzinstitute die Schlichtung von Streitigkeiten nicht vermeiden können. Die Kosten der Mediation erhöhen die Transaktionskosten, begrenzen die minimale praktische Transaktionsgröße und unterbinden die Möglichkeit kleinerer gelegentlicher Transaktionen, und es entstehen größere Kosten durch den Verlust der Fähigkeit, nicht rückgängig zu machende Zahlungen für nicht rückgängig zu machende Dienstleistungen zu tätigen. Mit der Möglichkeit der Umkehrung wächst der Bedarf an Vertrauen. Händler müssen sich vor ihren Kunden in Acht nehmen und sie um zusätzliche Informationen bitten, als sie es sonst tun würden. Ein bestimmter Prozentsatz an Betrug wird als unvermeidlich akzeptiert. Diese Kosten und Zahlungsunsicherheiten können persönlich durch die Verwendung physischer Währung vermieden werden, aber es gibt keinen Mechanismus, um Zahlungen über einen Kommunikationskanal ohne eine vertrauenswürdige Partei durchzuführen.
+
+Benötigt wird ein elektronisches Zahlungssystem, das auf kryptographischen Beweisen statt auf Vertrauen basiert und es zwei beliebigen willigen Parteien ermöglicht, direkt miteinander zu handeln, ohne dass ein vertrauenswürdiger Dritter erforderlich ist. Transaktionen, die rechnerisch nicht rückgängig zu machen sind, würden die Verkäufer vor Betrug schützen, und routinemäßige Treuhandmechanismen könnten leicht implementiert werden, um die Käufer zu schützen. In diesem Papier schlagen wir eine Lösung für das Problem der doppelten Ausgaben vor, indem wir einen Peer-to-Peer verteilten Zeitstempel-Server verwenden, um einen rechnerischen Nachweis der chronologischen Reihenfolge der Transaktionen zu generieren. Das System ist sicher, solange ehrliche Knoten gemeinsam mehr CPU-Leistung kontrollieren als jede kooperierende Gruppe von Angreifern.
+
+==== Transaktionen
+Wir definieren eine elektronische "Coin" als eine Kette von digitalen Signaturen. Jeder Besitzer übergibt die Coin an den nächsten, indem er einen Hash der vorherigen Transaktion und den öffentlichen Schlüssel des nächsten Besitzers digital signiert und diese am Ende der Coin anfügt. Ein Zahlungsempfänger kann die Signaturen und darüber die Kette der Eigentümerschaft verifizieren.
+
+image::images/mbc2_abin01.png["Transaktionen"]
+
+Das Problem ist natürlich, dass der Zahlungsempfänger nicht überprüfen kann, ob einer der Eigentümer die Coin nicht doppelt ausgegeben hat. Eine gemeinsame Lösung besteht darin, eine vertrauenswürdige zentrale Behörde oder Münzstätte einzuführen, die jede Transaktion auf doppelte Ausgaben überprüft. Nach jeder Transaktion muss die Coin an die Münzstätte zurückgegeben werden, um eine neue Coin auszugeben, und nur direkt von der Münzstätte ausgegebene Coins werden als nicht doppelt ausgegeben angesehen. Das Problem bei dieser Lösung ist, dass das Schicksal des gesamten Geldsystems von der Firma abhängt, die die Münzstätte betreibt, wobei jede Transaktion sie durchlaufen muss, genau wie eine Bank.
+
+Wir brauchen eine Möglichkeit für den Zahlungsempfänger zu wissen, dass die Vorbesitzer keine früheren Transaktionen unterzeichnet haben. Für unsere Zwecke ist die früheste Transaktion diejenige, die zählt, so dass wir uns nicht um spätere Versuche kümmern, doppelte Ausgaben zu tätigen. Die einzige Möglichkeit, das Fehlen einer Transaktion zu bestätigen, besteht darin, alle Transaktionen zu kennen. Im Modell der Münzprägung war die Münzprägestelle über alle Transaktionen informiert und entschied, welche zuerst eintrafen. Um dies ohne Vertrauenspersonen zu erreichen, müssen Transaktionen öffentlich angekündigt werden [1], und wir brauchen ein System, in dem sich die Teilnehmer auf eine einheitliche Historie der Reihenfolge einigen können, in der sie eingegangen sind. Der Zahlungsempfänger benötigt einen Nachweis, dass zum Zeitpunkt jeder Transaktion die Mehrheit der Knoten zugestimmt hat, dass sie die erste empfangene war.
+
+==== Timestamp Server
+Die von uns vorgeschlagene Lösung beginnt mit einem Timestamp-Server. Ein Timestamp-Server funktioniert, indem er einen Hash aus einem Block von Elementen nimmt, die mit einem Timestamp versehen werden sollen, und den Hash in großem Umfang veröffentlicht, z.B. in einer Zeitung oder per Usenet post [2-5]. Der Timestamp beweist, dass die Daten zu diesem Zeitpunkt offensichtlich vorhanden gewesen sein müssen, um in den Hash zu gelangen. Jeder Timestamp beinhaltet den vorherigen Timestamp in seinem Hash und bildet eine Kette, wobei jeder zusätzliche Timestamp die vorherigen verstärkt.
+
+image::images/mbc2_abin02.png["timestamp server"]
+
+==== Proof of Work
+Um einen verteilten Timestamp-Server auf Peer-to-Peer-Basis zu implementieren, müssen wir ein Proof-of-Work-System ähnlich Adam Backs Hashcash [6] verwenden und nicht Zeitungs- oder Usenet-Posts. Der Proof-of-Work beinhaltet das Scannen nach einem Wert, bei dem der Hash, z.B. bei SHA-256, mit einer Anzahl von Nullbits beginnt. Der durchschnittliche Arbeitsaufwand ist exponentiell in der Anzahl der erforderlichen Nullbits und kann durch Ausführen eines einzelnen Hash überprüft werden. Für unser Timestamp-Netzwerk implementieren wir den Proof-of-Work durch Inkrementieren eines Nonce im Block, bis ein Wert gefunden wird, der dem Hash des Blocks die erforderlichen Nullbits gibt. Sobald der CPU-Aufwand für den Nachweis der Arbeit aufgewendet wurde, kann der Block nicht mehr geändert werden, ohne die Arbeit erneut zu erledigen. Da spätere Blöcke danach verkettet werden, würde die Arbeit zum Ändern des Blocks das Wiederholen aller nachfolgenden Blöcke beinhalten.
+
+image::images/mbc2_abin03.png["pow"]
+
+Der Proof-of-Work löst auch das Problem der Bestimmung der Repräsentation bei der Mehrheitsentscheidung. Wenn die Mehrheit auf einer IP-Adresse - einer Stimme - beruhen würde, könnte sie von jedem, der in der Lage ist, viele IPs zu vergeben, untergraben werden. Der Arbeitsnachweis ist im Wesentlichen eine CPU - eine Stimme. Die Mehrheitsentscheidung wird durch die längste Kette repräsentiert, die den größten Aufwand für den Nachweis der Arbeit hat. Wenn ein Großteil der CPU-Leistung von ehrlichen Knoten gesteuert wird, wird die ehrliche Kette am schnellsten wachsen und alle konkurrierenden Ketten überholen. Um einen früheren Block zu modifizieren, müsste ein Angreifer den Proof-of-Work des Blocks und aller nachfolgenden Blöcke erneut durchführen und dann die Arbeit der ehrlichen Knoten einholen und übertreffen. Wir werden später zeigen, dass die Wahrscheinlichkeit, dass ein langsamerer Angreifer aufholt, exponentiell abnimmt, wenn nachfolgende Blöcke hinzugefügt werden.
+
+Um die steigende Hardwaregeschwindigkeit und das unterschiedliche Interesse an dem Betrieb von Knoten im Laufe der Zeit zu kompensieren, wird die Schwierigkeit des Proof of Work durch einen gleitenden Durchschnitt bestimmt, der auf eine durchschnittliche Anzahl von Blöcken pro Stunde abzielt. Wenn sie zu schnell erzeugt werden, steigt der Schwierigkeitsgrad.
+
+==== Netzwerk
+
+Die Schritte zum Ausführen des Netzwerks sind folgende:
+
+1. Neue Transaktionen werden an alle Knoten verteilt.
+2. Jeder Knoten sammelt neue Transaktionen in einem Block.
+3. Jeder Knoten arbeitet daran, einen schwierigen Proof of Work für seinen Block zu finden.
+4. Wenn ein Knoten einen Proof of Work findet, sendet er den Block an alle Knoten.
+5. Knoten akzeptieren den Block nur, wenn alle darin enthaltenen Transaktionen gültig und nicht bereits ausgegeben sind.
+6. Knoten drücken ihre Akzeptanz des Blocks aus, indem sie daran arbeiten, den nächsten Block in der Kette zu erstellen, wobei sie den Hash des akzeptierten Blocks als den vorherigen Hash verwenden.
+
+Knoten halten immer die längste Kette für die richtige und werden weiter daran arbeiten, sie zu erweitern. Wenn zwei Knoten gleichzeitig verschiedene Versionen des nächsten Blocks senden, können einige Knoten den einen oder anderen zuerst empfangen. In diesem Fall arbeiten sie an dem ersten, den sie erhalten haben, aber speichern den anderen Zweig, falls er länger wird. Die Verbindung wird unterbrochen, wenn der nächste Proof of Work gefunden wird und ein Zweig länger wird; die Knoten, die am anderen Zweig gearbeitet haben, wechseln dann zum längeren.
+
+Neue Transaktionsübertragungen müssen nicht unbedingt alle Knoten erreichen. Solange sie viele Knoten erreichen, werden sie in Kürze in einen Block gelangen. Blockübertragungen sind auch tolerant gegenüber gelöschten Nachrichten. Wenn ein Knoten keinen Block empfängt, wird er ihn anfordern, wenn er den nächsten Block empfängt, und feststellen, dass er einen übersehen hat.
+
+==== Anreiz
+Laut Vereinbarung ist die erste Transaktion in einem Block eine spezielle Transaktion, die eine neue Coin für den Ersteller des Blocks produziert. Dies schafft einen Anreiz für die Knoten, das Netzwerk zu unterstützen, und bietet die Möglichkeit, Coins zunächst in Umlauf zu bringen, da es keine zentrale Behörde gibt, die sie ausgibt. Die stetige Hinzufügung einer konstanten Menge an neuen Coins ist analog zu den Goldgräbern, die Ressourcen aufwenden, um Gold in den Umlauf zu bringen. In unserem Fall sind es CPU-Zeit und Strom, die verbraucht werden.
+
+Der Anreiz kann auch mit Transaktionsgebühren finanziert werden. Wenn der Ausgabewert einer Transaktion kleiner als ihr Eingabewert ist, ist die Differenz eine Transaktionsgebühr, die zum Anreizwert des Blocks, der die Transaktion enthält, addiert wird. Sobald eine bestimmte Anzahl von Coins in den Umlauf gelangt ist, kann der Anreiz vollständig auf Transaktionsgebühren umgestellt werden und ist völlig inflationsfrei.
+
+Der Anreiz kann dazu beitragen, dass die Knoten ehrlich bleiben. Wenn ein gieriger Angreifer in der Lage ist, mehr CPU-Leistung als alle ehrlichen Knoten zu sammeln, müsste er sich entscheiden, ob er sie zum Betrug von Menschen einsetzt, indem er seine Zahlungen stiehlt, oder ob er sie zum Erzeugen neuer Coins verwendet. Er sollte es für profitabler halten, sich an die Regeln zu halten, die ihn mit mehr neuen Coins begünstigen, als alle anderen zusammen, anstatt das System und die Gültigkeit seines eigenen Vermögens zu untergraben.
+
+==== Wiederherstellen von Festplattenspeicherplatz
+
+++++
+<p>Sobald die letzte Transaktion in einer Coin unter genügend Blöcken verborgen ist, können die getätigten Transaktionen davor verworfen werden, um Festplattenplatz zu sparen. Um dies zu ermöglichen, ohne den Hash des Blocks zu brechen, werden Transaktionen in einem Merkle Tree <a href="#ref_seven">[7]</a> <a href="#ref_two">[2]</a> <a href="#ref_five">[5]</a>gehasht, wobei nur die Wurzel im Hash des Blocks enthalten ist. Alte Blöcke können dann durch "Abschneiden von Ästen des Baumes" (Pruning) verdichtet werden. Die Innenhashes müssen nicht gespeichert werden.</p>
+++++
+
+image::images/mbc2_abin04.png["disk"]
+
+Ein Block-Header ohne Transaktionen würde etwa 80 Byte betragen. Wenn wir annehmen, dass Blöcke alle 10 Minuten generiert werden, sind das +80 Bytes * 6 * 24 * 365 = 4,2MB+ pro Jahr. Mit Computersystemen, die typischerweise ab 2008 mit 2 GB RAM verkauft werden, und Moore's Law, das ein aktuelles Wachstum von 1,2 GB pro Jahr prognostiziert, sollte der Speicher kein Problem darstellen, selbst wenn die Block-Header im Speicher bleiben müssen.
+
+==== Vereinfachte Zahlungsprüfung
+Es ist möglich, Zahlungen zu überprüfen, ohne einen vollständigen Netzwerkknoten zu betreiben. Ein Benutzer muss nur eine Kopie der Block-Header der längsten Proof of Work Kette aufbewahren, die er durch Abfragen von Netzwerkknoten erhalten kann, bis er überzeugt ist, dass er die längste Kette hat, und den Merkle-Zweig erhalten, der die Transaktion mit dem Block verknüpft, in dem sie zeitlich abgestempelt ist. Er kann die Transaktion nicht selbst überprüfen, aber indem er sie mit einer Stelle in der Kette verknüpft, kann er sehen, dass ein Netzwerkknoten sie akzeptiert hat, und Blöcke, die danach hinzugefügt wurden, bestätigen ebenfalls, dass das Netzwerk sie akzeptiert hat.
+
+image::images/mbc2_abin05.png["spv"]
+
+An sich ist die Verifizierung zuverlässig, solange ehrliche Knoten das Netzwerk kontrollieren, aber sie ist anfälliger, wenn das Netzwerk von einem Angreifer überwältigt wird. Während Netzwerkknoten Transaktionen selbst verifizieren können, kann die vereinfachte Methode von den fabrizierten Transaktionen eines Angreifers getäuscht werden, solange der Angreifer das Netzwerk weiterhin kontrollieren kann. Eine Strategie, um sich davor zu schützen, wäre es, Warnungen von Netzwerkknoten anzunehmen, wenn sie einen ungültigen Block erkennen, und die Software des Benutzers aufzufordern, den vollständigen Block herunterzuladen, sowie alarmierte Transaktionen, um die Inkonsistenz zu bestätigen. Unternehmen, die häufig Zahlungen erhalten, werden wahrscheinlich weiterhin ihre eigenen Knoten betreiben wollen, um eine unabhängigere Sicherheit und schnellere Verifizierung zu gewährleisten.
+
+==== Wert kombinieren und aufteilen
+Obwohl es möglich wäre, Coins einzeln zu behandeln, wäre es schwierig, für jeden Cent einer Überweisung eine separate Transaktion durchzuführen. Um eine Aufteilung und Kombination von Werten zu ermöglichen, enthalten Transaktionen mehrere Ein- und Ausgaben. Normalerweise gibt es entweder eine einzige Eingabe aus einer größeren früheren Transaktion oder mehrere Eingaben, die kleinere Beträge kombinieren, und höchstens zwei Ausgaben: eine für die Zahlung und eine für die Rückgabe des Wechselgelds, falls vorhanden, an den Absender.
+
+image::images/mbc2_abin06.png["combining-splitting"]
+
+Es ist zu beachten, dass Fan-Out, bei dem eine Transaktion von mehreren Transaktionen abhängt und diese Transaktionen von viel mehr abhängen, hier kein Problem darstellt. Es besteht nie die Notwendigkeit, eine vollständige eigenständige Kopie der Transaktionshistorie zu extrahieren.
+
+==== Datenschutz
+Das traditionelle Bankenmodell erreicht ein hohes Maß an Datenschutz, indem es den Zugang zu Informationen auf die beteiligten Parteien und den vertrauenswürdigen Dritten beschränkt. Die Notwendigkeit, alle Transaktionen öffentlich anzukündigen, schließt diese Methode aus, aber der Datenschutz kann dennoch gewahrt werden, indem der Informationsfluss an einem anderen Ort unterbrochen wird: durch die Anonymisierung der Public Keys. Die Öffentlichkeit kann sehen, dass jemand einen Betrag an jemand anderen sendet, aber ohne Informationen, die die Transaktion mit jemandem verbinden. Dies ähnelt dem Informationsstand an den Börsen, wo Zeit und Umfang der einzelnen Geschäfte, das "Band", veröffentlicht werden, ohne jedoch zu sagen, wer die Parteien waren.
+
+image::images/mbc2_abin07.png["privacy"]
+
+Als zusätzliche Firewall sollte für jede Transaktion ein neues Schlüsselpaar verwendet werden, damit sie nicht mit einem gemeinsamen Eigentümer verbunden werden. Einige Verknüpfungen sind bei Multi-Input-Transaktionen immer noch unvermeidlich, was zwangsläufig darauf hindeutet, dass ihre Inputs demselben Eigentümer gehörten. Das Risiko besteht darin, dass, wenn der Eigentümer eines Schlüssels aufgedeckt wird, die Verknüpfung andere Transaktionen aufdecken könnte, die zum gleichen Eigentümer gehörten.
+
+==== Berechnungen
+Wir betrachten das Szenario, dass ein Angreifer versucht, eine alternative Chain schneller zu generieren als die ehrliche Chain. Selbst wenn dies erreicht wird, öffnet es das System nicht für willkürliche Änderungen, wie z.B. die Schaffung von Mehrwert aus dem Nichts oder die Entnahme von Geld, das nie dem Angreifer gehörte. Knoten werden eine ungültige Transaktion nicht als Zahlung akzeptieren, und ehrliche Knoten werden niemals einen Block mit ihnen akzeptieren. Ein Angreifer kann nur versuchen, eine seiner eigenen Transaktionen zu ändern, um Geld zurückzubekommen, das er kürzlich ausgegeben hat.
+
+Das Rennen zwischen der ehrlichen Chain und einer Angreifer-Chain kann als Binomialer Zufallsweg (Binomial Random Walk) bezeichnet werden. Das Erfolgsereignis ist die ehrliche Chain, die um einen Block verlängert wird, wodurch ihr Vorsprung um +1 erhöht wird, und das Fehlerereignis ist die Verlängerung der Angreifer-Chain um einen Block, wodurch der Abstand um -1 verringert wird.
+
+++++
+<p>Die Wahrscheinlichkeit, dass ein Angreifer aus einem bestimmten Defizit aufholt, ist analog zum "Gambler's Ruin" Problem. Angenommen, ein Spieler mit unbegrenztem Guthaben beginnt bei einem Defizit und spielt potenziell eine unendliche Anzahl von Versuchen, den Break-Even zu erreichen. Wir können die Wahrscheinlichkeit, dass er jemals den Break-Even erreicht oder dass ein Angreifer die ehrliche Chain einholt, wie folgt berechnen <a href="#ref_eight">[8]</a>:</p>
+++++
+
+p = Wahrscheinlichkeit, dass ein ehrlicher Knoten den nächsten Block findet
+
+q = Wahrscheinlichkeit, dass der Angreifer den nächsten Block findet
+
+q~z~ = Wahrscheinlichkeit, dass der Angreifer jemals von z Blöcken im Defizit aufholen wird
+
+image::images/mbc2_abin08.png["eq1"]
+
+Unter der Annahme, dass p > q, sinkt die Wahrscheinlichkeit exponentiell, wenn die Anzahl der Blöcke, die der Angreifer nachholen muss, steigt. Mit den Chancen gegen ihn, wenn er nicht schon früh einen glücklichen Sprung nach vorne macht, werden seine Chancen verschwindend gering, wenn er weiter zurückfällt.
+
+Wir überlegen nun, wie lange der Empfänger einer neuen Transaktion warten muss, bevor er sicher ist, dass der Absender die Transaktion nicht ändern kann. Wir gehen davon aus, dass der Absender ein Angreifer ist, der den Empfänger für eine Weile glauben machen will, dass er ihn bezahlt hat, und dann dazu wechselt sich selbst zu bezahlen, nachdem einige Zeit vergangen ist. Der Empfänger wird benachrichtigt, wenn dies geschieht, aber der Absender hofft, dass es zu spät ist.
+
+Der Empfänger erzeugt ein neues Schlüsselpaar und übergibt den öffentlichen Schlüssel (Public Key) kurz vor der Signierung an den Absender. Dies verhindert, dass der Absender eine Chain von Blöcken vorzeitig vorbereitet, indem er kontinuierlich daran arbeitet, bis er das Glück hat, weit genug voraus zu sein, und dann die Transaktion in diesem Moment ausführt. Sobald die Transaktion gesendet wurde, beginnt der unehrliche Absender heimlich an einer parallelen Chain zu arbeiten, die eine alternative Version seiner Transaktion enthält.
+
+Der Empfänger wartet, bis die Transaktion zu einem Block hinzugefügt wurde und danach z Blöcke verknüpft wurden. Er weiß nicht genau, wie viel Fortschritt der Angreifer gemacht hat, aber unter der Annahme, dass die ehrlichen Blöcke die durchschnittlich erwartete Zeit pro Block benötigt haben, wird der potenzielle Fortschritt des Angreifers eine Poisson-Verteilung mit erwartetem Wert sein:
+
+image::images/mbc2_abin09.png["eq2"]
+
+Um die Wahrscheinlichkeit zu erhalten, dass der Angreifer jetzt noch aufholen könnte, multiplizieren wir die Poisson-Dichte für den Fortschritt, den er hätte machen können, mit der Wahrscheinlichkeit, dass er von diesem Punkt an aufholen könnte:
+
+image::images/mbc2_abin10.png["eq3"]
+
+Neuanordnung, um zu vermeiden, dass das unendliche Ende der Distribution summiert wird...
+
+image::images/mbc2_abin11.png["eq4"]
+
+Konvertierung in C-Code...
+
+[source,c]
+----
+#include <math.h>
+double AttackerSuccessProbability(double q, int z)
+{
+    double p = 1.0 - q;
+    double lambda = z * (q / p);
+    double sum = 1.0;
+    int i, k;
+    für (k = 0; k <= z; k++)
+    {
+        double poisson = exp(-lambda);
+        für (i = 1; i <= k; i++)
+            poisson *= lambda / i;
+        sum -= poisson * (1 - pow(q / p, z - k));
+    }
+    return sum;
+}
+----
+
+Mit einigen Ergebnissen können wir den Wahrscheinlichkeitsabfall exponentiell mit z sehen.
+----
+q=0.1
+z=0 P=1.0000000
+z=1 P=0.2045873
+z=2 P=0.0509779
+z=3 P=0.0131722
+z=4 P=0.0034552
+z=5 P=0.0009137
+z=6 P=0.0002428
+z=7 P=0.0000647
+z=8 P=0.0000173
+z=9 P=0.0000046
+z=10 P=0.0000012
+----
+----
+q=0.3
+z=0 P=1.0000000
+z=5 P=0.1773523
+z=10 P=0.0416605
+z=15 P=0.0101008
+z=20 P=0.0024804
+z=25 P=0.0006132
+z=30 P=0.0001522
+z=35 P=0.0000379
+z=40 P=0.0000095
+z=45 P=0.0000024
+z=50 P=0.0000006
+----
+Lösen für P kleiner als 0,1%...
+----
+P < 0.001
+q=0.10 z=5
+q=0.15 z=8
+q=0.20 z=11
+q=0.25 z=15
+q=0.30 z=24
+q=0.35 z=41
+q=0.40 z=89
+q=0.45 z=340
+----
+
+==== Zusammenfassung
+Wir haben ein System für elektronische Transaktionen vorgeschlagen, dass nicht auf Vertrauen angewiesen ist. Wir haben mit dem üblichen Rahmen von Coins, die aus digitalen Signaturen hergestellt werden, begonnen, der eine starke Kontrolle des Besitzverhältnisses ermöglicht, aber ohne eine Möglichkeit zur Vermeidung von Doppelausgaben unvollständig ist. Um dies zu lösen, schlugen wir ein Peer-to-Peer-Netzwerk mit Proof of Work vor, um einen öffentlichen Transaktionsverlauf aufzuzeichnen, was für einen Angreifer schnell rechnerisch unpraktisch wird, wenn ehrliche Knoten einen Großteil der CPU-Leistung kontrollieren. Das Netzwerk ist robust in seiner unstrukturierten Einfachheit. Knoten funktionieren auf einmal mit wenig Koordination. Sie müssen nicht identifiziert werden, da Nachrichten nicht an einen bestimmten Ort weitergeleitet werden und nur nach bestem Wissen und Gewissen zugestellt werden müssen. Knoten können das Netzwerk nach Belieben verlassen und wieder erneut teilnehmen und akzeptieren die Proof of Work Chain als Beweis dafür, was geschehen ist, während sie nicht im Netzwerk waren. Sie stimmen mit ihrer CPU-Leistung ab und drücken ihre Akzeptanz gültiger Blöcke aus, indem sie an deren Erweiterung arbeiten und ungültige Blöcke ablehnen, indem sie sich weigern, an ihnen zu arbeiten. Alle erforderlichen Regeln und Anreize können mit diesem Konsensmechanismus durchgesetzt werden.
+
+==== Referenzen
+++++
+<p>
+<span id="ref_one">[1]</span> W. Dai, "b-money," <a href="http://www.weidai.com/bmoney.txt"><em>http://www.weidai.com/bmoney.txt</em></a>, 1998.
+</p>
+<p>
+<span id="ref_two">[2]</span> H. Massias, X.S. Avila, und J.-J. Quisquater, "Design of a secure timestamping service with minimal trust requirements," Im 20. Symposium für Informationstheorie in den Benelux, Mai 1999.
+</p>
+<p>
+<span id="ref_three">[3]</span> S. Haber, W.S. Stornetta, "How to time-stamp a digital document," In Journal of Cryptology, vol 3, no 2, pages 99-111, 1991.
+</p>
+
+<p>
+<span id="ref_four">[4]</span> D. Bayer, S. Haber, W.S. Stornetta, "Improving the efficiency and reliability of digital time-stamping," In Sequences II: Methods in Communication, Security and Computer Science, pages 329-334, 1993.
+</p>
+
+<p>
+<span id="ref_five">[5]</span> S. Haber, W.S. Stornetta, "Secure names for bit-strings," In Proceedings of the 4th ACM Conference on Computer and Communications Security, pages 28-35, April 1997.
+</p>
+
+<p>
+<span id="ref_six">[6]</span> A. Back, "Hashcash - a denial of service counter-measure," <a href="http://www.hashcash.org/papers/hashcash.pdf"><em>http://www.hashcash.org/papers/hashcash.pdf</em></a>, 2002.
+</p>
+
+<p>
+<span id="ref_seven">[7]</span> R.C. Merkle, "Protocols for public key cryptosystems," In Proc. 1980 Symposium on Security and Privacy, IEEE Computer Society, pages 122-133, April 1980.
+</p>
+
+<p>
+<span id="ref_eight">[8]</span> W. Feller, "An introduction to probability theory and its applications," 1957.
+</p>
+++++
+
+=== Lizenz
+
+((("open source licenses")))Dieses Whitepaper wurde im Oktober 2008 von Satoshi Nakamoto veröffentlicht. Es wurde später (2009) als unterstützende Dokumentation in die bitcoin Software aufgenommen und trägt die gleiche MIT-Lizenz. Es wurde in diesem Buch, ohne andere Modifikationen als die Formatierung, unter den Bedingungen der MIT-Lizenz reproduziert:
+
+Die MIT Lizenz (MIT)
+Copyright (c) 2008 Satoshi Nakamoto
+
+Hiermit wird jeder Person, die eine Kopie dieser Software und der zugehörigen Dokumentationsdateien (die "Software") erhält, kostenlos die Erlaubnis erteilt, mit der Software uneingeschränkt umzugehen, einschließlich, aber nicht beschränkt auf die Rechte zur Nutzung, Vervielfältigung, Änderung, Zusammenführung, Veröffentlichung, Verteilung, Unterlizenzierung und/oder zum Verkauf von Kopien der Software, und Personen, denen die Software zur Verfügung gestellt wird, gestattet unter den folgenden Bedingungen:
+
+Der obige Urheberrechtshinweis und dieser Genehmigungshinweis sind in allen Kopien oder wesentlichen Teilen der Software enthalten.
+
+DIE SOFTWARE WIRD "WIE BESEHEN" OHNE JEGLICHE AUSDRÜCKLICHE ODER STILLSCHWEIGENDE GEWÄHRLEISTUNG BEREITGESTELLT, EINSCHLIESSLICH, ABER NICHT BESCHRÄNKT AUF DIE GEWÄHRLEISTUNG DER MARKTGÄNGIGKEIT, DER EIGNUNG FÜR EINEN BESTIMMTEN ZWECK UND DER NICHTVERLETZUNG VON RECHTEN. IN KEINEM FALL SIND DIE AUTOREN ODER URHEBERRECHTSINHABER HAFTBAR FÜR ANSPRÜCHE, SCHÄDEN ODER ANDERE HAFTUNGEN, SEI ES AUS EINER VERTRAGSHANDLUNG, UNERLAUBTER HANDLUNG ODER ANDERWEITIG, DIE SICH AUS, AUS ODER IN VERBINDUNG MIT DER SOFTWARE ODER DER NUTZUNG ODER ANDEREN VERFAHREN IN DER SOFTWARE ERGEBEN.((("", startref="whitethirteen")))((("", startref="nakamatothirteen")))((("", startref="BCwhitethirteen")))

@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[appendix]
+== Операторы, константы и символы языка транзакций 
+
+[ЗАМЕТКА]
+====
+Tables and descriptions sourced from https://en.bitcoin.it/wiki/Script[].
+====
+
+<<tx_script_ops_table_pushdata>> shows operators for pushing values onto the stack.((("transactions", "scripts and Script language", id="TRlang14")))((("scripting", "Script language operators, constants, and symbols", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+.Добавить значение в стек
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| OP_0 or OP_FALSE | 0x00 | В стек помещается пустой массив
+| 1 to 75 | 0x01 to 0x4b | Push the next N bytes onto the stack, where N is 1 to 75 bytes
+| OP_PUSHDATA1 | 0x4c | Следующий байт скрипта содержит N, поместить следующие N байтов в стек
+| OP_PUSHDATA2 | 0x4d | Следующие 2 байта скрипта содержат N, поместить следующие N байтов в стек
+| OP_PUSHDATA4 | 0x4e | Следующие 4 байта скрипта содержат N, поместить следующие N байтов в стек
+| OP_1NEGATE | 0x4f | Поместить в стек значение "–1"
+| OP_RESERVED | 0x50 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_1 or OP_TRUE| 0x51 | Поместить в стек значение "1"
+| OP_2 to OP_16 | 0x52 to 0x60 |  For OP_N, push the value "N" onto the stack, e.g., OP_2 pushes "2"
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> shows conditional flow control operators.
+
+[[tx_script_ops_table_control]]
+.Условное управление потоком выполнения
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| OP_NOP | 0x61 | Ничего не делать
+| OP_VER | 0x62 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_IF | 0x63 | Выполнить последующие команды, если на вершине стека находится не 0
+| OP_NOTIF | 0x64 | Выполнить последующие команды, если на вершине стека находится 0
+| OP_VERIF | 0x65 | Halt&#x2014;Invalid transaction
+| OP_VERNOTIF | 0x66 | Halt&#x2014;Invalid transaction
+| OP_ELSE | 0x67 | Выполнить только если предыдущие выражения не были выполнены
+| OP_ENDIF | 0x68 | Конец блоков OP_IF, OP_NOTIF, OP_ELSE
+| OP_VERIFY | 0x69 | Проверить вершину стека, остановить и объявить транзакцию ошибочной в случае, если не TRUE
+| OP_RETURN | 0x6a | Останов и объявление транзакции ошибочной
+|=======
+
+<<tx_script_ops_table_timelock>> shows operators used for timelocks.
+
+[[tx_script_ops_table_timelock]]
+.Timelock operations
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| OP_CHECKLOCKTIMEVERIFY (previously OP_NOP2) | 0xb1 | Marks transaction as invalid if the top stack item is greater than the transaction's nLockTime field, otherwise script evaluation continues as though an OP_NOP was executed. Transaction is also invalid if 1. the stack is empty; or 2. the top stack item is negative; or 3. the top stack item is greater than or equal to 500000000 while the transaction's nLockTime field is less than 500000000, or vice versa; or 4. the input's nSequence field is equal to 0xffffffff. The precise semantics are described in BIP-65 
+| OP_CHECKSEQUENCEVERIFY (previously OP_NOP3) | 0xb2 | Marks transaction as invalid if the relative lock time of the input (enforced by BIP 0068 with nSequence) is not equal to or longer than the value of the top stack item. The precise semantics are described in BIP-112|
+|=======
+
+<<tx_script_ops_table_stack>> shows operators used to manipulate the stack.
+
+[[tx_script_ops_table_stack]]
+.Операции над стеком
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| OP_TOALTSTACK | 0x6b | Извлечь верхний элемент из стека и поместить в альтернативный стек
+| OP_FROMALTSTACK | 0x6c | Извлечь верхний элемент из альтернативного стека и поместить в основной стек
+| OP_2DROP | 0x6d | Вынуть два элемента из стека
+| OP_2DUP | 0x6e | Продублировать два верхних элемента стека
+| OP_3DUP | 0x6F | Продублировать три верхних элемента стека
+| OP_2OVER | 0x70 | Скопировать третий и четвертый элементы на вершину стека
+| OP_2ROT | 0x71 | Переместить пятый и шестой элементы на вершину стека
+| OP_2SWAP | 0x72 | Поменять местаими две верхние пары элементов в стеке
+| OP_IFDUP | 0x73 | Продублировать верхний элемент стека, если это не 0
+| OP_DEPTH | 0x74 | Посчитать элементы в стеке и поместить результат в стек
+| OP_DROP | 0x75 | Извлечь верхний элемент стека
+| OP_DUP | 0x76 | Продублировать верхний элемент в стеке
+| OP_NIP | 0x77 | Извлечь второй элемент стека
+| OP_OVER | 0x78 | Скопировать второй элемент стека и поместить его на вершину
+| OP_PICK | 0x79 | Скопировать N-ый элемент на вершину стека
+| OP_ROLL | 0x7A | Переместить N-ый элемент на вершину стека
+| OP_ROT | 0x7b | Чередовать (налево) три верхних элемента
+| OP_SWAP | 0x7c | Swap the top two items on the stack
+| OP_TUCK | 0x7d | Copy the top item and insert it between the top and second item
+|=======
+
+<<tx_script_ops_table_splice>> shows string operators.
+
+[[tx_script_ops_table_splice]]
+.Операции со строками
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| _OP_CAT_ | 0x7e | Отключен (Конкатинирует два элемента на вершине стека)
+| _OP_SUBSTR_ | 0x7F | Отключен (вернуть подстроку)
+| _OP_LEFT_ | 0x80 | Отключен (возвращает подстроку слева)
+| _OP_RIGHT_ | 0x81 | Отключен (возвращает подстроку справа)
+| OP_SIZE | 0x82 | Подсчитать длину строки на вершине стека и поместить результат в стек 
+|=======
+
+<<tx_script_ops_table_binmath>> shows binary arithmetic and boolean logic operators.
+
+[[tx_script_ops_table_binmath]]
+.Бинарная арифметика и условия
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| _OP_INVERT_ | 0x83 | Отключен (Инвертировать биты верхнего элемента)
+| _OP_AND_ | 0x84 | Отключен (логическое И двух верхних элементов)
+| _OP_OR_ | 0x85 | Отключен (логическое ИЛИ двух верхних элементов)
+| _OP_XOR_ | 0x86 | Отключен (логической ВЗАИМОИСКЛЮЧАЮЩЕЕ ИЛИ двух верхних элементов)
+| OP_EQUAL | 0x87 | Поместить TRUE (1), если два верхних элемента точно равны, иначе поместить FALSE (0)
+| OP_EQUALVERIFY | 0x88 | То же, что OP_EQUAL, но с последующим запуском OP_VERIFY для останова в случае если не TRUE
+| OP_RESERVED1 | 0x89 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_RESERVED2 | 0x8a | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>> shows numeric (arithmetic) operators.
+
+[[tx_script_ops_table_numbers]]
+.Операции с числами
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| OP_1ADD | 0x8b | Прибавить 1 к верхнему элементу   
+| OP_1SUB | 0x8c | Вычесть 1 от верхнего элемента
+| _OP_2MUL_ | 0x8d | Отключен (умножить верхний элемент на 2)
+| _OP_2DIV_ | 0x8e | Отключен (разделить верхний элемент на 2)
+| OP_NEGATE | 0x8F | Поменять знак верхнего элемента на противоположный
+| OP_ABS | 0x90 | Поменять знак верхнего элемента на плюс
+| OP_NOT | 0x91 | Если верхний элемент равен 0 или 1 логически инвертировать, иначе вернуть 0
+| OP_0NOTEQUAL | 0x92 | Если верхний элемент равен 0 вернуть 0, в противном случае вернуть 1
+| OP_ADD | 0x93 | Извлечь два верхних элемента, сложить их и поместить результат в стек
+| OP_SUB | 0x94 | Извлечь два верхних элемента, вычесть первое из второго, поместить результат в стек
+| _OP_MUL_ | 0x95 | Disabled (multiply top two items)
+| _OP_DIV_ | 0x96 | Disabled (divide second item by first item)
+| _OP_MOD_ | 0x97 | Disabled (remainder divide second item by first item)
+| _OP_LSHIFT_ | 0x98 | Disabled (shift second item left by first item number of bits)
+| _OP_RSHIFT_ | 0x99 | Disabled (shift second item right by first item number of bits)
+| OP_BOOLAND | 0x9A | Логическое И двух верхних элементов
+| OP_BOOLOR | 0x9b | Логическое ИЛИ двух верхних элементов
+| OP_NUMEQUAL | 0x9C | Возвращает TRUE, если два верхних элемента представляют собой одинаковые числа
+| OP_NUMEQUALVERIFY | 0x9d | То же, что NUMEQUAL, но с OP_VERIFY и остановом, если не TRUE
+| OP_NUMNOTEQUAL | 0x9e | Вернуть TRUE, если два верхних элемента не равные числа
+| OP_LESSTHAN | 0x9F | Вернуть TRUE, если второй элемент меньше верхнего элемента
+| OP_GREATERTHAN | 0xa0 | Вернуть TRUE, если второй элемент больше, чем верхний элемент
+| OP_LESSTHANOREQUAL | 0xa1 | Вернуть TRUE, если второй элемент меньше или равен верхнему элементу
+| OP_GREATERTHANOREQUAL | 0xa2 | Вернуть TRUE, если второй пункт больше или равен верхнему элементу
+| OP_MIN | 0xa3 | Вернуть меньшее из двух верхних элементов 
+| op _ max | 0xa4 | Вернуть больший из двух верхних элементов
+| OP_WITHIN | 0xA5 | Вернуть TRUE, если значение третьего элемента между (или равно) вторым и первым элементами
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> shows cryptographic function operators.
+
+[[tx_script_ops_table_crypto]]
+.Криптографические операторы и операции хэширования
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| OP_RIPEMD160 | 0xa6 | Вернуть хэш RIPEMD160 верхнего элемента
+| OP_SHA1 | 0xa7 | Вернуть SHA1-хеш верхнего элемента
+| OP_SHA256 | 0xa8 | Вернуть SHA256-хэш верхнего элемента
+| OP_HASH160 | 0xa9 | Вернуть RIPEMD160(SHA256(x)) хэш верхнего элемента
+| OP_HASH256 | 0xAA | Вернуть SHA256(SHA256(x)) хэш верхнего элемента
+| OP_CODESEPARATOR | 0xab | Отмечает начало данных для проверки подписей
+| OP_CHECKSIG | 0xac | Извлечь публичный ключ и подпись и проверить подпись на хешированных данных транзакции, вернуть TRUE, если проверка удалась
+| OP_CHECKSIGVERIFY | 0xad | То же, что CHECKSIG, но с последующим OP_VERIFY и остановом, если не TRUE
+| OP_CHECKMULTISIG | 0xae | Запустить CHECKSIG для каждой предоставленной пары подписи и публичного ключа. Все должны совпасть. Ошибка в реализации помещает в стек дополнительное значение, обходится при помощи OP_NOP
+| OP_CHECKMULTISIGVERIFY | 0xAF | То же, что CHECKMULTISIG, но с последующим OP_VERIFY и остановом в случае, если не TRUE
+|=======
+
+<<tx_script_ops_table_nop>> shows nonoperator symbols.
+
+[[tx_script_ops_table_nop]]
+.Nonoperators
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| OP_NOP1 to OP_NOP10 | 0xb0 to 0xb9 | Does nothing, ignored
+|=======
+
+
+<<tx_script_ops_table_internal>> shows operator codes reserved for use by the internal script parser.((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+.OP-коды, зарезервированные для внутреннего использования парсером
+[options="header"]
+|=======
+| Символ | Значение (шестнадцатеричное) | Описание
+| OP_SMALLDATA | 0xf9 | Представляет небольшое поле данных 
+| OP_SMALLINTEGER | 0xfa | Представляет небольшое целое поле данных
+| OP_PUBKEYS | 0xfb | Представляет поля публичных ключей
+| OP_PUBKEYHASH | 0xfd | Представляет поле хеша публичного ключа
+| OP_PUBKEY | 0xfe | Представляет поле публичного ключа
+| OP_INVALIDOPCODE | 0xff | Представляет любой неназначенный OP-код
+|=======

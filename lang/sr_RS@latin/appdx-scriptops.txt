@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[dodatak]
+== Operatori, konstante i simboli skript jezika za transakcije
+
+[NOTE]
+====
+Tabele i opisi preuzeti sa https://en.bitcoin.it/wiki/Script[].
+====
+
+<<tx_script_ops_table_pushdata>> prikazuje operatore za stavljanje vrednosti na stek.((("transactions", "scripts and Script language", id="TRlang14")))((("scripting", "Script language operators, constants, and symbols", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+.Staviti vrednost na stek
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| OP_0 ili OP_FALSE | 0x00 | Prazan niz se stavlja na stek
+| 1 do 75 | 0x01 do 0x4b | Stavite sledeće N bajtove na stek, gde je N od 1 do 75 bajta
+| OP_PUSHDATA1 | 0x4c | Sledeći bajt skript sadrži N, stavite sledeće N bajtove na stek
+| OP_PUSHDATA2 | 0x4d | Sledeća dva bajta skripta sadrže N, a sledeće N bajtove stavite na stek
+| OP_PUSHDATA4 | 0x4e | Sledeća četiri bajta skripta sadrže N, a sledeće N bajtove stavite na stek
+| OP_1NEGATE | 0x4f | Stavite vrednost "-1" na stek
+| OP_RESERVED | 0k50 | Zastoj&#x2014;nevažeća transakcija ukoliko se ne nađe u neizvršenoj OP_IF klauzuli
+| OP_1 ili OP_TRUE | 0x51 | Stavite vrednost "1" na stek
+| OP_2 do OP_16 | 0x52 do 0x60 | Za OP_N, stavite vrednost "N" na stek, npr. OP_2 stavlja "2" na stek
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> prikazuje operatore uslovne kontrole toka.
+
+[[tx_script_ops_table_control]]
+.Uslovna kontrola toka
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| OP_NOP | 0x61 | Ne radi ništa
+| OP_VER | 0x62 | Zastoj&#x2014;Invalidna transakcija ukoliko se ne nađe u neizvršenoj OP_IF klauzuli
+| OP_IF | 0x63 | Izvršite sledeće operacije ako vrh steka nije 0
+| OP_NOTIF | 0x64 | Izvršite sledeće operacije ako je vrh steka 0
+| OP_VERIF | 0x65 | Zastoj&#x2014;Nevažeća transakcija
+| OP_VERNOTIF | 0x66 | Zastoj&#x2014;nevažeća transakcija
+| OP_ELSE | 0x67 | Izvršite samo ako prethodne operacije nisu izvršene
+| OP_ENDIF | 0x68 | Završite blok OP_IF, OP_NOTIF, OP_ELSE
+| OP_VERIFY | 0x69 | Proveri vrh steka, zaustavite i poništite transakciju ako nije TRUE
+| OP_RETURN | 0x6a | Zaustavite i poništite transakciju
+|=======
+
+<<tx_script_ops_table_timelock>> prikazuje operatore koji se koriste za vremenske brave.
+
+[[tx_script_ops_table_timelock]]
+.Operacije sa vremenskom bravom (Timelock)
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| OP_CHECKLOCKTIMEVERIFY (prethodno OP_NOP2) | 0xb1 | Označava transakciju nevažećom ako je vrednost na vrhu steka veća od polja nLockTime transakcije, u protivnom se izvršenje skripte nastavlja kao da je izvršen OP_NOP. Transakcija je takođe nevažeća ako je 1. stek prazan; ili 2. vrednost na vrhu steka negativna; ili 3. vrednost na vrhu steka veća ili jednaka 500.000.000 dok je polje nLockTime transakcije manje od 500.000.000, ili obrnuto; ili 4. polje ulaza nSequence jednako 0xffffffff. Precizna semantika je opisana u BIP-65 
+| OP_CHECKSEQUENCEVERIFY (prethodno OP_NOP3) | 0xb2 | Označava transakciju nevažećom ako relativno vreme zaključavanja ulaza (uvedeno od BIP-a 0068 sa nSekuence) nije jednako ili duže od vrednosti na vrhu steka. Precizna semantika opisana je u BIP-112 |
+|=======
+
+<<tx_script_ops_table_stack>> prikazuje operatore koji se koriste za manipulaciju steka.
+
+[[tx_script_ops_table_stack]]
+.Stek operacije
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| OP_TOALTSTACK | 0x6b | Skinite gornji element sa steka i stavite na alternativni stek
+| OP_FROMALTSTACK | 0x6c | Skinite gornji element sa alternativnog steka i stavite na stek
+| OP_2DROP | 0x6d | Skinite gornja dva elementa sa steka
+| OP_2DUP | 0x6e | Duplirajte gornja dva predmeta steka
+| OP_3DUP | 0x6f | Duplirajte gornja tri predmeta steka
+| OP_2OVER | 0x70 | Kopirajte treći i četvrti predmet sa steka na vrh
+| OP_2ROT | 0x71 | Pomerite peti i šesti predmet sa steka na vrh
+| OP_2SVAP | 0x72 | Zamenite redosled prva dva gornja predmeta na steku
+| OP_IFDUP | 0x73 | Duplirajte predmet na vrhu steka u nizu ako nije 0
+| OP_DEPTH | 0x74 | Prebrojte predmete na steku i stavite zbir na vrh steka
+| OP_DROP | 0x75 | Skinite predmet sa vrha steka
+| OP_DROP | 0x76 | Duplirajte predmet na vrhu steka
+| OP_NIP | 0x77 | Skinite drugi predmet sa steka
+| OP_OVER | 0x78 | Kopirajte drugi predmet sa steka i stavite ga na vrh
+| OP_PICK | 0x79 | Skinite vrednost N sa vrha, a zatim kopirajte N-ti predmet na vrh steka
+| OP_ROLL | 0x7a | Skinite N-ti predmet sa steka, a zatim pomerite N-ti predmet na vrh steka
+| OP_ROT | 0x7b | Rotirajte tri predmeta na vrhu steka
+| OP_SVAP | 0x7c | Rotirajte gornja dva predmeta na steku
+| OP_TUCK | 0x7d | Kopirajte predmet na vrhu steka i ubacite ga između prvog i drugog
+|=======
+
+<<tx_script_ops_table_splice>> prikazuje string operatore.
+
+[[tx_script_ops_table_splice]]
+.Operacija spajanje stringa
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| _OP_CAT_ | 0x7e | Onemogućeno (spaja gornja dva predmeta)
+| _OP_SUBSTR_ | 0x7f | Onemogućeno (vraća podstring)
+| _OP_LEFT_ | 0x80 | Onemogućeno (vraća levi podstring)
+| _OP_RIGHT_ | 0x81 | Onemogućeno (vraća desni podstring)
+| OP_SIZE | 0x82 | Izračunajte dužinu stringa predmeta na vrhu steka i stavite rezultat na vrh steka 
+|=======
+
+<<tx_script_ops_table_binmath>> prikazuje binarne aritmetičke i logičke operatere.
+
+[[tx_script_ops_table_binmath]]
+.Binarna aritmetika i uslovi
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| _OP_INVERT_ | 0x83 | Onemogućeno (Zamenite bitove na vrhu steka)
+| _OP_AND_ | 0x84 | Onemogućeno (Bulov AND od dva predmeta na vrhu steka)
+| _OP_OR_ | 0x85 | Onemogućeno (Bulov OR od dva predmeta na vrhu steka)
+| _OP_XOR_ | 0x86 | Onemogućeno (Bulov eksplicitni ili (XOR) od dva predmeta na vrhu steka)
+| OP_EQUAL | 0x87 | Stavite TRUE (1) na vrh steka ako su gornja dva predmeta potpuno jednaka, u suprotnom stavite FALSE (0)
+| OP_EQUALVERIFY | 0x88 | Isto kao OP_EQUAL, ali pokrenite OP_VERIFY ako želite da zaustavite izvršenje ako rezultat nije TRUE
+| OP_RESERVED1 | 0x89 | Zastoj&#x2014;nevažeća transakcija osim ako se ne nađe u neizvršenoj OP_IF klauzuli
+| OP_RESERVED2 | 0x8a | Zastoj&#x2014;nevažeća transakcija osim ako se ne nađe u neizvršenoj OP_IF klauzuli
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>> prikazuje numeričke (aritmetičke) operatore.
+
+[[tx_script_ops_table_numbers]]
+.Numerički operatori
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| OP_1ADD | 0x8b | Dodajte 1 na predmetu na vrhu steka   
+| OP_1SUB | 0x8c | Oduzmite 1 od predmeta na vrhu steka
+| _OP_2MUL_ | 0x8d | Onemogućeno (pomnožite gornji predmet sa 2)
+| _OP_2DIV_ | 0x8e | Onemogućeno (podelite gornji predmet sa 2)
+| OP_NEGATE | 0x8f | Okrenite znak gornjeg predmeta
+| OP_ABS | 0x90 | Promenite znak gornje stavke da broj bude veći od nule
+| OP_NOT | 0x91 | Ako je gornji predmet bulov 0 ili 1 okrenite ga, u suprotnom vratite 0
+| OP_0NOTEQUAL | 0x92 | Ako je gornji predmet 0, vratite 0, u suprotnom vratite 1
+| OP_ADD | 0x93 | Skinite gornja dva predmeta, saberite ih i stavite rezultat na vrh steka
+| OP_SUB | 0x94 | Skinite gornja dva predmeta, oduzmite prvi od drugog i stavite rezultat na vrh steka
+| _OP_MUL_ | 0x95 | Onemogućeno (pomnožite prva dva predmeta na steku)
+| _OP_DIV_ | 0x96 | Onemogućeno (podelite drugi predmet sa prvim na steku)
+| _OP_MOD_ | 0x97 | Onemogućeno (podsetnik podelite drugi predmet sa prvim)
+| _OP_LSHIFT_ | 0x98 | Onemogućeno (pomerite drugi predmet na levo za broj bita prvog predmeta)
+| _OP_RSHIFT_ | 0x99 | Onemogućeno (pomerite drugi predmet na desno za broj bita prvog predmeta)
+| OP_BOOLAND | 0x9a | Bulov AND od dva predmeta na vrhu steka
+| OP_BOOLOR | 0x9b | Bulov OR od dva predmeta na vrhu steka
+| OP_NUMEQUAL | 0x9c | Vratite TRUE ako su gornja dva predmeta jednaki brojevi
+| OP_NUMEQUALVERIFY | 0x9d | Isto kao NUMEQUAL, a zatim OP_VERIFY da zaustavite izvršenje ako nije TRUE
+| OP_NUMNOTEQUAL | 0x9e | Vratite TRUE ako gornja dva predmeta nisu jednaki brojevi
+| OP_LESSTHAN | 0x9f | Vratite TRUE ako je drugi predmet manji od prvog
+| OP_GREATERTHAN | 0xa0 | Vratite TRUE ako je drugi predmet veći od prvog
+| OP_LESSTHANOREQUAL | 0xa1 | Vratite TRUE ako je drugi predmet manji ili isti kao prvi
+| OP_GREATERTHANOREQUAL | 0xa2 | Vratite TRUE ako je drugi predmet veći ili isti kao prvi
+| OP_MIN | 0xa3 | Vratite manji od prva dva predmeta 
+| OP_MAX | 0xa4 | Vratite veći od prva dva predmeta
+| OP_WITHIN | 0xa5 | Vratite TRUE ako je vrednost trećeg predmeta između drugog (ili jednak) njemu i prvog predmeta
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> prikazuje operatore kriptografskih funkcija.
+
+[[tx_script_ops_table_crypto]]
+.Kriptografske i operacije hešovanja
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| OP_RIPEMD160 | 0xa6 | Vratite RIPEMD160 heš gornjeg predmeta
+| OP_SHA1 | 0xa7 | Vratite heš SHA1 gornjeg predmeta
+| OP_SHA256 | 0xa8 | Vratite heš SHA256 gornjeg predmeta
+| OP_HASH160 | 0xa9 | Vratite heš RIPEMD160 (SHA256(x)) gornjeg predmeta
+| OP_HASH256 | 0xaa | Vratite heš SHA256(SHA256(k)) gornjeg predmeta
+| OP_CODESEPARATOR | 0xab | Označite početak podatka sa proverenim potpisima
+| OP_CHECKSIG | 0xac | Skinite javni ključ i potpis i potvrdite potpis za heš transakcije, vratite TRUE ako su isti
+| OP_CHECKSIGVERIFY | 0xad | Isto kao CHECKSIG, pa OP_VERIFY da zaustavite ako nije TRUE
+| OP_CHECKMULTISIG | 0xae | Pokreni CHECKSIG za svaki par potpisa i javnog ključa. Svi se moraju da pašu. Greška u implementaciji skine dodatnu vrednost, prefiks sa OP_NOP-om kao rešenjem
+| OP_CHECKMULTISIGVERIFY | 0xaf | Isto kao CHECKMULTISIG, pa OP_VERIFY da zaustavite ako nije TRUE
+|=======
+
+<<tx_script_ops_table_nop>> prikazuje simbole operatora bez izvršenja (NOP).
+
+[[tx_script_ops_table_nop]]
+.Operatori bez izvršenja
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| OP_NOP1 do OP_NOP10 | 0xb0 do 0xb9 | Ne radi ništa, zanemariti
+|=======
+
+
+<<tx_script_ops_table_internal>> prikazuje operacijske kodove rezervisane za upotrebu u internom skript parseru (raščlanjivaču). ((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+.Rezervisani OP kodovi za internu upotrebu od strane parsera
+[options="header"]
+|=======
+| Simbol | Vrednost (heksadecimalna) | Opis
+| OP_SMALLDATA | 0xf9 | Predstavlja polje malih podatka 
+| OP_SMALLINTEGER | 0xfa | Predstavlja malo celokupno polje podatka
+| OP_PUBKEYS | 0xfb | Predstavlja polja javnog ključa
+| OP_PUBKEYHASH | 0xfd | Predstavlja polje heša javnog ključa
+| OP_PUBKEY | 0xfe | Predstavlja polje javnog ključa
+| OP_INVALIDOPCODE | 0xff | Predstavlja bilo koji OP kod koji trenutno nije dodeljen
+|=======

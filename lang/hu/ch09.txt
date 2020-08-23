@@ -1,0 +1,390 @@
+[[blockchain]]
+== A blokklánc
+
+=== Bevezetés
+
+((("blokklánc (a)", "áttekintése")))A blokklánc, mint adatstruktúra a tranzakciós blokkok egy rendezett láncolt listája. A blokkláncot tárolhatjuk sima fájlként, vagy egy egyszerű adatbázisban. A Bitcoin Core kliens a blokklánc metaadatait a Google LevelDB adatbázisának segítségével tárolja. Minden blokk visszafelé láncolt, azaz mindegyik visszahivatkozik a blokklánc előző blokkjára. ((("blokkok", "blokk magasság")))A blokkláncot gyakran egy függőleges halomként ábrázolják, ahol az első blokk mindig a halom alján szerepel. A blokkok ilyen megjelenítése miatt használunk olyan kifejezéseket, mint például a első blokktól számított távolság megjelölésére a "magasság", vagy a legutóbbi hozzáadott blokk esetén a "csúcs".
+
+((("blokkok", "blokk hash")))((("blokkok", "genezis blokk")))((("blokkok", "szülő blokkok")))((("genezis blokk")))((("szülő blokkok")))A blokklánc minden blokkját egy hash azonosítja, amely a blokk fejlécére alkalmazott SHA256 kriptográfiai hash algoritmussal áll elő. A blokkfejlécben lévő "előző blokk hashe" mező segítségével minden blokk hivatkozik a megelőző blokkra is, amelyet _szülő blokknak_ szokás nevezni. Más szóval: a saját fejlécén belül minden blokk tartalmazza a szülő blokkjának a hashét is. Ekképp a hashek sorozatából, melyek minden blokkot összekapcsolnak a szülőjével, egy lánc jön létre, amely minden esetben visszavezet a legeslegelsőként legenerált blokkhoz, az úgynevezett _genezis blokkhoz_.
+
+Bár egy blokknak csak egy szülője van, átmenetileg akár több gyereke is lehet. Minden gyerek ugyanarra a szülő blokkra hivatkozik, illetve minden gyerek azonos szülő hasht tartalmaz az "előző blokk hashe" mezőjében. Egy blokklánc elágazásnál egyszerre több gyerek is létrejöhet. Az elágazás egy átmeneti állapot, amely akkor jelentkezik, amikor két  bányász szinte egy időben fedez fel két különböző blokkot (lásd: <<forks>>). Végül csak az egyik gyerek-blokk fog a blokklánc részévé válni, az „elágazás” pedig megoldódik. Egy blokknak tehát akár több gyereke is lehet, azonban minden blokknak csak egy szülője van. Ez azért van így, mert egy blokknak csak egyetlen olyan "előző blokk hashe" mezője van, amely az egyedüli szülőjére hivatkozik.
+
+Az "előző blokk hashe" mező a blokkfejlécben van, és emiatt befolyásolja az _aktuális_ blokk hashét is. Ha a szülő identitása megváltozik, akkor a gyermek identitása is megváltozik. Ha a szülő bármilyen módon megváltozik, akkor a hashe is megváltozik. A megváltozott szülő hashének változása pedig elkerülhetetlenné teszi a gyerekben lévő "előző blokk hashének" a változását is. Emiatt a gyerek hashe is változni fog, ez pedig változást eredményez az unokában lévő hivatkozásban is, tehát megváltozik az unoka is, és így tovább. Ez a kaszkád hatás biztosítja, hogy ha egy blokkot több generáció követ, akkor a blokkot csak úgy lehet megváltoztatni, ha az összes rákövetkező blokkot is újraszámításra kötelezzük. Mivel egy ilyen újraszámítás hatalmas számítási kapacitást (és ezáltal energiafogyasztást) igényelne, a blokkok hosszú láncolatának a megléte megváltoztathatatlanná teszi a blokklánc mélyének történelemét, ez pedig a bitcoin biztonságának a kulcsfontosságú eleme.
+
+A blokkláncot valahogy úgy lehet elképzelni, mint a geológiai képződmények rétegeit, vagy mint egy gleccser-mag mintát. A felületi rétegek az évszakoknak megfelelően változhatnak, vagy akár el is tűnhetnek még azelőtt, hogy idejük lett volna sorba rendeződni. Ha viszont pár centivel mélyebbre ásunk, akkor azt tapasztaljuk, hogy a geológiai rétegek egyre stabilabbak. Amikor néhány száz méter mélyen vizsgálódunk, akkor tulajdonképpen a múlt pillanatfelvételét szemléljük, mely évezredeken, vagy évmilliókon át zavartalan maradt. A blokklánc néhány legutóbbi blokkja módosulhat, ha egy elágazás miatt újra kell számolni a láncot. A legfelső hat blokk olyan, mint a termőtalaj néhány centimétere. De ha egyre mélyebbre ásunk a blokkláncban, pl. 6 blokkon túl, akkor egyre valószínűtlenebb lesz, hogy egy blokk megváltozik. ((("tranzakciók", "coinbase tranzakciók")))((("coinbase tranzakciók")))100 blokk után már olyan szintű a stabilitás, hogy az úgynevezett „coinbase” tranzakció (az a tranzakció, amely az újonnan kibányászott érméket tartalmazza) el is költhető. Néhány ezer egymásra rétegződött blokk (kb. egy hónap), és a blokklánc már a történelem része, azaz gyakorlatilag soha nem változik meg. Noha a protokoll lehetővé teszi, hogy a láncot bármikor egy hosszabb lánc váltsa fel, és bármelyik blokk esetén van rá esély, hogy a blokk visszafordításra kerül, az ilyen események valószínűsége az idő múlásával egyre kisebbé válik, amíg infinitezimálissá nem lesz.
+
+=== Egy blokk szerkezete
+
+((("blokkok","szerkezetük")))(((("blokklánc (a)", "blokk szerkezet")))A blokk egy olyan adattároló adatszerkezet, amely összegyűjti a tranzakciókat, hogy azokat a nyilvános főkönyvbe, azaz a blokkláncba foglalja. A blokk egy metaadatokat tartalmazó fejlécből, és az azt követő, a tranzakciók hosszú sorát tartalmazó listából áll, ez utóbbi határozza meg a blokk méretét. A blokkfejléc mérete 80 bájt, míg egy átlagos tranzakcióé minimum 400 bájt. Egy átlagos blokk több mint 1900 tranzakciót tartalmaz, így egy teljes blokk, az összes tranzakcióval együtt 10 000-szer nagyobb, mint a blokkfejléc. A  <<block_structure1>> egy blokk szerkezetét írja le.
+
+[[block_structure1]]
+[role="pagebreak-before"]
+.Egy blokk szerkezete
+[options="header"]
+|=======
+|Méret | Mező | Leírás
+| 4 bájt | Blokkméret | A blokk mérete bájtokban, ezt a mezőt követően
+| 80 bájt | Blokkfejléc | A blokkfejléc mezői (lásd alább)
+| 1&#x2013;9 bájt (VarInt) | Tranzakció számláló | Hány tranzakció jön ezután
+| változó | Tranzakciók | A blokkban rögzített tranzakciók
+|=======
+
+[[block_header]]
+=== A blokkfejléc
+
+((("blokkok", "fejlécek")))((("blokklánc (a)", "blokkfejlécek")))((("fejlécek")))A blokkfejléc háromféle blokk metaadatból áll. Először is, van egy hivatkozás az előző blokk hashére, amely a blokklánc aktuális blokkját köti össze a megelőző blokkal. A második metaadat halmaz az úgynevezett _difficulty_ (nehézség), illetve az _időbélyegző_ és _számláló_. Ezek a bányászattal függenek össze, amint azt a <<mining>> részletezte. A metaadatok harmadik része a Merkle-fa gyökér, ami egy olyan adatstruktúra, amely hatékonyan összefoglalja a blokk tranzakcióit. A <<block_header_structure_ch09>>  a blokkfejléc felépítését írja le.
+
+
+[[block_header_structure_ch09]]
+.A blokkfej szerkezete 
+[options="header"]
+|=======
+|Méret | Mező | Leírás
+| 4 bájt | Version | A szoftver/protokoll változásokat nyomon követő verziószám
+| 32 bájt | Previous Block Hash | Hivatkozás a blokklánc előző (szülő) blokkjának a hash-ére
+| 32 bájt | Merkle Root | A blokk tranzakcióihoz tartozó Merkle-fa gyökerének a hash-e
+| 4 bájt | Timestamp | Időbélyeg: hozzávetőleg mikor jött létre a blokk (a Unix kezdőidő óta eltelt másodpercek)
+| 4 bájt | Difficulty Target | A munkabizonyíték algoritmus által megkövetelt cél nehézségi szint
+| 4 bájt | Nonce | A munkabizonyíték algoritmus által használt számláló
+|=======
+
+A Nonce, a nehézségi szint ás az időbélyeg a bányászat során használatos, ezekről részletesebben a  <<mining>> részben írunk.
+
+[[block_hash]]
+=== Blokk azonosítók: Blokkfejléc, Hash, és Blokk magasság
+
+((("blokklánc (a)", "blokk azonosítók")))((("blokkok", "blokk magasság")))((("blokkok","blokk hash")))Egy blokk elsődleges azonosítója a blokk kriptográfiai hashe, azaz a digitális ujjlenyomata, amely oly módon jön létre, hogy a blokkfejléc az SHA256 algoritmussal kétszer hashelésre kerül. Az így kapott 32 bájtos hash az úgynevezett _blokk hash_, vagy pontosabban a _blokkfejléc hash_, pass:[<span role="keep-together">mivel a kiszámításához csak a blokkfejlécre van szükség. Például a legelső legenerált bitcoin blokk blokk hashe a </span>] +000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f+ érték. A blokk hash egyértelmű módon azonosítja a blokkot. Bármely csomópont képes arra, hogy a többitől függetlenül előállítsa. Ehhez csupán a blokkfejlécet kell hashelnie.
+
+Meg kell jegyezni, hogy a blokk belső adatstruktúrája ténylegesen nem tartalmazza a blokk hash-t, sem akkor, amikor a blokk átvitelre kerül a hálózaton, sem akkor, amikor a blokklánc részeként, egy csomóponton tárolásra kerül. Valójában az történik, hogy mikor a blokk a hálózatból megérkezik, minden egyes csomópont újraszámítja a blokk hash-t. A blokk hash a blokk meta-adatainak a részeként egy külön adatbázis táblázatban is tárolható. Ez megkönnyíti a blokkok indexelését és meggyorsítja a blokkok merevlemezről történő visszakeresését.
+
+Egy blokk azonosítására egy másik módszer az, hogy megadjuk a blokkláncon belüli pozícióját, az úgynevezett pass:[<span role="keep-together"><em>blokk magasságot</em>. A legelőször legenerált blokknak a blokk magassága 0 (nulla), ez] pass:[<span role="keep-together">ugyanaz a blokk, amire az imént a</span>] +000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f+ blokk hash-sel hivatkoztunk. A blokk tehát kétféleképpen azonosítható: vagy a blokk hash-sel, vagy a blokk magassággal. Minden következő blokk az előző "tetejéhez" adódik hozzá, vagyis ahhoz, amelyik éppen a blokklánc „legmagasabb” blokkja volt, valahogy úgy, ahogy dobozokat rakunk egymás tetejére. A blokk magasság 2017. január 1-én körülbelül 446 000 volt, ami azt jelenti, hogy a megjelölt időpontig 446 000 blokk halmozódott fel a 2009 januárjában létrehozott első blokkon.
+
+A blokk hash-sel ellentétben, a blokk magasság nem egy egyedi azonosító. Míg egy blokknak mindig van egy adott és állandó blokk magassága, addig ennek a fordítottja nem igaz - a blokk magassághoz nem csak egy blokkot tartozhat. Két vagy akár több blokknak is azonos lehet a blokk magassága. Ezek a blokkok a blokklánc ugyanazon pozíciójáért versenyeznek. Ennek a menetéről az <<forks>> részben írunk részletesebben. A blokk magasság szintén nem része a blokk adatstruktúrájának; tehát nem kerül a blokkon belül tárolásra. Minden csomópont dinamikusan azonosítja az adott blokk blokkláncon belüli helyzetét (magasságát), amikor azt a bitcoin hálózattól megkapja. A gyorsabb visszakeresés érdekében a blokk magasság is tárolható meta-adatként egy indexelt adatbázis táblázatban.
+
+[TIP]
+====
+Egy blokk _blokk hash_-e minden esetben egyedi módon, egyetlen egy blokkot azonosít. A blokknak mindig van egy adott blokk magassága is. De egy adott blokk magasság nem minden esetben azonosít csak egyetlen blokkot. Gyakran előfordul, hogy két vagy akár több blokk is ugyanazért az blokkláncbeli pozícióért versenyez.
+====
+
+=== A genezis blokk
+
+((("blokkok","genezis blokk")))((("blokklánc (a)", "genezis blokk")))A blokklánc első blokkját, amely 2009-ben jött létre, genezis blokknak nevezzük. Ez a blokklánc blokkjainak "közös őse", ami azt jelenti, hogy ha a blokklánc mentén, bármelyik blokktól, elkezdünk időben visszafelé haladni, akkor végül a genezis blokkhoz fogunk elérkezni.
+
+Minden csomópont mindig egy minimum egy blokkból álló blokklánccal indul, mivel a genezis blokk megváltoztathatatlan módon, statikusan be van kódolva a bitcoin kliens szoftverbe. Minden csomópont mindig "tudja", hogy mi a genezis blokk hashe és milyen a szerkezete, mikor jött létre, és milyen tranzakciókat tartalmaz. Így minden csomópont rendelkezik a blokklánc kiindulópontjával, azaz van olyan biztonságos "gyökere", amelyből kiépíthető egy megbízható blokklánc.
+
+A Bitcoin Core kliensben a statikusan kódolt genezis blokk a chainparams.cpp állományban van: http://bit.ly/1x6rcwP[_chainparams.cpp_].
+
+A genezis blokk azonosító hashe:
+
+----
+000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+----
+
+Ezt a blokk hasht tetszőleges blokklánc vizsgáló weblapon megkereshetjük, például a _blockchain.info_-n is, az eredményként kapott oldal ennek a blokknak a tartalmát írja le, és mellesleg az URL-ben a hasht is tartalmazza:
+
+https://blockchain.info/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+
+A Bitcoin Core referencia kliensét használva a parancssorban:
+
+----
+$ bitcoin-cli getblock 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+----
+[source,json]
+----
+{
+    "hash" : "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+    "confirmations" : 308321,
+    "size" : 285,
+    "height" : 0,
+    "version" : 1,
+    "merkleroot" : "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+    "tx" : [
+        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
+    ],
+    "time" : 1231006505,
+    "nonce" : 2083236893,
+    "bits" : "1d00ffff",
+    "difficulty" : 1.00000000,
+    "nextblockhash" : "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048"
+}
+----
+
+A genezis blokk tartalmaz egy rejtett üzenetet is. A coinbase tranzakció bemenete az alábbi szöveget is tartalmazza: „The Times 03/Jan/2009 Chancellor on brink of second bailout for banks” („The Times, 2009. jan. 3., A pénzügyminiszter hajlik a bankok második kimentésére”). Ez az üzenet bizonyítja, hogy mikor jött létre a legelső blokk, mivel a _The Times_ brit újság akkori főcímére utal. A konkrét szöveget ironikus tréfaként is felfoghatjuk, hiszen felhívja figyelmünket egy önálló/független monetáris rendszer fontosságára, illetve arra is, hogy a bitcoin a példátlan világméretű pénzügyi válsággal egy időben indult útjára. Az üzenetet a bitcoin megalkotója, Satoshi Nakamoto rejtette el az első blokkban.
+
+=== A blokkok a blokklánccá történő összkapcsolása
+
+((("blokkok", "blokkok összekapcsolása a blokkláncon")))((("blokklánc (a)", "blokkok összekapcsolása a blokkláncon")))A bitcoin teljes csomópontok a blokklánc egy helyi példányával rendelkeznek, amely a genezis blokkal indul. A blokklánc helyi másolata folyamatosan frissül, mivel új blokkok képződnek, melyek bővítik a láncot. Ha a csomópontra a hálózatból egy blokk érkezik, akkor a csomópont először ellenőrzi a blokkot, majd hozzákapcsolja a blokkot a meglévő blokklánchoz. Az összekapcsoláshoz a csomópont megvizsgálja a beérkező blokk blokkfejlécét, és megkeresi benne az „előző blokk hashét”.
+
+Tegyük fel például, hogy egy csomópontnak 277 314 blokkja van a helyi blokklánc másolatában. A csomópont által ismert utolsó blokk a 277 314, melyben a blokkfejléc hashe:
+
+----
+00000000000000027e7ba6fe7bad39faf3b5a83daed765f05f7d1b71a1632249
+----
+
+A bitcoin csomópont ezután kap egy új blokkot a hálózattól, amelyet az alábbiak szerint értelmez:
+
+[source,json]
+----
+{
+    "size" : 43560,
+    "version" : 2,
+    "previousblockhash" :
+        "00000000000000027e7ba6fe7bad39faf3b5a83daed765f05f7d1b71a1632249",
+    "merkleroot" :
+        "5e049f4030e0ab2debb92378f53c0a6e09548aea083f3ab25e1d94ea1155e29d",
+    "time" : 1388185038,
+    "difficulty" : 1180923195.25802612,
+    "nonce" : 4215469401,
+    "tx" : [
+        "257e7497fb8bc68421eb2c7b699dbab234831600e7352f0d9e6522c7cf3f6c77",
+
+ #[... sok egyéb, itt fel nem tüntetett tranzakció ...]
+
+        "05cfd38f6ae6aa83674cc99e4d75a1458c165b7ab84725eda41d018a09176634"
+    ]
+}
+----
+
+Az új blokk vizsgálatakor a csomópont megtalálja az "előző blokk hash-e" mezőt, amely a szülő blokk hash-ét tartalmazza. Ezt a hash-t a csomópont ismeri, hiszen ez a lánc utolsó, 277'314-ik blokkjáé. Következésképpen, az új blokk a lánc utolsó blokkjának a gyereke, és kiterjeszthető vele a már meglévő blokklánc. A csomópont az új blokkot a lánc végéhez adja hozzá, 277'315-re növelve a blokklánc magasságát. A <<chain_of_blocks>> ábrán egy három blokkból álló lánc látható, a blokkokat a +previousblockhash+ mezőben lévő hivatkozások kapcsolják össze.
+
+
+[[merkle_trees]]
+=== Merkle fák
+
+((("Merkle fa", id="merkle09")))((("blocklánc (a)", "Merkle-fák", id="BCTmerkle09")))A bitcoin blokklánc minden egyes blokkjában van egy mező, amely egy _Merkle fa_ segítségével a blokkhoz tartozó összes tranzakciót összefoglalja.
+
+A _Merkle fa_, vagy más néven _bináris hash fa_ egy olyan adatstruktúra, amelyet nagy adathalmazok hatékony összefoglalására, illetve sértetlenségének ellenőrzésére használható. A Merkle fák kriptográfiai hasheket tartalmazó bináris fák. A "fa" kifejezés a számítástechnikában egy elágazó adatszerkezet leírására használatos, ám ezek a fák általában fejjel lefelé vannak ábrázolva, azaz "gyökerük" van az ábra tetején, míg "leveleik" a diagram alján, amint azt a következő példákban is láthatjuk.
+
+[[chain_of_blocks]]
+[role="smallerfourtyfive"]
+.Az előző blokkfejléc hashére hivatkozó, blokkláncba kapcsolt blokkok, 
+image::images/mbc2_0901.png[]
+
+A bitcoinnál a Merkle fák arra a célra szolgálnak, hogy összefoglalják egy blokk összes tranzakcióját, vagyis a blokkban szereplő tranzakciókból egy átfogó digitális ujjlenyomatot hozzanak létre, s ily módon egy nagyon hatékony eljárást biztosítsanak annak az ellenőrzésére, hogy egy adott tranzakció valóban szerepel-e a blokkban. A Merkle fa csomópont párok rekurzív hashelésével épül fel, egészen addig, amíg már csak egy hash, az úgynevezett _gyökér_ vagy _Merkle gyökér_ marad. A bitcoin esetében a Merkle fáknál használt kriptográfiai hash algoritmus a kétszer egymás után alkalmazott SHA256, vagyis a dupla SHA256 néven is ismert algoritmus.
+
+Ha N db adatelem egy Merkle fában van összefoglalva, akkor legfeljebb +2*log~2~(N)+ számítással ellenőrizhetjük, hogy egy adott adatelem valóban megtalálható-e a fában, emiatt ez az adatstruktúra rendkívül hatékony.
+
+A Merkle fa alulról felfelé épül. Az alábbi példában négy tranzakcióval kezdjük a munkát, A, B, C és D-vel, amelyek a Merkle fa leveleit alkotják, ahogy ez a <<simple_merkle>> ábra is mutatja. A Merkle fa nem tárolja a tranzakciókat, inkább hasheli azok adatait, és az így kapott hasht tárolja minden egyes levél-csomópontban, H~A~, H~B~, H~C~ és H~D~-ként:
+
+++++
+<pre data-type="codelisting">
+H<sub>A</sub> = SHA256(SHA256(Transaction A))
+</pre>
+++++
+
+Az egymás utáni levél-csomópontokat ezután a szülő-csomópont foglalja össze úgy, hogy összekapcsolja a két hash-t, majd hasheli őket. Például a H~AB~ szülő-csomópont úgy áll elő, hogy a két 32 bájtos hash gyerek összefűzésével egy 64 bájtos string áll elő. Ennek a stringnek a duplán hashelésével áll elő a szülő-csomópont hash-e:
+
+++++
+<pre data-type="codelisting">
+H<sub>AB</sub> = SHA256(SHA256(H<sub>A</sub> + H<sub>B</sub>))
+</pre>
+++++
+
+A folyamat mindaddig folytatódik, amíg már csak egyetlen csomópont lesz legfelül, az ún. Merkle gyökér. A blokkfejlécben ez a 32 bájtos hash kerül tárolásra, amely mind a négy tranzakció adatait összefoglalja. <<simple_merkle>> mutatja, hogy a gyökér hogyan számítható ki csomópontok páronkénti hashelésével.
+
+[[simple_merkle]]
+.Egy Merkle fa csomópontjainak a kiszámítása
+image::images/mbc2_0902.png["merkle_tree"]
+
+((("kiegyensúlyozott fák")))Mivel a Merkle fa egy bináris fa, így páros számú levél csomópontra van szüksége. Ha páratlan számú tranzakció összefoglalására van szükség, akkor az utolsó tranzakció hashe duplikálódik, így páros számú levél csomópont lesz. Ez az ún. _kiegyensúlyozott fa_. Ezt szemlélteti az alábbi <<merkle_tree_odd>>, ahol a C tranzakció lett megkettőzve:
+
+[[merkle_tree_odd]]
+.Egy adatelem megkettőzésével páros számú adat elem áll elő
+image::images/mbc2_0903.png["merkle_tree_odd"]
+
+A négy tranzakcióból fát építő módszer általánosítható bármilyen méretű fa felépítésére. A bitcoinnál gyakori, hogy egy blokk több száz, vagy akár több ezer tranzakciót is tartalmaz. Ezek pontosan ugyanilyen módon kerülnek összefoglalásra, és egyetlen 32 bájtos adatelem, a Merkle gyökér áll elő belőlük. Az alábbi <<merkle_tree_large>> ábrán egy 16 tranzakcióból felépülő fa látható. Meg kell jegyezni, hogy az ábrán a gyökér ugyan nagyobbnak látszik, mint levél csomópontjai, méretük azonban pontosan ugyanaz, mindössze 32 bájt. Legyen szó egy blokk egyetlen egy, vagy akár több százezer tranzakciójáról, a Merkle gyökér mindig 32 bájtban foglalja össze őket:
+
+((("hitelesítési útvonal")))Ha bizonyítani szeretnénk, hogy egy adott tranzakció szerepel egy blokkban, akkor csupán arra van szükség, hogy a csomópont egy +log~2~(N)+ 32 bájtos hasht hozzon létre, amely _hitelesítési útvonalat_ vagy úgynevezett _Merkle útvonalat_ alkot, és összeköti az adott tranzakciót a fa gyökérével. Ez különösen akkor fontos, amikor a tranzakciók száma nagy, mivel a tranzakciók számának 2-es alapú logaritmusa sokkal lassabban növekszik. Ily módon a bitcoin csomópontok képesek arra, hogy tíz vagy tizenkét hashből (320-384 bájtból) álló hatékony útvonalat hozzanak létre, amellyel bizonyítható egy tranzakció blokkon belüli jelenléte, akár egy megabájt méretű blokk több ezer tranzakciója között is.
+
+[[merkle_tree_large]]
+.Nagyszámú adatelemet összefoglaló Merkle fa
+image::images/mbc2_0904.png["merkle_tree_large"]
+
+Az alábbi <<merkle_tree_path>> példában a csomópont úgy tudja bizonyítani, hogy a blokk tartalmazza a K tranzakció-t, hogy csupán négy 32 bájt hash hosszúságú (összesen 128 bájtos) Merkle útvonalat hoz létre. Az útvonal a következő négy hashből (amelyek a <<merkle_tree_path>> ábrán kék háttérrel szerepelnek) áll: H~L~, H~IJ~, H~MNOP~ és H~ABCDEFGH~. A hitelesítési útvonalat alkotó négy hash érték ismeretében bármelyik csomópont bizonyítani tudja, hogy H~K~ (ami az ábra alsó részén fekete háttérrel szerepel) benne van a Merkle fában. Ehhez további három hash-párt kell kiszámítania : H~KL~, H~IJKL~ és H~IJKLMNOP~, melyek elvezetik a Merkle gyökérhez (az ábrán ezt szaggatott vonal szemlélteti).
+
+[[merkle_tree_path]]
+.Merkle útvonal egy adatelem jelenlétének a bizonyítására
+image::images/mbc2_0905.png["merkle_tree_path"]
+
+
+A <<merkle_example>> példában szereplő program egy Merkle fa létrehozásának folyamatát szemlélteti, a levél csomópontokból a gyökér irányába haladva. A példa a libbitcoin könyvtárat és néhány segédfüggvényt használ.
+
+[[merkle_example]]
+[role="pagebreak-before"]
+.Egy Merkle fa felépítése
+====
+[source, cpp]
+----
+include::code/merkle.cpp[]
+----
+====
+
+A <<merkle_example_run>> a példa lefordítását és futtatásának az eredményét mutatja.
+
+[[merkle_example_run]]
+.A Merkle példaprogram lefordítása és futtatása
+====
+[source,bash]
+----
+$ # A merkle.cpp lefordítása
+$ g++ -o merkle merkle.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # A merkle végrehajtható program futtatása
+$ ./merkle
+Aktuális Merkle hash lista:
+  32650049a0418e4380db0af81788635d8b65424d397170b8499cdc28c4d27006
+  30861db96905c8dc8b99398ca1cd5bd5b84ac3264a4e1b3e65afa1bcee7540c4
+
+Aktuális Merkle hash lista:
+  d47780c084bad3830bcdaf6eace035e4c6cbf646d103795d22104fb105014ba3
+
+Result: d47780c084bad3830bcdaf6eace035e4c6cbf646d103795d22104fb105014ba3
+
+----
+====
+
+A Merkle fák hatékonysága a méret növekedésével válik nyilvánvalóvá. A  <<block_structure2>> mutatja, hogy mennyi adatcserére van szükség egy Merke útvonalon, ha bizonyítani szeretnénk, hogy az adott tranzakció része egy blokknak.
+
+[[block_structure2]]
+.A Merkle-fák hatékonysága 
+[options="header"]
+|=======
+|Tranzakciók száma| Blokk kb. mérete |Útvonal mérete (hash db) | Útvonal mérete (bájtokban)
+| 16 tranzakció | 4 kilobájt | 4 hash | 128 bájt
+| 512 tranzakció | 128 kilobájt | 9 hash | 288 bájt
+| 2048 tranzakció | 512 kilobájt | 11 hash | 352 bájt
+| 65'535 tranzakció | 16 megabájt | 16 hash | 512 bájt
+|=======
+
+Ahogy a táblázatban látható: míg egy blokk mérete gyorsan növekszik, a 16 tranzakciót tartalmazó blokk 4 kilobájtjáról a 65,535 tranzakciónak megfelelő 16 megabájtra, addig a tranzakció jelenlétének az igazolásához szükséges Merkle útvonal sokkal lassabban, 128 bájtról csak 512 bájtra növekszik. A Merkle fákkal megoldható, hogy egy csomópont csak a blokkfejlécet (80 bájt/blokk) töltse le, és mégis képes legyen azonosítani egy tranzakció blokkon belüli jelenlétét úgy, hogy a Merkle útvonalnak mindössze csak egy kis részét keresi vissza a teljes csomópontból. Ehhez csupán a teljes blokkláncnak, ami több gigabájt méretű, csupán egy elenyésző részét kell tárolnia vagy letöltenie. Az úgynevezett Simplified Payment Verification (Egyszerűsített Fizetési Ellenőrzés) vagy SPV csomópontok olyan csomópontok, amelyek a teljes blokklánc letöltése nélkül, Merkle útvonalak segítségével  ellenőrzik a tranzakciók jelenlétét.
+
+=== A Merkle fák és az egyszerűsített fizetés ellenőrzés (Simplified Payment Verification (SPV))
+
+((("Simplified Payment Verification (SPV)")))((("bitcoin csomópontok", "SPV csomópontok")))Az úgynevezett Simplified Payment Verification csomópontok széles körben használják a Merkle fákat. A SPV csomópontokban nincs meg az összes tranzakció, és teljes blokkokat sem töltenek le, csupán blokkfejléceket. Ahhoz, hogy a hitelesítési útvonal, vagy Merkle útvonal használatával ellenőrizni tudják egy tranzakció blokkon belüli jelenlétét, nem szükséges a blokkon belüli összes tranzakció letöltése.
+
+Vegyünk például egy SPV csomópontot, amely a bejövő fizetéseknél egy adott, a pénztárcájában megtalálható cím után érdeklődik. Ekkor, az SPV csomópont létrehoz egy szűrőt (lásd <<bloom_filters>>) a peerjeiben. A szűrő a tranzakciók küldését csak a szóban forgó címre korlátozza. Amikor megjelenik egy, a szűrőnek megfelelő tranzakció, akkor a peer csomópont egy +merkleblock+ üzenet segítségével elküldi az adott blokkot. A +merkleblock+ üzenet egyrészt a blokkfejlécet, másrészt a keresett tranzakciót a blokk Merkle gyökerével összekötő Merkle útvonalat tartalmazza. Az SPV csomópont ezt a Merkle útvonalat használja arra is, hogy összekösse a tranzakciót a blokkal, illetve, hogy ellenőrizze a tranzakció jelenlétét a blokkban. Az SPV csomópont a blokkfejlécet is használja, hogy a blokkot összekapcsolja a lánc további részével. Ez a tranzakció és a blokk, illetve a blokk és a blokklánc közötti két kapcsolat bizonyítja azt, hogy a tranzakció rögzítésre került a blokkláncban. Mindent összevetve, az SPV csomópont kevesebb, mint egy kilobájt adat formájában megkapja a blokkfejlécet, illetve a Merkle útvonalat. Ez az adatmennyiség több mint ezerszer kisebb egy teljes blokknál (ami jelenleg körülbelül 1 megabájt).((("", startref="BCTmerkle09")))((("", startref="merkle09")))
+
+=== A bitcoin teszt blokkláncai
+
+((("blokklánc (a)", "teszt blokkláncok", id="BCTtest09")))((("mainnet", seealso="blokklánc (a)")))Talán meglepő, de nem csak egy bitcoin blokklánc létezik. A "fő" bitcoin blokkláncot, melyet Satoshi Nakamoto hozott létre 2009 január 3-án, és amely az e fejezetben tanulmányozott genezis blokkot tartalmazza, _mainnetnek_ nevezzük. Vannak egyéb blokkláncok is, amelyeket tesztelési célokra használnak. Jelenleg ezek a _testnet_, _segnet_ és _regtest_. Tekintsük meg mindegyiket sorban.((("testnet", id="testnet09")))
+
+
+==== Testnet – a bitcoin tesztelési homokozója
+
+A tesztelési célokra használt blokklánc, hálózat és pénz neve testnet. A testnet egy teljes értékű éles P2P hálózat pénztárcákkal, teszt bitcionokkal (testnet coinokkal), bányászattal, és a mainnet összes egyéb funkciójával. Valójában két dologban különböznek egymástól: a testnet coinok szándékosan értéktelenek, és a bányászat nehézségi szintje eléggé alacsony ahhoz, hogy bárki viszonylag könnyen tudjon test coinokat bányászni (így biztosítva értéktelenségüket).
+
+Bármely bitcoin mainneten futó, éles felhasználásra szánt szoftvert először a testneten, teszt érmékkel célszerű tesztelni. Ez megvédi mind a fejlesztőt a hibákból adódó pénzügyi veszteségektől, mind a hálózatot a hibákból adódó, nem várt működéstől.
+
+Azonban az érmék értéktelenségének, és a bányászat nehézségi szintjének alacsonyan tartatás nem könnyű. A fejlesztők kéréseinek dacára, egyesek fejlett bányászfelszerelést (GPU-kat és ASIC-okat) használnak a testneten való bányászatra. Ez növeli a nehézségi szintet, lehetetlenné teszi a CPU-val való bányászatot, és végül olyannyira megnehezíti a teszt érmékhez való hozzájutást, hogy azok már nem értéktelenek, hanem értékessé válnak. Ennek eredményeképp bizonyos időközönként a testnetet el kell dobni, és egy új genezis blokktól újra kell indítani, ezzel alaphelyzetbe állítva a nehézségi szintet.
+
+A jelenlegi testnet neve _testnet3_, a testnet harmadik iterációja, amelyet 2011 februárban indítottak újra, hogy alaphelyzetbe állítsák az előző testnet nehézségi szintjét.
+
+Emlékeztetünk rá, hogy a testnet3 egy nagy blokklánc, amelynek mérete 2017 elején meghaladta a 20 Gbájtot. Nagyjából egy napba telik a számítógépre való teljes szinkronizálás. Nem akkora, mint a mainnet, de pehelysúlyúnak sem nevezhető. Testnet csomópont futtatása erre a célra elkülönített virtuális gépen (pl. VirtualBox, Docker, Cloud Server) is lehetséges és javasolt.
+
+===== A testnet használata
+
+A bitcoin szoftverek többségéhez hasonlóan, a Bitcoin Core teljes támogatást nyújt (mainnet helyett) a testneten való futásra. A Bitcoin Core összes funkciója működik a testneten, beleértve a pénztárcát, a bányászatot, a testnet érméket, és a teljes testnet csomóponti szinkronizálást.
+
+A Bticoin Core (mainnet helyett) testneten való indításához a +testnet+ kapcsolót használjuk:
+
+----
+$ bitcoind -testnet
+----
+
+A naplófájlokban láthatjuk ahogy a bitcoind egy új blokkláncot épít fel az alapértelmezett bitcoind könyvtár +testnet3+ alkönyvtárában:
+
+----
+bitcoind: Using data directory /home/username/.bitcoin/testnet3
+----
+
+A bitcoind-hez való csatlakozáshoz a +bitcoin-cli+ parancssori eszközt használjuk, de ezt is át kell kapcsolni testnet módba:
+
+----
+$ bitcoin-cli -testnet getblockchaininfo
+{
+  "chain": "test",
+  "blocks": 1088,
+  "headers": 139999,
+  "bestblockhash": "0000000063d29909d475a1c4ba26da64b368e56cce5d925097bf3a2084370128",
+  "difficulty": 1,
+  "mediantime": 1337966158,
+  "verificationprogress": 0.001644065914099759,
+  "chainwork": "0000000000000000000000000000000000000000000000000000044104410441",
+  "pruned": false,
+  "softforks": [
+
+  [...]
+----
+
+Lehet a testnet3-mon más teljes csomópont implementációval is futtatni, mint pl. a +btcd+ (Go nyelven íródott) és +bcoin+ (JavaScriptben íródott), más programozási nyelveken és keretrendszereken való kísérletezés és tanulás céljából.
+
+2017 elején a testnet3 a mainnet összes funkcióját támogatja, beleértve a Segregated Witnesst (lásd <<segwit>>). Ezáltal a testnet3 a Segregated Witness funkciók tesztelésére is használható.((("", startref="testnet09")))
+
+==== Segnet – a Segregated Witness testnet
+
+
+((("segnet")))2016-ban egy speciális célú testnetet indítottak el, hogy segítse a Segregated Witness (más néven segwit; lásd <<segwit>>) fejlesztését és tesztelését. Ennek a teszt blokkláncnak a neve +segnet+, és a Bitcoin Core speciális verziójának (ágának) futtatásával lehet hozzá csatlakozni.
+
+((("segwit (Segregated Witness)")))Amióta a segwitet hozzáadták testnet3-hoz, már nem szükséges a segnet használata segwit funkciók teszteléséhez.
+
+A jövőben várhatóan több más testnet blokkláncot fogunk látni, amik egyes funkciók vagy nagyobb felépítési változások tesztelésére lesznek tervezve, mint amilyen a segnet.
+
+==== Regtest – a helyi blokklánc
+
+((("regtest (regressziós tesztelés)")))A regtest, ami a "regressziós tesztelés" rövidítése, egy olyan Bitcoin Core funkció, ami lehetővé teszi helyi blokklánc létrehozását tesztelési célokra. A testnet3-tól eltérően, amely egy nyilvános és megosztott blokklánc, a regtest blokkláncokat  zárt rendszerű, lokális tesztelésre szánják. Egy regtest blokklánc a semmiből jön létre, helyi genezis blokkot létrehozva. Más csomópontok is hozzáadhatók a hálózathoz, vagy egyéni csomópontként a Bitcoin Core szoftver tesztelésére használható.
+
+A Bitcoin Core regtest módban való indításához a +regtest+ opciót használjuk:
+
+----
+$ bitcoind -regtest
+----
+
+Csakúgy, mint a testnetnél, a Bitcoin Core egy új blokkláncot inicializál az ön alapértelmezett bitcoind könyvtárának _regtest_ alkönyvtára alatt:
+
+----
+bitcoind: Using data directory /home/username/.bitcoin/regtest
+----
+
+A parancssori eszköz használatához meg kell adni a +regtest+ opciót is. Próbáljuk meg a +getblockchaininfo+ paranccsal a regtest blokkláncot megvizsgálni:
+
+----
+$ bitcoin-cli -regtest getblockchaininfo
+{
+  "chain": "regtest",
+  "blocks": 0,
+  "headers": 0,
+  "bestblockhash": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
+  "difficulty": 4.656542373906925e-10,
+  "mediantime": 1296688602,
+  "verificationprogress": 1,
+  "chainwork": "0000000000000000000000000000000000000000000000000000000000000002",
+  "pruned": false,
+  [...]
+----
+
+Amint látható, még nincsenek blokkok. Bányásszunk ki néhányat (500 blokkot), és kapjuk meg a jutalmat:
+
+----
+$ bitcoin-cli -regtest generate 500
+[
+  "7afed70259f22c2bf11e406cb12ed5c0657b6e16a6477a9f8b28e2046b5ba1ca",
+  "1aca2f154a80a9863a9aac4c72047a6d3f385c4eec5441a4aafa6acaa1dada14",
+  "4334ecf6fb022f30fbd764c3ee778fabbd53b4a4d1950eae8a91f1f5158ed2d1",
+  "5f951d34065efeaf64e54e91d00b260294fcdfc7f05dbb5599aec84b957a7766",
+  "43744b5e77c1dfece9d05ab5f0e6796ebe627303163547e69e27f55d0f2b9353",
+   [...]
+  "6c31585a48d4fc2b3fd25521f4515b18aefb59d0def82bd9c2185c4ecb754327"
+]
+----
+
+Mindössze néhány másodperce telik ezen blokkok kibányászása, ami megkönnyíti a tesztelést. Ha megnézi pénztárcája egyenlegét, láthatja, hogy az első 400 blokkért kapott jutalmat (a coinbase jutalmaknak 100 blokk mélyen kell lenniük, hogy elkölthesse őket):
+
+----
+$ bitcoin-cli -regtest getbalance
+12462.50000000
+----
+
+=== Teszt blokkláncok fejlesztés céljára való használata
+
+((("fejlesztőkörnyezet", "teszt blokkláncok és")))A bitcoin különböző blokkláncai (+regtest+, +segnet+, +testnet3+, +mainnet+) egy sor tesztelőkörnyezetet kínálnak bitcoin fejlesztés céljára. Használja a teszt blokkláncokat, akár a Bitcoin Core-on, akár más teljes csomóponti konszenzus kliensen való fejlesztéshez. Használhatja őket alkalmazás, pl. pénztárca, tőzsde, e-kereskedelmi webhely, vagy akár újfajta okosszerződések és bonyolult scriptek fejlesztéséhez.
+
+A teszt blokkláncok segítségével egy fejlesztési folyamat alakítható ki. Tesztelje a kódját lokálisan a +regtest+-en, a fejlesztési fázis során. Amikor készen áll nyilvános hálózaton való teszteléshez, váltson át +testnet+-re. Ezzel egy dinamikusabb környezetnek teszi ki a kódját, melyen sokféle kód és alkalmazás fut. Végül, mikor megbizonyosodott a kód elvárt működéséről, váltson a +mainnet+-re, hogy élesben használható legyen. Ahogyan változtatásokat, javításokat eszközöl, kezdje elölről a fejlesztési folyamatot. A változtatásokat először a +regtest+-en, utána a +testnet+-en, végül a +mainnet+-en bocsátsa útjára.((("", startref="BCTtest09")))

@@ -1,0 +1,19 @@
+<section data-type="dedication" class="praise">
+<h1>Pohvale za <em>Mastering Bitcoin</em>-a</h1>
+<blockquote>
+  <p>Kada govorim o bitkoinu široj publici, ponekad me pitaju "ali kako to zaista funkcioniše?" Sada imam sjajan odgovor na to pitanje, jer svako ko pročita <em>Mastering Bitcoin</em> će dobiti duboko razumevanje kako to funkcioniše i biće dobro opremljen za pisanje nove generacije neverovatnih aplikacija za kriptovalute. </p>
+  <p data-type="attribution">Gavin Andresen, glavni naučnik Bitkoin fondacije</p>
+</blockquote>
+<blockquote>
+  <p> Bitkoin i blokčejn tehnologije postaju fundamentalni gradivni blokovi za nove internet generacije. Na njemu rade najbolji i najsjajniji iz Silicijumske doline. Andreasova knjiga pomoći će vam da se pridružite softverskoj revoluciji u svetu finansija. </p>
+  <p data-type="attribution">Naval Ravikant, saosnivač AngelList-a </p>
+</blockquote>
+<blockquote>
+  <p><em>Mastering Bitcoin</em>je najbolja tehnička referenca za bitkoin danas dostupna. A bitkoin će se verovatno retrospektivno posmatrati kao najvažnija tehnologija ove decenije. Zato bi ovu knjigu trebao da ima svaki programer, posebno oni koji su zainteresovani za izgradnju aplikacija pomoću bitkoin protokola. Preporučuje se. </p>
+  <p data-type="attribution">Balaji S. Srinivasan (@balajis), General Partner&#x2c; Andreessen Horowitz</p>
+</blockquote>
+<blockquote>
+  <p>Pronalazak Bitkoin Blokčejna predstavlja potpuno novu platformu za izgradnju, onu koja će omogućiti širok i raznolik ekosistem kao što je sam internet. Kao jedan od vodećih misaonih vođa, Andreas Antonopoulos je savršen izbor za pisanje ove knjige. </p>
+  <p data-type="attribution">Roger Ver, Bitkoin preduzetnik i investitor</p>
+</blockquote>
+</section>

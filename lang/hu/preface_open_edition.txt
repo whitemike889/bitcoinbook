@@ -1,0 +1,132 @@
+[preface]
+== Előszó
+
+=== A bitcoin könyv megírása
+
+((("bitcoin", "előnyök", id="BCbasicbenefits0")))((("decentralizált rendszerek", "bitcoin, mint")))Először 2011 közepén botlottam a bitcoinba. A reakcióm többé-kevésbé az volt, hogy "Brr! Egy újabb pénz a számítógép megszállottjainak!" - és további 6 hónapig nem törődtem vele, nem értettem meg a fontosságát. Az általam ismert legokosabb embereknél is sokszor láttam ugyanezt a reakciót, ami egy kicsit vigasztaló. Másodszor, amikor egy levelező listán került szóba a bitcoin, elhatároztam, hogy elolvasom Satoshi Nakamoto dolgozatát, azaz áttanulmányozom a hiteles forrást és megnézem, hogy miről van szó. ((("digitális pénz", "bitcoin kontra mások")))Még mindig emlékszem arra a pillanatra, amikor befejeztem a 9 oldalas dolgozatot és megértettem, hogy a bitcoin nem egyszerűen csak egy digitális pénz, hanem egy decentralizált bizalmi hálózat, és a pénznél sokkal több mindennek az alapjául szolgálhat. Ez a felismerés indított arra, hogy 4 hónapon keresztül a bitcoinra vonatkozó minden információmorzsát összeszedjek és elolvassak. Lelkesedtem és megszállottá váltam, napi 12 órát vagy még többet töltöttem a képernyőre tapadva, olvastam, írtam, kódoltam, és tanultam, amennyit csak tudtam. Tíz kilót fogytam ezalatt, mert nem ettem rendesen, hanem csak a bitcoinnal foglalkoztam.
+
+Két évvel később, miután számos kis céget alapítottam a bitcoinnal kapcsolatos szolgáltatások és termékek vizsgálatára, elhatároztam, hogy megírom az első könyvemet. A bitcoin volt az a téma, ami kreatívvá tett, lefoglalta a gondolataimat: ez volt a legizgalmasabb technológia, amióta csak találkoztam az Internettel. Itt az idő, hogy a tágabb olvasóközönséggel is megosszam azt az elragadtatásomat, amit ezzel az izgalmas technológiával kapcsolatban érzek.
+
+=== Olvasóközönség
+
+((("olvasóközönség")))A könyvet leginkább programozóknak szántam. Ha az Olvasó ismer bármely programozási nyelvet, akkor a könyvből megtanulhatja, hogyan működnek a digitális pénzek, hogyan lehet használni őket, és hogyan írható olyan szoftver, amelyik ezekre épül. Az első néhány fejezet laikusok számára is érthető bevezetést nyújt a bitcoin világába, vagyis azoknak, akik szeretnék megérteni a bitcoin és a digitális pénzek belső működését.
+
+=== A könyvben használt szabályok
+
+((("tipográfiai szabályok")))A könyv a következő tipográfiai szabályokat használja:
+
+_Dőlt betűs szedés_:: egy új szó, URL, email cím, állománynév vagy kiterjesztés jelölésére szolgál.
+
++Fix szélességű szedés+:: Programlisták, valamint egy bekezdésen belül valamilyen programrészlet, pl. változók vagy függvények, adatbázisok, adattípusok, környezeti változók, utasítások és kulcsszavak esetén használatos.
+
+**`Fix szélességű, vastag szedés`**:: Parancsok vagy más szövegek, melyeket a felhasználónak pontosan ilyen formában kell beadnia.
+
+_++Fix szélességű, dőlt betűs szedés_++:: Olyan szöveg, melyet a felhasználó által megadott értékekkel vagy a környezettől függő értékekkel kell helyettesíteni.
+
+
+[TIP]
+====
+Ez az ikon egy tippet vagy javaslatot jelöl.
+====
+
+[NOTE]
+====
+Ez az ikon egy általános megjegyzést jelöl.
+====
+
+[WARNING]
+====
+Ez az ikon egy figyelmeztetést jelöl.
+====
+
+=== Példaprogramok
+
+((("példaprogramok, elérhetőség és használat", id="codeuse00")))A példák szemléltetésére Python, C++ és egy Unix-szerű operációs rendszer (Linux, MacOS) parancssorai szolgálnak. Az összes kódrészlet elérhető a GitHub kódtáron, a https://github.com/bitcoinbook/bitcoinbook[https://github.com/bitcoinbook/bitcoinbook] URL címen, a főkönyvtár _code_ alkönyvtárában. A GitHub-ról töltse le a kódot, próbálja ki a példákat, vagy jelezze a hibákat.
+
+A kódrészletek a legtöbb operációs rendszer alatt a megfelelő nyelvek telepítésével, minimális munkával működőképessé tehetők. Ha szükségesnek láttuk, akkor megadtuk az telepítéshez szükséges utasításokat és az utasítások lépésről lépésre történő végrehajtása során keletkező kimeneteket.
+
+Némelyik kódrészletet és kódrészlet kimenetet a nyomtatás érdekében újraformáztuk. Az összes ilyen esetben a sorokat egy "\" karakterrel választottuk el, melyet egy új sor karakter követ. A példák újbóli futtatásakor távolítsák el ezt a két karaktert és egyesítsék újra a sorokat, ekkor a példában szereplő eredménnyel egyező kimenetet fognak kapni.
+
+Az összes kódrészlet lehetőleg valós értékeket és számításokat használt, emiatt példáról példára haladva ugyanazokat az eredményeket fogja kapni, mint amelyek a példa számításokban szerepelnek. Például a titkos kulcsok és a hozzájuk tartozó nyilvános kulcsok valamint címek mind valódiak. A minta tranzakciók, blokk és blokklánc hivatkozások a tényleges bitcoin blokkláncba lettek elvégezve és a nyilvános főkönyv részei, ezért bármelyik bitcoin rendszerben lekérdezhetők.
+
+=== A könyvben lévő bitcoin címek és tranzakciók 
+
+((("elindulás", "figyelmeztetések és óvatosság")))((("figyelmeztetések és óvatosság", "kerüljük a könyvben szereplő címekre való pénzküldést")))((("kulcsok és címek", "figyelmeztetések és óvatosság")))((("tranzakciók", "figyelmeztetések és óvatosság")))((("blokklánc alkalmazások", "figyelmeztetések és óvatosság")))((("QR kódok", "figyelmeztetések és óvatosság")))A könyvben használt bitcoin címek, tranzakciók, kulcsok, QR kódok és blokklánc adatok többnyire valósak. Ez azt jelenti, hogy saját szkriptekkel vagy programokkal mi is lekérdezhetjük a könyvben szereplő példákat.
+
+Vegyük figyelembe azonban, hogy a könyvbeli címekhez tartozó titkos kulcsok vagy kinyomtatásra kerültek, vagy "elégtek". Ha pénzt küldünk ezen címek bármelyikére, az vagy örökre elvész, vagy bizonyos esetekben bármelyik olvasó számára elvehető lesz.
+
+[WARNING]
+====
+NE KÜLDJÖN PÉNZT A KÖNYVBEN SZEREPLŐ CÍMEKRE. A pénzét egy másik olvasó el fogja venni, vagy örökre elvész.((("", startref="codeuse00")))
+====
+
+=== Publication by O'Reilly Media
+
+This book is derived under license from the book "Mastering Bitcoin 2nd Edition", by O'Reilly Media.
+
+=== Copyright and Book License
+
+Copyright (c) 2014 Andreas M. Antonopoulos LLC
+
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit
+
+http://creativecommons.org/licenses/by-sa/4.0/.
+
+To provide attribution please link to the book's repository:
+
+https://github.com/bitcoinbook/bitcoinbook
+
+and include this license or an equivalent open license, to satisfy the ShareAlike requirements.
+
+This "Free Culture" compliant license was approved by my publisher O'Reilly Media (http://oreilly.com), who understand the value of open source. O'Reilly Media is not just the world's best publisher of technical books but also a strong supporter of an open culture and the sharing of knowledge.
+
+Thank you O'Reilly!
+
+[role="pagebreak-before"]
+=== Kapcsolatfelvétel a szerzővel
+
+Lépjen kapcsolatba velem (Andreas M. Antonopoulos) személyes oldalamon:
+link:$$https://aantonop.com/$$[]
+
+A _Bitcoin fejlesztőknek_ könyvről, a nyílt kiadásról és a fordításokról szóló információk elérhetők itt:
+link:$$https://bitcoinbook.info/$$[]
+
+Kövessen Twitteren:
+link:$$https://twitter.com/aantonop$$[]
+
+Find more than 500 education videos on my YouTube channel:
+link:$$https://youtube.com/aantonop$$[]
+
+Nagyon köszönöm az összes Patreon támogatónak, akik a munkámat havi adományokkal segítették. A Patreon oldalam az alábbi linken követhető:
+link:$$https://patreon.com/aantonop$$[]
+
+=== Köszönetnyilvánítások
+
+((("köszönetnyilvánítások", id="acknowledge0")))Ez a könyv sok ember munkájának és közreműködésnek köszönhető. Hálás vagyok azért a segítségért, amelyet a barátaimtól, kollégáimtól és teljesen ismeretlen emberektől kaptam, akik velem együtt részt vettek a bitcoinról és a digitális pénzekről szóló definitív szakkönyv megírásában.
+
+Lehetetlen különbséget tenni a bitcoin technológia és a bitcoin közösség között, és ez a könyv épp annyira a közösség által létrehozott eredmény, mint amennyire a technológiáról szóló könyv. A könyvvel kapcsolatos munkámat a kezdetektől a legvégéig az egész bitcoin közösség bátorította, örömmel fogadta és támogatta. Ez a könyv mindenek előtt lehetővé tette, hogy két éven keresztül része lehettem ennek a csodálatos közösségnek, és nem tudom eléggé megköszönni, hogy befogadtak maguk közé. Túl sok embert kellene megemlítenem név szerint - olyanokat, akikkel konferenciákon, különféle eseményeken, szemináriumokon, pizzázás során és személyes megbeszéléseken találkoztam, továbbá azokat, akik twitter-en, reddit-en, a bitcointalk.org-on és a github-on kommunikáltak velem, és akik hatással voltak erre a könyvre. Minden egyes ötletet, analógiát, kérdést, választ és magyarázatot, amely a könyvben megtalálható, bizonyos szempontból a közösségi kommunikáció inspirálta, tesztelte vagy tette jobbá. Mindenkinek köszönöm a támogatását. Enélkül ez a könyv nem születhetett volna meg. Örökre hálás vagyok ezért.
+
+A szerzővé válás folyamata természetesen már sokkal korábban elkezdődik, mielőtt az ember megírná az első könyvét. Az anyanyelvem görög, a tanulmányaimat is ezen a nyelven végeztem, ezért mikor első éves egyetemista voltam, egy angol tanfolyamon kellett részt vennem, hogy jobban tudjak írni angolul. Köszönettel tartozom Diana Kordasnak, az angoltanáromnak, aki segített abban, hogy magabiztosabban és jobban írjak. Később, szakemberként és a _Network World_ magazin egyik szerzőjeként az adatközpontok témakörében fejlesztettem írói képességeimet. Köszönettel tartozom John Dixnek és John Gallantnak, akik először bíztak meg azzal, hogy a _Network World_-be írjak, valamint szerkesztőmnek, Michael Cooney-nek és kollégámnak, Johna Till Johnsonnak, akik szerkesztői munkájukkal  alkalmassá tették cikkeimet a megjelentetésre. Négy éven keresztül minden héten 500 szót írtam, ennek során elég gyakorlatot szereztem ahhoz, hogy végül is szerzőnek tekinthessem magam.
+
+Köszönet azoknak, akik hivatkozásaikkal és kritikáikkal támogattak, amikor benyújtottam az O’Reilly-nek a könyvre vonatkozó javaslatomat. Nevezetesen, köszönettel tartozom John Gallantnak, Gregory Nessnek, Richard Stiennonnak, Joel Snydernek, Adam B. Levine-nek, Sandra Gittlennek, John Dixnek, Johna Till Johnsonnak, Roger Vernek és Jon Matonisnak. Külön köszönet Richard Kagannak és Tymon Mattoszkonak akik a javaslatom korai változatait elbírálták, valamint Matthew Taylornak, aki a javaslatot megszerkesztette.
+
+Köszönet Cricket Liunak, aki a _DNS és BIND_ című O’Reilly könyv szerzője. Ő mutatott be engem a kiadónak. Köszönet Michael Loukidesnek és Allyson MacDonaldnak, akik az O’Reilly dolgozói, és hónapokon át együtt dolgoztak velem, hogy ez a könyv létrejöhessen. Allyson különösen türelmes volt, ha túlléptem a határidőket, és késve nyújtottam be valamit, mert az élet felülírta a terveinket. A második kiadásban köszönet Timothy McGovernnek a tanácsadásért, Kim Cofernek a türelmes lektorálásért, és Rebecca Panzernek az újabb ábrák illusztrációjáért.
+
+Az első néhány vázlat és az első pár fejezet megírása volt a legnehezebb, mert a bitcoin témájának a kifejtése nehéz. Minden egyes alkalommal, amikor megváltoztattam valamit a bitcoin technológia magyarázata során, az egész anyagot át kellett dolgoznom. Sokszor megakadtam, és kicsit kétségbe estem, mikor azzal küzdöttem, hogy az egész témát könnyen érthetővé tegyem, és leírjam ezt a bonyolult műszaki tárgyat. Végül úgy döntöttem, hogy a bitcoin történetét a bitcoin felhasználóinak a szemszögéből mondom el. Ez nagyban megkönnyítette a könyv megírását. Köszönettel tartozom barátomnak és mentoromnak, Richard Kagannak, aki segített kibontani a történetet, és segített legyőzni az írói leblokkolásokat, valamint Pamela Morgannek, aki az első és második kiadás fejezeteinek korai vázlatait átnézte, és nehéz kérdéseket tett föl nekem – ezektől lettek jobbak a fejezetek. Köszönettel tartozom a San Franciscó-i bitcoin fejlesztők társaságának, valamint Taariq Lewisnak és Denise Terry-nek, mert segítették az anyag elbírálását a korai fázisban. Köszönet továbbá Andrew Nauglernek az infógrafika megtervezéséért.
+
+A könyv megírása során a korai vázlatokat elérhetővé tettem a Githubon, és vártam a megjegyzéseket. Több, mint száz megjegyzést, javaslatot, javítást és hozzájárulást kaptam. Ezeket a hozzájárulásokat külön is kiemeltem és megköszöntem a <<github_contrib>> részben. Legfőképpen őszinte köszönetem Minh T. Nguyennek (első kiadás) és Will Binnsnek (második kiadás), akik önkéntesként fáradhatatlanul felügyelték, menedzselték és feloldották az áthúzási kérelmeket, jelentették és javították a hibákat a Githubon.
+
+A könyv első változata több kör műszaki lektoráláson ment keresztül. Köszönet Cricket Liunak és Lorne Lantznak alapos lektori munkájukért, megjegyzéseikért és támogatásukért.
+
+Számos bitcoin fejlesztőtől kaptam programokat, kritikákat, megjegyzéseket és bátorítást. Köszönetet mondok Amir Taakinak a kódrészletekért és a sok nagyszerű megjegyzéséért, Chris Kleeschulte-nek a Bicore mellékletért, Vitalik Buterinnek és Richard Kissnek az elliptikus görbékkel kapcsolatos matematikai megjegyzéseikért, Gavin Andresennek a javításaiért, megjegyzéseiért és bátorításáért, Michalis Karagis-nek a megjegyzéseiért, közreműködéséért és a btcd összefoglalójáért, és Robin Inge hibajelentéseiért, melyek tovább javították a könyv minőségét. A második kiadásban ismét sok segítséget kaptam több Bitcoin Core fejlesztőtől, Eric Lombrozotól a Segregated Witness demisztifikálásáért, Luke Dashjrtől, aki segített a tranzakciókról szóló fejezet javításában, Johnson Lautól, aki a Segregated Witness és egyéb fejezeteket lektorálta, és még sok mástól. Köszönettel tartozom Joseph Poonnak, Tadge Dryjanak, és Olaoluwa Osuntokunnak, akik elmagyarázták nekem a Lightning Networköt, lektoráltak, és megválaszolták kérdésimet, ha elakadtam.
+
+A szavak és könyvek szeretetét anyámnak, Theresának köszönhetem, aki egy olyan házban nevelt fel, amelyben minden falon könyvek voltak. Anyám vette nekem az első számítógépemet is 1982-ben, bár ő maga technofóbiás, a saját állítása szerint. Apám, Menelaos, építőmérnök, és 80 éves korában jelentette meg az első könyvét. Ő volt az, aki megtanított a logikus és analitikus gondolkodásra, valamint a műszaki tudományok szeretetére.
+
+Köszönet mindenkinek, aki segített nekem megtenni ezt az utat.
+
+
+////
+Github contributor acknowledgments in a new file...
+////
+
+include::github_contrib.asciidoc[]

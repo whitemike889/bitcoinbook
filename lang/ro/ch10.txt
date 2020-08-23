@@ -1,0 +1,1122 @@
+[[mining]]
+== Minerit și Consens
+
+
+== Introducere
+
+(((”minerit și consens”, ”scopul”)))Cuvântul ”minerit” este oarecum înșelător. Prin evocarea extracției de metale prețioase, ne concentrează atenția asupra recompensei pentru minerit, bitcoin nou creat în fiecare bloc. Deși mineritul este stimulat de această recompensă, scopul principal al mineritului nu este recompensa sau generarea de monede noi. Dacă vedeți mineritul doar ca procesul prin care sunt create monede, confundați mijloacele (stimulente) cu scopul procesului. Mineritul este mecanismul care stă la baza compensării descentralizate, prin care tranzacțiile sunt validate și acceptate. Mineritul este invenția care face bitcoin special, un mecanism de securitate descentralizat care stă la baza banilor digitali de-la-egal-la-egal (P2P - peer-to-peer).
+
+((("minerit și consens", "consens descentralizat")))((("autoritate centrală de încredere")))Mineritul _securizează sistemul bitcoin_ și permite apariția unui _consens la nivel de rețea fără o autoritate centrală_. (((”comisioane”, ”comisioane de tranzacție”)))Recompensa cu monede noi create și recompensa din comisioanele de tranzacție este o schemă de stimulare care aliniază acțiunile minerilor cu securitatea rețelei, implementând simultan aprovizionarea monetară.
+
+[TIP]
+====
+(((”sisteme descentralizate”, ”minerit bitcoin și”)))Scopul mineritului nu este crearea de noi bitcoin. Acesta este sistemul de stimulare. Mineritul este mecanismul prin care _securizarea_ bitcoin este _decentralizată_.
+====
+
+Minerii validează tranzacțiile noi și le înregistrează în registrul global. Un nou bloc, care conține tranzacții care au avut loc de la ultimul bloc, este ”minat” în medie la fiecare 10 minute, adăugând astfel acele tranzacții la lanțul-de-blocuri. Tranzacțiile care fac parte dintr-un bloc și se adaugă la lanțul-de-blocuri sunt considerate ”confirmate”, ceea ce permite noilor proprietari de bitcoin să cheltuiască bitcoinul pe care l-au primit în acele tranzacții.
+
+((("comisioane", "recompense de minerit")))((("minerit și consens", "recompense minere și comisioane")))((("algoritm Dovadă-de-Lucru")))((("minerit și consens", "algoritm Dovadă-de-Lucru")))Minerii primesc două tipuri de recompense în schimbul securității pe care o oferă prin minerit: monede noi create cu fiecare bloc nou și comisioane de tranzacție din toate tranzacțiile incluse în bloc. Pentru a câștiga această recompensă, minerii concurează pentru a rezolva o problemă matematică dificilă bazată pe un algoritm criptografic de rezumare. Soluția problemei, numită Dovadă-de-Lucru, este inclusă în noul bloc și acționează ca dovadă că minerul a investit eforturi de calcul semnificative. Competiția de rezolvare a algoritmului Dovadă-de-Lucru pentru a câștiga recompensa și dreptul de a înregistra tranzacții pe lanțul-de-blocuri este baza modelului de securitate bitcoin.
+
+Procesul se numește minerit, deoarece recompensa (generarea de monede noi) este concepută pentru a simula diminuarea randamentului, la fel ca minarea pentru metale prețioase. Oferta de monede bitcoin este creată prin minerit, similar cu modul în care o bancă centrală emite bani noi prin tipărirea bancnotelor. Cantitatea maximă de bitcoin nou-creat pe care un miner o poate adăuga la un bloc scade aproximativ la fiecare patru ani (sau mai exact la fiecare 210.000 de blocuri). A început la 50 de bitcoin pe bloc în ianuarie 2009 și s-a redus la jumătate (la 25 de bitcoin pe bloc) în noiembrie 2012. S-a redus la jumătate la 12,5 bitcoin în iulie 2016. Pe baza acestei formule, recompensele miniere bitcoin scad exponențial până aproximativ în anul 2140, când toată cantitatea de bitcoin (20.99999998 milioane) va fi emisă. După 2140, nu va fi emis niciun bitcoin nou.
+
+Minerii bitcoin câștigă, de asemenea, comisioane din tranzacții. Fiecare tranzacție poate include un comision de tranzacție sub forma unui excedent de bitcoin între intrările și ieșirile tranzacției. Minerul câștigător ajunge să ”păstreze restul” de la tranzacțiile incluse în blocul câștigător. Astăzi, comisioanele reprezintă 0,5% sau mai puțin din venitul unui miner, marea majoritate provenind din bitcoin-ul recent creat. Cu toate acestea, pe măsură ce recompensa scade în timp și numărul tranzacțiilor pe bloc crește, o proporție mai mare din veniturile miniere vor proveni din comisioane. Treptat, recompensa minieră va fi dominată de comisioanele de tranzacție, care vor constitui stimulentul principal pentru mineri. După 2140, cantitatea de bitcoin nouă în fiecare bloc scade la zero, iar minarea va fi stimulată doar prin comisioane de tranzacție.
+
+În acest capitol, vom examina mai întâi mineritul ca mecanism de aprovizionare monetară și apoi vom analiza funcția cea mai importantă a mineritului: mecanismul de consens descentralizat care stă la baza securității bitcoin.
+
+Pentru a înțelege mineritul și consensul, vom urmări tranzacția lui Alice, deoarece este primită și adăugată la un bloc de către echipamentele de minerit ale lui Jing. Apoi, vom urmări blocul pe măsură ce este minat, adăugat la lanțul-de-blocuri și acceptat de rețeaua bitcoin prin procesul de consens emergent.
+
+=== Economia Bitcoin și Crearea de Monede
+
+((("minerit și consens", "economia bitcoin și creare de monedă")))((("crearea de monedă")))((("masa monetară")))((("rata de emitere")))Bitcoin sunt ”emiși” în timpul creării fiecărui bloc la o rată fixă și în diminuare. Fiecare bloc, generat în medie la fiecare 10 minute, conține bitcoin complet nou, creat din nimic. La fiecare 210.000 de blocuri, sau aproximativ la fiecare patru ani, rata de emitere a monedei este redusă cu 50%. Pentru primii patru ani de funcționare a rețelei, fiecare bloc conținea 50 de bitcoin noi.
+
+În noiembrie 2012, noua rată de emitere bitcoin a scăzut la 25 de bitcoin per bloc. În iulie 2016, aceasta a fost redusă din nou la 12,5 bitcoin per bloc. S-a redus la jumătate (la 6,25 bitcoin) la blocul 630 000, care a fost minat în mai 2020. Rata monedelor noi scade astfel exponențial cu peste 32 de ”injumătățiri” până la blocul 6 720 000 (minat aproximativ în anul 2137), când atinge unitatea minimă de monedă de 1 satoshi. În cele din urmă, după 6,93 milioane de blocuri, în aproximativ 2140, vor fi emise aproape 2.099.999.997.690.000 de satoshi, sau aproape 21 de milioane de bitcoin. Ulterior, blocurile nu vor conține bitcoin nou, iar minerii vor fi răsplătiți doar prin comisioanele de tranzacție. <<bitcoin_money_supply>> arată totalul bitcoin în circulație în timp, ținând cont că emiterea de monedă scade.
+
+[[bitcoin_money_supply]]
+.Oferta de monedă bitcoin în timp, pe baza unei rate de emitere în scădere geometrică
+image::images/mbc2_1001.png["BitcoinMoneySupply"]
+
+[NOTE]
+====
+Numărul maxim de monede minate este limita _superioară_ a posibilelor recompense miniere pentru bitcoin. În practică, un miner poate mina în mod intenționat un bloc primind mai puțin decât recompensa completă. Astfel de blocuri au fost deja minate și mai multe pot fi minate în viitor, ceea ce duce la o emitere totală mai mică a monedei.
+====
+
+În exemplul de cod din <<max_money>>, calculăm cantitatea totală de bitcoin care va fi pusă în circulație.
+
+[[max_money]]
+.Un script pentru a calcula cât bitcoin va fi pus în circulație în total
+====
+[source, python]
+----
+include::code/max_money.py[]
+----
+====
+
+<<max_money_run>> arată ieșirea pentru rularea acestui script.
+
+[[max_money_run]]
+.Rularea scriptului max_money.py
+====
+[source,bash]
+----
+$ python max_money.py
+Total BTC to ever be created: 2099999997690000 Satoshis
+----
+====
+
+Punerea în circulație finită și în scădere creează o ofertă monetară fixă care rezistă inflației. Spre deosebire de o monedă fiduciară (fiat currency), care poate fi tipărită în număr infinit de o bancă centrală, bitcoin nu poate fi niciodată umflat prin tipărire.
+
+.Bani Deflaționari
+****
+(((”bani deflaționari”)))Cea mai importantă și dezbătută consecință a emiterii monetare fixe și în scădere este aceea că moneda tinde să fie inerent _deflationară_. Deflația este fenomenul de apreciere a valorii datorat unei nepotriviri a ofertei și cererii care crește valoarea (și cursul de schimb) al unei monede. Opusul inflației, deflația, înseamnă că banii au mai multă putere de cumpărare în timp.
+
+Mulți economiști susțin că o economie deflaționară este un dezastru care ar trebui evitat cu orice preț. Acest lucru se datorează faptului că într-o perioadă de deflație rapidă, oamenii tind să adune bani în loc să îi cheltuiască, sperând că prețurile vor scădea. Un astfel de fenomen s-a desfășurat în timpul ”Decadei Pierdute” a Japoniei, când o prăbușire completă a cererii a împins moneda într-o spirală deflaționară.
+
+Experții bitcoin susțin că deflația nu este rea în sine. Mai degrabă, deflația este asociată cu o prăbușire a cererii, deoarece acesta este singurul exemplu de deflație pe care trebuie să-l studiem. Într-o monedă fiduciară, cu posibilitatea de tipărire nelimitată, este foarte dificil să introduceți o spirală deflaționară, cu excepția cazului în care există o prăbușire completă a cererii și o lipsă de dorință de a imprima bani. Deflația în bitcoin nu este cauzată de o prăbușire a cererii, ci de o ofertă restrânsă predictibil.
+
+Aspectul pozitiv al deflației este, desigur, că este opusul inflației. Inflația provoacă o devalorizare lentă, dar inevitabilă a monedei, rezultând într-o formă de impozitare ascunsă, care îi pedepsește pe cei care economisesc pentru a salva debitorii (inclusiv cei mai mari debitori, guvernele în sine). Monedele aflate sub control guvernamental suferă de pericolul moral de emitere usoară a datoriilor, care poate fi ulterior ștearsă prin devalorizare în detrimentul economisitorilor.
+
+Rămâne de văzut dacă aspectul deflaționist al monedei este o problemă atunci când nu este determinată de contracție economică rapidă sau un avantaj, deoarece protecția împotriva inflației și a devalorizării depășește cu mult riscurile deflației.
+****
+
+=== Consens Descentralizat
+
+((("minerit și consens", "consens descentralizat)))((("sisteme descentralizate", "consens în")))În capitolul anterior am analizat lanțul-de-blocuri, registrul public global (lista) al tuturor tranzacțiilor, pe care toată lumea din rețeaua bitcoin îl acceptă ca înregistrarea oficială a dreptului de proprietate.
+
+Dar cum pot fi de acord toți cei din rețea cu un singur ”adevăr” universal despre cine deține ce, fără a fi nevoie să aibă încredere în nimeni? Toate sistemele tradiționale de plată depind de un model de încredere care are o autoritate centrală care furnizează un serviciu de compensare, verificând practic și compensând toate tranzacțiile. Bitcoin nu are o autoritate centrală, însă, într-un fel, fiecare nod complet are o copie completă a registrului public în care poate avea încredere ca fiind înregistrarea officială. Lanțul-de-blocuri nu este creat de o autoritate centrală, ci este asamblat independent de fiecare nod din rețea. Cumva, fiecare nod din rețea, care acționează asupra informațiior transmise prin conexiuni nesigure de rețea, poate ajunge la aceeași concluzie și poate asambla o copie a aceluiași registru public ca toți ceilalți. Acest capitol examinează procesul prin care rețeaua bitcoin ajunge la un consens global fără o autoritate centrală.
+
+((("consens emergent")))((("minerit și consens", "consens emergent"))Principala invenție a lui Satoshi Nakamoto este mecanismul descentralizat pentru _consens emergent_. Este emergent, deoarece consensul nu este obținut în mod explicit - nu există alegeri sau un moment fix când consensul are loc. În schimb, consensul este un artefact emergent al interacțiunii asincrone a mii de noduri independente, toate urmând reguli simple. Toate proprietățile bitcoin, inclusiv moneda, tranzacțiile, plățile și modelul de securitate care nu depinde de autoritatea centrală sau de încredere, derivă din această invenție.
+
+Consensul descentralizat al bitcoin rezultă din interacțiunea a patru procese care apar independent pe nodurile din întreaga rețea:
+
+[role="pagebreak-before"]
+* Verificarea independentă a fiecărei tranzacții, de către fiecare nod complet, pe baza unei liste cuprinzătoare de criterii
+* Agregarea independentă a acestor tranzacții în blocuri noi de către noduri de minerit, însoțită de calculul demonstrat printr-un algoritm Dovadă-de-Lucru
+* Verificarea independentă a noilor blocuri de către fiecare nod și asamblarea într-un lanț
+* Selectarea independentă, de către fiecare nod, a lanțului cu cea mai mare cumulare de calcul demonstrată prin Dovadă-de-Lucru
+
+În următoarele secțiuni vom examina aceste procese și modul în care interacționează pentru a crea proprietatea emergentă a unui consens la nivel de rețea care permite oricărui nod bitcoin să își asambleze propria copie a registrului autoritar, de încredere, public, global.
+
+[[tx_verification]]
+=== Verificarea Independentă a Tranzacțiilor
+
+((("minerit și consens", "verificare independentă a tranzacțiilor")))((("tranzacții", "verificare independentă a")))În <<transactions>>, am văzut cum software-ul portofel creează tranzacții prin colectarea UTXO-urilor, furnizarea scripturilor de deblocare corespunzătoare și apoi construirea de noi ieșiri alocate unui nou proprietar. Tranzacția rezultată este apoi trimisă nodurilor vecine din rețeaua bitcoin, pentru a putea fi propagată în întreaga rețea bitcoin.
+
+Cu toate acestea, înainte de a transmite tranzacțiile către vecinii săi, fiecare nod bitcoin care primește o tranzacție va verifica mai întâi tranzacția. Acest lucru asigură că numai tranzacțiile valide sunt propagate în rețea, în timp ce tranzacțiile invalide sunt respinse de primul nod care le întâlnește.
+
+Fiecare nod verifică fiecare tranzacție pe baza unei liste de verificare lungi:
+
+* Sintaxa și structura de date a tranzacției trebuie să fie corecte.
+* Listele de intrări și de ieșiri nu sunt goale.
+* Dimensiunea tranzacției în octeți este mai mică decât `MAX_BLOCK_SIZE`.
+* Fiecare valoare de ieșire, precum și totalul, trebuie să se încadreze în intervalul admis de valori (mai puțin de 21 milioane de monede, mai mult decât pragul de _praf_).
+* Niciuna dintre intrări nu are rezumat=0, N=-1 (tranzacțiile conibase nu trebuie transmise).
+* `nLocktime` este egal cu `INT_MAX`, sau valorile `nLocktime` și `nSequence` sunt satisfăcute în funcție de `MedianTimePast`.
+* Dimensiunea tranzacției în octeți este mai mare sau egală cu 100.
+* Numărul de operațiuni de semnătură (SIGOPS) conținut în tranzacție este mai mic decât limita de operare a semnăturilor.
+* Scriptul de deblocare (`scriptSig`) nu poate decât să împingă numerele pe stivă, iar scriptul de blocare (`scriptPubkey`) trebuie să corespundă formelor `isStandard` (acest lucru respinge tranzacțiile ”nonstandard”).
+* Trebuie să existe o tranzacție similară în bazinul de tranzacții sau într-un bloc din ramura principală.
+* Pentru fiecare intrare, dacă ieșirea referențiată există în orice altă tranzacție din bazinul de tranzacții, tranzacția trebuie respinsă.
+* Pentru fiecare intrare, caută în ramura principală și în bazinul de tranzacții pentru a găsi tranzacția de ieșire la care se face referire. Dacă tranzacția de ieșire lipsește pentru orice intrare, aceasta va fi o tranzacție orfană. Se adaugă la bazinul de tranzacții orfane, dacă o tranzacție identică nu este deja în bazin.
+* Pentru fiecare intrare, dacă tranzacția de ieșire referită este o ieșire coinbase, aceasta trebuie să aibă cel puțin `COINBASE_MATURITY` (100) confirmări.
+* Pentru fiecare intrare, ieșirea referențiată trebuie să existe și nu poate fi deja cheltuită.
+* Folosind tranzacțiile de ieșire la care se face referire pentru a obține valori de intrare, verifică dacă fiecare valoare de intrare, precum și suma, se află în intervalul admis de valori (mai puțin de 21 milioane bitcoin, mai mult de 0).
+* Respinge dacă suma valorilor de intrare este mai mică decât suma valorilor de ieșire.
+* Respinge dacă comisionul de tranzacție ar fi prea mic (`minRelayTxFee`) pentru a fi inclus într-un bloc gol.
+* fiecare script de deblocare a fiecării intrări trebuie validat față de scripturile corespunzătoare de blocare
+
+Aceste condiții pot fi văzute în detaliu în funcțiile `AcceptToMemoryPool`, `CheckTransaction` și `CheckInputs` în Bitcoin Core. Rețineți că aceste condiții se schimbă de-a lungul timpului, pentru a aborda noi tipuri de atacuri denial-of-service sau uneori pentru a relaxa regulile, astfel încât să includă mai multe tipuri de tranzacții.
+
+Verificând în mod independent fiecare tranzacție așa cum este primită și înainte de a o propaga, fiecare nod creează un bazin de tranzacții valide (dar neconfirmate) cunoscute sub denumirea de _bazin de tranzacții_, _memory pool_ sau _mempool_.
+
+=== Noduri de Minerit
+
+((("minerit și consens", "noduri de minerit")))((("noduri bitcoin", "noduri de minerit")))Unele dintre nodurile din rețeaua bitcoin sunt noduri specializate numite _mineri_. În <<ch01_intro_what_is_bitcoin>> l-am introdus pe ((("utilizări", "minerit bitcoin", id="jingten")))Jing, student în inginerie informatică din Shanghai, China, care este miner bitcoin. Jing câștigă bitcoin folosind o ”platformă minieră”, care este un sistem specializat de hardware proiectat pentru a mina bitcoin. Hardware-ul minier specializat este conectat la un server care rulează un nod bitcoin complet. Spre deosebire de Jing, unii mineri minează fără nod complet, așa cum vom vedea în <<mining_pools>>. Ca orice alt nod complet, nodul lui Jing primește și propagă tranzacțiile neconfirmate în rețeaua bitcoin. Nodul lui Jing, totuși, agregă aceste tranzacții în blocuri noi.
+
+Nodul lui Jing ascultă pentru blocuri noi, propagate în rețeaua bitcoin, la fel ca toate nodurile. Cu toate acestea, sosirea unui nou bloc are o semnificație specială pentru un nod miner. Concurența dintre mineri se încheie efectiv cu propagarea unui nou bloc care acționează ca un anunț al câștigătorului. Pentru mineri, primirea unui bloc nou valid înseamnă că altcineva a câștigat competiția. Cu toate acestea, sfârșitul unei runde a competiției este și începutul rundei următoare. Noul bloc nu doar marchează sfârșitul cursei; este și semnul de pornire în cursa pentru următorul bloc.
+
+=== Agregarea Tranzacțiilor în Blocuri
+
+((("minerit și consens", "agregarea tranzacțiilor în blocuri", id="MACaggreg10")))((("tranzacții", "agregarea tranzacțiilor în blocuri", id="Taggreg10")))((("blocuri", "agregarea tranzacțiilor în", id="Baggreg10")))((("blocuri", "blocuri candidat")))((("blocuri candidats")))((("bazine de tranzacții")))((("memory pools (mempools)")))După validarea tranzacțiilor, un nod bitcoin le va adăuga la _memory pool_, sau _bazinul de tranzacții_, unde tranzacțiile așteaptă până când pot fi incluse (minate) într-un bloc. Nodul lui Jing colectează, validează și transmite noi tranzacții la fel ca orice alt nod. Spre deosebire de alte noduri, totuși, nodul lui Jing va agrega aceste tranzacții într-un bloc _candidat_.
+
+Să urmărim blocurile care au fost create în perioada în care Alice a cumpărat o ceașcă de cafea de la Cafeneaua lui Bob (vezi <<cup_of_coffee>>). Tranzacția lui Alice a fost inclusă în blocul 277.316. În scopul de a demonstra conceptele din acest capitol, să presupunem că blocul a fost extras de sistemul miner al lui Jing și urmărește tranzacția lui Alice, deoarece devine parte a acestui nou bloc.
+
+Nodul miner al lui Jing păstrează o copie locală a lanțului-de-blocuri. Până la momentul (((”utilizări” ”cumpărare cafea”)))când Alice cumpără ceașca de cafea, nodul lui Jing a asamblat un lanț până la blocul 277.314. Nodul lui Jing ascultă pentru tranzacții, încearcă să extragă un bloc nou și ascultă și pentru blocurile descoperite de alte noduri. În timp ce nodul lui Jing minează, acesta primește blocul 277.315 prin rețeaua bitcoin. Sosirea acestui bloc semnifică sfârșitul competiției pentru blocul 277.315 și începutul competiției pentru crearea blocului 277.316.
+
+În decursul ultimelor 10 minute, în timp ce nodul lui Jing căuta o soluție pentru blocul 277.315, acesta colecta de asemenea tranzacții pentru pregătirea următorului bloc. Până acum, a colectat câteva sute de tranzacții în bazinul de memorie. După primirea blocului 277.315 și validarea acestuia, nodul lui Jing îl va compara, de asemenea, cu toate tranzacțiile din bazinul de memorie și va elimina orice tranzacție care a fost inclusă în blocul 277.315. Tranzacțiile rămase în bazinul de memorie nu sunt confirmate și așteaptă să fie înregistrate într-un bloc nou.
+
+(((”Algoritmul Dovadă-de-Lucru”))) (((”minerit și consens”, ”algoritmul dovadă de lucru”)))Nodul lui Jing construiește imediat un nou bloc gol, un candidat pentru blocul 277.316. Acest bloc se numește _bloc candidat_ deoarece nu este încă un bloc valid, deoarece nu conține o Dovadă-de-Lucru validă. Blocul devine valid numai dacă minerul reușește să găsească o soluție la algoritmul Dovadă-de-Lucru.
+
+Când nodul lui Jing agregă toate tranzacțiile din bazinul de memorie, noul bloc candidat are 418 tranzacții cu comisioane totale de tranzacție de 0,09094928 bitcoin. Puteți vedea acest bloc în lanțul-de-blocuri folosind interfața liniei de comandă a clientului Bitcoin Core, așa cum este aratăt în <<block277316>>.
+
+[[block277316]]
+.Utilizarea liniei de comandă pentru a prelua blocul 277.316
+====
+[source,bash]
+----
+$ bitcoin-cli getblockhash 277316
+
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+
+$ bitcoin-cli getblock 0000000000000001b6b9a13b095e96db41c4a928b97ef2d9\
+44a9b31b2cc7bdc4
+----
+
+
+[source,json]
+----
+{
+    "hash" : "0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4",
+    "confirmations" : 35561,
+    "size" : 218629,
+    "height" : 277316,
+    "version" : 2,
+    "merkleroot" : "c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e",
+    "tx" : [
+        "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+        "b268b45c59b39d759614757718b9918caf0ba9d97c56f3b91956ff877c503fbe",
+
+        ... 417 more transactions ...
+
+       ],
+    "time" : 1388185914,
+    "nonce" : 924591752,
+    "bits" : "1903a30c",
+    "difficulty" : 1180923195.25802612,
+    "chainwork" : "000000000000000000000000000000000000000000000934695e92aaf53afa1a",
+    "previousblockhash" : "0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569"
+}
+----
+====
+
+==== Tranzacția Coinbase
+
+((("tranzacții coinbase", id="coinbtrans10")))((("tranzacții", "tranzacții coinbase", id="Tcoinb10")))Prima tranzacție din orice bloc este o tranzacție specială, numită _tranzacţie coinbase_. Această tranzacție este construită de nodul lui Jing și conține _recompensa_ pentru efortul de minerit.
+
+[NOTE]
+====
+Când blocul 277.316 a fost minat, recompensa a fost de 25 de bitcoin per bloc. De atunci, s-a scurs o perioadă ”de înjumătățire”. Recompensa blocului s-a schimbat la 12,5 bitcoin în iulie 2016. Aceasta a fost din nou redusă la jumătate peste 210.000 de blocuri, în anul 2020.
+====
+
+Nodul lui Jing creează tranzacția coinbase ca plată către propriul portofel: ”Plătește adresa lui Jing 25.09094928 bitcoin”. Suma totală de recompensă pe care Jing o încasează pentru minarea unui bloc este suma recompensei coinbase (25 de bitcoin noi) și comisioanele de tranzacție (0.09094928) din toate tranzacțiile incluse în bloc, așa cum se arată în <<generation_tx_example>>.
+
+
+[[generation_tx_example]]
+.Tranzacție coinbase
+====
+----
+$ bitcoin-cli getrawtransaction d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f 1
+----
+
+[source,json]
+[role="c_less_space"]
+----
+{
+    "hex" : "01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f03443b0403858402062f503253482fffffffff0110c08d9500000000232102aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21ac00000000",
+    "txid" : "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+    "version" : 1,
+    "locktime" : 0,
+    "vin" : [
+        {
+            "coinbase" : "03443b0403858402062f503253482f",
+            "sequence" : 4294967295
+        }
+    ],
+    "vout" : [
+        {
+            "value" : 25.09094928,
+            "n" : 0,
+            "scriptPubKey" : {
+                "asm" : "02aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21OP_CHECKSIG",
+                "hex" : "2102aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21ac",
+                "reqSigs" : 1,
+                "type" : "pubkey",
+                "addresses" : [
+                    "1MxTkeEP2PmHSMze5tUZ1hAV3YTKu2Gh1N"
+                ]
+            }
+        }
+    ]
+}
+----
+====
+
+Spre deosebire de tranzacțiile obișnuite, tranzacția coinbase nu consumă (cheltuiește) UTXO ca intrări. În schimb, are o singură intrare, numită _coinbase_, care creează bitcoin din nimic. Tranzacția coinbase are o singură ieșire, plătibilă la propria adresă bitcoin a minerului. Rezultatul tranzacției coinbase trimite valoarea de 25.09094928 bitcoin la adresa bitcoin a minerului; în acest caz _1MxTkeEP2PmHSMze5tUZ1hAV3YTKu2Gh1N_.
+
+==== Recompense și Comisioane Coinbase
+
+((("tranzacții coinbase", "recompense și comisioane")))((("comisioane", "comisioane de tranzacție")))((("minerit și consens", "recompense și comisioane")))Pentru a construi o tranzacție coinbase, nodul lui Jing calculează mai întâi suma totală a comisioanelor de tranzacție prin adăugarea tuturor intrărilor și ieșirilor celor 418 tranzacții care au fost adăugate la bloc. Comisioanele sunt calculate ca:
+
+----
+Total Comisioane = Suma (Intrări) - Suma (Ieșiri)
+----
+
+În blocul 277.316, comisioanele totale de tranzacție sunt de 0,09094928 bitcoin.
+
+În continuare, nodul lui Jing calculează recompensa corectă pentru noul bloc. Recompensa este calculată pe baza înălțimii blocului, începând de la 50 de bitcoin pe bloc și redusă la jumătate la fiecare 210.000 de blocuri. Deoarece acest bloc are o înălțime de 277.316, recompensa corectă este de 25 de bitcoin.
+
+Calculul poate fi văzut în funcția `GetBlockSubsidy` în clientul Bitcoin Core, așa cum se arată în <<getblocksubsidy_source>>.
+
+[[getblocksubsidy_source]]
+.Calcularea recompensei blocului - Funcția GetBlockSubsidy, Bitcoin Core Client, main.cpp
+====
+[role="c_less_space"]
+[source, cpp]
+----
+CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
+{
+    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
+    // Force block reward to zero when right shift is undefined.
+    if (halvings >= 64)
+        return 0;
+
+    CAmount nSubsidy = 50 * COIN;
+    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
+    nSubsidy >>= halvings;
+    return nSubsidy;
+}
+----
+====
+
+Subvenția inițială este calculată în satoshi înmulțind 50 cu constanta `COIN` (100.000.000 satoshi). Aceasta stabilește recompensa inițială (`nSubsidy`) la 5 miliarde de satoshi.
+
+(((”înjumătățiri”)))În continuare, funcția calculează numărul de ”înjumătățiri” care s-au produs prin împărțirea înălțimii curente a blocului la intervalul de înjumătățire (`SubsidyHalvingInterval`). În cazul blocului 277.316, cu un interval de înjumătățire la fiecare 210.000 de blocuri, rezultatul este o înjumătățire.
+
+Numărul maxim de jumătăți admis este de 64, deci codul impune o recompensă zero (returnează doar comisioanele) dacă se depășesc cele 64 de înjumătățiri.
+
+În continuare, funcția folosește operatorul de deplasare-binară-dreapta pentru a împărți recompensa (+nSubsidy+) în două pentru fiecare rundă de înjumătățire. În cazul blocului 277.316, acest lucru ar deplasa-binar-dreapta recompensa de 5 miliarde de satoshi o dată (la jumătate) și ar rezulta în 2,5 miliarde de satoshis, sau 25 bitcoin. Operatorul de deplasare-binar-dreapta este utilizat deoarece este mai eficient decât mai multe împărțiri repetate. Pentru a evita o potențială eroare, operația de deplasare este omisă după 63 de înjumătățiri, iar subvenția este setată la 0.
+
+În cele din urmă, recompensa coinbase (`nSubsidy`) este adăugată la comisioanele de tranzacție (`nFees`), iar suma este returnată.
+
+[TIP]
+====
+Dacă nodul miner al lui Jing scrie tranzacția coinbase, ce îl oprește pe Jing să se ”recompenseze” el însuși cu 100 sau 1000 de bitcoin? Răspunsul este că o recompensă incorectă ar face ca blocul să fie considerat invalid de către toți ceilalți, pierzând energia electrică a lui Jing folosită pentru Dovada-de-Lucru. Jing poate să cheltuiască recompensa numai dacă blocul este acceptat de toată lumea.
+====
+
+==== Structura Tranzacției Coinbase
+
+(((”tranzacții coinbase”, ”structura”)))Cu aceste calcule, nodul lui Jing construiește apoi tranzacția coinbase pentru a-și plăti lui însuși 25.09094928 bitcoin.
+
+După cum puteți vedea în <<generation_tx_example>>, tranzacția coinbase are un format special. În loc de o intrare de tranzacție care specifică o UTXO anterioară pentru a fi cheltuită, aceasta are o intrare ”coinbase”. Am examinat intrările tranzacțiilor în <<tx_in_structure>>. Să comparăm o intrare obișnuită cu o intrare de tranzacție coinbase. <<table_8-1>> arată structura unei tranzacții obișnuite, în timp ce <<table_8-2>>; arată structura de intrare a tranzacției coinbase.
+
+[[table_8-1]]
+.Structura unei intrări ”normale” a tranzacției
+[options="header"]
+|=======
+| Dimensiune | Câmp | Descriere
+| 32 octeți | Rezumat (Hash) Tranzacție | Pointer la tranzacția care conține UTXO care trebuie cheltuită
+| 4 octeți | Indicele de ieșire | Numărul de index al UTXO care trebuie cheltuit, primul este 0
+| 1–9 octeți (VarInt) | Dimensiunea Scriptului de Deblocare | Lungimea Scriptului de Deblocare în octeți, care va urma
+| Variabilă |Script de Deblocare | Un script care îndeplinește condițiile scriptului de blocare al UTXO
+| 4 octeți | Număr de Secvență | De obicei setat pe 0xFFFFFFFF pentru a nu folosi BIP 125 și BIP 68
+|=======
+
+[[table_8-2]]
+.Structura unei intrări de tranzacție coinbase
+[options="header"]
+|=======
+| Dimensiune | Câmp | Descriere
+| 32 octeți | Rezumat (Hash) Tranzacție | Toți biții sunt zero: nu există o referință de rezumat a tranzacției
+| 4 octeți | Indicele de Ieșire | Toți biții sunt același: 0xFFFFFFFF
+| 1–9 octeți (VarInt) | Dimensiunea Coinbase | Lungimea datelor coinbase, de la 2 până la 100 de octeți
+| Variabilă | Date Coinbase | Date arbitrare utilizate pentru extra nonce și etichete miniere. În blocurile v2; trebuie să înceapă cu înălțimea blocului
+| 4 octeți | Număr de Secvență | Setat la 0xFFFFFFFF
+|=======
+
+Într-o tranzacție coinbase, primele două câmpuri sunt setate la valori care nu reprezintă o referință UTXO. În loc de un ”rezumat de tranzacție”, primul câmp este completat cu 32 de octeț setați pe zero. ”Indicele de ieșire” este umplut cu 4 octeți, toți setați la 0xFF (255 în zecimal). ”Scriptul de deblocare” (`scriptSig`) este înlocuit de date coinbase, un câmp de date folosit de mineri, după cum vom vedea în continuare.
+
+==== Date Coinbase
+
+(((”tranzacții coinbase”, ”date coinbase”))Tranzacțiile de tip coinbase nu au un câmp script de deblocare (`scriptSig`). În schimb, acest câmp este înlocuit cu date coinbase, care trebuie să aibă între 2 și 100 de octeți. Cu excepția primilor câțiva octeți, restul datelor coinbase pot fi utilizate de mineri în orice fel doresc; este vorba de date arbitrare.
+
+((("valori nonce")))((("blocuri", "blocul geneză")))((("lanțul-de-blocuri", "blocul geneză")))((("blocul geneză")))În blocul geneză, de exemplu, Satoshi Nakamoto a adăugat textul "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks" în datele coinbase, folosindu-l ca dovadă a datei și pentru a transmite un mesaj. În prezent, minerii folosesc datele coinbase pentru a include valori nonce și șiruri de caractere care identifică bazinul de minerit.
+
+Primii câțiva octeți ai datelor coinbase erau arbitrari, dar nu mai este cazul. Conform BIP-34, blocurile version-2 (blocurile cu câmpul de versiune setat la 2) trebuie să conțină indicele de înălțime al blocului ca operațiune ”push” a scriptului la începutul câmpului coinbase.
+
+În blocul 277.316 vedem că datele coinbase (vezi <<generation_tx_example>>), care se află în câmpul de deblocare sau câmpul `scriptSig` al intrării tranzacției, conține valoarea hexazecimală _03443b0403858402062f503253482f_. Să decodăm această valoare.
+
+Primul octet, _03_, instruiește motorul de execuție al scriptului să împingă următorii trei octeți pe stivă (vezi <<tx_script_ops_table_pushdata>>). Următorii trei octeți, _0x443b04_, sunt înălțimea blocului codificată în format little-endian (primul octet cel mai puțin semnificativ). Se inversează ordinea octeților și rezultatul este _0x043b44_, care este 277.316 în format zecimal.
+
+Următoarele cifre hexazecimale (_0385840206_) sunt folosite pentru a codifica un nonce suplimentar (vezi <<extra_nonce>>), sau valoare aleatorie, folosită pentru a găsi o soluție adecvată pentru Dovada-de-Lucru.
+
+((("propuneri de îmbunătățire bitcoin", "Plată către Rezumat Script (BIP-16)")))((("propuneri de îmbunătățire bitcoin", "CHECKHASHVERIFY (BIP-17)")))((("CHECKHASHVERIFY (CHV)")))((("Plată-către-Rezumat-Script (P2SH)", "date coinbase")))Partea finală a datelor coinbase (_2f503253482f_) este codul ASCII pass:[<span class="keep-together"><code>/P2SH/</code></span>], ceea ce indică faptul că nodul care a extras acest bloc acceptă îmbunătățirea P2SH definită în BIP-16. Introducerea funcționalității P2SH a necesitat semnalarea de către mineri pentru a aproba BIP-16 sau BIP-17. Cei care susțin implementarea BIP-16 urmau să includă `/P2SH/` în datele lor coinbase. Cei care susțin implementarea BIP-17 pentru P2SH urmau să includă șirul `p2sh/CHV` în datele lor coinbase. BIP-16 a fost ales câștigător, iar mulți mineri au continuat incluzând șirul `/P2SH/` în datele lor coinbase pentru a indica sprijinul pentru această funcționalitate.
+
+<<satoshi_words>> folosește biblioteca libbitcoin introdusă la <<alt_libraries>> pentru a extrage datele coinbase din blocul geneză, afișând mesajul lui Satoshi. Rețineți că biblioteca libbitcoin conține o copie statică a blocului geneză, astfel încât codul poate prelua blocul geneză direct din bibliotecă.
+
+[[satoshi_words]]
+.Extragerea datelor coinbase din blocul geneză
+====
+[source, cpp]
+----
+include::code/satoshi-words.cpp[]
+----
+====
+
+Compilăm codul cu compilatorul GNU C++ și rulăm executabilul rezultat, așa cum se arată în <<satoshi_words_run>>. ((("", startref="MACaggreg10")))((("", startref="Baggreg10")))((("", startref="Taggreg10")))((("", startref="Tcoinb10")))((("", startref="coinbtrans10")))
+
+[[satoshi_words_run]]
+.Compilarea și executarea codului pentru satoshi-words
+====
+[source,bash]
+----
+$ # Compile the code
+$  g++ -o satoshi-words satoshi-words.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # Run the executable
+$ ./satoshi-words
+^D��<GS>^A^DEThe Times 03/Jan/2009 Chancellor on brink of second bailout for banks
+----
+====
+
+=== Construirea Antetului Blocului
+
+((("minerit și consens", "construirea antetului blocului")))((("bloc", "anteturi")))((("anteturi")))((("lanțul-de-blocuri", "anteturi de bloc")))Pentru a construi antetul blocului, nodul de minerit trebuie să completeze șase câmpuri, așa cum sunt enumerate în <<block_header_structure_ch10>>.
+
+[[block_header_structure_ch10]]
+.Structura antetului blocului
+[options="header"]
+|=======
+| Dimensiune | Câmp | Descriere
+| 4 octeți | Versiunea | Un număr de versiune pentru urmărirea actualizărilor de software/protocol
+| 32 octeți | Rezumatul Blocului Anterior | O referință la rezumatul blocului anterior (părinte) din lanț
+| 32 octeți | Rădăcina Merkle | Un rezumat din rădăcina arborelui merkle a tranzacțiilor acestui bloc
+| 4 octeți | Marca de timp | Timpul aproximativ de creare al acestui bloc (secunde de la Unix Epoch)
+| 4 octeți | Țintă | Ținta algoritmului Dovadă-de-Lucru pentru acest bloc
+| 4 octeți | Nonce | Un contor folosit pentru algoritmul Dovadă-de-Lucru
+|=======
+
+La momentul în care blocul 277.316 a fost minat, numărul de versiune care descrie structura blocului este versiunea 2, care este codată în format little-endian pe 4 octeți ca _0x02000000_.
+
+((("blocuri", "blocuri părinte")))((("blocuri părinte")))Apoi, nodul de minerit trebuie să adauge ”Rezumatul Blocului Anterior” (cunoscut și ca `prevhash`). Acesta este rezumatul antetului blocului din blocul 277.315, blocul anterior primit de la rețea, pe care nodul lui Jing l-a acceptat și selectat ca _părinte_ al blocului candidat 277.316. Rezumatul antetului blocului pentru blocul 277.315 este:
+
+----
+0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569
+----
+
+[TIP]
+====
+Selectând blocul _părinte_ specific, indicat de câmpul ”Rezumatul Blocului Anteriror” din antetul blocului candidat, Jing își pune la bătaie puterea de minerit pentru a extinde lanțul care se termină în acel bloc. În esență, acesta este modul în care Jing ”votează” cu puterea sa de minerit pentru lanțul valid cel mai lung.
+====
+
+((("arbore merkle")))((("lanțul-de-blocuri", "arbore merkle")))Următorul pas este să sumarizăm toate tranzacțiile folosind un arbore merkle, pentru a adăuga rădăcina merkle la antetul blocului. Tranzacția coinbase este listată ca prima tranzacție din bloc. Apoi, încă 418 tranzacții sunt adăugate după aceasta, pentru un total de 419 tranzacții în bloc. După cum am văzut la <<merkle_trees>>, trebuie să existe un număr par de noduri ”frunză” în arbore, deci ultima tranzacție este duplicată, creând 420 noduri, fiecare conținând rezumatul unei tranzacții. Rezumatele de tranzacție sunt apoi combinate, în perechi, creând fiecare nivel al arborelui, până când toate tranzacțiile sunt rezumate într-un singur nod la ”rădăcina” arborelui. Rădăcina arborelui merkle rezumă toate tranzacțiile într-o singură valoare de 32 de octeți, pe care o puteți vedea listată ca ”rădăcină merkle” în <<block277316>>, și aici:
+
+----
+c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e
+----
+
+Nodul miner al lui Jing va adăuga apoi o marcă de timp de 4 octeți, codificată ca o marcă de timp Epocă Unix, care se bazează pe numărul de secunde scurse de la miezul nopții UTC, joi, 1 ianuarie 1970. Timpul _1388185914_ este egal cu vineri , 27 decembrie 2013, 23:11:54 UTC.
+
+Nodul lui Jing completează apoi ținta, care definește Dovada-de-Lucru necesară pentru a face acest bloc un bloc valid. Ținta este stocată în bloc sub formă de ”biți țintă”, care este o codificare exponent-mantisă a țintei. Codificarea are un exponent de 1 octet, urmat de o mantisă (coeficient) pe 3 octeți. În blocul 277.316, de exemplu, valoarea biților țintă este _0x1903a30c_. Prima parte _0x19_ este un exponent hexazecimal, în timp ce următoarea parte, _0x03a30c_, este coeficientul. Conceptul de țintă este explicat în <<target>> iar reprezentarea ”biți țintă” este explicată în <<target_bits>>.
+
+Câmpul final este nonce-ul, care este inițializat la zero.
+
+Având toate celelalte câmpuri completate, antetul blocului este acum complet și procesul de minerit poate începe. Obiectivul este acum de a găsi o valoare pentru nonce care are ca rezultat un rezumat de antet de bloc care este mai mic decât ținta. Nodul miner va trebui să testeze miliarde sau trilioane de valori nonce înainte de a găsi un nonce care să satisfacă cerința.
+
+=== Mineritul Blocului
+
+((("minerit și consens", "mineritul blocului", id="MACmining10")))Acum că un bloc candidat a fost construit de către nodul lui Jing, este timpul ca platforma minieră hardware Jing să ”mineze” blocul, pentru a găsi o soluție la algoritmul Dovadă-de-Lucru care face blocul valid. De-a lungul acestei cărți am studiat funcțiile de rezumat criptografic utilizate în diferite aspecte ale sistemului bitcoin. Funcția de rezumare SHA256 este funcția folosită în procesul de minerit bitcoin.((("", startref="jingten")))
+
+(((”minerit și consens”, ”definit”)))În termenii cei mai simpli, mineritul este procesul de a rezuma în mod repetat antetul blocului, schimbând un parametru, până când rezumatul rezultat se potrivește cu o țintă specifică. Rezultatul funcției de rezumare nu poate fi determinat în avans și nici nu poate fi creat un tipar care să producă o valoare de rezumat specifică. Această caracteristică a funcțiilor de rezumare înseamnă că singura modalitate de a produce un rezultat de rezumare care se potrivește cu o țintă specifică este să încercați din nou și din nou, modificând aleatoriu intrarea până când rezultatul dorit al rezumatului este descoperit din întâmplare.
+
+==== Algoritmul Dovadă-de-Lucru
+
+((("algoritm Dovadă-de-Lucrcu", id="proof10")))((("minerit și consens", "algoritm Dovadă-de-Lucru", id="Cproof10")))Un algoritm de rezumare ia o intrare de date cu lungime arbitrară și produce un rezultat determinist de lungime fixă, o amprentă digitală a intrării. Pentru orice intrare specifică, rezumatul rezultat va fi întotdeauna același și poate fi calculat și verificat cu ușurință de către oricine implementează același algoritm de rezumare. ((("coliziuni")))Caracteristica cheie a unui algoritm de rezumare criptografic este că este imposibil de calculat găsirea a două intrări diferite care produc aceeași amprentă (cunoscută sub denumirea de _coliziune_). Ca un corolar, este, de asemenea, practic imposibil să selectați o intrare astfel încât să producă o amprentă dorită, în afară de încercarea cu intrări aleatorii.
+
+Cu SHA256, ieșirea are întotdeauna lungimea de 256 biți, indiferent de dimensiunea intrării. În <<sha256_example1>>, vom folosi interpretorul Python pentru a calcula rezumatul SHA256 al expresiei "I am Satoshi Nakamoto."
+
+[[sha256_example1]]
+.Exemplu SHA256
+====
+[source,bash]
+----
+$ python
+----
+[source,pycon]
+----
+Python 2.7.1
+>>> import hashlib
+>>> print hashlib.sha256("I am Satoshi Nakamoto").hexdigest()
+5d7c7ba21cbbcd75d14800b100252d5b428e5b1213d27c385bc141ca6b47989e
+----
+====
+
+<<sha256_example1>> arată rezultatul calculării rezumatului pentru _"I am Satoshi Nakamoto"_: _5d7c7ba21cbbcd75d14800b100252d5b428e5b1213d27c385bc141ca6b47989e_. Acest număr pe 256 biți este _rezumatul_ sau _sumarul_ frazei și depinde de fiecare parte a frazei. Adăugarea unei singure litere, semn de punctuație sau orice alt caracter va produce un rezumat diferit.
+
+Acum, dacă schimbăm expresia, ar trebui să ne așteptăm să vedem rezumate complet diferite. Să încercăm asta adăugând un număr la sfârșitul frazei noastre, folosind scriptul Python de la <<sha256_example_generator>>.
+
+[[sha256_example_generator]]
+.Script SHA256 pentru generarea mai multor rezumate prin iterarea pe un nonce
+====
+[role="c_less_space"]
+[source, python]
+----
+include::code/hash_example.py[]
+----
+====
+
+Rularea acestui script va produce rezumatele mai multor fraze, făcute diferite prin adăugarea unui număr la sfârșitul textului. Prin creșterea numărului, putem obține diferite rezumate, așa cum se arată în <<sha256_example_generator_output>>.
+
+[[sha256_example_generator_output]]
+.Rezultatul SHA256 a unui script pentru generarea multor rezumate prin iterarea pe un nonce
+====
+[source,bash]
+----
+$ python hash_example.py
+----
+
+----
+I am Satoshi Nakamoto0 => a80a81401765c8eddee25df36728d732...
+I am Satoshi Nakamoto1 => f7bc9a6304a4647bb41241a677b5345f...
+I am Satoshi Nakamoto2 => ea758a8134b115298a1583ffb80ae629...
+I am Satoshi Nakamoto3 => bfa9779618ff072c903d773de30c99bd...
+I am Satoshi Nakamoto4 => bce8564de9a83c18c31944a66bde992f...
+I am Satoshi Nakamoto5 => eb362c3cf3479be0a97a20163589038e...
+I am Satoshi Nakamoto6 => 4a2fd48e3be420d0d28e202360cfbaba...
+I am Satoshi Nakamoto7 => 790b5a1349a5f2b909bf74d0d166b17a...
+I am Satoshi Nakamoto8 => 702c45e5b15aa54b625d68dd947f1597...
+I am Satoshi Nakamoto9 => 7007cf7dd40f5e933cd89fff5b791ff0...
+I am Satoshi Nakamoto10 => c2f38c81992f4614206a21537bd634a...
+I am Satoshi Nakamoto11 => 7045da6ed8a914690f087690e1e8d66...
+I am Satoshi Nakamoto12 => 60f01db30c1a0d4cbce2b4b22e88b9b...
+I am Satoshi Nakamoto13 => 0ebc56d59a34f5082aaef3d66b37a66...
+I am Satoshi Nakamoto14 => 27ead1ca85da66981fd9da01a8c6816...
+I am Satoshi Nakamoto15 => 394809fb809c5f83ce97ab554a2812c...
+I am Satoshi Nakamoto16 => 8fa4992219df33f50834465d3047429...
+I am Satoshi Nakamoto17 => dca9b8b4f8d8e1521fa4eaa46f4f0cd...
+I am Satoshi Nakamoto18 => 9989a401b2a3a318b01e9ca9a22b0f3...
+I am Satoshi Nakamoto19 => cda56022ecb5b67b2bc93a2d764e75f...
+----
+====
+
+Fiecare frază produce un rezultat complet diferit al rezumatului. Par complet aleatorii, dar puteți reproduce exact rezultatele din acest exemplu pe orice computer cu Python și puteți vedea exact aceleași rezumate.
+
+Numărul folosit ca variabilă într-un astfel de scenariu se numește _nonce_. Nonce-ul este utilizat pentru a varia ieșirea unei funcții criptografice, în acest caz pentru a varia amprenta SHA256 a frazei.
+
+Pentru a face o provocare din acest algoritm, să stabilim o țintă: găsiți o frază care produce un rezumat hexazecimal care începe cu un zero. Din fericire, acest lucru nu este dificil! <<sha256_example_generator_output>> arată că fraza "I am Satoshi Nakamoto13" produce rezumatul _0ebc56d59a34f5082aaef3d66b37a661696c2b618e62432727216ba9531041a5_, care se potrivește criteriilor noastre. A fost nevoie de 13 încercări. În ceea ce privește probabilitățile, dacă ieșirea funcției de rezumare este distribuită uniform, ne-am aștepta să găsim un rezultat având 0 ca prefix hexazecimal o dată la 16 rezumari (una din cele 16 cifre hexazecimale de la 0 până la F). În termeni numerici, înseamnă să găsiți o valoare rezumat mai mică decât _0x1000000000000000000000000000000000000000000000000000000000000000_. Numim acest prag _ținta_, iar scopul este de a găsi un rezumat care este numeric mai mic decât ținta. Dacă reducem ținta, sarcina de a găsi un rezumat mai mic decât ținta devine din ce în ce mai dificilă.
+
+Pentru a oferi o analogie simplă, imaginați-vă un joc în care jucătorii aruncă în mod repetat o pereche de zaruri, încercând să arunce mai puțin decât o țintă specificată. În primul tur, ținta este 12. Dacă nu arunci dublu-șase, câștigi. În runda următoare, ținta este 11. Jucătorii trebuie să arunce 10 sau mai puțin pentru a câștiga, din nou o sarcină ușoară. Să spunem că câteva runde mai târziu ținta va scădea la 5. Acum, mai mult de jumătate din aruncările zarurilor vor depăși ținta și, prin urmare, vor fi invalide. Este nevoie de exponențial mai multe aruncări pentru a câștiga, cu cât ținta este mai mică. În cele din urmă, când ținta este 2 (minimul posibil), o singură aruncare din fiecare 36, sau 2% dintre ele, va produce un rezultat câștigător.
+
+Din perspectiva unui observator care știe că ținta jocului de zaruri este 2, dacă cineva a reușit să aibă o aruncare câștigătoare, se poate presupune că a încercat, în medie, 36 de aruncări. Cu alte cuvinte, se poate estima cantitatea de muncă necesară pentru a reuși din dificultatea impusă de țintă. Când algoritmul se bazează pe o funcție deterministă cum ar fi SHA256, intrarea în sine constituie _dovada_ că o anumită cantitate de _lucru_ a fost depusă pentru a produce un rezultat sub țintă. Deci, _Dovada-de-Lucru_.
+
+[TIP]
+====
+Chiar dacă fiecare încercare produce un rezultat aleatoriu, probabilitatea oricăror rezultate posibile poate fi calculată în avans. Prin urmare, un rezultat de dificultate specificată constituie  dovada unei cantități specifice de lucru.
+====
+
+În <<sha256_example_generator_output>>, nonce-ul câștigător este 13 și acest rezultat poate fi confirmat de oricine în mod independent. Oricine poate adăuga numărul 13 ca sufix la expresia "I am Satoshi Nakamoto" și poate calcula rezumatul, verificând că acesta este mai mic decât ținta. Rezultatul este, de asemenea, Dovada-de-Lucru, deoarece dovedește că am făcut munca pentru a găsi acel nonce. În timp ce este nevoie de un singur calcul de rezumate pentru a verifica, ne-a luat 13 calcule de rezumare pentru a găsi un nonce care a funcționat. Dacă am avea o țintă mai mică (dificultate mai mare), ar fi nevoie de multe alte calcule de rezumare pentru a găsi un nonce adecvat, dar un singur calcul de rezumare pe care oricine îl poate verifica. Mai mult, cunoscând ținta, oricine poate estima dificultatea făcând niste calcule statistice și, prin urmare, știe cât de multă muncă a fost necesară pentru a găsi un astfel de nonce.
+
+[TIP]
+====
+Dovada-de-Lucru trebuie să producă un rezumat care este _mai mic decât_ ținta. O țintă mai mare înseamnă că este mai puțin dificil să găsiți un rezumat care este sub țintă. O țintă mai mică înseamnă că este mai dificil să găsiți un rezumat sub țintă. Ținta și dificultatea sunt invers corelate.
+====
+
+
+(((”ținte”)))Dovada-de-Lucru în bitcoin este foarte similară cu provocarea prezentată în <<sha256_example_generator_output>>. Minerul construiește un bloc candidat completat cu tranzacții. În continuare, minerul calculează rezumatul din antetul acestui bloc și vede dacă este mai mic decât _ținta_ curentă. În cazul în care rezumatul nu este mai mic decât ținta, minerul va modifica nonce-ul (de obicei doar îl incrementează) și va încerca din nou. La dificultatea actuală a rețelei bitcoin, minerii trebuie să încerce de cvadrilioane de ori înainte de a găsi un nonce care are ca rezultat un rezumat al antetului de bloc suficient de scăzut.
+
+Un algoritm foarte simplificat de Dovadă-de-Lucru este implementat în Python în <<pow_example1>>.
+
+[[pow_example1]]
+.Implementarea simplificată pentru Dovada-de-Lucru
+====
+[source, python]
+----
+include::code/proof-of-work-example.py[]
+----
+====
+
+Rulând acest cod, puteți seta dificultatea dorită (în biți, câți dintre biții de la început trebuie să fie zero) și să vedeți cât durează calculul pentru a găsi o soluție. În <<pow_example_outputs>>, puteți vedea cum funcționează pe un laptop mediu.
+
+[[pow_example_outputs]]
+.Rularea exemplului Dovada-de-Lucru pentru diferite dificultăți
+====
+[source, bash]
+----
+$ python proof-of-work-example.py*
+----
+
+----
+Difficulty: 1 (0 bits)
+
+[...]
+
+Difficulty: 8 (3 bits)
+Starting search...
+Success with nonce 9
+Hash is 1c1c105e65b47142f028a8f93ddf3dabb9260491bc64474738133ce5256cb3c1
+Elapsed Time: 0.0004 seconds
+Hashing Power: 25065 hashes per second
+Difficulty: 16 (4 bits)
+Starting search...
+Success with nonce 25
+Hash is 0f7becfd3bcd1a82e06663c97176add89e7cae0268de46f94e7e11bc3863e148
+Elapsed Time: 0.0005 seconds
+Hashing Power: 52507 hashes per second
+Difficulty: 32 (5 bits)
+Starting search...
+Success with nonce 36
+Hash is 029ae6e5004302a120630adcbb808452346ab1cf0b94c5189ba8bac1d47e7903
+Elapsed Time: 0.0006 seconds
+Hashing Power: 58164 hashes per second
+
+[...]
+
+Difficulty: 4194304 (22 bits)
+Starting search...
+Success with nonce 1759164
+Hash is 0000008bb8f0e731f0496b8e530da984e85fb3cd2bd81882fe8ba3610b6cefc3
+Elapsed Time: 13.3201 seconds
+Hashing Power: 132068 hashes per second
+Difficulty: 8388608 (23 bits)
+Starting search...
+Success with nonce 14214729
+Hash is 000001408cf12dbd20fcba6372a223e098d58786c6ff93488a9f74f5df4df0a3
+Elapsed Time: 110.1507 seconds
+Hashing Power: 129048 hashes per second
+Difficulty: 16777216 (24 bits)
+Starting search...
+Success with nonce 24586379
+Hash is 0000002c3d6b370fccd699708d1b7cb4a94388595171366b944d68b2acce8b95
+Elapsed Time: 195.2991 seconds
+Hashing Power: 125890 hashes per second
+
+[...]
+
+Difficulty: 67108864 (26 bits)
+Starting search...
+Success with nonce 84561291
+Hash is 0000001f0ea21e676b6dde5ad429b9d131a9f2b000802ab2f169cbca22b1e21a
+Elapsed Time: 665.0949 seconds
+Hashing Power: 127141 hashes per second
+----
+====
+
+După cum vedeți, creșterea dificultății cu 1 bit provoacă o dublare a timpului necesar pentru a găsi o soluție. Dacă vă gândiți la întreg spațiul numeric de 256 biți, de fiecare dată când restricționați încă un bit la zero, reduceți spațiul de căutare cu jumătate. În <<pow_example_outputs>>, este nevoie de 84 de milioane de încercări de rezumare pentru a găsi un nonce care produce un rezumat care începe cu 26 de biți de zero. Chiar și cu o viteză de peste 120.000 de rezumări pe secundă, este nevoie de 10 minute pe un laptop pentru a găsi această soluție.
+
+La momentul scrierii, rețeaua încearcă să găsească un bloc al cărui rezumat de antet este mai mic decât:
+
+----
+0000000000000000029AB9000000000000000000000000000000000000000000
+----
+
+După cum puteți vedea, la începutul acestei ținte există o mulțime de zerouri, ceea ce înseamnă că gama acceptabilă de rezumate este mult mai mică, prin urmare, este mai dificil să găsiți un rezumat valid. Va necesita în medie mai mult de 1,8 zeta-rezumări (mii de miliarde de rezumări) pe secundă pentru ca rețeaua să descopere următorul bloc. Aceasta pare a fi o sarcină imposibilă, dar, din fericire, rețeaua produce 3 exa-rezumate pe secundă (exa-hashes per second - EH/sec) de putere de procesare, care va putea găsi un bloc  în medie la aproximativ 10 minute.((("", startref="Cproof10")))((("", startref="proof10")))
+
+[[target_bits]]
+==== Reprezentarea Țintei
+
+((("minerit și consens", "mineritul blocului", "reprezentarea țintei")))((("ținte", id="targets10")))În <<block277316>>, am văzut că blocul conține ținta, într-o notație numită ”biți țintă” sau doar ”biți”, care în blocul 277.316 are valoarea de _0x1903a30c_. Această notare exprimă obiectivul Dovadă-de-Lucru sub forma coeficient/exponent, cu primele două cifre hexazecimale pentru exponent și următoarele șase cifre hexazecimale pentru coeficient. Prin urmare, în acest bloc, exponentul este _0x19_ iar coeficientul este _x03a30c_.
+
+Formula pentru a calcula ținta de dificultate din această reprezentare este:
+
+ 
+ 
+  ... ținta = coeficient * 2^(8 * (exponent – 3))^
+ 
+ 
+
+Folosind formula respectivă iar valoarea biților de dificultate fiind 0x1903a30c, obținem:
+
+ 
+ 
+  ... ținta = 0x03a30c * 2^0x08 * (0x19-0x03)^
+  ... => ținta = 0x03a30c * 2^(0x08*0x16)^
+  ... => ținta = 0x03a30c * 2^0xB0^
+ 
+ 
+
+care în format zecimal este:
+
+ 
+ 
+  ... => ținta = 238,348 * 2^176^
+  ... => ținta = 22,829,202,948,393,929,850,749,706,076,701,368,331,072,452,018,388,575,715,328
+ 
+ 
+
+revenind la hexazecimal:
+
+ 
+ 
+  ... => ținta = 0x0000000000000003A30C00000000000000000000000000000000000000000000
+ 
+ 
+
+Aceasta înseamnă că un bloc valid pentru înălțimea 277.316 este unul care are un rezumat de antet de bloc care este mai mic decât ținta. În format binar, acest număr trebuie să înceapă cu peste 60 de biți setați pe zero. Cu acest nivel de dificultate, un singur miner care prelucrează 1 trilion de rezumări pe secundă (1 terahash pe secundă sau 1 TH/sec) ar găsi în medie o soluție doar o dată la 8.496 blocuri sau o dată la 59 de zile.
+
+[[target]]
+==== Readaptare pentru Ajustarea Dificultății
+
+((("minerit și consens", "mineritul blocului", "readaptare pentru ajustarea dificultății")))După cum am văzut, ținta determină dificultatea și, prin urmare, afectează timpul necesar pentru a găsi o soluție la algoritmul Dovadă-de-Lucru. Acest fapt ridică unele întrebări evidente: de ce este ajustabilă dificultatea, cine o ajustează și cum?
+
+Blocurile bitcoin sunt generate în medie la fiecare 10 minute. Acesta este pulsul bitcoin și stă la baza frecvenței emiterii de monedă și vitezei de confirmare a tranzacțiilor. Trebuie să rămână constant nu doar pe termen scurt, ci pe o perioadă de multe decenii. În acest timp, este de așteptat ca puterea de calcul să crească în continuare într-un ritm rapid. Mai mult, numărul de participanți în procesul de minerit și calculatoarele pe care le folosesc se vor schimba în mod constant. Pentru a menține timpul de generare a blocurilor la 10 minute, dificultatea trebuie ajustată pentru a ține cont de aceste modificări. De fapt, ținta Dovadă-de-Lucru este un parametru dinamic care este ajustat periodic pentru a îndeplini obiectivul de un bloc la 10 minute. În termeni simpli, ținta este stabilită astfel încât puterea de minerit curentă să rezulte la un interval de un bloc la 10 minute.
+
+Atunci, cum se face o astfel de ajustare într-o rețea complet descentralizată? Readaptarea se face automat și pe fiecare nod independent. La fiecare 2.016 blocuri, toate nodurile readaptează Dovada-de-Lucru. Ecuația pentru readaptare măsoară timpul necesar pentru a găsi ultimele 2.016 blocuri și le compara cu timpul preconizat de 20.160 minute (2.016 blocuri la intervalul dorit de 10 minute). Se calculează raportul dintre durata efectivă și durata dorită și se face o adaptare proporțională (în sus sau în jos) a țintei. În termeni simpli: dacă rețeaua găsește blocuri mai repede decât la fiecare 10 minute, dificultatea crește (ținta scade). Dacă descoperirea blocurilor este mai lentă decât se aștepta, dificultatea scade (ținta crește).
+
+Ecuația poate fi sumarizată ca:
+
+----
+Ținta Nouă = Ținta Veche * (Durata Efectivă a Ultimelor 2016 Blocuri / 20160 minute)
+----
+
+<<retarget_code>> arată codul utilizat în clientul Bitcoin Core.
+
+[[retarget_code]]
+.Readaptarea Dovezii-de-Lucuru - CalculateNextWorkRequired () în pow.cpp
+====
+[source,cpp]
+----
+
+   // Limit adjustment step
+    int64_t nActualTimespan = pindexLast->GetBlockTime() - nFirstBlockTime;
+    LogPrintf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
+    if (nActualTimespan < params.nPowTargetTimespan/4)
+        nActualTimespan = params.nPowTargetTimespan/4;
+    if (nActualTimespan > params.nPowTargetTimespan*4)
+        nActualTimespan = params.nPowTargetTimespan*4;
+
+    // Retarget
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    arith_uint256 bnNew;
+    arith_uint256 bnOld;
+    bnNew.SetCompact(pindexLast->nBits);
+    bnOld = bnNew;
+    bnNew *= nActualTimespan;
+    bnNew /= params.nPowTargetTimespan;
+
+    if (bnNew > bnPowLimit)
+        bnNew = bnPowLimit;
+
+----
+====
+
+[NOTE]
+====
+În timp ce calibrarea țintei are loc la fiecare 2.016 blocuri, din cauza unei erori în clientul Bitocoin Core original, aceasta se bazează pe timpul total al celor 2.015 blocuri anterioare (nu 2.016 așa cum ar trebui să fie), rezultând o eroare de readaptare către o dificultate mai mare cu 0,05%.
+====
+
+
+Parametrii `Interval` (2.016 blocuri) și `TargetTimespan` (două săptămâni sub forma de 1.209.600 secunde) sunt definiți în _chainparams.cpp_.
+
+Pentru a evita volatilitate extremă în dificultate, ajustarea țintei trebuie să fie mai mică decât un multiplu de patru (4) pe ciclu. Dacă ajustarea necesară țintei este mai mare decât un multiplu de patru, aceasta va fi ajustată cu un multiplu de 4 și nu mai mult. Orice ajustare suplimentară se va realiza în următoarea perioadă de readaptare, deoarece dezechilibrul va persista pe durata următoarelor 2.016 blocuri. Prin urmare, discrepanțele mari între puterea de rezumare și dificultate ar putea dura câteva cicluri de 2.016 blocuri pentru a se echilibra.
+
+[TIP]
+====
+Dificultatea de a mina un bloc bitcoin este de aproximativ ”10 minute de procesare” pentru întreaga rețea, pe baza timpului necesar pentru a mina precedentele 2.016 blocuri. Acest lucru se realizează prin scăderea sau ridicarea țintei.
+====
+
+Rețineți că ținta este independentă de numărul de tranzacții sau de valoarea tranzacțiilor. Aceasta înseamnă că volumul de putere de rezumare și, prin urmare, energia electrică cheltuită pentru a securiza bitcoin este, de asemenea, complet independentă de numărul de tranzacții. Bitcoin poate scala, poate fi adoptat pe scară largă și poate rămâne în siguranță fără o creștere a puterii de rezumare de la nivelul actual. Creșterea puterii de rezumare reprezintă forțele pieței, deoarece noi mineri intră pe piață pentru a concura pentru recompensă. Atâta timp cât suficientă putere de rezumare ramâne sub controlul minerilor care acționează cinstit în urmărirea recompensei, este suficient pentru a preveni atacurile de ”preluare” și, prin urmare, este suficient pentru a securiza bitcoin.
+
+Dificultatea mineritului este strâns legată de costul energiei electrice și de cursul de schimb al bitcoin față de moneda utilizată pentru plata energiei electrice. Sistemele miniere de înaltă performanță sunt cât se poate de eficiente cu generația actuală de hardware, transformând energia electrică în calculul de rezumare la cea mai mare rată posibilă. Influența principală pe piața minieră este prețul unui kilowatt-oră de energie electrică, deoarece acest lucru determină rentabilitatea mineritului și, prin urmare, stimulentele pentru a intra sau ieși de pe piața de minerit.((("", startref="targets10")))
+
+=== Mineritul cu Succes al Blocului
+
+((("minerit și consens", "mineritul blocului", "finalizarea cu succes")))((("utilizări", "minerit bitcoin", id="jingtentwo")))Așa cum am văzut mai devreme, nodul lui Jing a construit un bloc candidat și l-a pregătit pentru minerit. Jing are mai multe platforme miniere hardware, unde sute de mii de circuite integrate rulează algoritmul SHA256 în paralel la viteze incredibile. Multe dintre aceste mașini specializate sunt conectate la nodul său miner prin USB sau o rețea locală. Apoi, nodul de exploatare care rulează pe desktopul lui Jing transmite antetul blocului la hardware-ul său de minerit, care începe testarea a trilioane de nonce-uri  pe secundă. Deoarece nonce-ul are doar 32 de biți, după epuizarea tuturor posibilităților de nonce (aproximativ 4 miliarde), hardware-ul de minerit schimbă antetul blocului (ajustând extra nonece-ul din coinbase sau marca de timp) și resetează contorul nonce, testând noi combinații.
+
+La aproape 11 minute de la începerea minării blocului 277.316, una dintre mașinile de minerit hardware găsește o soluție și o trimite înapoi la nodul miner.
+
+Când este inserat în antetul blocului, nonce-ul 924.591.752 produce un rezumat de bloc de:
+
+----
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+----
+
+care este mai mic decât ținta:
+
+----
+0000000000000003A30C00000000000000000000000000000000000000000000
+----
+
+Imediat, nodul miner al lui Jing transmite blocul tuturor semenilor săi. Ei primesc, validează și apoi propagă noul bloc. Pe măsură ce blocul se propagă prin rețea, fiecare nod îl adaugă la propria sa copie a lanțului-de-blocuri, extinzând lanțul la o nouă înălțime de 277.316 blocuri. Pe măsură ce nodurile minere primesc și validează blocul, își abandonează eforturile pentru a găsi un bloc la aceeași înălțime și încep imediat să calculeze următorul bloc din lanț, folosind blocul lui Jing drept ”părinte”. Construind peste blocul recent descoperit al lui Jing, ceilalți mineri ”votează” în esență cu puterea lor minieră și aprobă blocul lui Jing și lanțul pe care îl extinde.
+
+În următoarea secțiune, vom analiza procesul pe care fiecare nod îl folosește pentru validarea unui bloc și selectarea celui mai lung lanț, creând consensul care formează lanțul-de-blocuri descentralizat.((("", startref="MACmining10")))((("", startref="jingtentwo")))
+
+=== Validarea unui Bloc Nou
+
+((("minerit și consens", "validarea noului bloc")))((("blocuri", "validarea noului bloc")))((("validare")))Al treilea pas în mecanismul de consens al bitcoin este validarea independentă a fiecărui nou bloc de către fiecare nod din rețea. Pe măsură ce blocul nou rezolvat se deplasează prin rețea, fiecare nod efectuează o serie de teste pentru a-l valida înainte de a-l propaga la semenii săi. Acest lucru asigură că numai blocurile valide sunt propagate în rețea. Validarea independentă asigură, de asemenea, că minerii care acționează cinstit vor avea blocurile lor încorporate în lanțul-de-blocuri, obținând astfel recompensa. Acei mineri care acționează necinstit vor avea blocurile respinse și nu numai că pierd recompensa, dar își și risipesc eforturile depuse pentru a găsi o soluție Dovadă-de-Lucru, suportând astfel costul energiei electrice fără compensații.
+
+Când un nod primește un bloc nou, acesta va valida blocul verificând o listă lungă de criterii care trebuie îndeplinite toate; în caz contrar, blocul este respins. Aceste criterii pot fi văzute în clientul Bitcoin Core în funcțiile `CheckBlock` și `CheckBlockHeader` și includ:
+
+* Structura datelor blocului este validă sintactic
+* Rezumatul antetului blocului este mai mic decât ținta (impune Dovada-de-Lucru)
+* Marca de timp a blocului este mai puțin de două ore în viitor (permițând erori de timp)
+* Dimensiunea blocului este în limite acceptabile
+* Prima tranzacție (și numai prima) este o tranzacție coinbase
+* Toate tranzacțiile din bloc sunt valide folosind lista de verificare a tranzacțiilor discutată în <<tx_verification>>
+
+Validarea independentă a fiecărui nou bloc de către fiecare nod din rețea asigură că minerii nu pot înșela. În secțiunile anterioare am văzut cum minerii ajung să scrie o tranzacție care să le acorde bitcoin nou creat în cadrul blocului și să solicite comisioane de tranzacție. De ce minerii nu își scriu singuri o tranzacție pentru o mie de bitcoin în loc de o recompensă corectă? Deoarece fiecare nod validează blocurile conform acelorași reguli. O tranzacție coinbase invalidă ar face ca întregul bloc să fie invalid, ceea ce ar duce la respingerea blocului și, prin urmare, acea tranzacție nu va deveni niciodată parte a registrului. Minerii trebuie să construiască un bloc perfect, bazat pe regulile pe care le respectă toate nodurile și să-l mineze cu o soluție corectă pentru Dovada-de-Lucru. Pentru a face acest lucru, ei cheltuiesc multă energie electrică pentru minerit, iar dacă trișează, toată energia electrică și efortul sunt pierdute. Acesta este motivul pentru care validarea independentă este o componentă cheie a consensului descentralizat.
+
+=== Asamblarea și Selectarea Lanțurilor-de-Blocuri
+
+((("minerit și consens", "asamblarea și selectarea lanțurilor-de-blocuri", id="MACassembling10")))((("blocuri", "asamblarea și selectarea lanțurilor de", id="Bassemble10")))Ultimul pas în mecanismul de consens descentralizat al bitcoin este asamblarea blocurilor în lanțuri și selectarea lanțului cu cele mai multe Dovezi-de-Lucru. După ce un nod a validat un nou bloc, va încerca apoi să asambleze un lanț conectând blocul la lanțul-de-blocuri existent.
+
+Nodurile mențin trei seturi de blocuri: cele conectate la lanțul-de-blocuri principal, cele care formează ramuri în afara lanțului-de-blocuri principal (lanțuri secundare) și, în final, blocuri care nu au un părinte cunoscut în lanțurile cunoscute (orfani). Blocurile invalide sunt respinse imediat ce unul dintre criteriile de validare eșuează și, prin urmare, nu sunt incluse în niciun lanț.
+
+În orice moment, ”lanțul principal” este lanțul-de-blocuri _valid_ care are cea mai multă Dovadă-de-Lucru cumulată. În majoritatea circumstanțelor, acesta este și lanțul cu cele mai multe blocuri, cu excepția cazului în care există două lanțuri de lungime egală și unul are mai multă Dovadă-de-Lucru. Lanțul principal va avea și ramuri cu blocuri care sunt ”frați” ai blocurilor din lanțul principal. Aceste blocuri sunt valide, dar nu fac parte din lanțul principal. Acestea sunt păstrate pentru referințe viitoare, în cazul în care unul dintre aceste lanțuri este extins pentru a depăși lanțul principal în lucru. În secțiunea următoare (<<forks>>), vom vedea cum se produc lanțuri secundare ca urmare a unei minări de blocuri aproape simultane la aceeași înălțime.
+
+Când un nou bloc este primit, un nod va încerca să îl introducă în lanțul-de-blocuri existent. Nodul va verifica câmpul ”rezumat bloc anterior”, care este referința la părintele blocului. Apoi, nodul va încerca să găsească acel părinte în lanțul-de-blocuri existent. De cele mai multe ori, părintele va fi ”vârful” lanțului principal, adică acest nou bloc extinde lanțul principal. De exemplu, noul bloc 277.316 are o referimță la rezumatul blocului său părinte 277.315. Majoritatea nodurilor care primesc 277.316 vor avea deja blocul 277.315 ca vârful lanțului lor principal și, prin urmare, vor lega noul bloc și vor extinde acel lanț.
+
+Uneori, așa cum vom vedea în <<forks>>, noul bloc extinde un lanț care nu este lanțul principal. În acest caz, nodul va atașa noul bloc la lanțul secundar pe care îl extinde și apoi va compara munca lanțului secundar cu lanțul principal. Dacă lanțul secundar are mai multă Dovadă-de-Lucru cumulată decât lanțul principal, nodul va converge la lanțul secundar, ceea ce înseamnă că va selecta lanțul secundar ca noul său lanț principal, făcând din vechiul lanț principal un lanț secundar. Dacă nodul este un miner, acum va construi un bloc care extinde acest nou lanț, mai lung.
+
+Dacă se primește un bloc valid și nu se găsește niciun părinte în lanțurile existente, acel bloc este considerat ”orfan”. Blocurile orfane sunt salvate în bazinul de blocuri orfane, unde vor rămâne până la primirea părintelui lor. Odată ce părintele este primit și legat în lanțurile existente, orfanul poate fi scos din bazinul de orfani și legat de părinte, făcându-l să facă parte dintr-un lanț. Blocurile orfane apar de obicei atunci când două blocuri minate într-un timp scurt între ele sunt primite în ordine inversă (copil înainte de părinte).
+
+Prin selectarea lanțului valid cea mai mare Dovadă-de-Lucru cumulată, toate nodurile ajung la un consens la nivel de rețea. Discrepanțele temporare între lanțuri sunt soluționate în cele din urmă, pe măsură ce se adaugă mai multă Dovadă-de-Lucru, extinzând unul dintre lanțurile posibile. Nodurile miner ”votează” cu puterea lor minieră alegând ce lanț va fi extins prin minarea următorului bloc. Când extrag un nou bloc și extind lanțul, noul bloc reprezintă votul lor.
+
+În secțiunea următoare vom analiza modul în care discrepanțele dintre lanțurile (bifurcările) concurente sunt rezolvate prin selecția independentă a lanțului cu cea mai mare Dovadă-de-Lucru cumulată.
+
+[[forks]]
+==== Bifurcări ale Lanțului-de-Blocuri
+
+((("minerit și consens", "asamblarea și selectarea lanțurilor-de-blocuri", "bifurcări ale lanțului-de-blocuri")))((("lanțul-de-blocuri", "bifurcări ale lanțului-de-blocuri", id="BCTfork10")))((("bifurcări", "evenimente bifurcări lanț-de-blocuri", id="forks10")))Deoarece lanțul-de-blocuri este o structură de date descentralizată, diferitele copii ale acestuia nu sunt întotdeauna consistente. Blocurile ar putea ajunge la noduri diferite în momente diferite, ceea ce face ca nodurile să aibă perspective diferite asupra lanțului-de-blocuri. Pentru a rezolva acest lucru, fiecare nod selectează și încearcă întotdeauna să extindă lanțul-de-blocuri care reprezintă cea mai mare Dovadă-de-Lucru, cunoscut și ca cel mai lung lanț sau cel mai mare lanț cumulativ de lucru. Prin însumarea Dovezilor-de-Lucru înregistrate în fiecare bloc dintr-un lanț, un nod poate calcula cantitatea totală de muncă care a fost depusă pentru a crea acel lanț. Atâta timp cât toate nodurile selectează lanțul cu cea mai mare Dovadă-de-Lucru cumulată, rețeaua bitcoin globală ajunge în cele din urmă la o stare consistentă. Bifurcările apar ca neconcordanțe temporare între versiunile lanțului-de-blocuri, care sunt rezolvate prin eventuala reconvergență, pe măsură ce se adaugă mai multe blocuri la una dintre bifurcări.
+
+[TIP]
+====
+Bifurcările lanțului-de-blocuri descrise în această secțiune apar în mod natural ca urmare a întârzierilor de transmitere în rețeaua globală. De asemenea, vom analiza bifurcările induse în mod deliberat mai târziu în acest capitol.
+====
+
+În următoarele diagrame, urmărim progresul unui eveniment de ”bifurcare” în rețea. Diagrama este o reprezentare simplificată a rețelei bitcoin. În scop ilustrativ, blocuri diferite sunt prezentate sub forme diferite (stea, triunghi, triunghi cu susul în jos, romb), răspândite în rețea. Fiecare nod din rețea este reprezentat ca un cerc.
+
+Fiecare nod are propria sa perspectivă asupra lanțului-de-blocuri global. Pe măsură ce fiecare nod primește blocuri de la vecinii săi, acesta își actualizează propria copie a lanțului-de-blocuri, selectând lanțul cu cea mai mare Dovadă-de-Lucru. În scop ilustrativ, fiecare nod conține o formă geometrică care reprezintă blocul care crede că este în prezent vârful lanțului principal. Deci, dacă vedeți o stea în nod, asta înseamnă că blocul stea este vârful lanțului principal, în ceea ce privește acel nod.
+
+În prima diagramă (<<fork1>>), rețeaua are o perspectivă unificată asupra lanțului-de-blocuri, cu blocul stea drept vârful lanțului principal.
+
+[[fork1]]
+[role="smallereighty"]
+.Înainte de bifurcare - toate nodurile au aceeași perspectivă
+image::images/mbc2_1002.png["Înainte de bifurcare - toate nodurile au aceeași perspectivă"]
+
+O ”bifurcare” apare ori de câte ori există două blocuri candidat care concurează pentru a forma cel mai lung lanț-de-blocuri. Aceasta se întâmplă în condiții normale ori de câte ori doi mineri rezolvă algoritmul Dovadă-de-Lucru într-o perioadă scurtă de timp unul față de celălalt. Pe măsură ce ambii mineri descoperă o soluție pentru blocurile lor candidat, aceștia își transmit imediat propriul bloc ”câștigător” către vecinii lor, iar vecinii încep să propage blocul în rețea. Fiecare nod care primește un bloc valid îl va încorpora în lanțul-de-blocuri, extinzând lanțul-de-blocuri cu un singur bloc. Dacă acel nod vede mai târziu un alt bloc candidat care extinde același părinte, acesta conectează al doilea candidat pe un lanț secundar. Drept urmare, unele noduri vor ”vedea” mai întâi un bloc candidat, în timp ce altele vor vedea celălalt bloc candidat și vor apărea două versiuni concurente ale lanțului-de-blocuri.
+
+În <<fork2>>, vedem doi mineri (nodul X și nodul Y) care minează două blocuri diferite aproape simultan. Ambele blocuri sunt copii (urmași) ale blocului stea și extind lanțul construind deasupra blocului stea. Pentru a ne ajuta să le urmărim, unul este prezentat ca un bloc triunghi pornind din nodul X, iar celălalt este prezentat ca un bloc triunghi cu capul în jos pornind din nodul Y.
+
+[[fork2]]
+[role="smallersixty"]
+.Vizualizarea unui eveniment de bifurcare în lanțul-de-blocuri: două blocuri găsite simultan
+image::images/mbc2_1003.png["Vizualizarea unui eveniment de bifurcare în lanțul-de-blocuri: două blocuri găsite simultan"]
+
+Să presupunem, de exemplu, că un nod miner X găsește o soluție Dovadă-de-Lucru pentru un ”triunghi” care extinde lanțul-de-blocuri, construind deasupra blocui părinte stea. Aproape simultan, un nod miner Y, care extindea de asemenea lanțul de la blocul ”stea”, găsește o soluție pentru blocul ”triunghi cu susul în jos”, blocul său candidat. Acum, există două blocuri posibile; unul pe care îl numim ”triunghi”, originar din nodul X; și unul pe care îl numim ”triunghi cu susul în jos”, originar din nodul Y. Ambele blocuri sunt valide, ambele blocuri conțin o soluție validă pentru Dovada-de-Lucru și ambele blocuri extind același părinte (blocul ”stea”). Ambele blocuri conțin probabil în cea mai mare parte aceleași tranzacții, cu poate doar câteva diferențe în ordinea tranzacțiilor.
+
+Pe măsură ce cele două blocuri se propagă, unele noduri primesc mai întâi blocul ”triunghi”, iar altele primesc mai întâi blocul ”triunghiul cu susul în jos”. Așa cum se arată în <<fork3>>, rețeaua se împarte în două perspective diferite asupra lanțului-de-blocuri; o parte este acoperită cu un bloc triunghi, cealaltă cu un bloc triunghi cu susul în jos.
+
+[[fork3]]
+[role="smallersixty"]
+.Vizualizarea unui eveniment de bifurcare a lanțului-de-blocuri: două blocuri se propagă, împărțind rețeaua
+image::images/mbc2_1004.png["Vizualizarea unui eveniment de bifurcare a lanțului-de-blocuri: două blocuri se propagă, împărțind rețeaua"]
+
+În diagramă, un nodul X ales la întâmplare a primit mai întâi blocul triunghi și a extins lanțul stea cu acesta. Nodul X a ales lanțul cu blocul ”triunghi” ca lanț principal. Mai târziu, nodul X a primit și blocul ”triunghi cu susul în jos”. Deoarece a fost primit al doilea, se presupune că a ”pierdut” cursa. Cu toate acestea, blocul ”triunghi cu susul în jos” nu este aruncat. Este legat de părintele bloc ”stea” și formează un lanț secundar. Chiar dacă nodul X presupune că a selectat corect lanțul câștigător, acesta păstrează lanțul ”pierzător”, astfel încât are informațiile necesare pentru a reconverge dacă lanțul ”pierzător” ajunge să ”câștige”.
+
+De cealaltă parte a rețelei, nodul Y construiește un lanț-de-blocuri bazat pe propria perspectivă a secvenței de evenimente. A primit întâi ”triunghi cu susul în jos” și a ales acel lanț drept ”câștigător”. Când ulterior a primit blocul ”triunghi”, l-a conectat la blocul ”stea”, ca un lanț secundar.
+
+Nicio parte nu este ”corectă” sau ”incorectă”. Ambele sunt perspective valide ale lanțului-de-blocuri. Doar unul va triumfa, bazat pe modul în care aceste două lanțuri concurente sunt extinse prin eforturi suplimentare.
+
+Nodurile minere a căror perspectivă seamănă cu ce a nodului X vor începe imediat extragerea unui bloc candidat care extinde lanțul cu ”triunghi” ca vârf. Prin legarea ”triunghi” ca părinte al blocului candidat, aceștia votează cu puterea de calcul. Votul lor susține lanțul pe care l-au ales ca lanț principal.
+
+Orice nod miner a cărui perspectivă seamănă cu cea a nodului Y va începe să construiască un nod candidat având ”triunghiul cu susul în jos” ca părinte, extinzând lanțul care cred că este lanțul principal. Și uite așa, cursa începe din nou.
+
+Bifurcările sunt aproape întotdeauna rezolvate după un singur bloc. În timp ce o parte a puterii de calcul a rețelei este dedicată construirii deasupra ”triunghiului” ca părinte, o altă parte a puterii de calcul este concentrată pe construirea deasupra ”triunghiului cu susul în jos”. Chiar dacă puterea de calcul este divizată aproape uniform, este probabil ca un grup de mineri să găsească o soluție și să o propage înainte ca celălalt grup de mineri să găsească vreo soluție. Să spunem, de exemplu, că minerii care construiesc deasupra ”triunghiului” găsesc un nou block ”romb” care extinde lanțul (de exemplu, stea-triunghi-romb). Ei propagă imediat acest nou bloc și întreaga rețea îl vede ca o soluție validă, așa cum se arată în <<fork4>>.
+
+
+Toate nodurile care au ales ”triunghiul” drept câștigător în runda precedentă vor extinde pur și simplu lanțul cu încă un bloc. Nodurile care au ales ”triunghiul cu susul în jos” drept câștigător, vor vedea acum două lanțuri: stea-triunghi-romb și stea-triunghiul-cu-susul-în-jos. Lanțul stea-triunghi-romb este acum mai lung (mai mult efort cumulat) decât celălalt lanț. Drept urmare, acele noduri vor seta lanțul stea-triunghi-romb ca lanț principal și vor schimba lanțul stea-triunghiul-cu-susul-în-jos într-un lanț secundar, așa cum se arată în <<fork5>>. Aceasta este o reconvergență a lanțului, deoarece acele noduri sunt obligate să își revizuiască viziunea asupra lanțului-de-blocuri pentru a încorpora noile dovezi ale unui lanț mai lung. Toți minerii care lucrează la extinderea lanțului stea-triunghiul-cu-susul-în-jos vor opri acum această muncă, deoarece blocul lor candidat este ”orfan”, întrucât părintele său ”triunghiul-cu-susul-în-jos” nu mai este pe cel mai lung lanț. Tranzacțiile din ”triunghiul-cu-susul-în-jos” care nu se află în ”triunghi” sunt re-inserate în mempool pentru a fi incluse în următorul bloc pentru a deveni parte a lanțului principal. Întreaga rețea reconverge spre un singur lanț-de-blocuri stea-triunghi-romb, având ”romb” ca ultimul bloc din lanț. Toți minerii încep imediat să lucreze la blocurile candidat care referențiază ”romb” ca părinte pentru a extinde lanțul stea-triunghi-romb.
+
+[[fork4]]
+[role="smallereighty"]
+.Vizualizarea unui eveniment de bifurcare a lanțului-de-blocuri: un bloc nou extinde o bifurcare, reconvergența rețelei
+image::images/mbc2_1005.png["Vizualizarea unui eveniment de bifurcare a lanțului-de-blocuri: un bloc nou extinde o bifurcare, reconvergența rețelei"]
+
+[[fork5]]
+[role="smallereighty"]
+.Vizualizarea unui eveniment de bifurcare a lanțului-de-blocuri: rețeaua reconverge pe un nou lanț mai lung
+image::images/mbc2_1006.png["Vizualizarea unui eveniment de bifurcare a lanțului-de-blocuri: rețeaua reconverge pe un nou lanț mai lung"]
+
+Teoretic este posibil ca o bifurcare să se extindă la două blocuri, dacă două blocuri sunt găsite aproape simultan de minerii de pe ”părțile” opuse ale unei bifurcări anterioare. Cu toate acestea, șansa să se întâmple este foarte mică. În timp ce o bifurcare cu un bloc poate apărea în fiecare zi, o bifurcare cu două blocuri apare cel mult o dată la câteva săptămâni.
+
+Intervalul de 10 minute per bloc al bitcoin este un compromis de proiectare între timpii de confirmare rapidă (validarea tranzacțiilor) și probabilitatea unei bifurcări. Un timp mai rapid ar valida tranzacțiile mai repede, dar ar duce la bifurcări ale lanțului-de-blocuri mai frecvente, în timp ce un timp mai lent ar reduce numărul de bifurcări, dar ar face ca validarea să fie mai lentă((("", startref="Bassemble10")))((("", startref="MACassembling10")))((("", startref="forks10")))((("", startref="BCTfork10")))
+
+=== Minerit și Cursa de Rezumare
+
+((("minerit și consens", "cursa puterii de rezumare", id="MAChash10")))Mineritul bitcoin este o industrie extrem de competitivă. Puterea de rezumare a crescut exponențial în fiecare an al existenței bitcoin. Pentru câțiva ani, creșterea a reflectat o schimbare completă a tehnologiei, cum ar fi în 2010 și 2011, când mulți mineri au trecut de la mineritul cu CPU la mineritul cu GPU. În 2013, introducerea mineritului ASIC a dus la un alt salt uriaș în puterea de minerit, prin plasarea funcției SHA256 direct pe cipurile de siliciu specializate în minerit. Primele astfel de cipuri puteau furniza mai multă putere de minerit într-o singură cutie decât întreaga rețea bitcoin în 2010.
+
+Următoarea listă arată puterea totală de rezumare a rețelei bitcoin, în primii opt ani de funcționare:
+
+2009:: 0.5 MH/sec–8 MH/sec (16× growth)
+2010:: 8 MH/sec–116 GH/sec (14,500× growth)
+2011:: 116 GH/sec–9 TH/sec (78× growth)
+2012:: 9 TH/sec–23 TH/sec (2.5× growth)
+2013:: 23 TH/sec–10 PH/sec (450× growth)
+2014:: 10 PH/sec–300 PH/sec (30× growth)
+2015:: 300 PH/sec-800 PH/sec (2.66× growth)
+2016:: 800 PH/sec-2.5 EH/sec (3.12× growth)
+
+În graficul din <<network_hashing_power>>, putem observa că puterea de rezumare a rețelei bitcoin a crescut în ultimii doi ani. După cum puteți vedea, concurența dintre mineri și creșterea bitcoin a dus la o creștere exponențială a puterii de rezumare (rezumări totale pe secundă în întreaga rețea).
+
+[[network_hashing_power]]
+.Puterea totală de rezumare, terahashes pe secundă (TH/sec)
+image::images/mbc2_1007.png["NetworkHashingRate"]
+
+Pe măsură ce cantitatea de putere de rezumare folosită pentru a mina bitcoin a explodat, dificultatea a crescut și ea. Metrica de dificultate din graficul prezentat în <<bitcoin_difficulty>> se măsoară ca raportul între dificultatea curentă și dificultatea minimă (dificultatea primului bloc).
+
+[[bitcoin_difficulty]]
+.Metrica dificultății pentru minerit bitcoin
+image::images/mbc2_1008.png["BitcoinDifficulty"]
+
+În ultimii doi ani, cipurile de minerit ASIC au devenit din ce în ce mai dense, apropiindu-se de limita producției de siliciu cu o dimensiune (rezoluție) de 16 nanometri (nm). În prezent, producătorii ASIC își propun să depășească producătorii de cipuri de procesare cu scop general, proiectând cipuri cu o dimensiune de 14 nm, deoarece profitabilitatea mineritului împinge această industrie chiar mai repede decât cea a calculatoarelor obișnuite. Nu mai există salturi uriașe în minerit bitcoin, deoarece industria a ajuns în prim-planul Legii lui Moore, care stipulează că densitatea de calcul se va dubla aproximativ la fiecare 18 luni. Totuși, puterea de minerit a rețelei continuă să avanseze într-un ritm exponențial, deoarece cursa pentru cipuri cu densitate mai mare este acompaniată de o cursă pentru centre de date cu densitate mai mare, unde mii de aceste cipuri pot fi folosite. Nu mai este vorba despre cât minerit se poate face cu un cip, ci despre cât de multe cipuri pot fi îngrămădite într-o clădire, asigurând in același timp disiparea căldurii și având suficientă energie electrică.
+
+[[extra_nonce]]
+==== Soluția Extra Nonce
+
+(((”valori nonce”))Din 2012, mineritul bitcoin a evoluat pentru a rezolva o limitare fundamentală în structura antetului blocului. În primele zile ale bitcoin, un miner putea găsi un bloc prin iterarea peste un nonce până când rezumatul rezultat era sub țintă. Pe măsură ce dificultatea a crescut, minerii au trecut adesea prin toate cele 4 miliarde de valori ale nonce-ului fără a găsi un bloc. Cu toate acestea, acest lucru a fost rezolvat cu ușurință prin actualizarea mărcii de timp pentru a ține cont de timpul scurs. Deoarece marca de timp face parte din antet, schimbarea ei le permite minerilor să itereze peste valorile nonce-ului din nou, cu rezultate diferite. Odată ce hardware-ul de minerit a depășit 4GH/sec, această abordare a devenit din ce în ce mai dificilă, deoarece valorile pentru nonce erau epuizate în mai puțin de o secundă. Pe măsură ce echipamentele de minerit ASIC au început să împingă și să depășească rata de rezumare de TH/sec, software-ul de minerit avea nevoie de mai mult spațiu pentru valorile nonce-ului pentru a găsi blocuri valide. Marca de timp putea fi modificată un pic, dar deplasarea ei prea departe în viitor ar determina blocul să nu fie valid. A fost necesară o nouă sursă de ”schimbare” în antetul blocului. Soluția a fost utilizarea tranzacției coinbase ca sursă de valori extra pentru nonce. Deoarece script-ul coinbase poate stoca între 2 și 100 de octeți de date, minerii au început să folosească acel spațiu ca spațiu suplimentar pentru nonce, permițându-le să exploreze o gamă mult mai mare de valori ale antetului blocului pentru a găsi blocuri valide. Tranzacția coinbase este inclusă în arborele merkle, ceea ce înseamnă că orice modificare a scriptului coinbase determină modificarea rădăcinii merkle. Opt octeți de nonce în plus, plus cei 4 octeți de nonce ”standard” le permit minerilor să exploreze un total de 2^96^ (8 urmate de 28 zerouri) posibilități _pe secundă_ fără a fi nevoie să modifice marca de timp. Dacă, în viitor, minerii ar putea parcurge toate aceste posibilități, atunci ar putea modifica marca de timp. Există, de asemenea, mai mult spațiu în script-ul coinbase pentru extinderea viitoare a spațiului pentru nonce.
+
+[[mining_pools]]
+==== Bazine de Minerit
+
+((("bazine de minerit", id="MACoverpool10")))((("bazine de minerit", "beneficii ale")))În acest mediu extrem de competitiv, minerii individuali care lucrează singuri (cunoscuți și ca mineri solo) nu au nicio șansă. Probabilitatea ca aceștia să găsească un bloc care să le compenseze energia electrică și costurile hardware sunt atât de mici încât reprezintă un joc de noroc, precum jocul la loterie. Nici cel mai rapid sistem de minerit ASIC de larg consum nu poate ține pasul cu sistemele comerciale care folosesc zeci de mii de aceste cipuri în depozite gigant, în apropierea centralelor hidroelectrice. Minerii colaborează acum pentru formarea bazinelor de minerit, care își combină puterea de rezumare și împărtășesc recompensa între mii de participanți. Prin participarea la un bazin, minerii obțin o pondere mai mică din recompensa totală, dar, de obicei, sunt recompensați în fiecare zi, reducând incertitudinea.
+
+Să ne uităm la un exemplu specific. Presupunem că un miner a achiziționat echipamente de minerit cu o rată combinată de rezumare de 14.000 gigahashes pe secundă (GH/s) sau 14 TH/s. În 2017, acest echipament costa aproximativ 2.500 USD. Hardware-ul consumă 1375 wați (1,3 kW) de energie electrică atunci când funcționează, 33 kW-oră pe zi, cu un cost între 1 și 2 USD pe zi, la tarife foarte mici de electricitate. În cazul dificultății actuale bitcoin, minerul va putea mina singur un bloc aproximativ o dată la 4 ani. Cum am calculat această probabilitate? Se bazează pe o rată de rezumare în rețea de 3 EH/sec (în 2017), iar rata minerului este de 14 TH/sec:
+
+ 
+ 
+  ... P = (14 * 10^12^ / 3 * 10^18^) * 210240 = 0.98
+ 
+ 
+
+Unde 210240 este numărul de blocuri în patru ani. Minerul are o probabilitate de 98% de a găsi un bloc pe parcursul a patru ani, pe baza ratei globale de rezumare la începutul perioadei.
+
+Dacă minerul găsește un singur bloc în acest interval de timp, răsplata de 12,5 bitcoin, la aproximativ 1.000 de dolari pe bitcoin, va duce la o singură recompensă de 12 500 de dolari, ceea ce va produce un profit net de aproximativ 7 000 de dolari. Cu toate acestea, șansa de a găsi un bloc într-o perioadă de 4 ani depinde de norocul minerului. S-ar putea să găsească două blocuri în 4 ani și să facă un profit foarte mare. Sau s-ar putea să nu găsească nici un bloc timp de 5 ani și să sufere o pierdere financiară mai mare. Și mai rău, dificultatea algoritmului Dovadă-de-Lucru este probabil să crească semnificativ în acea perioadă, la ritmul actual de creștere a puterii de rezumare, ceea ce înseamnă că minerul are cel mult un an pentru a ajunge pe zero chiar înainte ca hardware-ul să fie în mod efectiv învechit și să trebuiască înlocuit cu un hardware minier mai puternic. Dacă acest miner participă la un bazin de minerit, în loc să aștepte o șansă norocoasă de 12.500 de dolari o dată la patru ani, el va putea câștiga aproximativ 50 până la 60 $ pe săptămână. Plățile obișnuite de la un bazin de minerit îl vor ajuta să amortizeze de-a lungul timpului costul hardware-ului și al energiei electrice, fără a-și asuma un risc enorm. Hardware-ul va rămâne învechit într-un an sau doi ani, iar riscul este încă ridicat, dar veniturile sunt cel puțin regulate și fiabile în acea perioadă. Din punct de vedere financiar, acest lucru are sens doar la costuri reduse de energie electrică (mai puțin de 1 cent per kW-oră) și doar la o scară foarte mare.
+
+Bazinele de minerit coordonează sute sau mii de mineri, pe baza unor protocoale specializate pentru bazinele de minerit. Minerii individuali își configurează echipamentele miniere pentru a se conecta la un server de bazin, după crearea unui cont cu bazinul. Hardware-ul lor de exploatare rămâne conectat la serverul de bazin în timp ce minează, sincronizând eforturile lor cu ceilalți mineri. Astfel, minerii din bazin împărtășesc efortul de a mina un bloc și apoi împart recompensele.
+
+Blocurile minate cu succes plătesc recompensa către o adresă bitcoin a bazinului, mai degrabă decât minerilor individuali. Serverul de bazin va efectua periodic plăți către adresele bitcoin ale minerilor, odată ce ponderea lor din recompense a atins un anumit prag. De obicei, serverul de bazin percepe o taxă procentuală din recompense pentru furnizarea serviciului de bazin de minare.
+
+((("bazin de minare", "operațiunea de")))Minerii care participă într-un bazin împart munca de căutare a unei soluții la un bloc candidat, obținând ”părți” pentru contribuția lor minieră. Bazinul de minerit stabilește o țintă mai mare (dificultate mai mică) pentru câștigarea unei părți, de obicei de peste 1.000 de ori mai ușor decât ținta rețelei bitcoin. Când cineva din bazin minează cu succes un bloc, recompensa este câștigată de către bazin și apoi împărțită tuturor minerilor proporțional cu numărul de părți cu care au contribuit la efort.
+
+Bazinele sunt deschise oricărui miner, mare sau mic, profesionist sau amator. Prin urmare, un bazin va avea unii participanți cu o singură mașină de minerit, iar alții cu un garaj plin cu hardware de minerit de înaltă performanță. Unii vor extrage cu câteva zeci de kilowati de electricitate, alții vor opera un centru de date consumând un megawatt de energie. Cum măsoară un bazin minier contribuțiile individuale, pentru a distribui în mod corect recompensele, fără posibilitatea de a înșela? Răspunsul este folosirea algoritmului Dovadă-de-Lucru pentru a măsura contribuția fiecărui miner din bazin, dar stabilind o dificultate mai mică, astfel încât chiar și cei mai mici mineri din bazin câștigă o cotă suficient de frecvent pentru fi rentabilă participarea la bazin. Prin stabilirea unei dificultăți mai mici pentru a câștiga părți, grupul măsoară cantitatea de muncă depusă de fiecare miner. De fiecare dată când un miner din bazin găsește un rezumat din antetul blocului care este mai mic decât ținta bazinului, el dovedește că a depus munca de rezumare pentru a găsi rezultatul respectiv. Mai important, munca de a găsi părți contribuie, într-un mod măsurabil statistic, la efortul general de a găsi un rezumat mai mic decât ținta rețelei bitcoin. Mii de mineri care încearcă să găsească rezumate cu valoare scăzută vor găsi în cele din urmă unul suficient de scăzut pentru a satisface ținta rețelei bitcoin.
+
+Să revenim la analogia unui joc de zaruri. Dacă jucătorii aruncă zaruri cu un obiectiv de a arunca mai puțin de patru (dificultatea generală a rețelei), un bazin ar stabili o țintă mai ușoară, numărând de câte ori jucătorii din bazin au reușit să arunce mai puțin de opt. Atunci când jucătorii din bazin aruncă mai puțin de opt (ținta bazinului), câștigă părți, dar nu câștigă jocul, deoarece nu ating obiectivul de joc (mai puțin de patru). Jucătorii din bazin vor atinge mult mai des ținta mai ușoară a bazinului, câștigând părți foarte regulat, chiar și atunci când nu ating ținta mai grea de a câștiga jocul. Din când în când, unul dintre jucătorii din bazin va arunca o aruncare combinată de zar mai mică de patru, iar bazinul câștigă. Apoi, câștigurile pot fi distribuite participaților la bazin pe baza părților pe care le-au obținut. Chiar dacă ținta de opt sau mai puțin nu a fost câștigătoare, a fost o modalitate corectă de a măsura aruncările de zar pentru jucători și produce ocazional o aruncare mai mică de patru.
+
+În mod similar, un bazin de minerit va stabili o țintă (mai mare și mai ușoară) pentru bazin, care va asigura că un miner individual din bazin poate găsi rezumate cu antetul blocului care sunt mai mici decât ținta de bazin, obținând părți. Din când în când, una dintre aceste încercări va produce un rezumat de antet de bloc care este mai mic decât ținta rețelei bitcoin, ceea ce îl face un bloc valid și întregul bazin câștigă.
+
+===== Bazine Gestionate
+
+((("bazine de minerit", "bazine gestionate")))((("operatori de bazin", seealso="mining pools")))Majoritatea bazinelor de minerit sunt ”gestionate”, ceea ce înseamnă că există o companie sau o persoană care rulează un server de bazin. Proprietarul serverului de bazin se numește _operator de bazin_, iar acesta percepe minerilor din bazin o taxă procentuală din câștiguri.
+
+Serverul de bazin rulează software specializat și un protocol pentru bazine de minare care coordonează activitățile minerilor din bazin. Serverul de bazin este, de asemenea, conectat la unul sau mai multe noduri-complete și are acces direct la o copie completă a bazei de date lanț-de-blocuri. Acest lucru permite serverului de bazin să valideze blocurile și tranzacțiile în numele minerilor din bazin, scutindu-i de povara de a rula un nod complet. Pentru minerii din bazin, aceasta este o considerație importantă, deoarece un nod complet necesită un computer dedicat cu cel puțin 100 până la 150 GB stocare persistentă (disc) și cel puțin 2 până la 4 GB memorie (RAM). În plus, software-ul bitcoin care rulează pe nodul complet trebuie monitorizat, întreținut și actualizat frecvent. Orice timp de oprire cauzat de lipsa de întreținere sau de lipsa resurselor va afecta profitabilitatea minerului. Pentru mulți mineri, posibilitatea de a mina fără a rula un nod complet este un alt mare beneficiu al aderării la un bazin gestionat.
+
+Minerii din bazin se conectează la serverul de bazin utilizând un protocol minier, cum ar fi Stratum (STM) sau GetBlockTemplate (GBT). Un standard mai vechi numit GetWork (GWK) a fost în mare parte scos din uz încă de la sfârșitul anului 2012, deoarece nu accepta cu ușurință mineritul la rate de rezumare de peste 4GH/s. Atât protocoalele STM, cât și GBT creează _șabloane_ de bloc care conțin un șablon de antet de bloc candidat. Serverul de bazin construiește un bloc candidat prin agregarea tranzacțiilor, adăugând o tranzacție de tip coinbase (cu spațiu suplimentar pentru nonce), calculând rădăcina merkle și legând rezumatul blocului anterior. Antetul blocului candidat este apoi trimis fiecărui miner din bazin ca șablon. Fiecare miner din bazin apoi minează folosind șablonul de bloc, la o țintă mai mare (mai ușoară) decât ținta rețelei bitcoin și trimite rezultatele de succes înapoi serverului de bazin pentru a obține părți.
+
+===== Bazin de Minerit de-la-egal-la-egal (P2Pool)
+
+((("bazine de minerit", "bazine de-la-egal-la-egal (P2Pool)")))((("bazine de-la-egal-la-egal (P2Pool)")))Bazinele gestionate creează posibilitatea înșelării de către operatorul bazinului, care ar putea direcționa efortul bazinului către tranzacții de cheltuiere dublă sau de invalidare blocurilor (a se vedea <<consensus_attacks>>). Mai mult, serverele de bazin centralizate reprezintă un singur punct de eșec. Dacă serverul de bazin este dezactivat sau este încetinit de un atac de tip denial-of-service, minerii bazinului nu pot să mineze. În 2011, pentru a rezolva aceste probleme de centralizare, a fost propusă și pusă în aplicare o nouă metodă de minerit în bazine: P2Pool, un bazin minier de-la-egal-la-egal (peer-to-peer) fără operator central.
+
+P2Pool funcționează descentralizând funcțiile serverului de bazin, implementând un sistem paralel de tip lanț-de-blocuri numit _lanț de acțiuni_. Un lanț de acțiuni este un lanț-de-blocuri care se confruntă cu o dificultate mai mică decât lanțul-de-blocuri bitcoin. Lanțul de acțiuni permite minerilor din bazin să colaboreze într-un bazin descentralizat prin minarea acțiunilor din lanțul de acțiuni, la o rată de un bloc de acțiuni la fiecare 30 de secunde. Fiecare dintre blocurile din lanțul de acțiuni înregistrează o recompensă proporțională a acțiunilor pentru minerii din bazin care contribuie la efort, transportând acțiunile înainte de la blocul de acțiuni precedent. Când unul dintre blocurile de acțiuni atinge și ținta rețelei bitcoin, acesta este propagat și inclus pe lanțul-de-blocuri bitcoin, răsplătind toți minerii din bazin care au contribuit la toate acțiunile care au precedat blocul de acțiuni câștigător. În esență, în loc de un server de bazin care să țină evidența acțiunilor și a recompenselor minerilor din bazin, lanțul de acțiuni permite tuturor minerilor din bazin să țină evidența tuturor acțiunilor folosind un mecanism de consens descentralizat, similar cu mecanismul de consens al lanțului-de-blocuri bitcoin.
+
+Mineritul P2Pool este mai complex decât mineritul gestionat de bazin, deoarece necesită ca minerii din bazin să ruleze un calculator dedicat cu suficient spațiu pe disc, memorie și lățime de bandă pentru a susține un nod bitcoin și software-ul P2Pool. Minerii P2Pool conectează hardware-ul de minare la nodul lor local P2Pool, care simulează funcțiile unui server de bazin prin trimiterea de șabloane de blocuri la hardware-ul miner. Pe P2Pool, minerii individuali de bazin își construiesc propriile blocuri candidat, agregând tranzacții la fel ca minerii solo, dar apoi minează colaborativ pe lanțul de acțiuni. P2Pool este o abordare hibridă care are avantajul unor plăți mult mai granulare decât mineritul solo, dar fără a da prea mult control unui operator de bazin, cum ar fi cazul pentru bazinele gestionate.
+
+
+Chiar dacă P2Pool reduce concentrația de putere a operatorilor de bazine de minerit, este posibil ca acesta să fie vulnerabil la atacurile de tip 51% împotriva lanțului de acțiuni în sine. O adopție mult mai amplă a P2Pool nu rezolvă problema atacului de 51% pentru bitcoin în sine. Mai degrabă, P2Pool face bitcoin mai robust în ansamblu, ca parte a unui ecosistem minier diversificat.((("", startref="MAChash10")))((("", startref="MACoverpool10")))
+
+[[consensus_attacks]]
+=== Atacuri de Consens
+
+((("minerit și consens", "atacuri de consens", id="Cattack10")))((("securitate", "atacuri de consens", id="Sconsens10")))Mecanismul de consens al bitcoin este cel puțin teoretic, vulnerabili la atacul minerilor (sau bazinelor) care încearcă să-și folosească puterea de calcul pentru scopuri necinstite sau distructive. După cum am văzut, mecanismul de consens depinde de faptul că majoritatea minerilor acționează cinstit din interes propriu. Cu toate acestea, dacă un miner sau un grup de mineri pot obține o pondere semnificativă din puterea de minerit, ei pot ataca mecanismul de consens, astfel încât să perturbe securitatea și disponibilitatea rețelei bitcoin.
+
+Este important de menționat că atacurile de consens pot afecta doar consensul viitor sau, în cel mai bun caz, trecutul cel mai recent (zeci de blocuri). Registrul bitcoin devine din ce în ce mai imutabil pe măsură ce trece timpul. În timp ce în teorie, o bifurcare poate fi obținută la orice adâncime, în practică, puterea de calcul necesară pentru a forța o bifurcare foarte adâncă este imensă, făcând blocurile vechi practic imutabile. Atacurile de consens nu afectează nici securitatea cheilor private sau a algoritmului de semnare (ECDSA). Un atac de consens nu poate fura bitcoin, nu poate cheltui bitcoin fără semnături, redirecționa bitcoin sau schimba tranzacțiile sau înregistrările de proprietate din trecut. ((("denial-of-service attacks")))((("security", "denial-of-service attacks")))Atacurile de consens nu pot afecta decât cele mai recente blocuri și pot provoca perturbări de tipul denial-of-service pentru crearea de blocuri viitoare.
+
+Un scenariu de atac împotriva mecanismului de consens se numește ”atac 51%”. În acest scenariu, un grup de mineri, care controlează o majoritate (51%) din puterea totală de calcul a rețelei, pun la cale atacul împotriva bitcoin. Cu capacitatea de a mina majoritatea blocurilor, minerii atacatori pot provoca ”bifurcări” deliberate în lanțul-de-blocuri și pot efectua cheltuiri duble sau să execute atacuri de tip denial-of-service împotriva unor tranzacții sau adrese specifice. Un atac bifurcare/cheltuire-dublă este acela în care atacatorul face ca blocurile confirmate anterior să fie invalidate, bifurcând sub ele și re-convergând pe un lanț alternativ. Cu o putere suficientă, un atacator poate invalida șase sau mai multe blocuri la rând, determinând invalidarea tranzacțiilor considerate imutabile (șase confirmări). Rețineți că o cheltuire dublă se poate efectua numai pe tranzacțiile proprii ale atacatorului, pentru care atacatorul poate produce o semnătură validă. Cheltuirea dublă a propriilor tranzacții este profitabilă dacă prin invalidarea unei tranzacții, atacatorul poate face un schimb ireversibil pentru o plată sau un produs fără să le plătească.
+
+Să examinăm un exemplu practic de atac 51%. În primul capitol, am analizat o tranzacție între (((”utilizări”, ”cumpărarea de cafea”)))Alice și Bob pentru o ceașcă de cafea. Bob, proprietarul cafenelei, este dispus să accepte plata pentru cafea fără să aștepte confirmarea (minare într-un bloc), deoarece riscul unei cheltuiri duble pentru o ceașcă de cafea este scăzut, în comparație cu comoditatea unui serviciu rapid pentru clienți. Acest lucru este similar cu practicile cafenelelor care acceptă plăți cu cardul de credit fără o semnătură pentru sume sub 25$, deoarece riscul unei rambursări cu card de credit este scăzut, în timp ce costul întârzierii tranzacției pentru obținerea unei semnături este relativ mai mare. În schimb, vânzarea unui articol mai scump pentru bitcoin riscă un atac de cheltuire-dublă, în care cumpărătorul difuzează o tranzacție concurentă care cheltuiește aceleași intrări (UTXO) și anulează plata către comerciant. Un atac de cheltuire-dublă se poate întâmpla în două moduri: fie înainte de confirmarea unei tranzacții, fie dacă atacatorul profită de o bifurcare în lanțul-de-blocuri pentru a anula mai multe blocuri. Un atac de 51% le permite atacatorilor să-și cheltuiască dublu propriile tranzacții în noul lanț, anulând astfel tranzacția corespunzătoare din vechiul lanț.
+
+În exemplul nostru, atacatorul rău intenționat Mallory merge la ((("utilizări", "vânzări cu amănuntul", id="carolten")))Galeria lui Carol și achiziționează un frumos tablou care îl înfățișează pe Satoshi Nakamoto drept Prometeu. Carol vinde tabloul ”Marele Foc” pentru 250.000 de dolari în bitcoin către Mallory. În loc să aștepte șase sau mai multe confirmări cu privire la tranzacție, Carol împacheteaza și inmâneaza tabloul lui Mallory după o singură confirmare. Mallory lucrează cu un complice, Paul, care operează un bazin de minerit mare, iar complicele lansează un atac de 51% imediat ce tranzacția lui Mallory este inclusă într-un bloc. Paul îndrumă bazinul de minerit să remineze aceeași înălțime a blocului ca și blocul care conține tranzacția lui Mallory, înlocuind plata lui Mallory către Carol cu o tranzacție care cheltuie dublu aceeași intrare ca și plata lui Mallory. Tranzacția de cheltuire-dublă consumă același UTXO și plătește înapoi portofelul lui Mallory, în loc să îi plătească lui Carol, permițându-i, în esență, lui Mallory să păstreze bitcoinul. Paul apoi îndrumă bazinul de minerit să mineze un bloc suplimentar, astfel încât lanțul care conține tranzacția cu cheltuire dublă să fie mai lung decât lanțul inițial (provocând o bifurcare sub blocul care conține tranzacția lui Mallory). Când bifurcarea lanțului-de-blocuri se rezolvă în favoarea noului lanț (mai lung), tranzacția cu cheltuire-dublă înlocuiește plata inițială către Carol. Lui Carol îi lipsește acum tabloul și, de asemenea, nu are nicio plată bitcoin. Pe toată durata acestei activități, participanții la bazinul de minerit a lui Paul ar putea să nu aibă nici o idee de încercarea de cheltuire-dublă, deoarece ei minează cu mineri automatizați și nu pot monitoriza fiecare tranzacție sau bloc.((("", startref="carolten")))
+
+((("confirmări", "tranzacții de valore ridicată", secondary-sortas="tranzacții de valore ridicată")))Pentru a se proteja împotriva acestui tip de atac, un comerciant care vinde articole de valoare mare trebuie să aștepte cel puțin șase confirmări înainte de a da produsul cumpărătorului. În mod alternativ, comerciantul ar trebui să utilizeze un cont multisemnatură cu împuternicire, așteptând din nou mai multe confirmări după finanțarea contului cu împuternicire. Cu cât trec mai multe confirmări, cu atât devine mai greu să invalidezi o tranzacție cu un atac de 51%. Pentru articole cu valoare ridicata, plata cu bitcoin va fi în continuare convenabilă și eficientă chiar dacă cumpărătorul trebuie să aștepte 24 de ore pentru livrare, ceea ce ar corespunde cu aproximativ 144 confirmări.
+
+Pe lângă un atac de cheltuire-dublă, celălalt scenariu pentru un atac de consens este să refuze serviciul anumitor participanți bitcoin (adrese bitcoin specifice). Un atacator cu majoritatea puterii de minare poate pur și simplu să ignore anumite tranzacții. Dacă sunt incluse într-un bloc minat de un alt miner, atacatorul poate în mod deliberat să bifurce și să remineze blocul, excluzând din nou tranzacțiile specifice. Acest tip de atac poate duce la o negare a serviciului împotriva unei adrese specifice sau a unui set de adrese atâta timp cât atacatorul controlează majoritatea puterii de minerit.
+
+În ciuda numelui său, scenariul de atac de 51% nu necesită de fapt 51% din puterea de calcul. De fapt, un astfel de atac poate fi încercat cu un procent mai mic din puterea de rezumare. Pragul de 51% este pur și simplu nivelul la care un astfel de atac este aproape garantat să reușească. Un atac de consens este în esență un remorcher de război pentru următorul bloc, iar grupul ”mai puternic” are mai multe șanse de câștig. Cu o putere mai puțin sporită, probabilitatea de reușită este redusă, deoarece alți mineri controlează generarea unor blocuri cu puterea lor de minerit ”cinstită”. O modalitate de a privi problema este că cu cât un atacator are mai multă putere de calcul, cu atât mai multe bifurcări poate crea în mod deliberat, cu atât mai multe blocuri din trecutul recent poate invalida, sau cu atât mai multe blocuri pe viitor poate controla. Grupurile de cercetare în domeniul securității au folosit modelarea statistică pentru a susține că sunt posibile diferite tipuri de atacuri de consens cu doar 30% din puterea de calcul.
+
+Creșterea masivă a puterii totale de calcul a făcut, în mod cert, bitcoin insensibil atacurilor unui singur miner. Nu este posibil ca un miner solo să controleze mai mult decât un procent mic din puterea de minerit totală. Cu toate acestea, centralizarea controlului cauzată de bazinele de minerit a introdus riscul atacurilor unui operator de bazin de minerit cu scopul de a obține profit. Operatorul de bazin dintr-un bazin gestionat controlează construcția blocurilor candidat și, de asemenea, controlează tranzacțiile incluse. Acest lucru oferă operatorului de bazin posibilitatea de a exclude tranzacții sau de a introduce tranzacții cu cheltuire-dublă. Dacă un astfel de abuz de putere se face într-un mod limitat și subtil, un operator de bazin ar putea obține profit dintr-un atac de consens, fără a fi observat.
+
+Cu toate acestea, nu toți atacatorii vor fi motivați de profit. Un scenariu de atac potențial este acela în care un atacator intenționează să perturbe rețeaua bitcoin fără posibilitatea de a profita de o asemenea perturbare. Un atac rău intenționat gândit să paralizeze bitcoin ar necesita investiții enorme și planificare ascunsă, dar poate fi lansat de un atacator bine finanțat, cel mai probabil sponsorizat de stat. În mod alternativ, un atacator bine finanțat ar putea ataca consensul bitcoin, acumulând simultan hardware-ul minier, compromitând operatorii de bazine și atacând alte bazine cu atacuri denial-of-service. Toate aceste scenarii sunt teoretic posibile, dar din ce în ce mai nepractice, întrucât puterea totală de calcul a rețelei bitcoin continuă să crească exponențial.
+
+Fără îndoială, un atac de consens serios ar deteriora încrederea în bitcoin pe termen scurt, ceea ce ar putea duce la o scădere semnificativă a prețului. Cu toate acestea, rețeaua și software-ul bitcoin sunt în continuă evoluție, astfel încât atacurile de consens ar fi întâmpinate cu măsuri imediate de către comunitatea bitcoin, ceea ce face ca bitcoin să fie mai robust.((("", startref="Cattack10")))((("", startref="MACattack10")))((("", startref="Sconsens10")))
+
+[[consensus_changes]]
+=== Modificarea Regulilor de Consens
+
+((("minerit și conses", "reguli de consesn", "schimbare", id="Crule10")))Regulile de consens determină validitatea tranzacțiilor și a blocurilor. Aceste reguli stau la baza colaborării dintre toate nodurile bitcoin și sunt responsabile pentru convergența tuturor perspectivelor locale într-un singur lanț-de-blocuri consecvent în întreaga rețea.
+
+Deși regulile de consens sunt invariabile pe termen scurt și trebuie să fie consecvente pe toate nodurile, acestea nu sunt invariabile pe termen lung. Pentru a  permite evoluția și dezvoltarea sistemului bitcoin, regulile trebuie să se schimbe din când în când pentru a acomoda noi funcționalități, îmbunătățiri sau corecții de erori. Spre deosebire de dezvoltarea software tradițional, totuși, upgrade-urile unui sistem de consens sunt mult mai dificile și necesită coordonare între toți participanții.
+
+
+[[hard_forks]]
+==== Bifurcări Hard
+((("bifurcări", "schimbarea regulilor de conses", id="forks10a")))((("bifurcări", "schimbarea regulilor de conses", "bifurcări hard")))În <<forks>> am analizat modul în care rețeaua bitcoin poate diverge pentru scurt timp, două părți ale rețelei urmând două ramuri diferite ale lanțului-de-blocuri pentru o perioadă scurtă de timp. Am văzut cum acest proces se produce în mod natural, ca parte a funcționării normale a rețelei și modul în care rețeaua reconverge pe un lanț-de-blocuri comun după ce unul sau mai multe blocuri sunt minate.
+
+Există un alt scenariu în care rețeaua poate devia în două lanțuri: o schimbare a regulilor de consens. Acest tip de bifurcare se numește _bifurcare hard_, deoarece după bifurcare rețeaua nu mai converge într-un singur lanț. În schimb, cele două lanțuri evoluează independent. Bifurcările hard apar atunci când o parte a rețelei funcționează sub un set diferit de reguli de consens decât restul rețelei. Acest lucru poate apărea din cauza unei erori sau din cauza unei schimbări deliberate în implementarea regulilor de consens.
+
+Bifurcările hard pot fi folosite pentru a schimba regulile de consens, dar necesită coordonare între toți participanții la sistem. Orice noduri care nu se actualizează la noile reguli de consens nu sunt în măsură să participe la mecanismul de consens și sunt forțate pe un lanț separat în momentul bifurcării. Astfel, o schimbare introdusă de o bifurcare hard poate fi considerată ”incompatibilă cu versiunele precedente”, în condițiile în care sistemele neactualizate nu mai pot procesa noile reguli de consens.
+
+Să examinăm mecanismele unei bifurcări hard cu un exemplu specific.
+
+<<blockchainwithforks>> prezintă un lanț-de-blocuri cu două bifurcări. La înălțimea blocului 4, apare o bifurcare de un bloc. Acesta este tipul de bifurcare spontană pe care am văzut-o în <<forks>>. Odată cu minarea blocului 5, rețeaua reconverge pe un singur lanț și bifurcarea este rezolvată.
+
+[[blockchainwithforks]]
+.Un lanț-de-blocuri cu bifurcări
+image::images/mbc2_1009.png[Un lanț-de-blocuri cu bifurcări]
+
+Mai târziu, însă, la înălțimea de bloc 6, apare o bifurcare hard. Să presupunem că o nouă implementare a clientului este lansată cu o modificare a regulilor de consens. Începând de la înălțimea blocului 7, minerii care execută această nouă implementare vor accepta un nou tip de semnătură digitală, să o numim o semnătură ”Smores”, care nu este bazată pe ECDSA. Imediat după, un nod care rulează noua implementare creează o tranzacție care conține o semnătură Smores și un miner cu software-ul actualizat minează blocul 7b care conține această tranzacție.
+
+Orice nod sau miner care nu a actualizat software-ul pentru validarea semnăturilor Smores nu poate prelucra acum blocul 7b. Din perspectiva lor, atât tranzacția care conține o semnătură Smores, cât și blocul 7b care conține acea tranzacție nu sunt valide, deoarece le evaluează pe baza vechilor reguli de consens. Aceste noduri vor respinge tranzacția împreună cu blocul și nu le vor propaga. Orice mineri care utilizează regulile vechi nu vor accepta blocul 7b și vor continua să mineze un bloc candidat al cărui părinte este blocul 6. De fapt, minerii care folosesc regulile vechi pot să nu primească nici măcar blocul 7b dacă toate nodurile cu care sunt conectate respectă de asemenea vechile reguli și, prin urmare, nu propagă blocul. În cele din urmă, vor reuși să mineze blocul 7a, care este valid în conformitate cu vechile reguli și nu conține tranzacții cu semnături Smores.
+
+Cele două lanțuri continuă să diverge din acest punct. Minerii din lanțul ”b” vor continua să accepte și să mineze tranzacțiile care conțin semnături Smores, în timp ce minerii din lanțul ”a” vor continua să ignore aceste tranzacții. Chiar dacă blocul 8b nu conține nicio tranzacție semnată Smores, minerii din lanțul ”a” nu îl pot prelucra. Pentru ei pare a fi un bloc orfan, deoarece părintele său ”7b” nu este recunoscut ca un bloc valid.
+
+==== Bifurcări Hard: Software, Rețea, Minerit și Lanț
+
+((("bifurcări", "schimbarea regulilor de consens", "bifurcări de software)))Pentru progrmatori, termenul ”bifurcare” are o altă semnificație, adăugând confuzie la termenul ”bifurcare hard”. În software-ul open source, o bifurcare apare atunci când un grup de dezvoltatori aleg să urmeze un roadmap software diferit și să înceapă o implementare concurentă a unui proiect open source. Am discutat deja despre două circumstanțe care vor duce la o bifurcare hard: o eroare a regulilor de consens și o modificare deliberată a regulilor de consens. În cazul unei modificări deliberate a regulilor de consens, o bifurcare software precede bifurcarea hard. Cu toate acestea, pentru ca acest tip de bifurcare să aibă loc, trebuie dezvoltată, adoptată și lansată o nouă implementare software a regulilor de consens.
+
+Exemple de bifurcări software care au încercat să schimbe regulile de consens includ Bitcoin XT, Bitcoin Classic și cel mai recent Bitcoin Unlimited. Cu toate acestea, niciuna dintre aceste bifurcări software nu a rezultat într-o bifurcare hard. Deși o bifurcare software este o precondiție necesară, nu este în sine suficientă pentru apariția unei bifurcări hard. Pentru ca o bifucare să aibă loc, implementarea concurentă trebuie adoptată și noile reguli activate, de către mineri, portofele și noduri intermediare. În schimb, există numeroase implementări alternative ale Bitcoin Core, și chiar bifurcări software, care nu schimbă regulile de consens și corectează o eroare, pot coexista în rețea și pot interopera fără a provoca o bifurcare hard.
+
+Regulile de consens pot diferi în mod evident și explicit, în validarea tranzacțiilor sau a blocurilor. Regulile pot diferi în moduri mai subtile, în implementarea regulilor de consens, deoarece acestea se aplică scripturilor bitcoin sau primitivelor criptografice, cum ar fi semnăturile digitale. În cele din urmă, regulile de consens pot diferi în moduri neanticipate din cauza restricțiilor implicite de consens impuse de limitările sistemului sau de către detaliile de implementare. Un exemplu al situației din urmă a fost observat la bifurcarea hard neanticipată în timpul actualizării Bitcoin Core 0.7 la 0.8, care a fost cauzată de o limitare a implementării Berkeley DB folosită pentru stocarea blocurilor.
+
+În mod conceptual, ne putem gândi la o bifurcare hard ca fiind dezvoltată în patru etape: o biurcarea software, o bifurcare de rețea, o bifurcare de minerit și o bifurcare a lanțului.
+
+Procesul începe atunci când programatorii creează o implementare alternativă a clientului, cu reguli de consens modificate.
+
+Atunci când această implementare a bifurcării este lansată în rețea, un anumit procent de mineri, utilizatori de portofel și noduri intermediare pot adopta și executa această implementare. Apariția unei bifurcări va depinde dacă noile reguli de consens se aplică blocurilor, tranzacțiilor sau a unui alt aspect al sistemului. Dacă noile reguli de consens se referă la tranzacții, atunci un portofel care creează o tranzacție în conformitate cu noile reguli poate precipita o bifurcare de rețea, urmată de o bifurcare hard când tranzacția este minată într-un bloc. Dacă noile reguli se referă la blocuri, atunci procesul de bifurcare hard va începe atunci când un bloc este minat în conformitate cu noile reguli.
+
+În primul rând, rețeaua va bifurca. Nodurile bazate pe implementarea inițială a regulilor de consens vor respinge orice tranzacții și blocuri create după noile reguli. Mai mult, nodurile care urmează regulile de consens originale vor interzice și se vor deconecta temporar de la nodurile care le transmit aceste tranzacții și blocuri invalide. Drept urmare, rețeaua se va împărți în două: nodurile vechi vor rămâne conectate numai la nodurile vechi și nodurile noi vor fi conectate numai la nodurile noi. O singură tranzacție sau bloc bazat pe noile reguli se va propaga prin rețea și va avea ca rezultat partiționarea în două rețele.
+
+Odată ce un miner, care utilizează noile reguli, va mina un bloc, puterea de minerit și lanțul vor bifurca de asemenea. Noii mineri vor mina deasupra noului bloc, în timp ce minerii vechi vor mina un lanț separat pe baza vechilor reguli. Rețeaua partiționată va face astfel încât minerii care operează pe reguli de consens diferite să nu primească blocuri unii de la alții, deoarece sunt conectați la două rețele separate.
+
+==== Mineri Divergenți si Dificultate
+
+((("bifurcări", "schimbarea regulilor de consens", "mineri divergenți și dificultate")))Pe măsură ce minerii diverg în minarea a două lanțuri diferite, puterea de calcul este împărțită între lanțuri. Puterea de minerit poate fi împărțită în orice proporție între cele două lanțuri. Noile reguli pot fi urmate doar de o minoritate sau de marea majoritate a puterii de minerit.
+
+Să presupunem, de exemplu, o scindare de 80% -20%, majoritatea puterii de minerit folosind noile reguli de consens. Să presupunem, de asemenea, că bifurcarea apare imediat după o perioadă de ajustarea a țintei de dificultate.
+
+Cele două lanțuri ar moșteni fiecare dificultatea din perioada de ajustare. Noile reguli de consens ar avea 80% din puterea de minerit disponibilă anterior. Din perspectiva acestui lanț, puterea de minerit a scăzut brusc cu 20% față de perioada anterioară. Blocurile vor fi găsite în medie la fiecare 12,5 minute, reprezentând scăderea cu 20% a puterii de minerit disponibile pentru extinderea acestui lanț. Această rată a emiterii blocurilor va continua (exceptând orice schimbări în puterea de rezumare) până la extragerea a 2016 blocuri, ceea ce va dura aproximativ 25.200 de minute (12.5 minute pe bloc) sau 17.5 zile. După 17,5 zile, va avea loc o ajustare și dificultatea se va regla (redusă cu 20%) pentru a produce din nou blocuri la 10 minute.
+
+Lanțul minoritar, minând în conformitate cu vechile reguli cu doar 20% din puterea de rezumare, se va confrunta cu o sarcină mult mai dificilă. Pe acest lanț, acum blocurile vor fi minate în medie la fiecare 50 de minute. Dificultatea nu va fi ajustată pentru următoarele 2016 blocuri, care vor necesita 100.800 de minute sau aproximativ 10 săptămâni pentru a fi minate. Presupunând o capacitate fixă pe bloc, aceasta va rezulta, de asemenea, la reducerea capacității de tranzacție cu un factor de 5, deoarece există mai puține blocuri pe oră disponibile pentru înregistrarea tranzacțiilor.
+
+==== Bifurcări Hard Contencioase
+
+((("bifurcări", "schimbarea regulilor de consens", "bifurcări hard contencioase")))((("bifurcări hard")))Acum sunt începuturile dezvoltării de software de consens. La fel cum dezvoltarea open source a schimbat atât metodele și produsele software-ului, cât și crearea de noi metodologii, noi instrumente și noi comunități în urma sa, dezvoltarea software-ului consensual reprezintă, de asemenea, o nouă frontieră în informatică. Din dezbaterile, experimentele și încercările dezvoltării bitcoin, vom vedea că apar noi instrumente de dezvoltare, practici, metodologii și comunități.
+
+Bifurcările hard sunt văzute ca riscante, deoarece forțează o minoritate să facă upgrade sau să rămână pe un lanț minoritar. Mulți consideră că riscul de a împărți întregul sistem în două sisteme concurente este un risc inacceptabil. Drept urmare, mulți programatori sunt reticenți să utilizeze mecanismul de bifurcare hard pentru a implementa actualizări la regulile de consens, cu excepția cazului în care există o susținere aproape unanimă din partea întregii rețele. Orice propuneri de bifurcare hard care nu au un suport aproape unanim sunt considerate prea ”controversate” pentru fi încercate fără a risca o partajare a sistemului.
+
+Problema bifurcărilor hard este extrem de controversată în comunitatea de dezvoltare bitcoin, mai ales când se referă la orice modificări propuse la regulile de consens care controlează limita maximă a blocului. Unii dezvoltatori se opun oricărei forme de bifurcare hard, considerând-o prea riscantă. Alții consideră mecanismul bifurcării hard ca un instrument esențial pentru modernizarea regulilor de consens într-un mod care evită ”datoriile tehnice” și oferă o despărțire curată de trecut. În cele din urmă, unii dezvoltatori văd bifurcările hard ca un mecanism care ar trebui utilizat rar, cu multă planificare în avans și doar sub un consens aproape unanim.
+
+Deja am văzut apariția de noi metodologii care să abordeze riscurile create de bifurcări hard. În secțiunea următoare, vom analiza bifurcările soft și metodele BIP-34 și BIP-9 pentru semnalizarea și activarea modificărilor consensului.
+
+==== Bifurcări Soft
+
+((("bifurcări", "schimbarea regulilor de consens", "bifurcări soft")))((("bifurcări soft", "definite")))Nu toate modificările regulilor de consens provoacă o bifurcare hard. Doar schimbările de consens care sunt incompatibile cu versiunea veche determină o bifurcare. Modificarea poate avea loc fără o bifurcare, dacă este implementată în așa fel încât un client nemodificat încă vede tranzacția sau blocul ca fiind valide în conformitate cu regulile anterioare,.
+
+Termenul _bifurcare soft_ a fost introdus pentru a distinge această metodă de actualizare de o ”bifurcare hard”. În practică, o bifurcare soft nu este deloc o bifurcare. O bifurcare soft este o modificare compatibilă cu versiunile anterioare a regulilor de consens, care permite clienților neactualizați să continue să funcționeze în consens cu noile reguli.
+
+Un aspect al bifurcărilor soft care nu este imediat evident este faptul că actualizările bifurcării soft pot fi folosite doar pentru a constrânge regulile de consens, nu pentru a le relaxa. Pentru a fi compatibile cu versiunile anterioare, tranzacțiile și blocurile create în conformitate cu noile reguli trebuie să fie valide și în conformitate cu vechile reguli, dar nu invers. Noile reguli pot limita numai ceea ce este valid; altfel, vor declanșa o bifurcare hard atunci când sunt respinse în conformitate cu vechile reguli.
+
+Bifurcările soft pot fi implementate în mai multe moduri - termenul nu specifică o anumită metodă, ci mai degrabă un set de metode care au un lucru în comun: nu necesită ca toate nodurile să se actualizeze sau să forțeze în afara consensului nodurile neactualizate.
+
+===== Bifurcări soft care redefinesc operatorii NOP
+
+((("operatori", "redefinire de către bifurcări soft")))((("bifurcări soft", "redefinirea operatorilor NOP")))O serie de bifurcări soft au fost implementate în bitcoin, pe baza reinterpretării operatorilor NOP. Bitcoin Script avea zece operatori rezervați pentru utilizări viitoare, NOP1 până la NOP10. Conform regulilor de consens, prezența acestor operatori într-un script este interpretată ca un operator nul, ceea ce înseamnă că nu au niciun efect. Execuția continuă după operatorul NOP, ca și cum nu ar fi fost acolo.
+
+Prin urmare, o bifurcare soft poate modifica semantica unui operator NOP pentru a-i da un sens nou. De exemplu, BIP-65 (`CHECKLOCKTIMEVERIFY`) a reinterpretat operatorul NOP2. Clienții care implementează BIP-65 interpretează NOP2 ca `OP_CHECKLOCKTIMEVERIFY` și impun o regulă absolută de consens de timp de blocare pentru UTXO-uri care conțin acest operator în scripturile de blocare. Această modificare este o bifurcare soft, deoarece o tranzacție valabilă în conformitate cu BIP-65 este valabilă și pentru orice client care nu implementează (ignorând) BIP-65. Pentru clienții vechi, scriptul conține un cod NOP, care este ignorat.
+
+===== Alte modalități de actualizare folosind bifurcări soft
+
+Reinterpretarea operatorilor NOP a fost și planificată și un mecanism evident pentru actualizarea consensului. Recent, însă, a fost introdus un alt mecanism de bifurcare soft, care nu se bazează pe operatorii NOP pentru un tip foarte specific de schimbare a consensului. Acest lucru este examinat mai în detaliu în <<segwit>>. Segwit este o modificare arhitecturală în structura unei tranzacții, care mută scriptul de deblocare (martor) din interiorul tranzacției într-o structură externă de date (segregarea acesteia). Segwit a fost inițial conceput ca o actualizare hard fork, deoarece modifica o structură fundamentală (tranzacția). În noiembrie 2015, un programator care lucrează la Bitcoin Core a propus un mecanism prin care segwit ar putea fi introdus ca o bifurcare soft. Mecanismul folosit este o modificare a scriptului de blocare a UTXO-ului creat în conformitate cu regulile segwit, astfel încât clienții nemodificați văd scriptul de blocare drept răscumpărabil cu orice script de deblocare. Drept urmare, segwit poate fi introdus fără a fi nevoie ca fiecare nod să fie actualizat sau separat de lanț: o bifurcare soft.
+
+Este probabil să existe și alte mecanisme, încă de descoperit, prin care actualizările pot fi realizate ca bifurcare soft într-un mod compatibil cu versiunile precedente.
+
+==== Critici ale Bifurcărilor Soft
+
+((("bifurcări", "schimbarea regulilor de consens", "dezavantajele bifurcărilor soft")))((("bifurcări soft", "dezavantaje ale")))Bifurcările soft bazate pe operatorii NOP sunt relativ necontroversate. Operatorii NOP au fost plasați în Bitcoin Script cu scopul explicit de a permite actualizări care nu perturbă.
+
+Cu toate acestea, mulți programatori sunt îngrijorați de faptul că alte metode de actualizare folosind bifurcări soft fac compromisuri inacceptabile. Criticile obișnuite cu privire la modificările bifurcărilor soft includ:
+
+Datoria tehnică:: Deoarece bifurcările soft sunt mai complexe din punct de vedere tehnic decât o actualizare folosind o bifurcare hard, acestea introduc _datorii tehnice_, termen care se referă la creșterea costurilor viitoare de întreținere a codului din cauza compromisurilor de proiectare făcute în trecut. La rândul său, complexitatea codului crește probabilitatea de erori și vulnerabilități de securitate.
+
+Relaxarea validării:: Clienții nemodificați văd tranzacțiile ca fiind valide, fără a evalua regulile de consens modificate. De fapt, clienții nemodificați nu validează folosind gama completă de reguli de consens, deoarece sunt orbi la noile reguli. Aceasta se aplică actualizărilor bazate pe NOP, precum și altor actualizări de bifurcare soft.
+
+Actualizări ireversibile:: Deoarece bifurcările soft creează tranzacții cu constrângeri suplimentare de consens, ele devin în practică actualizări ireversibile. Dacă o actualizare a bifurcării soft ar fi inversată după activare, orice tranzacție creată în conformitate cu noile reguli ar putea duce la pierderea fondurilor în conformitate cu vechile reguli. De exemplu, dacă o tranzacție CLTV este evaluată conform vechilor reguli, nu există nicio restricție de timp și ea poate fi cheltuită în orice moment. Prin urmare, criticii susțin că o bifurcare soft eșuată care a trebuit să fie inversată din cauza unei erori ar duce cu siguranță la pierderea de fonduri.((("", startref="Crule10")))
+
+[[softforksignaling]]
+=== Semnalizare Bifurcare Soft folosind Versiunea Blocului
+
+((("bifurcări", "schimbarea regulilor de consens", "activare bifurcare soft")))((("bifurcări soft", "activare")))Deoarece bifurcările soft permit clienților nemodificați să continue să funcționeze în cadrul consensului, mecanismul pentru ”activarea” unei bifurcări este semnalizarea disponibilității de către mineri: majoritatea minerilor trebuie să fie de acord că sunt pregătiți și dispuși să aplice noile reguli de consens. Pentru a-și coordona acțiunile, există un mecanism de semnalizare care le permite să își arate sprijinul pentru o schimbare a regulilor de consens. Acest mecanism a fost introdus odată cu activarea BIP-34 în martie 2013 și înlocuit cu activarea BIP-9 în iulie 2016.
+
+==== Semnalizare și Activare BIP-34
+
+((("propuneri de îmbunătățire bitcoin", "Bloc v2, Înălțimea în Coinbase (BIP-34)")))Prima implementare, în BIP-34, a folosit câmpul de versiune a blocului pentru a permite minerilor să semnalizeze disponibilitatea pentru a schimba o regulă specifică de consens. Înainte de BIP-34, versiunea blocului a fost setată la ”1” prin _convenție_ nu impusă  de _consens_.
+
+BIP-34 a definit o modificare a regulilor de consens care a impus câmpul coinbase (de intrare) al tranzacției coinbase pentru a conține înălțimea blocului. Înainte de BIP-34, coinbase putea conține orice date arbitrare pe care minerii au ales să le includă. După activarea BIP-34, blocurile valide au trebuit să conțină o înălțime specifică a blocului la începutul coinbase și să fie identificate cu un număr de versiune mai mare sau egal cu ”2.”
+
+Pentru a semnaliza schimbarea și activarea BIP-34, minerii au setat versiunea de bloc pe ”2”, în loc de ”1.” Acest lucru nu a făcut ca blocurile cu versiunea ”1” să devină imediat invalide. Odată activat, blocurile cu versiunea ”1” vor deveni invalide și toate blocurile cu versiunea ”2” ar trebui să conțină înălțimea blocului în coinbase pentru a fi valabile.
+
+BIP-34 a definit un mecanism de activare în două etape, bazat pe o fereastră de 1000 de blocuri. Un miner va semnala disponibilitatea sa individuală pentru BIP-34 prin construirea de blocuri cu ”2” ca număr de versiune. În mod strict, aceste blocuri nu trebuiau încă să respecte noua regulă de consens privind includerea înălțimii blocului în tranzacția coinbase, deoarece regula de consens nu a fost încă activată. Regulile de consens sunt activate în două etape:
+
+* Dacă 75% (750 din ultimele 1000 de blocuri) sunt marcate cu versiunea ”2”, atunci blocurile de versiune ”2” trebuie să conțină înălțimea blocului în tranzacția coinbase sau sunt respinse ca invalide. Blocurile de versiune ”1” sunt încă acceptate de rețea și nu trebuie să conțină înălțimea blocului. Vechile și noile reguli de consens coexistă în această perioadă.
+
+* Când 95% (950 din cele mai recente 1000 de blocuri) au versiunea ”2”, blocurile cu ”versiunea 1” nu mai sunt considerate valide. Blocurile cu versiunea ”2” sunt valide numai dacă conțin înălțimea blocului în coinbase (conform pragului anterior). După aceea, toate blocurile trebuie să respecte noile reguli de consens, iar toate blocurile valide trebuie să conțină înălțimea blocului în tranzacția coinbase.
+
+După semnalizarea și activarea cu succes în conformitate cu regulile BIP-34, acest mecanism a fost utilizat încă de două ori pentru a activa bifurcări soft:
+
+* https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki[BIP-66] Codificarea DER strictă a semnăturilor a fost activată prin semnalizarea de tip BIP-34 cu o versiune de bloc ”3”, invalidând versiunea ”2” a blocurilor.
+
+* https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki[BIP-65] `CHECKLOCKTIMEVERIFY` a fost activat prin semnalizarea de tip BIP-34 cu versiunea de bloc ”4” invalidând versiunea ”3” a blocurilor.
+
+După activarea BIP-65, mecanismul de semnalizare și activare BIP-34 a fost retras și înlocuit cu mecanismul de semnalizare BIP-9 descris în continuare.
+
+Standardul este definit în https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki[BIP-34 (Block v2, Height in Coinbase)].
+
+==== Semnalizare și Activare BIP-9
+
+((("propuneri de îmbunătățire bitcoin", "Biți de versiune cu expirare și întârziere (BIP-9)")))((("propuneri de îmbunătățire bitcoin", "CHECKLOCKTIMEVERIFY (BIP-65)")))((("propuneri de îmbunătățire bitcoins", "Semnături DER sctricte (BIP-66)")))Mecanismul folosit de BIP-34, BIP-66 și BIP-65 a avut succes în activarea a trei bifurcări soft. Cu toate acestea, a fost înlocuit pentru că avea mai multe limitări:
+
+* Folosind valori întregi pentru versiunea de bloc, doar o bifurcare soft ar putea fi activată la un moment dat, astfel încât a fost necesară coordonarea între propunerile de bifurcare soft și acordul asupra prioritizării și ordinii acestora.
+
+* Mai mult, deoarece versiunea de bloc a fost incrementată, mecanismul nu a oferit o modalitate simplă de a respinge o modificare și apoi de a propune o altă variantă. Dacă clienții vechi încă rulau, ei puteau greși semnalizarea pentru o nouă modificare ca semnalizare pentru modificarea respinsă anterior.
+
+* Fiecare nouă modificare a redus irevocabil versiunile de bloc disponibile pentru modificările viitoare.
+
+BIP-9 a fost propus pentru a depăși aceste provocări și a îmbunătăți rata și ușurința implementării viitoarelor modificări.
+
+BIP-9 interpretează versiunea blocului ca un câmp de biți în loc de un număr întreg. Deoarece versiunea blocului a fost utilizată inițial ca un număr întreg, versiunile 1 până la 4, acum rămân disponibili doar 29 de biți pentru a fi utilizați pentru câmpul de biți. Acest lucru lasă 29 de biți care pot fi folosiți pentru a semnaliza în mod independent și simultan disponibilitatea pentru 29 de propuneri diferite.
+
+De asemenea, BIP-9 stabilește un timp maxim pentru semnalizare și activare. În acest fel, minerii nu trebuie să semnalizeze pentru totdeauna. Dacă o propunere nu este activată în perioada `TIMEOUT` (definită în propunere), propunerea este considerată respinsă. Propunerea poate fi retrimisă pentru semnalizare cu un bit diferit, reînnoind perioada de activare.
+
+Mai mult, după ce `TIMEOUT` a trecut și o funcționalitate a fost activată sau respinsă, bitul de semnalizare poate fi reutilizat pentru o altă funcționalitate fără confuzie. Prin urmare, până la 29 de modificări pot fi semnalizate în paralel și după `TIMEOUT` biții pot fi ”reciclați” pentru a propune noi modificări.
+
+[NOTE]
+====
+În timp ce biții de semnalizare pot fi reutilizați sau reciclați, atâta timp cât perioada de votare nu se suprapune, autorii BIP-9 recomandă ca biții să fie reutilizați numai atunci când este necesar; un comportament neașteptat ar putea apărea din cauza erorilor din software-ul mai vechi. Pe scurt, nu ar trebui să ne așteptăm să vedem reutilizarea până când nu s-au folosit toți cei 29 de biți o singură dată.
+====
+
+Modificările propuse sunt identificate de o structură de date care conține următoarele câmpuri:
+
+nume:: O scurtă descriere utilizată pentru a distinge propunerile. Cel mai adesea BIP-ul care descrie propunerea, ca ”bipN”, unde N este numărul BIP.
+
+bit:: de la 0 la 28, bitul din versiunea de bloc pe care minerii îl folosesc pentru a semnaliza aprobarea pentru această propunere.
+
+starttime:: Timpul (bazat pe Timpul Mediat Trecut) la care începe semnalizarea după care valoarea bitului este interpretată ca semnalizarea disponibilității pentru propunere.
+
+endtime:: Timpul (bazat pe Timpul Median Trecut) după care modificarea este considerată respinsă dacă nu a atins pragul de activare.
+
+Spre deosebire de BIP-34, BIP-9 contorizează semnalizarea de activare în intervale întregi pe baza perioadei de ajustare a țintei de dificultate de 2016 blocuri. Pentru fiecare perioadă de reajustare, dacă suma blocurilor care semnalizează pentru o propunere depășește 95% (1916 din 2016), propunerea va fi activată după o încă o perioadă de reajustare.
+
+BIP-9 oferă o diagramă de stare a propunerii în care ilustrează diferitele etape și tranziții pentru o propunere, așa cum se arată în <<bip9states>>.
+
+Propunerile încep în starea `DEFINED` (definit), odată ce parametrii lor sunt cunoscuți (definiți) în software-ul bitcoin. Pentru blocurile cu Timp Median Trecut după data de pornire, propunerea tranzitează la starea `STARTED`. Dacă pragul de vot este depășit într-o perioadă de reajustare și nu a fost depășită limita de timp, starea propunerii trece la `LOCKED_IN`. O perioadă de reajustare mai târziu, propunerea devine `ACTIVE`. Propunerile rămân în starea `ACTIVE` pentru totdeauna odată ce ajung la acea stare. Dacă termenul expiră înainte de atingerea pragului de vot, starea propunerii se schimbă în `FAILED`, indicând o propunere respinsă. Propunerile `FAILED` rămân permanent în acea stare.
+
+[[bip9states]]
+.Diagrama BIP-9 de tranziție a stării
+image::images/mbc2_1010.png[BIP-9 Diagram Stării de Tranziție pentru Propunere]
+
+BIP-9 a fost implementat pentru prima oară pentru activarea `CHECKSEQUENCEVERIFY` și a BIP-urilor asociate (68, 112, 113). Propunerea denumită ”csv” a fost activată cu succes în iulie 2016.((("", startref="forks10a")))
+
+Standardul este definit în  https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki[BIP-9 (Biți de versiune cu timp și întârziere)].
+
+=== Dezvoltarea de Software de Consens
+
+((("minerit și consens", "dezvoltarea software de consens")))((("mediu de dezvoltare", "dezvoltarea software de consens")))Software-ul de consens continuă să evolueze și există multe discuții cu privire la diferitele mecanisme de schimbare a regulilor de consens. Prin natura sa, bitcoin stabilește un standard foarte ridicat pentru coordonare și consens pentru schimbări. Ca sistem descentralizat, nu are nicio ”autoritate” care să-și poată impune voința participanților rețelei. Puterea este dispersată între mai multe circumscripții, cum ar fi minerii, programatorii bitcoin core, dezvoltatorii de portofele, bursele, comercianții și utilizatorii finali. Deciziile nu pot fi luate unilateral de niciuna dintre aceste circumscripții. De exemplu, în timp ce minerii pot modifica teoretic regulile cu majoritate simplă (51%), acestea sunt constrânse de acordul celorlalte circumscripții. Dacă acționează unilateral, restul participanților pot refuza pur și simplu să le urmeze, păstrând activitatea economică pe un lanț minoritar. Fără activitate economică (tranzacții, comercianți, portofele, schimburi), minerii vor mina o monedă fără valoare cu blocuri goale. Această dispersie a puterii înseamnă că toți participanții trebuie să se coordoneze sau nu se pot face modificări. Status quo este starea stabilă a acestui sistem cu doar câteva modificări posibile dacă există o majoritate foarte mare de consens. Pragul de 95% pentru bifurcările soft reflectă această realitate.
+
+(((”bifurcări hard”)))Este important să recunoaștem că nu există o soluție perfectă pentru dezvoltarea consensului. Atât bifurcările hard, cât și bifurcările soft implică compromisuri. Pentru unele tipuri de schimbări, bifurcările soft pot fi o alegere mai bună; pentru altele, bifurcările hard pot fi o alegere mai bună. Nu există o alegere perfectă; ambele prezintă riscuri. Singura caracteristică constantă a dezvoltării software-ului de consens este că schimbarea este dificilă și că consensul obligă la compromisuri.
+
+Unii văd acest lucru ca o slăbiciune a sistemelor de consens. În timp, este posibil să ajungeți să îl vedeți așa cum fac eu, ca cea mai mare forță a sistemului.

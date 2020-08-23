@@ -1,0 +1,19 @@
+<section data-type="dedication" class="praise">
+<h1>שבחים על <em>Mastering Bitcoin</em></h1>
+<blockquote>
+  <p>כאשר אני מרצה על ביטקוין לציבור הרחב, אני נשאת לעתים 'אך כיצד זה באמת עובד'? כעת יש לי תשובה טובה לשאלה זו, כיון שמי שקורא את  <em>Mastering Bitcoin</em> יקבל הבנה מעמיקה של לגבי אופן הפעולה ויצויד היטב ביכולת לכתוב את הדור הבא של אפליקציות קריפטו מדהימות .</p>
+  <p data-type="attribution">Gavin Andresen, Chief Scientist Bitcoin Foundation</p>
+</blockquote>
+<blockquote>
+  <p>טכנולוגיות ביטקוין ובלוקצ'יין הופכות להיות אבני בנין בסיסיים עבור הדור הבא של האינטרנט. הטובים והמבריקים בעמק הסיליקון עובדים עליה. הספר של אנדריאס יעזור לך להצטרף למהפכת התוכנ בעולם הפיננסים.</p>
+  <p data-type="attribution">Naval Ravikant, Co-founder AngelList</p>
+</blockquote>
+<blockquote>
+  <p><em>Mastering Bitcoin</em> הנו המקור הטכני הטוב ביותר הזמין היום על בלוקצ'יין, וביטקוין קרוב לודאי יראה ברטרוספקטיבה כטכנולוגיה החשובה ביותר בעשרו הזה. שכזו, ספר זה הנו חובה לכל מפתח, בפרט אלו המתענינים בבנית אפליקציות בפרוטוקול ביטקוין. מומלץ ביותר.</p>
+  <p data-type="attribution">Balaji S. Srinivasan (@balajis), General Partner&#x2c; Andreessen Horowitz</p>
+</blockquote>
+<blockquote>
+  <p>מהפכת הבלוקצ'יין של ביטקוין מציגה פלטפורמה חדשה לגמרי להתבסס עליה, כזו שתאפשר אקוסיסטם רחב ומבוזר כמו האינטרנט עצמו. כאחד המובילים המוקדמים בחשיבה, אנדריאס אנטונופולוס הנו הבחירה המושלמת לכתוב ספר זה.</p>
+  <p data-type="attribution">Roger Ver, Bitcoin Entrepreneur and Investor</p>
+</blockquote>
+</section>

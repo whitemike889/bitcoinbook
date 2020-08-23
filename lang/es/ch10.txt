@@ -1,0 +1,1122 @@
+[[mining]]
+== Minería y Consenso
+
+
+=== Introducción
+
+((("minería y consenso", "propósito de")))La palabra "minería" es un tanto engañosa. Al evocar la extracción de metales preciosos, se centra nuestra atención en la recompensa por la minería, los nuevos bitcoin creados en cada bloque. Aunque esta recompensa incentiva la minería, el propósito principal de la minería no es la recompensa o la generación de nuevas monedas. Si ves la minería solo como el proceso por el cual se crean las monedas, estás confundiendo los medios (incentivos) con el objetivo del proceso. La minería es el mecanismo que sustenta la cámara de compensación descentralizada, mediante el cual las transacciones se validan y autorizan. La minería es el invento que hace especial a bitcoin, un mecanismo de seguridad descentralizado que es la base del efectivo digital P2P.
+
+((("minería y consenso", "consenso descentralizado")))((("autoridad de confianza descentralizada")))La minería _asegura al sistema de bitcoin_ y permite el surgimiento en toda la red del _consenso sin una autoridad central_. (((("comisiones", "comisiones de transacción")))La recompensa de las monedas recién acuñadas y las comisiones de transacción es un esquema de incentivos que alinea las acciones de los mineros con la seguridad de la red, al mismo tiempo que implementa la oferta monetaria.
+
+[TIP]
+====
+((("sistemas descentralizados, "minería en bitcoin")))El propósito de la minería no es la creación de bitcoin nuevos. Ese es el sistema de incentivos. La minería es el mecanismo que permite que la _seguridad_ de bitcoin sea _descentralizada_.
+====
+
+Los mineros validan nuevas transacciones y las graban en el libro contable global. Un nuevo bloque, que contiene las transacciones que tuvieron lugar desde el último bloque, se "extrae" cada 10 minutos de promedio, añadiendo esas transacciones a la cadena de bloques. Las transacciones que pasan a formar parte de un bloque y se agregan a la cadena de bloques se consideran "confirmadas", y permite a los nuevos propietarios de bitcoin gastar los bitcoin que recibieron en esas transacciones.
+
+((("comisiones", "recompensas por minería")))((("minería y consenso", "recompensa de minería y comisiones")))((("Prueba-de-Trabajo, algoritmo")))((("minería y consenso", "algoritmo de Prueba-de-Trabajo")))Los mineros reciben dos tipos de recompensas a cambio de la seguridad proporcionada por la minería: nuevas monedas creadas con cada nuevo bloque y comisiones de transacción de todas las transacciones incluidas en el bloque. Para ganar esta recompensa, los mineros compiten para resolver un problema matemático complejo basado en un algoritmo de hash criptográfico. La solución al problema, llamada Prueba-de-Trabajo, se incluye en el nuevo bloque y actúa como prueba de que el minero realizó un importante esfuerzo de computación. La competición para resolver el algoritmo de Prueba-de-Trabajo para ganar la recompensa y el derecho a registrar transacciones en la cadena de bloques es la base del modelo de seguridad de bitcoin.
+
+El proceso de generación de nueva moneda se llama minería porque la recompensa está diseñada para simular rendimientos decrecientes, al igual que la minería de metales preciosos. La oferta monetaria de bitcoin se crea a través de la minería, de forma similar a como un banco central crea dinero nuevo imprimiendo billetes. La cantidad máxima de nuevo bitcoin que un minero puede añadir a un bloque disminuye aproximadamente cada cuatro años (o precisamente cada 210.000 bloques). Se comenzó con 50 bitcoin por bloque en enero de 2009 y se redujo a la mitad, a 25 bitcoin por bloque, en noviembre de 2012. Se redujo a la mitad otra vez, a 12,5 bitcoin por bloque, en julio de 2016. Sobre la base de esta fórmula, las recompensas de la minería en bitcoin disminuyen exponencialmente hasta aproximadamente el año 2140, cuando se habrán emitido todos los bitcoin (20,99999998 millones). Después de 2140, no se emitirán nuevos bitcoin.
+
+Los mineros de bitcoin también ganan comisiones por las transacciones. Cada transacción puede incluir una comisión de transacción, en forma de un excedente de bitcoin entre las entradas y salidas de la transacción. El minero de bitcoin ganador es el que "se queda con el cambio" en las transacciones incluidas en el bloque ganador. Hoy en día, las comisiones representan el 0,5% o menos de los ingresos de un minero de bitcoin, la gran mayoría proveniente de los bitcoin de nuevo cuño. Sin embargo, a medida que la recompensa disminuye con el tiempo y el número de transacciones por bloque aumenta, una mayor proporción de las ganancias de la minería de bitcoin provendrá de las comisiones. Gradualmente, la recompensa de minería estará dominada por las comisiones de transacción, que constituirán el incentivo principal para los mineros. Después de 2140, la cantidad de bitcoins nuevos en cada bloques se reduce a cero y la minería de bitcoin se incentivará solo por las comisiones de transacción.
+
+En este capítulo, vamos a examinar primero la minería como un mecanismo de oferta monetaria y luego veremos la función más importante de la minería: el mecanismo de consenso descentralizado en el que se basa la seguridad de bitcoin.
+
+Para comprender la minería y el consenso, seguiremos la transacción de Alice a medida que se recibe y se agrega a un bloque por el equipo de minería de Jing. Después seguiremos el bloque a medida que es minado, se agrega a la cadena de bloques y es aceptado por la red bitcoin a través del proceso de consenso emergente.
+
+==== Economía Bitcoin y Creación de Moneda
+
+((("minería y consenso", "economía de bitcoin y creación de moneda")))((("creación de moneda")))((("oferta monetaria")))((("tasa de emisión")))Los bitcoins son "acuñados" durante la creación de cada bloque a un ritmo fijo y decreciente. Cada bloque, generado en promedio cada 10 minutos, contiene bitcoins totalmente nuevos, creados de la nada. Cada 210.000 bloques, o aproximadamente cada cuatro años, la tasa de emisión de moneda se reduce en un 50%. Durante los primeros cuatro años de funcionamiento de la red, cada bloque contenía 50 nuevos bitcoins.
+
+En noviembre de 2012, la nueva tasa de emisión de bitcoin se redujo a 25 bitcoin por bloque. En julio de 2016 se redujo nuevamente a 12,5 bitcoins por bloque. Se reducirá a la mitad nuevamente a 6,25 bitcoin en el bloque 630.000, que se minará en algún momento en 2020. La velocidad de creación de nuevas monedas disminuye exponencialmente de esta manera en más de 32 "divisiones a la mitad" hasta el bloque 6,720.000 (minado aproximadamente en el año 2137), cuando alcanzará la unidad mínima de moneda de 1 satoshi. Finalmente, después de 6,93 millones de bloques, en aproximadamente 2140, se emitirán casi 2,099,999,997,690,000 satoshis, o casi 21 millones de bitcoin. A partir de entonces, los bloques no contendrán bitcoin nuevos y los mineros serán recompensados únicamente a través de comisiones de transacción. <<bitcoin_money_supply>> muestra los bitcoin total en circulación a lo largo del tiempo, a medida que disminuye la emisión de moneda.
+
+[[bitcoin_money_supply]]
+.La oferta de moneda bitcoin a lo largo del tiempo se basa en una velocidad de emisión geométricamente decreciente
+image::images/mbc2_1001.png["BitcoinMoneySupply"]
+
+[NOTE]
+====
+El número máximo de monedas minadas es el _limite superior_ de posibles recompensas de minería para bitcoin. En la práctica, un minero puede minar intencionadamente un bloque para tomar menos de la recompensa completa. Dichos bloques ya han sido extraídos y más pueden ser extraído en el futuro, lo que resulta en una emisión total más baja de moneda.
+====
+
+En el código de ejemplo <<max_money>> calculamos el número total de bitcoin que serán emitidos.
+
+[[max_money]]
+.Un script para calcular cuántos bitcoin serán emitidos en total
+====
+[source, python]
+----
+include::code/max_money.py[]
+----
+====
+
+<<max_money_run>> muestra la salida producida al ejecutar el script.
+
+[[max_money_run]]
+.Ejecutando el script max_money.py
+====
+[source,bash]
+----
+$ python max_money.py
+Total BTC to ever be created: 2099999997690000 Satoshis
+----
+====
+
+La emisión finita y decreciente crea una oferta monetaria fija que resiste la inflación. A diferencia de una moneda fiduciaria, que un banco central puede imprimir en números infinitos, bitcoin nunca podrá sufrir de inflación mediante la impresión.
+
+.Dinero Deflacionario
+****
+((("dinero deflacionario")))La más importante y debatida consecuencia de la emisión monetaria fija y decreciente es que la moneda tiende a ser intrínsecamente _deflacionaria_. La deflación es el fenómeno de apreciación del valor debido a un desajuste entre oferta y demanda que hace aumentar el valor (y el tipo de cambio) de una moneda. Siendo lo opuesto a la inflación, la deflación de precios significa que el dinero adquiere mayor poder de compra con el tiempo.
+
+Muchos economistas sostienen que la economía deflacionaria es un desastre y debe ser evitada a toda costa. Eso se debe a que en un período de deflación acelerada la gente tiende a acaparar dinero en vez de gastarlo, esperando que los precios caerán. Tal fenómeno se desató durante la "Década Perdida" de Japón, durante la cual un colapso completo de la demanda empujó a la moneda hacia una espiral deflacionaria.
+
+Los expertos de bitcoin sostienen que la deflación no es mala por sí misma. En cambio, la deflación se asocia con el colapso de la demanda ya que ese es el único tipo de ejemplo de deflación que tenemos para estudiar. En una moneda fiduciaria con la posibilidad de impresión ilimitada es muy difícil entrar en una espiral deflacionaria a menos que ocurra un colapso completo en la demanda sumada a un rechazo a imprimir moneda. La deflación en bitcoin no está causada por un colapso en la demanda, sino por una oferta predecible y restringida.
+
+El aspecto positivo de la deflación, por supuesto, es que es lo opuesto a la inflación. La inflación causa una devaluación lenta pero inevitable de la moneda, lo que resulta en una forma de impuesto oculto que castiga a los ahorradores para rescatar a los deudores (incluidos los deudores más grandes, los gobiernos mismos). Las monedas bajo el control del gobierno sufren el riesgo moral de una fácil emisión de deuda que luego puede borrarse a través de la devaluación a costa de los ahorradores.
+
+Queda por verse si el aspecto deflacionario de una moneda es un problema cuando no se debe a una rápida retracción económica, o una ventaja porque la protección contra la inflación y la devaluación supera con creces los riesgos de la deflación.
+****
+
+=== Consenso Descentralizado
+
+((("minería y consenso", "consenso descentralizado")))((("sistemas descentralizados", "consenso en")))En el capítulo anterior vimos la cadena de bloques, el libro contable (o lista) público y global de todas las transacciones, que es aceptado como un registro autoritario de propiedad por todos en la red bitcoin.
+
+Pero, ¿cómo puede todo el mundo en la red estar de acuerdo sobre una única "verdad" universal, sobre quién es dueño de qué, sin tener que confiar en nadie? Todos los sistemas de pago tradicionales están basados en un modelo de confianza en el que una autoridad central proporciona un servicio de cámara de compensación, básicamente, verificando y compensando todas las transacciones. Bitcoin no tiene autoridad central, pero de alguna manera cada nodo completo tiene una copia completa de un libro de contabilidad público en el que se puede confiar como registro de autoridad. La cadena de bloques no está creada por una autoridad central, pero se monta de forma independiente por cada nodo de la red. De alguna manera, cada nodo de la red, que actúa sobre la información transmitida a través de conexiones de red inseguras, puede llegar a la misma conclusión y montar una copia del mismo libro de contabilidad público que los demás. En este capítulo se examina el proceso por el cual la red bitcoin logra un consenso global sin autoridad central.
+
+((("consenso emergente")))((("minería y consenso", "consenso emergente")))La invención principal de Satoshi Nakamoto es el mecanismo descentralizado para el _consenso emergente_. Emergente, porque el consenso no se logra explícitamente: no hay elección o momento fijo en el que se produce el consenso. En cambio, el consenso es un artefacto emergente de la interacción asíncrona de miles de nodos independientes, todos siguiendo reglas simples. Todas las propiedades de bitcoin se derivan de esta invención, incluyendo moneda, transacciones, pagos, y el modelo de seguridad que no depende de una autoridad central o de la confianza, .
+
+El consenso descentralizado de bitcoin emerge de la interacción de cuatro procesos que ocurren de forma independiente en los nodos de la red:
+
+[role="pagebreak-before"]
+* La verificación independiente de cada transacción, por cada nodo completo, basado en una amplia lista de criterios
+* La incorporación independiente de esas transacciones en nuevos bloques por nodos de minería, junto con la computación demostrada a través de un algoritmo de Prueba-de-Trabajo
+* La verificación independiente de los nuevos bloques por cada nodo y el montaje en una cadena
+* Selección independiente, por cada nodo, de la cadena con mayor poder computacional demostrado a través de Prueba-de-Trabajo.
+
+En las próximas secciones examinaremos estos procesos y cómo interactúan para crear la propiedad emergente de consenso de toda la red que permite a cualquier nodo bitcoin montar su propia copia de autoridad, confiable, pública, del libro contable global.
+
+[[tx_verification]]
+=== Verificación Independiente de Transacciones
+
+((("minería y consenso", "verificación independiente de transacciones")))((("transacciones", "verificación independiente de")))En <<transactions>>, vimos cómo el software de cartera crea transacciones mediante la recopilación de UTXO, proporcionando los scripts de desbloqueo apropiados, y construyendo después nuevas salidas asignadas a un nuevo propietario. La transacción resultante se envía entonces a los nodos vecinos en la red bitcoin de manera que se pueda propagar a través de toda la red bitcoin.
+
+Sin embargo, antes de retransmitir las transacciones a sus vecinos, cada nodo bitcoin que recibe una transacción primero verifica la transacción. Esto garantiza que solo las transacciones válidas se propaguen a través de la red, mientras que las transacciones no válidas se descartan en el primer nodo que las encuentra.
+
+Cada nodo verifica cada transacción a través de una larga lista de criterios:
+
+* La sintaxis de la transacción y su estructura de datos deben ser correctos.
+* Ni las listas de entradas ni de salidas estén vacías.
+* El tamaño de la transacción en bytes es inferior a +MAX_BLOCK_SIZE+.
+* Cada valor de salida, así como el total, deben estar dentro del rango permitido de valores (menos de 21m de monedas, más que el umbral de _polvo_).
+* Ninguna de las entradas tiene de hash=0, N=-1 (transacciones coinbase no deben ser transmitidas).
+* +nLocktime+ es igual a +INT_MAX+, o los valores +nLocktime+ y +nSequence+ se satisfacen según +MedianTimePast+.
+* El tamaño de la transacción en bytes es mayor o igual a 100.
+* El número de operaciones de firma (SIGOPS) contenidas en la transacción es menor que el límite de operación de firma.
+* El script de desbloqueo (+scriptSig+) solo puede empujar números en la pila, y el script de bloqueo (+scriptPubkey+) debe respetar los formatos +isStandard+ (esto rechaza transacciones "no estándar").
+* Debe existir una transacción coincidente en el pool, o en un bloque en la rama principal.
+* Para cada entrada, si existe la salida de referencia en cualquier otra transacción del pool, la transacción debe ser rechazada.
+* Para cada entrada, busca en la rama principal y en el pool de transacciones para encontrar la transacción de salida de referencia. Si la transacción de salida no se encuentra para cualquier entrada, esta será una transacción huérfana. Añadir al pool de transacciones huérfanas, si una transacción coincidente no está ya en el pool.
+* Para cada entrada, si la transacción de salida de referencia es una salida coinbase, debe tener por lo menos +COINBASE_MATURITY+ (100) confirmaciones.
+* Para cada entrada, debe existir la salida de referencia y ya no puede ser gastada.
+* Usando las transacciones de salida de referencia para obtener los valores de entrada, compruebe que cada valor de entrada, así como la suma, están en el rango permitido de valores (menos de 21m monedas, más de 0).
+* Rechazar si la suma de los valores de entrada es inferior a la suma de los valores de salida.
+* Rechazar si la comisión de transacción sería demasiado baja (+minRelayTxFee+) para entrar en un bloque vacío.
+* Los scripts de desbloqueo para cada entrada se deben validar contra los scripts de bloqueo de salida correspondientes.
+
+Estas condiciones pueden verse en detalle en las funciones +AcceptToMemoryPool+, +CheckTransaction+, y +CheckInputs+ en el Bitcoin Core. Ten en cuenta que las condiciones cambian con el tiempo, para hacer frente a los nuevos tipos de ataques de denegación de servicio o, a veces se relajan las normas a fin de incluir más tipos de transacciones.
+
+Al verificar de forma independiente cada transacción, en el momento en que se recibe y antes de propagarlo, cada nodo construye un conjunto de transacciones válidas (pero sin confirmar) conocido como el _pool de transacciones_, _pool de memoria_ o _mempool_.
+
+=== Nodos de Minería
+
+((("minería y consenso", "nodos de minería")))((("nodos bitcoin", "nodos de minería")))Algunos de los nodos de la red bitcoin son nodos especializados llamados _mineros_. En <<ch01_intro_what_is_bitcoin>> presentamos a ((("casos de uso", "minería de bitcoin", id="jingten")))Jing, un estudiante de ingeniería informática en Shanghai, China, que es un minero bitcoin. Jing gana bitcoin ejecutando una "plataforma de minería", que es un sistema informático de hardware especializado diseñado para minar bitcoin. El hardware especializado de minería de Jing se conecta a un servidor que ejecuta un nodo bitcoin completo. A diferencia de Jing, algunos mineros minan sin un nodo completo, como veremos en <<mining_pools>>. Como cualquier otro nodo completo, el nodo de Jing recibe y propaga transacciones sin confirmar en la red bitcoin. El nodo de Jing, sin embargo, también agrega estas transacciones en nuevos bloques.
+
+El nodo de Jing está a la escucha de nuevos bloques, propagados en la red bitcoin, al igual que hacen todos los nodos. Sin embargo, la llegada de un nuevo bloque tiene un significado especial para un nodo de minería. La competencia entre los mineros termina efectivamente con la propagación de un nuevo bloque que actúa como un anuncio del ganador. Para los mineros, recibir un nuevo bloque válido significa que otra persona ganó la competición y que ellos perdieron. Sin embargo, el final de una ronda de la competición marca también el comienzo de la siguiente ronda. El nuevo bloque no es sólo una bandera a cuadros, que marca el final de la carrera; también es el pistoletazo de salida en la carrera por el siguiente bloque.
+
+=== Agregando Transacciones en los Bloques
+
+((("minería y consenso", "agregando transacciones en bloques", id="MACaggreg10")))((("transacciones", "agregando en bloques", id="Taggreg10")))((("bloques", "agregando transacciones", id="Baggreg10")))((("bloques", "bloques candidatos")))((("bloques candidatos")))((("pool de transacciones")))((("tanques de memoria (mempools)")))Después de validar las transacciones, un nodo bitcoin las añadirá al _tanque de memoria_ o _pool de transacciones_, donde las transacciones esperan hasta que puedan ser incluidas (minadas) en un bloque. El nodo de Jing recoge, valida y transmite nuevas transacciones como cualquier otro nodo. Sin embargo, a diferencia de otros nodos, el nodo de Jing agregará estas transacciones en un _bloque candidato_ .
+
+Sigamos los bloques que se crearon durante el tiempo en que Alice compró una taza de café de Bob's Cafe (ver <<cup_of_coffee>>). La transacción de Alice se incluyó en el bloque 277.316. Con el fin de demostrar los conceptos de este capítulo, vamos a suponer que el bloque fue minado por el sistema de minería de Jing y seguiremos la transacción de Alice, hasta que pasa a formar parte de este nuevo bloque.
+
+El nodo de minería de Jing mantiene una copia local de la cadena de bloques. Para cuando ((("casos de uso", "comprando café")))Alice compra la taza de café, el nodo de Jing ha montado una cadena hasta el bloque 277.314. El nodo de Jing está escuchando transacciones, intentando extraer un nuevo bloque y también escuchando los bloques descubiertos por otros nodos. Mientras el nodo de minería Jing está minando, recibe el bloque 277.315 a través de la red bitcoin. La llegada de este bloque significa el final de la competición para el bloque 277.315 y el comienzo de la competición para crear el bloque 277.316.
+
+Durante los 10 minutos anteriores, mientras que el nodo de Jing estaba buscando una solución para el bloque 277.315, estaba al mismo tiempo recogiendo las transacciones en preparación para el siguiente bloque. Para entonces habrá recogido unos pocos cientos de transacciones en el tanque de memoria. Al recibir el bloque 277.315 y validarlo, el nodo de Jing también comprobará todas las transacciones en el tanque de memoria y retirará las que se hayan incluido en el bloque 277.315. Las transacciones que aún permanezcan en el tanque de memoria seguirán sin confirmar y estarán esperando a ser registradas en un nuevo bloque.
+
+((("algoritmo de Prueba-de-Trabajo")))((("minería y consenso", "algoritmo de Prueba-de-Trabajo")))El nodo de Jing construye de inmediato un nuevo bloque vacío, un candidato para el bloque 277.316. Este bloque se denomina _bloque candidato_ porque aún no es un bloque válido, ya que no contiene una Prueba-de-Trabajo válida. El bloque se vuelve válido sólo si el minero tiene éxito en la búsqueda de una solución para el algoritmo de Prueba-de-Trabajo.
+
+Cuando el nodo de Jing agrega todas las transacciones del tanque de memoria, el nuevo bloque candidato tiene 418 transacciones con comisiones de transacción totales de 0.09094928 bitcoin. Puedes ver este bloque en la cadena de bloques utilizando la interfaz de línea de comandos del cliente principal de bitcoin, como se muestra en <<block277316>>.
+
+[[block277316]]
+.Usando la línea de comandos para obtener el bloque 277.316
+====
+[source,bash]
+----
+$ bitcoin-cli getblockhash 277316
+
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+
+$ bitcoin-cli getblock 0000000000000001b6b9a13b095e96db41c4a928b97ef2d9\
+44a9b31b2cc7bdc4
+----
+
+
+[source,json]
+----
+{
+    "hash" : "0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4",
+    "confirmations" : 35561,
+    "size" : 218629,
+    "height" : 277316,
+    "version" : 2,
+    "merkleroot": "c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e",
+    "tx" : [
+        "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+        "B268b45c59b39d759614757718b9918caf0ba9d97c56f3b91956ff877c503fbe",
+
+        ... 417 more transactions ...
+
+       ],
+    "time" : 1388185914,
+    "nonce" : 924591752,
+    "bits" : "1903a30c",
+    "difficulty" : 1180923195.25802612,
+    "chainwork" : "000000000000000000000000000000000000000000000934695e92aaf53afa1a",
+    "previousblockhash" : "0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569"
+}
+----
+====
+
+==== La Transacción Coinbase
+
+((("coinbase, transacciones", id="coinbtrans10")))((("transacciones", "transacciones coinbase", id="Tcoinb10")))La primera transacción en cualquier bloque es una transacción especial, llamada _transacción coinbase_. Esta transacción es construida por el nodo de Jing y contiene su _recompensa_ por el esfuerzo de minería.
+
+[NOTE]
+====
+Cuando se minó el bloque 277.316, la recompensa fue de 25 bitcoin por bloque. Desde entonces, ha transcurrido un período de "reducción a la mitad". La recompensa del bloque cambió a 12,5 bitcoins en julio de 2016. Se reducirá a la mitad nuevamente en 210.000 bloques, en el año 2020.
+====
+
+El nodo de Jing crea la transacción coinbase como un pago a su propia cartera: "Páguese a la dirección de Jing 25,09094928 bitcoins." Es la cantidad total de recompensa que Jing recolecta por la minería de un bloque y es la suma de la recompensa coinbase (25 bitcoins nuevos) mas las comisiones de transacción (0,09094928) de todas las transacciones incluidas en el bloque como se muestra en <<generation_tx_example>>.
+
+
+[[generation_tx_example]]
+.Transacción de Coinbase
+====
+----
+$ bitcoin-cli getrawtransaction d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f 1
+----
+
+[source,json]
+[role="c_less_space"]
+----
+{
+    "hex" : "01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f03443b0403858402062f503253482fffffffff0110c08d9500000000232102aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21ac00000000",
+    "txid" : "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+    "version" : 1,
+    "locktime" : 0,
+    "vin" : [
+        {
+            "coinbase" : "03443b0403858402062f503253482f",
+            "sequence" : 4294967295
+        }
+    ],
+    "vout" : [
+        {
+            "value" : 25.09094928,
+            "n" : 0,
+            "scriptPubKey" : {
+                "asm" : "02aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21OP_CHECKSIG",
+                "hex" : "2102aa970c592640d19de03ff6f329d6fd2eecb023263b9ba5d1b81c29b523da8b21ac",
+                "reqSigs" : 1,
+                "type" : "pubkey",
+                "addresses" : [
+                    "1MxTkeEP2PmHSMze5tUZ1hAV3YTKu2Gh1N"
+                ]
+            }
+        }
+    ]
+}
+----
+====
+
+A diferencia de las transacciones regulares, la transacción coinbase no consume (no gasta) ninguna UTXO como entrada. En cambio, solo tiene una entrada, llamada _coinbase_, que crea bitcoins de la nada. La transacción coinbase tiene una salida, pagadera a la propia dirección bitcoin del minero. La salida de la transacción coinbase envía el valor de 25,09094928 bitcoins a la dirección bitcoin del minero; en este caso es +1MxTkeEP2PmHSMze5tUZ1hAV3YTKu2Gh1N+.
+
+==== Recompensa de Coinbase y Comisiones
+
+((("transacciones coinbase", "recompensas y comisiones")))(((("comisiones", "comisiones de transacción")))((("minería y consenso", "recompensas y comisiones")))Para construir la transacción coinbase, el nodo de Jing calcula primero el monto total de las comisiones de transacción al agregar todas las entradas y salidas de las 418 transacciones que se agregaron al bloque. Las comisiones se calculan como:
+
+----
+Total Comisiones = Suma(Entradas) - Suma(Salidas)
+----
+
+En el bloque 277.316, el total de las comisiones de las transacciones es de 0,09094928 bitcoin.
+
+A continuación, el nodo de Jing calcula la recompensa correcta para el nuevo bloque. La recompensa se calcula en función de la altura de bloque, comenzando en 50 bitcoins por bloque y se reduce a la mitad cada 210.000 bloques. Debido a que este bloque tiene una altura de 277.316, la recompensa correcta es de 25 bitcoins.
+
+El cálculo se puede ver en la función +GetBlockSubsidy+ del Cliente Principal de Bitcoin, como se muestra en <<getblocksubsidy_source>>.
+
+[[getblocksubsidy_source]]
+.Calculando la recompensa de bloque&#x2014;Función GetBlockSubsidy, Cliente Principal de Bitcoin, main.cpp
+====
+[role="c_less_space"]
+[source, cpp]
+----
+CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
+{
+    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
+    // Forzar la recompensa de bloque a cero cuando el desplazamiento a la derecha no está definido.
+    if (halvings >= 64)
+        return 0;
+
+    CAmount nSubsidy = 50 * COIN;
+    // La recompensa se reduce a la mitad cada 210.000 bloques que se producirán aproximadamente cada 4 años.
+    nSubsidy >>= halvings;
+    return nSubsidy;
+}
+----
+====
+
+La recompensa inicial se calcula en satoshis multiplicando 50 por la constante +COIN+ (100,000.000 satoshis). Esto establece la recompensa inicial (+nSubsidy+) a 5 mil millones de satoshis.
+
+((("reducciones a la mitad")))A continuación, la función calcula el número de +halvings+ que se han producido al dividir la altura de bloque actual por el intervalo de mitades (+SubsidyHalvingInterval+). En el caso del bloque 277.316, con un intervalo de reducción a la mitad cada 210.000 bloques, el resultado es 1 reducción a la mitad o halving.
+
+El número máximo de reducciones a la mitad permitido es 64, por lo que el código impone una recompensa cero (solo devuelve las comisiones) si se exceden las 64 reducciones a la mitad.
+
+Luego, la función usa el operador binario de desplazamiento-a-la-derecha para dividir la recompensa (+nSubsidy+) entre dos para cada ronda de reducción a la mitad. En el caso del bloque 277.316; esto desplazaría binariamente a la derecha, la recompensa de 5 mil millones de satoshis una vez (una reducción a la mitad) y daría como resultado 2,5 millardos de satoshis, o 25 bitcoins. El operador binario de desplazamiento a la derecha se usa porque es más eficiente que aplicar múltiples divisiones repetidas. Para evitar un posible error, la operación de cambio se omite después de 63 reducciones a la mitad y la recompensa se establece en 0.
+
+Finalmente, se añade la recompensa coinbase (+nSubsidy+) a las comisiones de transacción (+nFees+), y se devuelve la suma.
+
+[TIP]
+====
+Si el nodo de minería de Jing redacta la transacción coinbase, ¿qué le impide a Jing "recompensarse" a sí mismo con 100 o 1000 bitcoins? La respuesta es que una recompensa incorrecta daría como resultado que el bloque sea considerado inválido por todos los demás nodos, desperdiciando la electricidad que Jing utilizó para la Prueba-de-Trabajo. Jing solo podrá cobrar su recompensa si su bloque es aceptado por todos los demás nodos.
+====
+
+==== Estructura de una Transacción de Coinbase
+
+((("transacciones coinbase", "su estructura")))Con estos cálculos, el nodo de Jing construye la transacción coinbase para pagarse 25,09094928 bitcoins.
+
+Como puede verse en <<generation_tx_example>>, la transacción coinbase tiene un formato especial. En lugar de una entrada de transacción que especifica una UTXO previa a ser gastada, ésta posee una entrada "coinbase". Ya se examinaron las entradas de transacciones en <<tx_in_structure>>. Comparemos una entrada de transacción regular con una entrada de transacción coinbase. <<table_8-1>> muestra la estructura de una transacción regular, mientras que <<table_8-2>> muestra la estructura de la entrada de una transacción coinbase.
+
+[[table_8-1]]
+.La estructura de una entrada de transacción "normal"
+[opciones="título"]
+|=======
+|Tamaño| Campo | Descripción
+| 32 bytes | Hash de Transacción | Puntero a la transacción que contiene la UTXO a ser gastada
+| 4 bytes | Índice de Salida | El número de índice de la UTXO que se pasó, primera es 0
+| 1&#x2013;9 bytes (VarInt) | Tamaño Script-de-Desbloqueo | Longitud del Script-de-Desbloqueo en bytes, a continuación
+| Variable | Script-de-Desbloqueo | Un script que cumple las condiciones del script de bloqueo del UTXO
+| 4 bytes |  Número de secuencia | Generalmente se establece en 0xFFFFFFFF para optar por no participar en BIP 125 y BIP 68
+|=======
+
+[[table_8-2]]
+.La estructura de una entrada de transacción coinbase
+[opciones="título"]
+|=======
+|Tamaño| Campo | Descripción
+| 32 bytes | Hash Transacción | Todos los bits son cero: No es una referencia de hash transacción
+| 4 bytes | Índice de salida | Todos los bits son requeridos: 0xFFFFFFFF
+| 1&#x2013;9 bytes (VarInt) | Tamaño de Data Coinbase | Extensión de la data coinbase, desde 2 a 100 bytes
+| Variable | Data Coinbase | Data extra arbitraria utilizada para el nonce y para etiquetas de minería. En bloques de v2; se debe comenzar con la altura de bloque.
+| 4 bytes | Número de secuencia | Ajuste a 0xFFFFFFFF
+|=======
+
+En una transacción coinbase, los valores de los dos primeros campos se establecen de tal manera que no representan una referencia ninguna UTXO. En lugar de un "hash de transacción", el primer campo se llena con 32 bytes, todos con números cero. El "índice de salida" se llena con 4 bytes, todos configurados en 0xFF (o en números 255 en notación decimal). El "script de desbloqueo" (+scriptSig+) se reemplaza por la data de coinbase, un campo de datos utilizado por los mineros, como veremos a continuación.
+
+==== Datos Coinbase
+
+((("transacciones coinbase", "data de coinbase")))Las transacciones coinbase no tienen un campo de script de desbloqueo (también conocido como +scriptSig+). En cambio, este campo se reemplaza por data de coinbase, que debe tener entre 2 y 100 bytes. Excepto por los pocos primeros bytes, los mineros pueden usar el resto de la data de coinbase de la forma que quieran; son datos arbitrarios.
+
+((("valores nonce")))((("bloques","bloque génesis")))((("cadena de bloques","bloque génesis")))((("bloque génesis")))En el bloque génesis, por ejemplo, Satoshi Nakamoto agregó el texto: "The Times 03/Jan/2009 Cancillería al borde del segundo rescate para los bancos", en el campo de la data coinbase, utilizándola como prueba de la fecha y para transmitir un mensaje. Actualmente, los mineros usan la data coinbase para incluir valores nonce extra y cadenas adicionales que identifican al grupo de minería.
+
+Los primeros pocos bytes de coinbase solían ser arbitrarios, pero ese ya no es el caso. Según el BIP-34, los bloques de la versión-2 (bloques con el campo de versión establecido en 2) deben contener el índice de la altura de bloque como un script u operación de "inserción" al comienzo del campo de coinbase.
+
+En el bloque 277.316 se observa en la data de coinbase (véase <<generation_tx_example>>), que corresponde al script de desbloqueo o campo +scriptSig+ de la entrada de la transacción, con el valor hexadecimal +03443b0403858402062f503253482f+. A continuación desciframos este valor. 
+
+El primer byte, +03+, le ordena a la máquina de ejecución de los script que empuje los siguientes tres bytes en la pila de scripts (véase <<tx_script_ops_table_pushdata>>). Los siguientes tres bytes, +0x443b04+, son la altura de bloque codificada en formato “little-endian” (en reversa, se coloca de primero al byte menos significativo). Inviértase el orden de los bytes y el resultado es +0x043b44+, que es 277.316 en formato decimal. 
+
+Los siguientes dígitos hexadecimales (+0385840206+) se utilizan para codificar un _nonce_ extra (véase <<extra_nonce>>), o un valor aleatorio, que se utiliza para encontrar una solución apropiada al desafío de la Prueba-de-Trabajo.
+
+((("propuestas de mejora de bitcoin", "Pagar al script Hash (BIP-16)")))((("propuestas de mejora de bitcoin","CHECKHASHVERIFY (BIP-17)")))((("CHECKHASHVERIFY (CHV)"))) ((("Pay-to-Script-Hash (P2SH)","data de coinbase ")))La parte final de los datos de coinbase (+2f503253482f+) es la cadena de caracteres en código ASCII serializada pass:[<span class="keep-together"><code>/P2SH/</code></span>], que indica que el nodo de minería que confirmó este bloque admite la mejora “P2SH” definida en la BIP-16. La introducción de la capacidad P2SH requirió de la señalización de los mineros para respaldar a la BIP-16, o bien a la BIP-17. Aquellos que respaldaban la implementación de BIP-16 debían incluir +/P2SH/+ en la data de su coinbase. Aquellos que respaldaban la implementación BIP-17 de P2SH debían incluir la cadena +p2sh/CHV+ en la data de su coinbase. El BIP-16 fue elegido como el ganador, y muchos mineros continuaron incluyendo la cadena +/P2SH/+ en su coinbase para indicar el apoyo a esta función.
+
+<<satoshi_words>> utiliza la biblioteca libbitcoin introducida en <<alt_libraries>> para extraer los datos coinbase del bloque génesis que muestran el mensaje de Satoshi. Tenga en cuenta que la biblioteca libbitcoin contiene una copia estática del bloque génesis, por lo que el código de ejemplo puede recuperar el bloque génesis directamente desde la biblioteca.
+
+[[satoshi_words]]
+.Extraer los datos coinbase del bloque génesis
+====
+[source, cpp]
+----
+include::code/satoshi-words.cpp[]
+----
+====
+
+Compilamos el código con el compilador GNU C ++ y ejecutamos el ejecutable resultante, como se muestra en  <<satoshi_words_run>>.((("", startref="MACaggreg10")))((("", startref="Baggreg10")))((("", startref="Taggreg10")))((("", startref="Tcoinb10")))((("", startref="coinbtrans10")))
+
+[[satoshi_words_run]]
+.Compilando y ejecutando el código de ejemplo satoshi-words
+====
+[source,bash]
+----
+$ # Compilando el código
+$  g++ -o satoshi-words satoshi-words.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # Ejecutar el ejecutable
+$ ./satoshi-words
+^D��<GS>^A^DEThe Times 03/Jan/2009 Chancellor on brink of second bailout for banks
+----
+====
+
+=== Construyendo la Cabecera de Bloque
+
+((("minería y consenso", "construcción de cabeceras de bloque")))((("bloques","cabeceras")))((("cabeceras")))((("(la) cadena de bloques","cabeceras de bloque")))Para construir la cabecera de bloque, el nodo de minería necesita completar seis campos, como se enumera en <<block_header_structure_ch10>>.
+
+[[estructura_cabecera_bloque_ch10]]
+.La estructura de la cabecera de bloque
+[opciones="título"]
+|=======
+|Tamaño| Campo | Descripción
+| 4 bytes | Versión | Un número de versión para seguir las actualizaciones de software y protocolo
+| 32 bytes | Hash del Bloque Anterior | Una referencia al hash del bloque anterior (padre) en la cadena
+| 32 bytes | Raíz Merkle | Un hash de la raíz del árbol merkle de las transacciones de este bloque
+| 4 bytes | Sello de Tiempo | El tiempo de creación aproximada de este bloque (segundos desde Unix Epoch)
+| 4 bytes | Objetivo |  El objetivo del algoritmo de Prueba-de-Trabajo para este bloque
+| 4 bytes | Nonce | Un contador usado para el algoritmo de Prueba-de-Trabajo
+|=======
+
+En el momento que el bloque 277.316 fue minado, el número de versión que describe la estructura de bloques es la versión 2, que está codificada en formato little-endian en 4 bytes como +0x02000000+.
+
+((("bloques", "bloques ancestrales")))((("bloques ancestrales")))A continuación, el nodo de minería debe agregar el "Hash de Bloque Previo" (también conocido como +prevhash+). Este es el hash de la cabecera de bloque, del bloque 277.315; el bloque previo recibido de la red, que el nodo de Jing ha aceptado y seleccionado como el _padre_ del bloque candidato 277.316. El hash de la cabecera de bloque para el bloque 277.315 es:
+
+----
+0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569
+----
+
+[TIP]
+====
+Al seleccionar el bloque _padre_ específico, indicado por el campo Hash de Bloque Previo en la cabecera de bloque del bloque candidato, Jing está comprometiendo su poder de minería en el trabajo de extender la cadena que termina en ese bloque específico. En esencia, así es como Jing "vota" con su poder de minería, por la cadena válida de mayor dificultad.
+====
+
+((("árboles de merkle")))((("(la) cadena de bloques", "árboles de merkle")))El siguiente paso es resumir todas las transacciones en un árbol de merkle, con el fin de agregar la raíz de merkle a la cabecera de bloque. La transacción coinbase aparece como la primera transacción en el bloque. Luego, se agregan 418 transacciones más, para un total de 419 transacciones en el bloque. Como vimos en los <<merkle_trees>>, debe tenerse un número par de nodos tipo "hoja" en el árbol, por lo que la última transacción debe duplicarse, creando 420 nodos, cada uno con el hash de una transacción. Los valores hash de las transacciones se combinan en pares, creando cada nivel del árbol, hasta que todas las transacciones se resumen en un nodo en la "raíz" del árbol. La raíz del árbol de merkle resume todas las transacciones en un solo valor de 32 bytes, que puede verse listada como la "raíz de merkle" en <<block277316>>, y aquí:
+
+----
+c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e
+----
+
+El nodo de minería de Jing agregará un sello de tiempo de 4 bytes, que estará codificado como un sello de tiempo del tipo "epoch" de Unix, que se basa en la cantidad de segundos transcurridos desde la medianoche según la hora UTC, del jueves 1° de enero de 1970. El tiempo +1388185914+ es igual al viernes, 27 de diciembre de 2013, a las 23:11:54, hora UTC.
+
+El nodo de Jing a continuación rellena el objetivo que define la Prueba-de-Trabajo requerida para hacer de este un bloque válido. El objetivo se almacena en el bloque como una métrica de "objetivo en bits", que es una codificación de exponente de mantisa del objetivo. La codificación tiene un exponente de 1 byte, seguido de una mantisa (coeficiente) de 3 bytes. En el bloque 277.316, por ejemplo, el valor del objetivo en bits es de +0x1903a30c+. La primera parte +0x19+ es un exponente hexadecimal, mientras que la siguiente parte, +0x03a30c+, es el coeficiente. El concepto de un objetivo se explica en <<target>> y la representación de "objetivo en bits" se explica en <<target_bits>>.
+
+El campo final es el nonce, que se inicializa a cero.
+
+Con todos los demás campos llenos, la cabecera de bloque ahora está completa y el proceso de minería puede comenzar. El objetivo ahora es encontrar un valor para el nonce que dé como resultado un hash de cabecera de bloque que sea menor que el objetivo. El nodo de minería necesitará probar miles de millones o billones de valores nonce antes de encontrar un nonce que satisfaga el requisito.
+
+=== Minando el Bloque
+
+((("minería y consenso", "minería del bloque", id="MACmining10")))Ahora que un bloque candidato ha sido ensamblado por el nodo de Jing, es hora de que la plataforma hardware de minería de Jing "mine" el bloque, para encontrar una solución al algoritmo de la Prueba-de-Trabajo que haga que el bloque sea válido. A lo largo de este libro, hemos estudiado las funciones de hash criptográfico que se utilizan en varios aspectos del sistema bitcoin. La función hash SHA256 es la función utilizada en el proceso de minería de bitcoin.((("", startref="jingten")))
+
+((("minería y consenso", "definido")))En los términos más simples, la minería es el proceso de obtener el valor hash de la cabecera de bloque repetidamente, cambiando un parámetro, hasta que el hash resultante coincida con un objetivo específico. El resultado de la función hash no se puede determinar de antemano, ni se puede crear un patrón que produzca un valor hash específico. Esta característica de las funciones hash significa que la única forma de producir un resultado hash que coincida con un objetivo específico es intentar una y otra vez, modificando aleatoriamente la entrada hasta que el resultado del hash deseado aparezca por casualidad.
+
+==== Algoritmo  de Prueba-de-Trabajo
+
+((("Algoritmo de la Prueba-de-Trabajo", id="proof10")))((("minería y consenso", "Algoritmo de la Prueba-de-Trabajo", id="Cproof10")))Un algoritmo hash toma una entrada de datos de longitud arbitraria y produce un resultado con una longitud de datos determinísticamente prefijada, es decir, una huella digital de la data de entrada. Para cualquier entrada de datos específica, el valor hash resultante siempre será el mismo y puede ser fácilmente calculado y verificado por cualquier persona que implemente el mismo algoritmo hash.((("colisiones")))La característica esencial de un algoritmo hash criptográfico es que no es computacionalmente factible encontrar dos entradas diferentes que produzcan la misma huella digital (lo que se conoce como _colisión_). Como corolario, también es prácticamente imposible seleccionar una entrada de tal manera que produzca la huella digital deseada, mas allá de intentar ingresos aleatorios.
+
+Con SHA256, la salida es siempre de 256 bits de longitud, independientemente del tamaño de la entrada. En <<sha256_example1>>, vamos a utilizar el intérprete de Python para calcular el hash SHA256 de la frase: "I am Satoshi Nakamoto."
+
+[[sha256_example1]]
+Ejemplo .SHA256
+====
+[source,bash]
+----
+$ python
+----
+[source,pycon]
+----
+Python 2.7.1
+>>> import hashlib
+>>> print hashlib.sha256("I am Satoshi Nakamoto").hexdigest()
+5d7c7ba21cbbcd75d14800b100252d5b428e5b1213d27c385bc141ca6b47989e
+----
+====
+
+<<sha256_example1>> muestra el resultado de calcular el hash de +"I am Satoshi Nakamoto"+ +5d7c7ba21cbbcd75d14800b100252d5b428e5b1213d27c385bc141ca6b47989e+. Este número de 256 bits es el _hash_ o _digest_ de la frase y depende de todos y cada uno de los elementos de frase. Si se añade una sola letra, signo de puntuacion, o cualquier otro carácter, producirá un hash diferente.
+
+Por tanto, si cambiamos la frase, deberíamos ver hashes completamente diferentes. Vamos a comprobarlo añadiendo un número al final de nuestra frase, usando el script simple de Python en <<sha256_example_generator>>.
+
+[[sha256_example_generator]]
+.Comando script SHA256 para generar muchos hashes iterando con un nonce
+====
+[role="c_less_space"]
+[source, python]
+----
+include::code/hash_example.py[]
+----
+====
+
+La ejecución de este script producirá los hashes de varias frases. Se ha añadido un número al final de las frases para hacerlas diferentes entre sí. Incrementando el número, podemos obtener diferentes hashes, como se muestra en <<sha256_example_generator_output>>.
+
+[[sha256_example_generator_output]]
+.Salida SHA256 de un script para generar muchos hashes iterando un nonce
+====
+[source,bash]
+----
+$ python hash_example.py
+----
+
+----
+I am Satoshi Nakamoto0 => a80a81401765c8eddee25df36728d732...
+I am Satoshi Nakamoto1 => f7bc9a6304a4647bb41241a677b5345f...
+I am Satoshi Nakamoto2 => ea758a8134b115298a1583ffb80ae629...
+I am Satoshi Nakamoto3 => bfa9779618ff072c903d773de30c99bd...
+I am Satoshi Nakamoto4 => bce8564de9a83c18c31944a66bde992f...
+I am Satoshi Nakamoto5 => eb362c3cf3479be0a97a20163589038e...
+I am Satoshi Nakamoto6 => 4a2fd48e3be420d0d28e202360cfbaba...
+I am Satoshi Nakamoto7 => 790b5a1349a5f2b909bf74d0d166b17a...
+I am Satoshi Nakamoto8 => 702c45e5b15aa54b625d68dd947f1597...
+I am Satoshi Nakamoto9 => 7007cf7dd40f5e933cd89fff5b791ff0...
+I am Satoshi Nakamoto10 => c2f38c81992f4614206a21537bd634a...
+I am Satoshi Nakamoto11 => 7045da6ed8a914690f087690e1e8d66...
+I am Satoshi Nakamoto12 => 60f01db30c1a0d4cbce2b4b22e88b9b...
+I am Satoshi Nakamoto13 => 0ebc56d59a34f5082aaef3d66b37a66...
+I am Satoshi Nakamoto14 => 27ead1ca85da66981fd9da01a8c6816...
+I am Satoshi Nakamoto15 => 394809fb809c5f83ce97ab554a2812c...
+I am Satoshi Nakamoto16 => 8fa4992219df33f50834465d3047429...
+I am Satoshi Nakamoto17 => dca9b8b4f8d8e1521fa4eaa46f4f0cd...
+I am Satoshi Nakamoto18 => 9989a401b2a3a318b01e9ca9a22b0f3...
+I am Satoshi Nakamoto19 => cda56022ecb5b67b2bc93a2d764e75f...
+----
+====
+
+Cada frase produce un hash resultante completamente diferente. Parecen completamente al azar, pero si replica los valores exactos de este ejemplo en cualquier computadora con Python, obtendrá exactamente los mismos hashes.
+
+El número que se ha utilizado como variable en este escenario se llama _nonce_. El nonce se utiliza para variar la salida de una función criptográfica, en este caso para variar la huella digital SHA256 de la frase.
+
+Para plantear un desafío con este algoritmo, se establecerá un objetivo: encontrar una frase que produzca un hash hexadecimal que comience con un cero. Afortunadamente, esto no es difícil! <<sha256_example_generator_output>> muestra que la frase "Yo soy Satoshi Nakamoto13" produce el hash +0ebc56d59a34f5082aaef3d66b37a661696c2b618e62432727216ba9531041a5+, el cual se ajusta a nuestros criterios. Se necesitaron 13 intentos para encontrarlo. En términos de probabilidades, si la salida de la función hash se distribuye uniformemente, esperaríamos encontrar un resultado con un 0 como prefijo hexadecimal una vez cada 16 hashes (uno de cada 16 dígitos hexadecimales desde el 0 hasta el F). En términos numéricos, eso significa encontrar un valor hash que sea menor que +0x1000000000000000000000000000000000000000000000000000000000000000+. Llamamos a este umbral el objetivo y el objetivo es encontrar un hash que sea numéricamente menor que el objetivo. Si disminuimos el objetivo, la tarea de encontrar un hash que sea menor que el objetivo se vuelve cada vez más difícil.
+
+Para dar una analogía simple, imagínese un juego donde los jugadores lanzan un par de dados repetidamente, tratando de lanzar menos de un objetivo específico. En la primera ronda, el objetivo es 12. A menos que arrojes doble seis, ganas. En la siguiente ronda, el objetivo es 11. Los jugadores deben lanzar 10 o menos para ganar, nuevamente una tarea fácil. Digamos que unas rondas más tarde el objetivo se ha reducido a 5. Ahora, más de la mitad de los lanzamientos de dados excederán el objetivo y, por lo tanto, no serán válidos. Se necesitan exponencialmente más lanzamientos de dados para ganar, cuanto más bajo sea el objetivo. Finalmente, cuando el objetivo es 2 (el mínimo posible), solo un lanzamiento de cada 36, o el 2% de ellos, producirá un resultado ganador.
+
+Desde la perspectiva de un observador que sabe que el objetivo del juego de dados es 2, si alguien ha logrado lanzar un lanzamiento ganador, se puede suponer que intentó, en promedio, 36 lanzamientos. En otras palabras, uno puede estimar la cantidad de trabajo que se necesita para tener éxito a partir de la dificultad impuesta por el objetivo. Cuando el algoritmo se basa en una función determinista como SHA256, la entrada en sí constituye una prueba de que se realizó una cierta cantidad de trabajo para producir un resultado por debajo del objetivo. De allí el concepto de _Prueba-de-Trabajo_.
+
+[TIP]
+====
+Aunque cada intento produce un resultado aleatorio, la probabilidad de cualquier resultado posible se puede calcular por adelantado. Por lo tanto, un resultado de dificultad específica constituye la prueba de una cantidad específica de trabajo.
+====
+
+En <<sha256_example_generator_output>>, el "nonce" ganador es 13 y este resultado puede ser confirmado por cualquiera independientemente. Cualquiera puede agregar el número 13 como sufijo a la frase "Yo soy Satoshi Nakamoto" y calcular el hash, verificando que sea menor que el objetivo. El resultado exitoso es también Prueba-de-Trabajo, porque demuestra que hicimos el trabajo para encontrar ese nonce. Si bien solo se necesita un cómputo hash para realizar la verificación, se necesitaron 13 cómputos hash para encontrar un nonce que funcionara. Si tuviéramos un objetivo más bajo (mayor dificultad), se necesitarían muchos más cómputos hash para encontrar un nonce adecuado, pero solo un cómputo hash para que cualquiera pueda verificarlo. Además, al conocer el objetivo, cualquiera puede estimar la dificultad usando estadísticas y, por lo tanto, saber cuánto trabajo se necesitó para encontrar el susodicho nonce.
+
+[TIP]
+====
+La Prueba-de-Trabajo debe producir un hash que sea _menor que_ el objetivo. Un objetivo más alto significa que es menos difícil encontrar un hash que esté debajo del objetivo. Un objetivo más bajo significa que es más difícil encontrar un hash debajo del objetivo. El objetivo y la dificultad están inversamente relacionados.
+====
+
+
+((("objetivos")))La Prueba-de-Trabajo de bitcoin es muy similar al desafío que se muestra en <<sha256_example_generator_output>>. El minero ensambla un bloque candidato lleno de transacciones. Luego, el minero calcula el hash de la cabecera de este bloque y ve si es más pequeño que el _objetivo_ actual. Si el hash no es menor que el objetivo, el minero modificará el nonce (por lo general, solo lo incrementará en uno) e intentará nuevamente. En la dificultad actual en la red bitcoin, los mineros tienen que probar miles de billones de veces antes de encontrar un nonce que resulte en un hash de cabecera de bloque lo suficientemente bajo.
+
+Se implementa un algoritmo de prueba de trabajo muy simplificado en Python en <<pow_example1>>.
+
+[[pow_example1]]
+.Implementación simplificada de prueba de trabajo
+====
+[source, python]
+----
+include::code/proof-of-work-example.py[]
+----
+====
+
+Mediante la ejecución de este código, puede establecer la dificultad que desee (en bits, cuántos de los primeros bits deben ser cero) y ver cuánto tiempo se necesita para encontrar una solución en su equipo. En <<pow_example_outputs>>, se puede ver cómo funciona en un ordenador portátil normal.
+
+[[pow_example_outputs]]
+.Ejecutar el ejemplo de prueba de trabajo para diversas dificultades
+====
+[source, bash]
+----
+$ python proof-of-work-example.py*
+----
+
+----
+Difficulty: 1 (0 bits)
+
+[...]
+
+Difficulty: 8 (3 bits)
+Starting search...
+Success with nonce 9
+Hash is 1c1c105e65b47142f028a8f93ddf3dabb9260491bc64474738133ce5256cb3c1
+Elapsed Time: 0.0004 seconds
+Hashing Power: 25065 hashes per second
+Difficulty: 16 (4 bits)
+Starting search...
+Success with nonce 25
+Hash is 0f7becfd3bcd1a82e06663c97176add89e7cae0268de46f94e7e11bc3863e148
+Elapsed Time: 0.0005 seconds
+Hashing Power: 52507 hashes per second
+Difficulty: 32 (5 bits)
+Starting search...
+Success with nonce 36
+Hash is 029ae6e5004302a120630adcbb808452346ab1cf0b94c5189ba8bac1d47e7903
+Elapsed Time: 0.0006 seconds
+Hashing Power: 58164 hashes per second
+
+[...]
+
+Difficulty: 4194304 (22 bits)
+Starting search...
+Success with nonce 1759164
+Hash is 0000008bb8f0e731f0496b8e530da984e85fb3cd2bd81882fe8ba3610b6cefc3
+Elapsed Time: 13.3201 seconds
+Hashing Power: 132068 hashes per second
+Difficulty: 8388608 (23 bits)
+Starting search...
+Success with nonce 14214729
+Hash is 000001408cf12dbd20fcba6372a223e098d58786c6ff93488a9f74f5df4df0a3
+Elapsed Time: 110.1507 seconds
+Hashing Power: 129048 hashes per second
+Difficulty: 16777216 (24 bits)
+Starting search...
+Success with nonce 24586379
+Hash is 0000002c3d6b370fccd699708d1b7cb4a94388595171366b944d68b2acce8b95
+Elapsed Time: 195.2991 seconds
+Hashing Power: 125890 hashes per second
+
+[...]
+
+Difficulty: 67108864 (26 bits)
+Starting search...
+Success with nonce 84561291
+Hash is 0000001f0ea21e676b6dde5ad429b9d131a9f2b000802ab2f169cbca22b1e21a
+Elapsed Time: 665.0949 seconds
+Hashing Power: 127141 hashes per second
+----
+====
+
+Como puede verse, aumentar la dificultad en 1 bit provoca una duplicación en el tiempo que lleva encontrar una solución. Si se piensa en el espacio numérico completo de 256 bits, cada vez que se restringe a cero un bit adicional, se disminuye el espacio de búsqueda a la mitad. En <<pow_example_outputs>>, se necesitan 84 millones de intentos de hash para encontrar un nonce que produzca un hash con 26 bits iniciales como cero. Incluso a una velocidad de más de 120.000 hashes por segundo, todavía se requieren 10 minutos en una computadora portátil para encontrar esta solución.
+
+Al momento de escribir este libro, la red está intentando encontrar un bloque cuyo hash de cabecera sea menor que:
+
+----
+0000000000000000029AB9000000000000000000000000000000000000000000
+----
+
+Como puede verse, hay muchos ceros al comienzo de ese objetivo, lo que significa que el rango aceptable de hashes es mucho más pequeño, por lo tanto, es más difícil encontrar un hash válido. En promedio, se necesitarán más de 1.8 zeta-hashes (mil millones de billones de hashes) por segundo para que la red descubra el siguiente bloque. Parece una tarea imposible, pero afortunadamente la red está ejecutando una potencia de procesamiento de 3 exa-hashes por segundo (EH/seg), que podrá encontrar un bloque en aproximadamente 10 minutos en promedio.((("", startref="Cproof10")))((("", startref="proof10")))
+
+[[objetivo_bits]]
+==== Representación del objetivo
+
+((("minería y consenso", "minería del bloque", "representación del objetivo")))((("objetivos", id="objetivos10")))En <<block277316>>, se observó que el bloque contiene el objetivo, en una notación llamada "objetivo en bits" o simplemente "bits", que en el bloque 277.316 tiene el valor de +0x1903a30c+. Esta notación expresa el objetivo de la Prueba-de-Trabajo bajo un formato de coeficiente/exponente, con los dos primeros dígitos hexadecimales para el exponente y los siguientes seis dígitos hexadecimales para el coeficiente. En este bloque, por lo tanto, el exponente es +0x19+ y el coeficiente es +0x03a30c+.
+
+La fórmula para calcular el objetivo de dificultad a partir de esta representación es:
+
+++++
+<ul class="simplelist">
+  <li> objetivo = coeficiente * 2 <sup>(8 * (exponente – 3))</sup> </li>
+</ul>
+++++
+
+Usando esa fórmula, y el valor de los bits de dificultad 0x1903a30c, obtenemos:
+
+++++
+<ul class="simplelist">
+  <li> objetivo = 0x03a30c * 2 <sup>0x08 * (0x19-0x03)</sup> </li>
+  <li> => objetivo = 0x03a30c * 2 <sup>(0x08 * 0x16)</sup> </li>
+  <li> => objetivo = 0x03a30c * 2 <sup>0xB0</sup> </li>
+</ul>
+++++
+
+que en decimal es:
+
+++++
+<ul class="simplelist">
+  <li> => objetivo = 238,348 * 2 <sup>176</sup> </li>
+  <li> => objetivo = <br/> 22.829.202.948.393.929.850.749.706.076.701.368.331.072.452.018.388.575.715.328 </li>
+</ul>
+++++
+
+cambiando de nuevo a hexadecimal:
+
+++++
+<ul class="simplelist">
+  <li> => objetivo = <br/> 0x0000000000000003A30C00000000000000000000000000000000000000000000 </li>
+</ul>
+++++
+
+Esto significa que un bloque válido para la altura 277.316 es uno que tiene un hash de cabecera de bloque que es menor que el objetivo. En binario, ese número debe tener más de 60 bits iniciales establecidos en cero. Con este nivel de dificultad, un solo minero que procesa 1 billón de hashes por segundo (1 terahash por segundo o 1 TH/seg) solo encontraría una solución una vez cada 8.496 bloques o una vez cada 59 días, en promedio.
+
+[[objetivo]]
+==== Re-calibrando para ajustar la dificultad
+
+((("minería y consenso", "minería del bloque", "recalibrando para ajustar la dificultad")))Como se ha visto, el objetivo determina la dificultad y, por lo tanto, afecta el tiempo que lleva encontrar una solución al algoritmo de la Prueba-de-Trabajo. Esto lleva a las preguntas obvias: ¿Por qué es ajustable la dificultad, quién la ajusta y cómo?
+
+Los bloques de Bitcoin se generan cada 10 minutos, en promedio. Este es el latido del corazón de bitcoin y apuntala la frecuencia de emisión de divisas y la velocidad de confirmación de las transacciones. Tiene que permanecer constante no solo a corto plazo, sino durante un período de muchas décadas. Durante este tiempo, se espera que la potencia de computador continúe aumentando a un ritmo rápido. Además, el número de participantes en la minería y de computadoras involucradas, también cambiarán constantemente. Para mantener el tiempo de generación del bloque en 10 minutos, la dificultad de la minería debe ajustarse para tener en cuenta estos cambios. De hecho, el objetivo de la Prueba-de-Trabajo es un parámetro dinámico que se ajusta periódicamente para mantener el objetivo del intervalo de emisión de bloques en 10 minutos. En términos simples, el objetivo se establece de modo que la potencia de minería actual dé como resultado un intervalo de emisión de bloques en 10 minutos.
+
+¿Cómo es que entonces, semejante ajuste puede llevarse a cabo en una red completamente descentralizada? La re-calibración ocurre automáticamente y en cada nodo de forma independiente. Cada 2.016 bloques, todos los nodos reajustan la Prueba-de-Trabajo. La ecuación de re-calibración mide el tiempo que llevó encontrar los últimos 2.016 bloques anteriores y lo compara con el tiempo esperado de 20.160 minutos (el número de 2.016 bloques multiplicado por el intervalo de bloque de 10 minutos deseado). Se calcula la relación entre el intervalo de tiempo real y el intervalo de tiempo deseado y se realiza un ajuste proporcional (hacia arriba o hacia abajo) del objetivo. En términos simples: si la red encuentra bloques más rápido que cada 10 minutos, la dificultad aumenta (el objetivo disminuye). Si el descubrimiento de bloques es más lento de lo esperado, la dificultad disminuye (el objetivo aumenta).
+
+La ecuación se puede resumir como:
+
+----
+Nuevo objetivo = Viejo objetivo * (Tiempo real de los últimos 2016 bloques / 20160 minutos)
+----
+
+<<retarget_code>> muestra el código utilizado en el Cliente Principal de Bitcoin.
+
+[[código_recálculo_objetivo]]
+.Recálculo de prueba de trabajo&#x2014;CalculateNextWorkRequired() in pow.cpp
+====
+[source,cpp]
+----
+
+   // Etapa de ajuste de límite
+    int64_t nActualTimespan = pindexLast->GetBlockTime() - nFirstBlockTime;
+    LogPrintf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
+    if (nActualTimespan < params.nPowTargetTimespan/4)
+        nActualTimespan = params.nPowTargetTimespan/4;
+    if (nActualTimespan > params.nPowTargetTimespan*4)
+        nActualTimespan = params.nPowTargetTimespan*4;
+
+    // Recálculo
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    arith_uint256 bnNew;
+    arith_uint256 bnOld;
+    bnNew.SetCompact(pindexLast->nBits);
+    bnOld = bnNew;
+    bnNew *= nActualTimespan;
+    bnNew /= params.nPowTargetTimespan;
+
+    if (bnNew > bnPowLimit)
+        bnNew = bnPowLimit;
+
+----
+====
+
+[NOTE]
+====
+Si bien la calibración del objetivo ocurre cada 2.016 bloques, debido a un error de tipo “por-un-paso”, en el cliente principal original de Bitcoin, el cálculo se basa en el tiempo total de los 2.015 bloques anteriores (no los 2.016 anteriores como debería ser), lo que resulta en un sesgo de re-calibración hacia la mayor dificultad, en 0,05%.
+====
+
+
+Los parámetros +Interval+ (2.016 bloques) y +TargetTimespan+ (de dos semanas, o bien 1.209.600 segundos) se definen en _chainparams.cpp_.
+
+Para evitar una volatilidad muy extrema en los ajustes de la dificultad, el ajuste de re-calibración debe ser menor a un factor de cuatro (4) por ciclo. Si el ajuste requerido del objetivo es mayor que un factor de cuatro, se ajustará por un factor de 4 y no más. Cualquier ajuste adicional se logrará en el próximo período de re-calibración porque el desequilibrio persistirá durante los próximos 2.016 bloques. Por lo tanto, las grandes discrepancias entre la potencia de hash y la dificultad pueden tomar varios ciclos de 2.016 bloques para estabilizarse.
+
+[TIP]
+====
+La dificultad de minería para un bloque de bitcoin es aproximadamente de '10 minutos de procesamiento' para toda la red, en función del tiempo que llevó minar los 2.016 bloques anteriores, ajustados cada 2.016 bloques. Esto se logra bajando o elevando el objetivo.
+====
+
+Téngase en cuenta que el objetivo es independiente del número de transacciones o del valor de las transacciones. Esto significa que la cantidad de potencia de hash y, por lo tanto, de la cantidad de electricidad gastada para asegurar la plataforma bitcoin, también es completamente independiente de la cantidad de transacciones. Bitcoin puede escalar, lograr una adopción más amplia y permanecer seguro sin ningún aumento en la potencia de hash desde el nivel actual. El aumento en la potencia de hash representa a las fuerzas del mercado a medida que los nuevos mineros ingresan al mismo para competir por la recompensa. Mientras haya suficiente potencia de hash bajo el control de los mineros que actúen honestamente en busca de la recompensa, es suficiente para prevenir ataques de "toma de control" y, por lo tanto, es suficiente para mantener segura a la plataforma bitcoin.
+
+La dificultad de la minería está estrechamente relacionada con el costo de la electricidad y el tipo de cambio de bitcoin con respecto a la moneda utilizada para pagar la electricidad. Los sistemas de minería de alto rendimiento son lo más eficientes posible con el estado del arte actual en la fabricación de silicio, convirtiendo la electricidad en cómputo de hash a la tasa más alta posible. La influencia principal en el mercado de la minería es el precio de un kilovatio-hora de electricidad en bitcoin, porque eso determina la rentabilidad de la minería y, por lo tanto, los incentivos para entrar o salir del mercado de la minería.((("", startref="targets10")))
+
+=== Éxito en el Minado de un Bloque
+
+((("minería y consenso", "minería del bloque", "finalización exitosa")))((("casos de uso", "minería de bitcoin", id="jingtentwo")))Como se vió anteriormente, el nodo de Jing ha ensamblado un bloque candidato y lo ha preparado para la minería. Jing tiene varias plataformas de minería de hardware con circuitos integrados de aplicación específica, donde cientos de miles de circuitos integrados ejecutan el algoritmo SHA256 en paralelo a velocidades increíbles. Muchas de estas máquinas especializadas están conectadas a su nodo de minería a través de puertos USB o de una red de área local. A continuación, el nodo de minería que se ejecuta en el computador de escritorio de Jing, transmite la cabecera de bloque a su hardware de minería, que comienza a probar billones de nonces por segundo. Debido a que el nonce es de solo 32 bits, después de agotar todas las posibilidades de nonce (alrededor de 4 mil millones), el hardware de minería cambia la cabecera de bloque (ajustando el espacio extra del nonce en la transacción coinbase o en el sello de tiempo) y restablece el contador de nonce, probando nuevas combinaciones.
+
+Casi 11 minutos después de comenzar a minar el bloque 277.316, una de las máquinas de hardware de minería, encuentra una solución y la envía de vuelta al nodo de minería.
+
+Cuando se inserta en la cabecera de bloque, el nonce 924.591.752 produce un hash de bloque de:
+
+----
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+----
+
+que es menor que el objetivo:
+
+----
+0000000000000003A30C00000000000000000000000000000000000000000000
+----
+
+Inmediatamente, el nodo de minería de Jing transmite el bloque a todos sus pares. Ellos reciben, validan y luego propagan el nuevo bloque. A medida que el bloque se difunde a través de la red, cada nodo lo agrega a su propia copia de la cadena de bloques, extendiéndola a una nueva altura de 277.316 bloques. A medida que los nodos de minería reciben y validan el bloque, abandonan sus esfuerzos para encontrar un bloque a la misma altura e inmediatamente comienzan a calcular el siguiente bloque de la cadena, utilizando el bloque de Jing como el "padre". Al construir sobre el bloque recién descubierto por Jing, los otros mineros están esencialmente "votando" con su poder de minería, que respaldan el bloque de Jing, extendiendo de este modo la cadena.
+
+En la siguiente sección, veremos el proceso que cada nodo utiliza para validar un bloque y para seleccionar la cadena más larga, creando el consenso que conforma la cadena de bloques descentralizada.((("", startref="MACmining10")))((("", startref="jingtentwo")))
+
+=== Validación de un Nuevo Bloque
+
+((("minería y consenso", "validación de un bloque nuevo")))(((("bloques", "validación de un bloque nuevo")))(((("validación")))El tercer paso en el mecanismo de consenso de bitcoin es la validación independiente de cada nuevo bloque por cada nodo en la red. A medida que el bloque recién resuelto se transmite a través de la red, cada nodo realiza una serie de pruebas para validarlo antes de retransmitirlo a sus pares. Esto garantiza que solo los bloques válidos se propaguen en la red. La validación independiente también garantiza que los mineros que actúan honestamente logren incorporen sus bloques en la cadena de bloques, obteniendo así su recompensa. A los mineros que actúan de manera deshonesta les repudian sus bloques y no solo pierden la recompensa, sino que también desperdician el esfuerzo realizado para encontrar una solución de la Prueba-de-Trabajo, incurriendo así en un costo sin compensación de la electricidad.
+
+Cuando un nodo recibe un nuevo bloque, validará el bloque comparándolo con una larga lista de criterios que deben cumplirse todos; de lo contrario, el bloque es rechazado. Estos criterios se pueden ver en el Cliente Principal de Bitcoin en las funciones +CheckBlock+ y +CheckBlockHeader+ e incluyen:
+
+* La estructura de datos de bloque es sintácticamente válida
+* El hash de la cabecera de bloque es menor que el objetivo (hace cumplir la Prueba-de-Trabajo)
+* El sello de tiempo del bloque es menos de dos horas en el futuro (lo que permite errores de tiempo)
+* El tamaño del bloque está dentro de límites aceptables
+* La primera transacción (y solo la primera) es una transacción de coinbase
+* Todas las transacciones dentro del bloque son válidas utilizando la lista de verificación de transacciones discutida en <<tx_verification>>
+
+La validación independiente de cada nuevo bloque por cada nodo en la red asegura que los mineros no puedan hacer trampa. En secciones anteriores vimos cómo los mineros escribían una transacción que les otorgaba los nuevos bitcoins creados dentro del bloque y reclamaban las comisiones de transacción. ¿Por qué los mineros no escriben una transacción por mil bitcoins en lugar de la recompensa correcta? Porque cada nodo valida los bloques de acuerdo con las mismas reglas. Una transacción coinbase no válida, invalidaría todo el bloque, lo que resultaría en el rechazo del bloque y, por lo tanto, esa transacción nunca pasaría a formar parte del libro contable. Los mineros tienen que construir un bloque perfecto, basado en las reglas compartidas que siguen todos los nodos, y minarlo con una solución correcta a la Prueba-de-Trabajo. Para hacerlo, gastan mucha electricidad en la minería, y si hacen trampa, se desperdicia toda la electricidad y el esfuerzo. Es por eso que la validación independiente es un componente clave del consenso descentralizado.
+
+=== Montaje y Selección de Cadenas de Bloques
+
+((("minería y consenso", "ensamblar y seleccionar cadenas de bloques", id="MACassembling10")))((("bloques", "ensamblar y seleccionar cadenas de", id="Bassemble10")))El último paso en el mecanismo de consenso descentralizado de Bitcoin es el ensamblaje de bloques en cadenas y la selección de la cadena con la mayor cantidad de Prueba-de-Trabajo. Una vez que un nodo ha validado un nuevo bloque, intentará ensamblar una cadena conectando el bloque a la cadena de bloques existente.
+
+Los nodos mantienen tres conjuntos de bloques: los conectados a la cadena de bloques principal, los que forman ramas de la cadena de bloques principal (cadenas secundarias) y, finalmente, los bloques que no tienen un padre conocido en las cadenas conocidas (los “huérfanos”). Los bloques no válidos se rechazan en cuanto falla uno de los criterios de validación y, por lo tanto, no se incluyen en ningún grupo.
+
+La "cadena principal" es en cualquier momento, la cadena de bloques _valida_ y tiene el acumulado más grande de Prueba-de-Trabajo. En la mayoría de las circunstancias, esta es también la cadena con la mayor cantidad de bloques, a menos que haya dos cadenas de igual longitud y una tenga más cantidad de Prueba-de-Trabajo. La cadena principal también tendrá ramas con bloques que son "gemelos" de los bloques de la cadena principal. Estos bloques son válidos pero no forman parte de la cadena principal. Se guardan para referencia futura, en caso de que una de esas cadenas se extienda para exceder la cadena principal en cantidades de trabajo. En la siguiente sección (<<forks>>), veremos cómo se producen cadenas secundarias como resultado de una minería casi simultánea de bloques a la misma altura.
+
+Cuando se recibe un nuevo bloque, un nodo intentará ubicarlo en la cadena de bloques existente. El nodo tomará nota del campo "hash de bloque previo" de este bloque, que es la referencia al padre del bloque. Luego, el nodo intentará encontrar ese padre en la cadena de bloques existente. La mayoría de las veces, el padre se ubicará en la "punta" de la cadena principal, lo que significa que este nuevo bloque extiende la cadena principal. Por ejemplo, el nuevo bloque 277.316 tiene una referencia al hash de su bloque padre 277.315. La mayoría de los nodos que reciben al bloque 277.316, ya tendrán el bloque 277.315 como la punta de su cadena principal y, por lo tanto, vincularán el nuevo bloque y extenderán esa cadena.
+
+A veces, como veremos en <<forks>>, el nuevo bloque extiende una cadena que no corresponde a la cadena principal. En ese caso, el nodo unirá el nuevo bloque a la cadena secundaria que éste extiende, y luego comparará el trabajo de la cadena secundaria con la cadena principal. Si la cadena secundaria tiene más trabajo acumulado que la cadena principal, el nodo se _redirigirá_ hacia la cadena secundaria, lo que significa que seleccionará la cadena secundaria como su nueva cadena principal, haciendo que la cadena principal anterior sea una cadena secundaria. Si el nodo es un minero, ahora ensamblará un nuevo bloque que extienda esta nueva cadena más larga.
+
+Si se recibe un bloque válido y no se encuentra ningún padre en las cadenas existentes, ese bloque se considera un "huérfano". Los bloques huérfanos se guardan en el pool de bloques huérfanos donde permanecerán hasta que se reciba a su padre. Una vez que se recibe el padre y se enlaza a las cadenas existentes, el huérfano se puede sacar del pool de huérfanos y enlazarlo al padre, haciéndolo parte de una cadena. Los bloques huérfanos suelen ocurrir cuando dos bloques que fueron minados en poco tiempo el uno del otro se reciben en orden inverso (hijo antes del padre).
+
+Al seleccionar la cadena válida con la cantidad de trabajo acumulado más grande, todos los nodos finalmente logran un consenso en toda la red. Las discrepancias temporales entre cadenas se resuelven eventualmente a medida que se agrega más trabajo, al extenderse una de las cadenas posibles. Los nodos de minería "votan" con su poder de minería al elegir qué cadena extender mediante la minería del siguiente bloque. Cuando minan un nuevo bloque y extienden la cadena, el nuevo bloque en sí representa su voto.
+
+En la siguiente sección veremos cómo se resuelven las discrepancias entre las cadenas competidoras (bifurcaciones) mediante la selección independiente de la cadena  con la cantidad de trabajo acumulado más grande.
+
+[[forks]]
+==== Bifurcaciones de la Cadena de Bloques
+
+((("minería y consenso", "ensamblar y seleccionar cadenas de bloques", "bifurcaciones de la cadena de bloques")))((("(la) cadena de bloques", " bifurcaciones de la cadena de bloques", id="BCTfork10")))((("bifurcaciones", "eventos de bifurcación en la cadena de bloques", id="forks10")))Debido a que la cadena de bloques es una estructura de datos descentralizada, las diferentes copias no siempre son consistentes. Los bloques pueden llegar a diferentes nodos en diferentes momentos, haciendo que los nodos tengan diferentes perspectivas de la cadena de bloques. Para resolver esto, cada nodo siempre selecciona e intenta extender la cadena de bloques que representa la mayor cantidad de Prueba-de-Trabajo, también conocida como la cadena más larga o la cadena con mayor cantidad de trabajo acumulado. Al sumar el trabajo registrado en cada bloque de una cadena, un nodo puede calcular la cantidad total de trabajo que se ha gastado para crear esa cadena. Mientras todos los nodos seleccionen la cadena con la mayor cantidad de trabajo acumulado, la red global de bitcoin eventualmente converge a un estado consistente. Las bifurcaciones se producen como inconsistencias temporales entre las distintas versiones de la cadena de bloques, que se resuelven mediante una eventual reconvergencia a medida que se agregan más bloques a una de las bifurcaciones.
+
+[TIP]
+====
+Las bifurcaciones de la cadena de bloques descritas en esta sección ocurren de manera natural como resultado de los retardos en las transmisiones en la red global. También veremos las bifurcaciones inducidas deliberadamente más adelante en este capítulo.
+====
+
+En los siguientes diagramas, seguiremos el progreso de un evento de "bifurcación" a lo largo de la red. El diagrama es una representación simplificada de la red bitcoin. Con fines ilustrativos, los diferentes bloques se muestran como formas diferentes (estrella, triángulo, triángulo invertido, rombo), que se extienden por la red. Cada nodo en la red se representa como un círculo.
+
+Cada nodo tiene su propia perspectiva de la cadena de bloques global. A medida que cada nodo recibe bloques de sus vecinos, actualiza su propia copia de la cadena de bloques, seleccionando la mayor cadena de trabajo acumulativo. Con fines ilustrativos, cada nodo contiene una forma que representa el bloque que cree que actualmente es la punta de la cadena principal. Entonces, si se ve una forma de estrella en el nodo, eso significa que el bloque de estrella es la punta de la cadena principal, en lo que respecta a ese nodo.
+
+En el primer diagrama (<<fork1>>), la red tiene una perspectiva unificada de la cadena de bloques, con el bloque con forma de estrella como la punta de la cadena principal.
+
+[[fork1]]
+[role="smallereighty"]
+.Antes de la bifurcación&#x2014;todos los nodos tienen la misma perspectiva.
+image::images/mbc2_1002.png["Antes de la bifurcación - todos los nodos tienen la misma perspectiva"]
+
+Una "bifurcación" se produce cada vez que dos bloques candidatos compiten para conformar la cadena de bloques más larga. Esto ocurre en condiciones normales cuando dos mineros resuelven el algoritmo de la Prueba-de-Trabajo con una diferencia de tiempo muy corta el uno del otro. A medida que ambos mineros descubren una solución para sus respectivos bloques candidatos, difunden inmediatamente su propio bloque "ganador" a sus vecinos inmediatos que comienzan a propagar el bloque a través de la red. Cada nodo que recibe un bloque válido lo incorporará a su cadena de bloques, extendiendo la cadena de bloques en un bloque adicional. Si ese nodo luego ve otro bloque candidato que se extiende a partir del mismo padre, conectará al segundo candidato en una cadena secundaria. Como resultado, algunos nodos "verán" de primero a uno de los bloques candidato, mientras que otros nodos verán al otro bloque y surgirán dos versiones competidoras de la cadena de bloques.
+
+En <<fork2>>, vemos dos nodos mineros (Nodo X y Nodo Y) que minan dos bloques diferentes casi simultáneamente. Ambos bloques son hijos del bloque de estrellas, y extienden la cadena construyendo encima del bloque de estrellas. Para ayudarnos a visualizarlos, uno se ilustra como un bloque triangular que se origina en el Nodo X, y el otro se muestra como un bloque triangular invertido que se origina en el Nodo Y.
+
+[[fork2]]
+[role="smallersixty"]
+.Visualización de un evento bifurcación en la cadena de bloques: se encuentran dos bloques simultáneamente
+image::images/mbc2_1003.png["Visualización de un evento de bifurcación en la cadena de bloques: dos bloques encontrados simultáneamente"]
+
+Supongamos, por ejemplo, que el minero del Nodo X encuentra una solución para la Prueba-de-Trabajo para un bloque "triángulo" que extiende la cadena de bloques, construyéndose encima de bloque padre con forma de "estrella". Casi simultáneamente, el minero del Nodo Y, que también estaba trabajando en extender la cadena desde el bloque "estrella", encuentra una solución para el bloque "triángulo invertido", que es su bloque candidato. Ahora, hay dos posibles bloques; uno que llamamos "triángulo", que se origina en el Nodo X; y uno que llamamos "triángulo invertido", que se origina en el Nodo Y. Ambos bloques son válidos, ambos bloques contienen una solución válida para la Prueba-de-Trabajo, y ambos bloques se extienden a partir del mismo bloque padre (el bloque "estrella"). Es probable que ambos bloques contengan la mayoría de las mismas transacciones, con solo unas pocas diferencias en el orden de las transacciones.
+
+A medida que los dos bloques se propagan, algunos nodos reciben el bloque "triángulo" primero y algunos reciben el bloque "triángulo invertido" primero. Como se muestra en <<fork3>>, la red se divide en dos perspectivas diferentes de la cadena de bloques; una que observa al bloque de triángulo en la punta de la cadena, y otra que ve en la punta al bloque de triángulo invertido.
+
+[[fork3]]
+[role="smallersixty"]
+.Visualización de un evento bifurcación en la cadena de bloques: se propagan dos bloques, seccionando la red
+image::images/mbc2_1004.png["Visualización de un evento de bifurcación en la cadena de bloques: dos bloques se propagan, dividiendo a la red"]
+
+En el diagrama, un "Nodo X" elegido al azar recibió el bloque triangular primero y extendió la cadena de estrellas con él. El nodo X seleccionó la cadena con el bloque "triángulo" como la cadena principal. Más tarde, el Nodo X también recibió el bloque "triángulo invertido". Como se recibió en segundo lugar, se supone que ha "perdido" la carrera. Sin embargo, el bloque "triángulo invertido" no se descarta. Está vinculado al bloque padre "estrella" y forma una cadena secundaria. Si bien el Nodo X asume que ha seleccionado correctamente la cadena ganadora, mantiene la cadena "perdedora" para que tenga la información necesaria para volver a converger a ella si la cadena "perdedora" termina "ganando" a la larga.
+
+En el otro lado de la red, el Nodo Y construye una cadena de bloques basada en su propia perspectiva de la secuencia de eventos. Este nodo recibió primero el "triángulo invertido" y eligió a la cadena representada con esta punta como el "ganador". Cuando más tarde recibe el bloque "triángulo", lo conecta con el bloque padre con forma de "estrella" en una cadena que presumirá como cadena secundaria.
+
+Ninguno de los dos lados está ni en lo "correcto" ni "equivocado". Ambas son perspectivas válidas de la cadena de bloques. Solo en retrospectiva prevalecerá una de ellas, en función de cómo estas dos cadenas competidoras se extiendan mediante una cantidad de trabajo adicional.
+
+Los nodos de minería cuya perspectiva concuerda con el Nodo X comenzarán inmediatamente a trabajar en la minería de un bloque candidato que extienda la cadena que posea al bloque "triángulo" como punta. Al vincular al "triángulo" como el padre de su bloque candidato, están votando con su potencia de hash. Su voto apoya la cadena que han elegido como la cadena principal.
+
+Cualquier nodo de minería cuya perspectiva concuerde con el Nodo Y comenzará a construir un nodo candidato con el bloque con forma de "triángulo invertido" como su padre, extendiendo la cadena que ellos creen que es la cadena principal. Y así, la carrera comienza de nuevo.
+
+Las bifurcaciones casi siempre se resuelven dentro de un bloque. Si bien parte de la potencia de hash de la red se dedica a construir sobre el "triángulo" como padre, otra parte de la potencia de hash se centrará en construir sobre el "triángulo invertido". Incluso si la potencia de hash se divide casi por igual, es muy probable que un grupo de mineros encuentre una solución y la propague mucho antes que el otro grupo de mineros haya encontrado alguna solución. Digamos, por ejemplo, que los mineros que construyen sobre el "triángulo" encuentran un nuevo bloque "rombo" que extiende la cadena (por ejemplo, estrella-triángulo-rombo). Inmediatamente propagan este nuevo bloque y toda la red lo ve como una solución válida, como se muestra en <<fork4>>.
+
+
+Todos los nodos que hayan elegido al "triángulo" como ganador en la ronda anterior simplemente extenderán la cadena un bloque más. Sin embargo, los nodos que eligieron al "triángulo invertido" como el ganador ahora verán dos cadenas: la de estrella-triángulo-rombo y la de estrella-triángulo-invertido. La cadena estrella-triángulo-rombo ahora es más larga (posee más trabajo acumulado) que la otra cadena. Como resultado, esos nodos establecerán a la cadena estrella-triángulo-rombo como la cadena principal y re-clasificarán a la cadena estrella-triángulo-invertido como cadena secundaria, como se muestra en <<fork5>>. Esta es una convergencia de la cadena, porque esos nodos se ven obligados a revisar su visión de la cadena de bloques para incorporar la nueva evidencia de una cadena más larga. Cualquier minero que trabaje para extender la cadena estrella-triángulo-invertido ahora detendrá su trabajo porque su bloque candidato es un "huérfano", ya que su bloque padre "triángulo-invertido" ya no estará más en la cadena más larga. Las transacciones dentro del "triángulo-invertido" que no están dentro del bloque "triángulo" se vuelven a insertar en el tanque de memoria o “mempool” para incluirlas en el siguiente bloque y para que pasen a formar parte de la cadena principal. Toda la red se reconvierte en una sola cadena de bloques estrella-triángulo-rombo, con el bloque "rombo" como el último bloque de la cadena. Todos los mineros comienzan inmediatamente a trabajar en bloques candidatos que hagan referencia al "rombo" como su padre para extender la cadena estrella-triángulo-rombo.
+
+[[fork4]]
+[role="smallereighty"]
+.Visualización de un evento de bifurcación de la cadena de bloques: un nuevo bloque extiende una bifurcación, re-dirigiendo a la red.
+image::images/mbc2_1005.png["Visualización de un evento de bifurcación de la cadena de bloques: un nuevo bloque extiende una bifurcación"]
+
+[[fork5]]
+[role="smallereighty"]
+.Visualización de un evento bifurcación de la cadena de bloques: la red reconverge en una nueva cadena más larga
+image::images/mbc2_1006.png["Visualización de un evento de bifurcación de la cadena de bloques: la red se redirige hacia la nueva cadena mas larga"]
+
+Teóricamente es posible que una bifurcación se extienda a dos bloques, si los mineros encuentran dos bloques casi simultáneamente en "lados" opuestos de una bifurcación anterior. Sin embargo, la posibilidad de que eso ocurra es muy baja. Mientras que una bifurcación de un bloque puede ocurrir todos los días, una bifurcación de dos bloques ocurre como máximo una vez cada pocas semanas.
+
+El intervalo entre bloques de 10 minutos de bitcoin es un compromiso de diseño entre tiempos de confirmación rápidos (liquidación de transacciones) y la probabilidad de una bifurcación. Un intervalo entre bloques más corto haría que las transacciones se confirmasen más rápido, pero conduciría a bifurcaciones más frecuentes en la cadena de bloques, mientras que un intervalo entre bloques más largo disminuiría el número de bifurcaciones, pero haría que la confirmación fuese más lenta. ((("", startref="Bassemble10")))((("", startref="MACassembling10")))((("", startref="forks10")))((("", startref="BCTfork10")))
+
+=== Minería y la Carrera de Hashing
+
+((("minería y consenso", "la carrera por la potencia de hash", id="MAChash10")))La minería de bitcoin es una industria extremadamente competitiva. La potencia de hash ha aumentado exponencialmente cada año desde la aparición de bitcoin. En algunos años, el crecimiento ha reflejado un cambio completo de tecnología, como fue en 2010 y 2011, cuando muchos mineros pasaron de usar la minería de CPU a la minería de GPU y hacia la minería de matrices de compuertas programables de campo (FPGA). En 2013, la introducción de la minería ASIC condujo a otro salto gigante en el poder de minería, al colocar la función SHA256 directamente en los chips de silicio especializados para la minería. Los primeros chips de este tipo podrían entregar más poder de minería en una sola caja que toda la red bitcoin en 2010.
+
+La siguiente lista muestra la potencia de hash total de la red Bitcoin, durante los primeros ocho años de operación:
+
+2009:: 0.5 MH/sec–8 MH/sec (16× growth)
+2010:: 8 MH/sec–116 GH/sec (14,500× growth)
+2011:: 116 GH/sec–9 TH/sec (78× growth)
+2012:: 9 TH/sec–23 TH/sec (2.5× growth)
+2013:: 23 TH/sec–10 PH/sec (450× growth)
+2014:: 10 PH/sec–300 PH/sec (30× growth)
+2015:: 300 PH/sec-800 PH/sec (2.66× growth)
+2016:: 800 PH/sec-2.5 EH/sec (3.12× growth)
+
+En el gráfico que se muestra en <<network_hashing_power>>, podemos ver que la potencia de hash de la red bitcoin aumentó en los últimos dos años. Como puede verse, la competencia entre los mineros y el crecimiento de bitcoin ha resultado en un aumento exponencial en la potencia de hash (hashes totales por segundo en toda la red).
+
+[[network_hashing_power]]
+.Potencia de hash total, terahashes por segundo (TH/seg)
+image::images/mbc2_1007.png["NetworkHashingRate"]
+
+A medida que la cantidad de potencia de hash aplicada a la minería de bitcoin se ha multiplicado, la dificultad ha aumentado para poder igualarla. La métrica de dificultad en el cuadro que se muestra en <<bitcoin_difficulty>>  se mide como una relación de la dificultad actual sobre la dificultad mínima (la dificultad que tuvo el primer bloque).
+
+[[bitcoin_difficulty]]
+.Medida de la dificultad de minería de bitcoin.
+image::images/mbc2_1008.png["BitcoinDifficulty"]
+
+En los últimos dos años, los chips de minería ASIC se han vuelto cada vez más densos, acercándose a la vanguardia de la fabricación de silicio con un tamaño característico (resolución) de 16 nanómetros (nm). Actualmente, los fabricantes de ASIC tienen como objetivo superar a los fabricantes de chips de CPU de propósito general, diseñando chips con un tamaño característico de 14 nm, porque la rentabilidad de la minería está impulsando esta industria aún más rápido que la computación general. No quedan más saltos gigantes en la minería de bitcoin, porque la industria ha llegado a la vanguardia de la Ley de Moore, que estipula que la densidad informática se duplicará aproximadamente cada 18 meses. Aún así, el poder de minería de la red continúa avanzando a un ritmo exponencial a medida que la carrera por chips de mayor densidad coincide con una carrera por centros de datos de mayor densidad donde se pueden implementar miles de estos chips. Ya no se trata de la cantidad de minería que se puede hacer con un chip, sino de cuántos chips se pueden apilar dentro de una edificación, mientras se logra disipar el calor y se proporciona la energía adecuada.
+
+[[extra_nonce]]
+==== La Solución del Nonce Extra 
+
+((("valores nonce")))Desde 2012, la minería de bitcoins ha evolucionado para resolver una limitación fundamental en la estructura de la cabecera de bloque. En los primeros días de bitcoin, un minero podría encontrar un bloque iterando a través del nonce hasta que el hash resultante estuviera por debajo del objetivo. A medida que ha aumentado la dificultad, los mineros a menudo recorren los 4 mil millones de valores del nonce sin encontrar un bloque. Sin embargo, esto se resolvió fácilmente actualizando el sello de tiempo del bloque para tener en cuenta el tiempo transcurrido. Debido a que el sello de tiempo es parte de la cabecera, el cambio permitiría a los mineros repetir los valores del nonce nuevamente con diferentes resultados. Sin embargo, una vez que el hardware de minería superó los 4 GH/seg, este enfoque se volvió cada vez más difícil porque los valores nonce se agotaron en menos de un segundo. Conforme el hardware de minería ASIC comenzó a presionar y luego a exceder una tasa de hash de Tera-hashes por segundo, el software de minería necesitó más espacio para los valores nonce de modo de poder encontrar bloques válidos. El sello de tiempo podría extenderse un poco, pero moverla demasiado hacia el futuro provocaría que el bloque dejara de ser válido. Se necesitaba una nueva fuente de "cambios" en la cabecera de bloque. La solución fue utilizar la transacción coinbase como fuente de valores nonce adicionales. Debido a que el script coinbase puede almacenar entre 2 y 100 bytes de datos, los mineros comenzaron a usar ese espacio como espacio nonce adicional, lo que les permite explorar un rango mucho más grande de valores de cabecera de bloque para encontrar bloques válidos. La transacción de coinbase se incluye en el árbol de merkle, lo que significa que cualquier cambio en el script de coinbase hace que cambie la raíz de merkle. Ocho bytes de nonce extra, más los 4 bytes de nonce "estándar" permiten a los mineros explorar un total de 2^96^ (8 seguidos por 28 ceros) posibilidades _por segundo_ sin tener que modificar el sello de tiempo. Si, en el futuro, los mineros pudieran aprovechar todas estas posibilidades, podrían modificar el sello de tiempo. También hay más espacio en el script de coinbase para la futura expansión del espacio adicional del nonce.
+
+[[mining_pools]]
+==== Pools de Minería
+
+((("agrupaciones de minería", id="MACoverpool10")))((("agrupaciones de minería", "prestaciones")))En este entorno altamente competitivo, los mineros individuales que trabajan solos (también conocidos como mineros en solitario) no tienen muchas oportunidad. La probabilidad de que encuentren un bloque para compensar sus costos de electricidad y hardware es tan baja que representa una apuesta, como jugar a la lotería. Incluso el sistema de minería ASIC de alta eficiencia no puede mantenerle el paso a los sistemas comerciales que apilan decenas de miles de estos chips en granjas gigantescas cercanas a las centrales hidroeléctricas. Los mineros ahora colaboran para formar grupos de minería, uniendo su potencia de hash y compartiendo la recompensa entre miles de participantes. Al participar en un grupo, los mineros obtienen una parte menor de la recompensa general, pero generalmente son recompensados todos los días, lo que reduce un factor de incertidumbre.
+
+Veamos un ejemplo específico. Supongamos que un minero ha comprado hardware de minería con una tasa de hasheo combinada de 14.000 gigahashes por segundo (GH/s), o 14 TH/s. En 2017, este equipo costaba aproximadamente $ 2.500 USD. El hardware consume 1375 vatios (1,3 kW) de electricidad cuando funciona, 33 kW-horas al día, a un costo de $ 1 a $ 2 por día a tarifas de consumo eléctrico muy bajas. Con la dificultad actual de bitcoin, ese minero podrá extraer en solitario un bloque aproximadamente una vez cada 4 años. ¿Cómo calculamos esa probabilidad? Se basa en una tasa de hasheo de toda la red de 3 EH/seg (en 2017), y la tasa de este minero de 14 TH/seg:
+
+++++
+<ul class="simplelist">
+  <li> P = (14 * 10 <sup>12/3</sup> * 10 <sup>18)</sup> * 210240 = 0,98 </li>
+</ul>
+++++
+
+... donde 210240 es el número de bloques en cuatro años. El minero tiene una probabilidad del 98% de encontrar un bloque en cuatro años, según la tasa de hash global al comienzo del período.
+
+Si el minero encuentra un solo bloque en ese período de tiempo, el pago de 12.5 bitcoin, a aproximadamente $ 1,000 por bitcoin, dará como resultado un pago único de $ 12,500, lo que producirá una ganancia neta de aproximadamente $ 7,000. Sin embargo, la posibilidad de encontrar un bloque en un período de 4 años depende de la suerte del minero. Podría encontrar dos bloques en 4 años y obtener una gran ganancia. O tal vez no encuentre un bloque durante 5 años y sufra una pérdida financiera significativa. Peor aún, es probable que la dificultad del algoritmo de Prueba-de-Trabajo de bitcoin aumente significativamente durante ese período, a la tasa actual de crecimiento de la potencia de hash, lo que significa que el minero tiene, como máximo, un año antes de quebrar, lo que incluso es mucho antes de que el hardware se haga efectivamente obsoleto y deba ser reemplazado por un hardware de minería más potente. Si este minero participase en un grupo de minería, en lugar de esperar una ganancia inesperada de $ 12,500 una vez en cuatro años, podría ganar aproximadamente $ 50 a $ 60 por semana. Los pagos regulares de un grupo de minería lo ayudarán a amortizar el costo del hardware y de la electricidad con el tiempo sin correr un riesgo enorme. El hardware seguirá siendo obsoleto en uno o dos años y el riesgo sigue siendo alto, pero los ingresos son al menos regulares y confiables durante ese período. Financieramente, esto solo tiene sentido a un costo de electricidad muy bajo (menos de 1 centavo por kW-hora) y solo a gran escala.
+
+Las pools de minería coordinan muchos cientos o miles de mineros, mediante protocolos especializados para pools de minería. Los mineros individuales configuran sus equipos de minería para conectarse a un servidor de pool, después de haber creado una cuenta con el pool. Su hardware de minería permanece conectado al servidor del pool mientras están minando, sincronizando así sus esfuerzos con los otros mineros. Por lo tanto, los mineros de pool comparten el esfuerzo para extraer un bloque y luego comparten las recompensas.
+
+Los bloques exitosos pagan la recompensa a una dirección bitcoin del pool, en lugar de a los mineros individuales. El servidor del pool hará periódicamente pagos a las direcciones bitcoin de los mineros, cuando su parte de la recompensa haya llegado a un cierto umbral. Normalmente, el servidor de pool cobra una tarifa de porcentaje de los beneficios por la prestación del servicio de minería en pool.
+
+((("agrupaciones de minería", "operaciones")))Los mineros que participan en una agrupación dividen el trabajo de buscar una solución para un bloque candidato, ganando "acciones" por su contribución de minería. El grupo de minería establece un objetivo más alto (menor dificultad) para ganar una participación, generalmente más de 1,000 veces más fácil que el objetivo de la red bitcoin. Cuando alguien en el grupo mina con éxito un bloque, el grupo obtiene la recompensa y luego se reparte entre todos los mineros en proporción al número de acciones que contribuyeron al esfuerzo.
+
+Las agrupaciones están abiertas a cualquier minero, grande o pequeño, profesional o aficionado. Por lo tanto, un grupo tendrá algunos participantes con una sola máquina de minería pequeña, y otros con una granja llena de hardware de minería de alta gama. Algunos llevarán a cabo su minería con unas pocas decenas de kilovatios de electricidad, otros llevarán un centro de datos que consumirá un mega-vatio de energía. ¿Cómo mide un grupo de minería las contribuciones individuales, para distribuir equitativamente las recompensas, sin la posibilidad de hacer trampa? La respuesta es usar el algoritmo de Prueba-de-Trabajo de bitcoin para medir la contribución de cada minero de grupo, pero con una dificultad menor para que incluso los mineros de grupo más pequeños ganen una parte con la frecuencia suficiente para que valga la pena contribuir al grupo. Al establecer una dificultad menor para ganar acciones, el grupo mide la cantidad de trabajo realizado por cada minero. Cada vez que un minero de grupo encuentra un hash de cabecera de bloque que es menor que el objetivo del grupo, prueba que ha realizado el trabajo de hash para encontrar ese resultado. Más importante aún, el trabajo para encontrar acciones contribuye, de una manera estadísticamente mesurable, al esfuerzo general para encontrar un hash más bajo que el objetivo de la red bitcoin. Miles de mineros que intentan encontrar hashes de bajo valor eventualmente encontrarán uno lo suficientemente bajo como para satisfacer el objetivo de la red bitcoin.
+
+Volvamos a la analogía de un juego de dados. Si los jugadores de dados están tirando los dados con el objetivo de lanzar menos de cuatro (la dificultad general de la red), un pool fijaría un objetivo más fácil, contando cuántas veces los jugadores del pool lograron tirar menos de ocho. Cuando los jugadores del pool tiran menos de ocho (el objetivo de cuota del pool), ganan cuotas, pero no ganan el juego, ya que no alcanzan el objetivo del juego (menos de cuatro). Los jugadores del pool lograrán el objetivo del pool, que es más fácil, con mucha más frecuencia, ganando cuotas muy regularmente, incluso cuando no logran el objetivo más difícil de ganar el juego. De vez en cuando, uno de los jugadores del pool lanzará un tiro de dados combinado de menos de cuatro y en ese caso, el pool gana. Entonces, las ganancias se pueden distribuir a los jugadores del pool sobre la base de las cuotas que habían conseguido. A pesar de que el objetivo de ocho-o-menos no significaba ganar, era una forma razonable de medir el número de lanzamientos de dados de los jugadores, y que de vez en cuando produce un tiro de menos-que-cuatro.
+
+Del mismo modo, un grupo de minería establecerá un objetivo de grupo (más alto y más fácil) que garantizará que un minero del grupo, individualmente pueda encontrar hashes de cabecera de bloque que a menudo sean menores que el objetivo del grupo, ganando acciones. De vez en cuando, uno de estos intentos producirá un hash de cabecera de bloque que es menor que el objetivo de la red bitcoin, lo que lo convierte en un bloque válido, lo que le hace ganar a todo el grupo.
+
+===== Pools gestionados
+
+((("agrupaciones de minería", "administración de grupos")))((("operadores de grupos", seealso="agrupaciones de minería")))La mayoría de los grupos de minería están "gestionados", lo que significa que hay una empresa o individuo que ejecuta un servidor para la agrupación. El propietario del servidor de la agrupación se denomina _operador de la agrupación_ y cobra a los mineros de la agrupación una tarifa porcentual de las ganancias.
+
+El servidor de la agrupación ejecuta un software especializado y un protocolo de minería de agrupación que coordina las actividades de los mineros de esta agrupación. El servidor del grupo también está conectado a uno o más nodos completos de bitcoin y tiene acceso directo a una copia completa de la base de datos de la cadena de bloques. Esto permite al servidor de la agrupación validar bloques y transacciones en nombre de los mineros de la agrupación, liberándolos de la carga de ejecutar un nodo completo. Para los mineros de agrupaciones, esto es una consideración importante, porque un nodo completo requiere una computadora dedicada con al menos 100 a 150 GB de almacenamiento persistente (en disco) y al menos entre 2 a 4 GB de memoria (RAM). Además, el software de bitcoin que se ejecuta en el nodo completo necesita ser monitoreado, mantenido y actualizado con frecuencia. Cualquier tiempo de inactividad causado por falta de mantenimiento o falta de recursos afectará la rentabilidad del grupo minero. Para muchos mineros, la capacidad de minar sin tener que ejecutar un nodo completo es otro gran beneficio de unirse a un grupo administrado.
+
+Los mineros de la agrupación se conectan al servidor del grupo utilizando un protocolo de minería tal como lo es Stratum (STM) o GetBlockTemplate (GBT). Un estándar anterior llamado GetWork (GWK) ha quedado obsoleto en su mayoría desde finales de 2012, porque no admite fácilmente la minería a tasas de hash superiores a 4 GH/s. Los protocolos STM y GBT crean bloques tipo _plantillas_ que contienen una especie de formulario de cabecera de bloque candidato. El servidor del grupo ensambla un bloque candidato agregando transacciones y agregando una transacción coinbase (con un nonce con espacio de reserva adicional); calcula la raíz de merkle y vincula al candidato con el hash de bloque previo. La cabecera de bloque del bloque candidato se envía a cada uno de los mineros del grupo como una plantilla. Cada minero de grupo procede a minar, utilizando la plantilla del bloque, con un objetivo más alto (más fácil) que el objetivo de la red bitcoin, y envía los resultados exitosos al servidor del grupo para ganar acciones.
+
+===== Agrupaciones de minería tipo "peer-to-peer" (P2Pool)
+
+((("agrupaciones de minería", "agrupaciones peer-to-peer (P2Pool)"))) ((("agrupaciones peer-to-peer (P2Pool)")))Las agrupaciones administradas crean la posibilidad de hacer trampa por el operador de la agrupación, quién podría dirigir el esfuerzo del grupo para falsificar transacciones, mediante un doble gasto o invalidar bloques (véase <<consensus_attacks>>). Además, los servidores de un grupo centralizado representan un punto único de falla. Si el servidor del grupo quedase inactivo o se ralentizara por un ataque de denegación de servicio, los mineros del grupo no podrían operar. En 2011, para resolver estos problemas de centralización, se propuso e implementó un nuevo método de minería de grupos: P2Pool, un grupo de minería entre pares, sin un operador central.
+
+El “P2Pool” funciona descentralizando las funciones del servidor de la agrupación, implementando un sistema paralelo similar a una pequeña cadena de bloques llamada _cadena de acciones_. Una cadena de acciones es una cadena de bloques que se ejecuta con una dificultad menor que la cadena de bloques de bitcoin. La cadena de acciones permite a los mineros del grupo colaborar en un grupo descentralizado mediante la minería de acciones en la cadena de acciones a una tasa de un bloque de acciones cada 30 segundos. Cada uno de los bloques en la cadena de acciones registra una recompensa de acciones proporcional para los mineros que contribuyen con el trabajo, llevando las acciones hacia adelante desde el bloque de acciones anterior. Cuando uno de los bloques de acciones también alcanza el objetivo de la red bitcoin, se propaga e incluye en la cadena de bloques de bitcoin, recompensando a todos los mineros que contribuyeron a todas las acciones que precedieron al bloque de acciones ganador. Esencialmente, en lugar de un servidor para el grupo que realiza un seguimiento de las acciones y recompensas de cada minero de la agrupación, la cadena de acciones permite a todos los mineros de la agrupación realizar un seguimiento de todas las acciones utilizando un mecanismo de consenso descentralizado como el mecanismo de consenso de la cadena de bloques de bitcoin.
+
+La minería P2Pool es más compleja que la minería centralizada de grupos porque requiere que los mineros del grupo descentralizado tengan una computadora dedicada con suficiente espacio en disco, memoria y ancho de banda de Internet para admitir un nodo bitcoin completo y el software del nodo P2Pool. Los mineros de P2Pool conectan su hardware de minería a su nodo P2Pool local, que simulará las funciones del servidor de un grupo centralizado, enviando plantillas de bloques al hardware de minería. En P2Pool, los mineros de grupos individuales construyen sus propios bloques de candidatos, agregando transacciones de manera muy similar a los mineros en solitario, pero luego minan en colaboración en la cadena de acciones. P2Pool es un enfoque híbrido que tiene la ventaja de pagos mucho más granulares que la minería en solitario, pero sin dar demasiado control a un operador de grupo como los grupos centralmente gestionados.
+
+
+A pesar de que P2Pool reduce la centralización del poder que poseen los administradores de agrupaciones centralizadas de minería, es posiblemente vulnerable a ataques del 51% en su propia cadena de acciones. Una adopción mucho más amplia del P2Pool no resuelve el problema de ataque del 51% para la red bitcoin en sí. Por el contrario, P2Pool hace que Bitcoin sea más robusto en general, como parte de un ecosistema de minería diversificada.((("", startref="MAChash10")))((("", startref="MACoverpool10")))
+
+[[consensus_attacks]]
+=== Ataques Contra el Consenso
+
+((("minería y consenso", "ataques de consenso", id="Cattack10")))((("seguridad", "ataques de consenso", id="Sconsens10")))El mecanismo de consenso de bitcoin es, al menos teóricamente, vulnerable al ataque de mineros (o agrupaciones) que intentan usar su potencia de hash para fines deshonestos o destructivos. Como vimos, el mecanismo de consenso depende de que la mayoría de los mineros actúen honestamente por interés propio. Sin embargo, si un minero o un grupo de mineros pueden acaparar una parte significativa del poder de minería, pueden atacar el mecanismo de consenso para arruinar la seguridad y la disponibilidad de la red bitcoin.
+
+Es importante tener en cuenta que los ataques de consenso solo pueden afectar el consenso futuro, o en el mejor de los casos, el pasado más reciente (en decenas de bloques). El libro contable de bitcoin se vuelve cada vez más inmutable a medida que pasa el tiempo. Si bien, en teoría, se puede lograr una bifurcación a cualquier profundidad, en la práctica, el poder de cómputo necesario para forzar una bifurcación muy profunda es inmenso, lo que hace que los bloques viejos sean prácticamente inmutables. Los ataques de consenso tampoco afectan la seguridad de las llaves privadas como tampoco afectan al algoritmo de firma (ECDSA). Un ataque de consenso no puede robar bitcoins, gastar bitcoins sin firmas, redirigir la red bitcoin o cambiar transacciones pasadas o registros de propiedad.((("ataques de denegación de servicio")))((("seguridad","ataques de denegación de servicio")))Los ataques de consenso solo pueden afectar los bloques más recientes y causar interrupciones por denegación de servicio en la creación de futuros bloques.
+
+Un escenario de ataque contra el mecanismo de consenso se llama "ataque del 51%". En este escenario, un grupo de mineros, que controlan una mayoría (51%) de la potencia de hash de la red total, se confabulan para atacar bitcoin. Con la capacidad de minar la mayoría de los bloques, los mineros atacantes pueden causar "bifurcaciones" deliberadas en la cadena de bloques y transacciones falsas mediante el doble gasto o ejecutar ataques de denegación de servicio contra transacciones o direcciones específicas. Un ataque de bifurcación/doble gasto es donde el atacante hace que los bloques previamente confirmados se invaliden al bifurcarse por debajo de ellos y volver a dirigir la red a una cadena alternativa. Con suficiente potencia, un atacante puede invalidar seis o más bloques seguidos, lo que hace que se invaliden las transacciones que se consideraron inmutables (seis confirmaciones). Téngase en cuenta que un doble gasto solo se puede hacer con las transacciones propias del atacante, para lo cual el atacante puede producir una firma válida. El doble gasto de las transacciones propias es rentable si al invalidar una transacción el atacante puede obtener un pago o producto a cambio de manera irreversible al eludir el pago en bitcoins.
+
+Examinemos un ejemplo práctico de un ataque del 51%. En el primer capítulo, vimos una transacción entre ((("casos de uso", "comprar café")))Alice y Bob por una taza de café. Bob, el dueño del café, está dispuesto a aceptar el pago de tazas de café sin esperar confirmación (acepta una minería de un solo bloque), porque el riesgo de un doble gasto en una taza de café es bajo en comparación con la conveniencia de un servicio rápido al cliente. Esto es similar a la práctica de las cafeterías que aceptan pagos con tarjetas de crédito sin firmas por montos inferiores a $ 25, porque el riesgo de una devolución de tarjeta de crédito es bajo, mientras que el costo de retrasar la transacción para obtener una firma es comparativamente mayor. En contraste, al venderse un artículo más caro con bitcoins, se corre el riesgo de un ataque de doble gasto, donde el comprador transmite una transacción competitiva que gasta las mismas entradas (o UTXOs), cancelando el pago al comerciante. Un ataque de doble gasto puede ocurrir de dos maneras: antes de confirmar una transacción o si el atacante aprovecha una bifurcación de la cadena de bloques para deshacer varios bloques. Un ataque del 51% permite a los atacantes generar un doble gasto de sus propias transacciones en la nueva cadena, deshaciendo así la transacción correspondiente en la cadena anterior.
+
+En nuestro ejemplo, el atacante malicioso: Mallory, va a ((("casos de uso", "ventas al por menor", id="carolten")))la galería de Carol y compra una hermosa pintura tríptico que representa a Satoshi Nakamoto como Prometeo. Carol vende pinturas de "El Gran Incendio" por $ 250,000 en bitcoin a Mallory. En lugar de esperar seis o más confirmaciones de la transacción, Carol envuelve y entrega las pinturas a Mallory después de una sola confirmación. Mallory trabaja con un cómplice, Paul, que opera un gran grupo de minería, y el cómplice lanza un ataque del 51% tan pronto como la transacción de Mallory se incluye en un bloque. Paul ordena al grupo de minería que vuelva a minar la misma altura de bloque que el bloque que contiene la transacción de Mallory, reemplazando el pago de Mallory a Carol por una transacción que realiza un doble gasto de la misma entrada que el pago de Mallory. La transacción de doble gasto consume la misma UTXO y la devuelve el valor de esta salida a la misma cartera de Mallory, en lugar de pagarle a Carol, esencialmente permitiendo que Mallory conserve los bitcoins. Luego, Paul dirige al grupo de minería para minar un bloque adicional, a fin de hacer que la cadena que contiene la transacción con el doble gasto sea más larga que la cadena original (causando una bifurcación por debajo del bloque que contiene la transacción de Mallory). Cuando la bifurcación en la cadena de bloques se resuelve a favor de la nueva cadena (más larga), la transacción con el doble gasto reemplaza el pago original a Carol. A Carol ahora le faltan sus tres pinturas y tampoco tiene el pago en bitcoins. A lo largo de toda esta actividad, los participantes del grupo de minería de Paul podrían permanecer felizmente inconscientes del intento de doble gasto, porque minan con mineros automatizados y no pueden monitorear cada transacción o cada bloque.((("", startref="carolten")))
+
+((("confirmaciones", "para transacciones de gran valor", secondary-sortas="transacciones de gran-valor")))Para protegerse contra este tipo de ataques, un comerciante que vende artículos de gran valor debe esperar al menos seis confirmaciones antes de entregar el producto al comprador. Alternativamente, el comerciante podría utilizar una cuenta de depósito en custodia multifirma, nuevamente esperando varias confirmaciones después de que la cuenta en custodia sea financiada. Cuantas más confirmaciones transcurran, más difícil será invalidar una transacción con un ataque del 51%. Para los artículos de alto valor, el pago en bitcoins seguirá siendo conveniente y eficiente incluso si el comprador tuviese que esperar 24 horas para la entrega, lo que correspondería a aproximadamente 144 confirmaciones.
+
+Además de un ataque de doble gasto, el otro escenario para un ataque de consenso es negar el servicio a participantes específicos de bitcoin (direcciones específicas de bitcoin). Un atacante con una mayoría del poder de minería puede simplemente ignorar transacciones específicas. Si están incluidas en un bloque minado por otro minero, el atacante puede bifurcar y remover deliberadamente ese bloque, excluyendo nuevamente las transacciones específicas. Este tipo de ataque puede resultar en una denegación de servicio sostenida contra una dirección específica o un conjunto de direcciones mientras el atacante controle la mayor parte del poder de minería.
+
+A pesar de su nombre, la posibilidad de un ataque del 51% en realidad no requiere el 51% de la potencia de hash. De hecho, este tipo de ataque se puede intentar con un porcentaje menor de la potencia de hash. El umbral del 51% es simplemente el nivel en el que el ataque es casi seguro que tenga éxito. Un ataque de consenso es esencialmente una lucha por el siguiente bloque y el grupo "más fuerte" es el que tiene más probabilidades de ganar. Con menor poder de hash, la probabilidad de éxito se reduce, debido a que otros mineros controlan la generación de algunos bloques con su potencia de minería "honesta". Una forma de verlo es que cuanta más potencia de hash tenga un atacante, mayor será la longitud de la bifurcación que pueda crear deliberadamente, mayor será el número de bloques del pasado reciente que pueda invalidar, o mayor será el número de bloques en el futuro que pueda controlar. Existen grupos de investigación de seguridad que han utilizado modelos estadísticos para afirmar que es posible llevar a cabo diversos tipos de ataques de consenso con tan solo el 30% de la potencia de hash.
+
+El aumento masivo de la potencia de hash total ha hecho que probablemente bitcoin sea inmune a los ataques de un solo minero. No hay manera posible de que un minero en solitario pueda controlar más de un pequeño porcentaje de la potencia de minería total. Sin embargo, la centralización del control causado por los pools de minería ha introducido el riesgo de ataques con afán de lucro por parte de un operador de pool de minería. El operador del pool en un pool gestionado controla la construcción de bloques candidatos y también controla qué transacciones se incluyen. Esto le da al operador del pool la facultad de excluir transacciones o de introducir transacciones de doble gasto. Si ese abuso de poder se hace de una manera limitada y sutil, un operador de pool posiblemente podría pasar desapercibido y beneficiarse de un ataque de consenso.
+
+Sin embargo, no todos los atacantes estarán motivados por las ganancias. Un escenario de ataque potencial es cuando un atacante intenta interrumpir la red de bitcoin sin la posibilidad de beneficiarse de dicha interrupción. Un ataque malicioso destinado a paralizar bitcoin requeriría de una inversión enorme y una planificación encubierta, pero posiblemente podría ser lanzado por un atacante bien financiado, muy probablemente patrocinado por algún estado. Alternativamente, un atacante bien financiado podría atacar el consenso de bitcoin acumulando simultáneamente hardware de minería, comprometiendo a los operadores de grupos y atacando a otros grupos con denegación de servicio. Todos estos escenarios son teóricamente posibles, pero cada vez menos prácticos a medida que la potencia de hash general de la red bitcoin continúa creciendo exponencialmente.
+
+Sin lugar a dudas, un ataque contra el consenso realmente grave erosionaría la confianza en bitcoin a corto plazo, posiblemente causando una disminución significativa de sus precios. Sin embargo, la red y el software de bitcoin están en constante evolución, por lo que los ataques de consenso se encontrarían con contramedidas inmediatas por parte de la comunidad de bitcoin, haciendo que bitcoin sea más robusto.((("", startref="Cattack10")))((("", startref="MACattack10")))((("", startref = "Sconsens10")))
+
+[[consensus_changes]]
+=== Cambiando las Reglas de Consenso
+
+((("minería y consenso", "reglas de consenso", "cambiándolas", id="Crule10")))Las reglas de consenso determinan la validez de las transacciones y de los bloques. Estas reglas son la base para la colaboración entre todos los nodos de bitcoin y son responsables de la convergencia de todas las perspectivas locales en una única cadena de bloques consistente en toda la red.
+
+Si bien las reglas de consenso son invariables a corto plazo y deben ser consistentes en todos los nodos, no son invariables a largo plazo. Para evolucionar y desarrollar el sistema bitcoin, las reglas tienen que cambiar de vez en cuando para acomodar nuevas características, mejoras o correcciones de errores. Sin embargo, a diferencia del desarrollo de software tradicional, las actualizaciones a un sistema de consenso son mucho más difíciles y requieren coordinación entre todos los participantes.
+
+
+[[hard_forks]]
+==== Bifurcaciones Fuertes
+((("bifurcaciones", "cambiando las reglas de consenso", id="forks10a")))((("bifurcaciones", "cambiando las reglas de consenso", "bifurcaciones fuertes")))En <<forks>> se pudo observar cómo funciona la red bitcoin cuando esta sufre una breve divergencia, con dos partes de la red siguiendo dos ramas diferentes de la cadena de bloques por un corto tiempo. Vimos cómo este proceso ocurre de manera natural, como parte del funcionamiento normal de la red y cómo la red se redirige hacia una cadena de bloques unificada después que se han minado uno o más bloques.
+
+Hay otro escenario en el que la red puede experimentar una divergencia en dos cadenas subsecuentes: un cambio en las reglas de consenso. Este tipo de bifurcación se denomina _bifurcación fuerte_, porque después de tal bifurcación, la red no se vuelve a dirigirse hacia una sola cadena. En cambio, las dos cadenas evolucionan independientemente. Las bifurcaciones fuertes ocurren cuando parte de la red está operando bajo un conjunto diferente de reglas de consenso que el resto de la red. Esto puede ocurrir debido a un error en el software o debido a un cambio deliberado en la implementación de las reglas de consenso.
+
+Las bifurcaciones fuertes se pueden usar para cambiar las reglas de consenso, pero requieren de la coordinación de todos los participantes en el sistema. Los nodos que no se actualizan a las nuevas reglas de consenso no pueden seguir participando en el mecanismo de consenso y se ven obligados a seguir una cadena separada en el momento de la bifurcación fuerte. Por lo tanto, se puede considerar que un cambio introducido por una bifurcación fuerte no es "compatible con versiones anteriores", ya que los nodos no actualizados ya no pueden procesar las nuevas reglas de consenso del sistema.
+
+Examinemos la mecánica de una bifurcación fuerte con un ejemplo específico.
+
+<<blockchainwithforks>> muestra una cadena de bloques con dos bifurcaciones. En la altura de bloque igual a 4, se produce una bifurcación de un bloque. Este es el tipo de bifurcación espontánea que vimos en <<forks>>. Cuando la minería produce al bloque 5, la red converge nuevamente en una sola cadena y se resuelve la bifurcación.
+
+[[blockchainwithforks]]
+.Una cadena de bloques con bifurcaciones
+image::images/mbc2_1009.png[Una cadena de bloques con bifurcaciones]
+
+Más tarde, sin embargo, a la altura de bloque 6, se produce una bifurcación fuerte. Supongamos que se ha publicado una nueva versión del cliente con un cambio en las reglas de consenso. Comenzando en la altura de bloque 7, los mineros que ejecutan esta nueva implementación aceptarán un nuevo tipo de firma digital, a la que llamaremos firma "Smores", que no está basada en ECDSA. Inmediatamente después, un nodo que ejecuta la nueva implementación crea una transacción que contiene una firma Smores y un minero con el software actualizado mina el nuevo bloque 7b que contiene esta transacción.
+
+Cualquier nodo o minero que no haya actualizado su software para validar las firmas Smores ahora no puede procesar el bloque 7b. Desde su perspectiva, tanto la transacción que contenía una firma Smores como el bloque 7b que contenía esa transacción no son válidos, porque los están evaluando en base a las viejas reglas de consenso. Estos nodos rechazarán la transacción y el bloque y no los propagarán. Cualquier minero que esté usando las reglas antiguas no aceptará el bloque 7b y continuará minando un bloque candidato cuyo padre es el bloque 6. De hecho, los mineros que usan las reglas viejas no pueden ni siquiera recibir el bloque 7b si todos los nodos a los que están conectados están también obedeciendo las viejas reglas y por lo tanto no estarán propagando el bloque. Llegado el momento, lograrán minar el bloque 7a, que es válido según las reglas anteriores y no contiene ninguna transacción con firmas Smores.
+
+Las dos cadenas continuarán divididas desde este punto. Los mineros en la cadena "b" continuarán aceptando y minando transacciones que contengan firmas Smores, mientras que los mineros en la cadena "a" continuarán ignorando estas transacciones. Incluso si el bloque 8b no contuviese ninguna transacción firmada por Smores, los mineros en la cadena "a" no pueden procesarlo. Para ellos, parece ser un bloque huérfano, ya que su padre "7b" no se reconoce como un bloque válido.
+
+==== Bifurcaciones Fuertes: Software, Red, Minería y Cadena
+
+((("bifurcaciones", "cambiando las reglas de consenso", "bifurcaciones de software")))Para los desarrolladores de software, el término "bifurcación" tiene otro significado, lo que agrega confusión al término "bifurcación fuerte". En el software de código abierto, una bifurcación ocurre cuando un grupo de desarrolladores elige seguir una hoja de ruta diferente para el software y comienzan una a desarrollar una implementación diferente y competitiva de un proyecto de código abierto. Ya hemos discutido dos circunstancias que conducirán a una bifurcación fuerte: un error de software en las reglas de consenso y una modificación deliberada de las reglas de consenso. En el caso de un cambio deliberado en las reglas de consenso, una bifurcación de software precede a la bifurcación fuerte. Sin embargo, para que se produzca este tipo de bifurcación fuerte, se debe desarrollar, adoptar y lanzar una nueva implementación de software para nuevas reglas de consenso.
+
+Los ejemplos de bifurcaciones de software que han intentado cambiar las reglas de consenso incluyen Bitcoin XT, Bitcoin Classic y, más recientemente, Bitcoin Unlimited. Sin embargo, ninguna de estas bifurcaciones de software obtuvo el resultado de una bifurcación fuerte. Si bien una bifurcación de software es una condición previa necesaria, no es en sí misma suficiente para que ocurra una bifurcación fuerte. Para que ocurra una bifurcación fuerte, la implementación competitiva debe ser adoptada y las nuevas reglas deben ser activadas por los mineros, billeteras y nodos intermediarios. Por el contrario, existen numerosas implementaciones alternativas del Cliente Principal de Bitcoin, e incluso las bifurcaciones de software, que no cambian las reglas de consenso y a excepción de errores de software, pueden coexistir en la red e operar conjuntamente sin causar una bifurcación fuerte.
+
+Las reglas de consenso pueden diferir de manera obvia y explícita, en torno a la validación de transacciones o bloques. Las reglas también pueden diferir en formas más sutiles, en la implementación de las reglas de consenso, en la medida que se aplican a los scripts de bitcoin o normas criptográficas primitivas, como las firmas digitales. Finalmente, las reglas de consenso pueden diferir de maneras imprevistas debido a restricciones de consenso implícitas impuestas por las limitaciones del sistema o detalles de implementación. Se vio un ejemplo de esto último en la bifurcación fuerte que no fue prevista durante la actualización de Bitcoin Core 0.7 a 0.8, que fue causada por una limitación en la implementación de “Berkeley DB” utilizada para almacenar bloques.
+
+Conceptualmente, podemos pensar que una bifurcación fuerte se desarrolla en cuatro etapas: una bifurcación de software, una bifurcación en la red, una bifurcación de minería y una bifurcación de la cadena.
+
+El proceso comienza cuando los desarrolladores crean una implementación alternativa del cliente, con reglas de consenso modificadas.
+
+Cuando esta implementación bifurcada se implementa en la red, un cierto porcentaje de mineros, usuarios de billeteras y nodos intermedios pueden adoptar y ejecutar esta implementación. Una bifurcación resultante dependerá de si las nuevas reglas de consenso se aplican a los bloques, a las transacciones o algún otro aspecto del sistema. Si las nuevas reglas de consenso se refieren a las transacciones, entonces una aplicación de billetera que crea una transacción bajo las nuevas reglas puede precipitar una bifurcación de red, seguida de una bifurcación fuerte cuando la transacción se mina en un bloque. Si las nuevas reglas son referentes a los bloques, entonces el proceso de bifurcación fuerte comenzará cuando se mine un bloque bajo las nuevas reglas.
+
+Primero, la red se bifurcará. Los nodos basados en la implementación original de las reglas de consenso rechazarán cualquier transacción y bloque que se cree bajo las nuevas reglas. Además, los nodos que siguen las reglas de consenso originales prohibirán temporalmente y se desconectarán de cualquier nodo que les envíe estas transacciones y bloques no válidos. Como resultado, la red se dividirá en dos: los nodos antiguos solo permanecerán conectados a los nodos antiguos y los nodos nuevos solo se conectarán a los nodos nuevos. Una sola transacción o bloque basado en las nuevas reglas se extenderá por la red y dará como resultado la partición en dos redes.
+
+Una vez que un minero que usa las nuevas reglas mina un bloque, el poder de minería y la cadena también se bifurcarán. Los nuevos mineros minarán en la parte superior del nuevo bloque, mientras que los antiguos mineros trabajarán sobre una cadena separada según las viejas reglas. La red dividida hará que los mineros que operan con reglas de consenso separadas probablemente no reciban los bloques de la otra red, ya que estarán conectados a dos redes separadas.
+
+==== Mineros y Dificultad Divergentes
+
+((("bifurcaciones", "cambiando las reglas de consenso", "mineros y dificultad divergentes")))A medida que los mineros divergen en la minería de dos cadenas diferentes, la potencia de hash también se divide entre las cadenas. El poder de minería se puede dividir en cualquier proporción entre las dos cadenas. Las nuevas reglas solo pueden ser seguidas por una minoría o por la gran mayoría del poder de minería.
+
+Supongamos, por ejemplo, una división del 80%&#x2013;20%, con la mayoría del poder de minería aplicando las nuevas reglas de consenso. Supongamos también que la bifurcación ocurre inmediatamente después de un período de reorientación.
+
+Las dos cadenas heredarían cada una la dificultad del reciente período de reorientación. Las nuevas reglas de consenso dispondrían del 80% del poder de minería que estuvo a disposición de la red previamente. Desde la perspectiva de esta cadena, el poder de minería ha disminuido repentinamente en un 20% con respecto al período anterior. Los bloques se encontrarán en promedio cada 12,5 minutos, lo que representa la disminución del 20% en el poder de minería disponible para extender esta cadena. Esta tasa de producción de bloques continuará (salvo cualquier cambio en la potencia de hash) hasta que se minen los próximos 2016 bloques, lo que tomará aproximadamente 25.200 minutos (a 12,5 minutos por bloque), o 17 días y medio. Después de estos 17,5 días, ocurrirá un reajuste y la dificultad se calibrará (se reducirá en un 20%) para producir bloques de 10 minutos nuevamente, en función de la cantidad reducida de la potencia de hash en esta cadena.
+
+Pero la cadena minoritaria, que ahora realiza una minería bajo las viejas reglas con solo el 20% de la potencia de hash, enfrentará una tarea mucho más difícil. En esta cadena, los bloques ahora se extraerán, en promedio cada 50 minutos. La dificultad no se ajustará en esta cadena por los próximos 2016 bloques, lo que tomará 100.800 minutos, o aproximadamente 10 semanas para minarlos. Suponiendo una capacidad fija por bloque, esto también dará como resultado una reducción de la capacidad de transacción por un factor de 5, ya que hay menos bloques por hora disponibles para registrar las transacciones.
+
+==== Bifurcaciones Fuertes por Disputa
+
+((("bifurcaciones", "cambiando las reglas de consenso", "bifurcaciones fuertes por disputas")))(((("bifurcaciones fuertes")))Este es el inicio del desarrollo de software de consenso. Así como el desarrollo de código abierto cambió los métodos y productos del software y creó nuevas metodologías, nuevas herramientas y nuevas comunidades a su paso, el desarrollo de software de consenso también representa una nueva frontera en las ciencias informáticas. De los debates, experimentos y tribulaciones de la hoja de ruta del desarrollo de bitcoin, veremos surgir nuevas herramientas de desarrollo, nuevas prácticas, metodologías y comunidades de desarrollo.
+
+Las bifurcaciones fuertes se consideran riesgosas porque obligan a una minoría a actualizarse o a permanecer en una cadena minoritaria. Muchos ven el riesgo de dividir todo el sistema en dos sistemas competitivos como un riesgo inaceptable. Como resultado, muchos desarrolladores son reacios a utilizar el mecanismo de bifurcación fuerte para implementar actualizaciones a las reglas de consenso, a menos que exista un apoyo casi unánime de toda la red. Cualquier propuesta de bifurcación fuerte que no tenga soporte casi unánime, se considera demasiado "contenciosa" para intentarla sin arriesgarse a una partición del sistema.
+
+El tema de las bifurcaciones fuertes es muy controvertido en la comunidad de desarrolladores de bitcoin, especialmente en la medida que se relaciona con cualquier cambio propuesto a las reglas de consenso que controlan el límite máximo del tamaño del bloque. Algunos desarrolladores se oponen a cualquier forma de bifurcación fuerte, ya que las consideran demasiado arriesgadas. Otros ven en el mecanismo de bifurcación fuerte una herramienta esencial para actualizar las reglas de consenso de una manera que evite la "deuda técnica" y proporcione una separación quirúrgica con el pasado. Finalmente, algunos desarrolladores ven a las bifurcaciones fuertes como un mecanismo que debería usarse raramente, con mucha planificación anticipada y solo bajo un consenso casi unánime.
+
+Ya hemos visto la aparición de nuevas metodologías para abordar los riesgos de las bifurcaciones fuertes. En la siguiente sección, veremos las bifurcaciones suaves y los métodos BIP-34 y BIP-9 para la señalización y activación de modificaciones por consenso.
+
+==== Bifurcaciones Suaves
+
+((("bifurcaciones", "cambiando las reglas de consenso", "bifurcaciones suaves")))((("bifurcaciones suaves","definidas")))No todos los cambios en las reglas de consenso causan una bifurcación fuerte. Solo los cambios de consenso que son incompatibles con la versión anterior causan una bifurcación. Pero si la modificación se implementa de tal manera que un cliente no actualizado todavía pueda ver transacciones o bloques que cumplan con las reglas viejas como válidos, el cambio puede ocurrir sin que se dé una bifurcación.
+
+El término _bifurcación suave_ se introdujo para distinguir este método de actualizaciones de una "bifurcación fuerte". En la práctica, una bifurcación suave no es una bifurcación en absoluto. Una bifurcación suave es un cambio compatible con las reglas de consenso que permite a los clientes no actualizados continuar operando en consenso con las nuevas reglas.
+
+Un aspecto de las bifurcaciones suaves que no es inmediatamente obvio, es que las actualizaciones de una bifurcación suave solo pueden usarse para restringir las reglas de consenso, no para expandirlas. Para ser compatibles con las nuevas reglas, las transacciones y los bloques creados bajo estas nuevas reglas también deben ser válidos bajo las viejas reglas, pero no al revés. Las nuevas reglas solo pueden limitar lo que es válido; de lo contrario, desencadenarían una bifurcación fuerte cuando se rechacen estos elementos según las viejas reglas.
+
+Las bifurcaciones suaves se pueden implementar de varias maneras&#x2014;el término no especifica un método en particular, sino un conjunto de métodos que tienen una cosa en común: no requieren que todos los nodos se actualicen o que sean forzados a salir del consenso si no se actualizan.
+
+===== Bifurcaciones suaves que redefinieron códigos operativos NOP
+
+((("códigos operativos", "redefiniciones mediante bifurcaciones suaves")))((("bifurcaciones suaves","redefinición de códigos NOP")))Varias bifurcaciones suaves se han implementado en bitcoin, en base a la reinterpretación de los códigos de operativos “NOP”. Los Scripts Bitcoin tenían diez códigos operativos reservados para usos futuros, desde el NOP1 hasta el NOP10. Según las reglas de consenso, la presencia de estos códigos operativos en un script se interpreta como la de operadores de potencia-nula, lo que significa que no tienen ningún efecto. La ejecución continúa después del código de operación NOP como si ése código no estuviera allí.
+
+Por lo tanto, una bifurcación suave puede modificar la semántica de un código NOP para darle un nuevo significado. Por ejemplo, la propuesta de mejoras a bitcoin BIP-65 (que versa sobre el comando +CHECKLOCKTIMEVERIFY+) reinterpretó el código de operaciones NOP2. Los clientes que implementan el BIP-65 interpretan NOP2 como +OP_CHECKLOCKTIMEVERIFY+ e imponen una regla de consenso de bloqueo temporal absoluto en las UTXOs que contienen este código de operación en sus scripts de bloqueo. Este cambio es una bifurcación suave porque una transacción que es válida bajo el BIP-65 también será válida en cualquier cliente que no esté implementando (o sea ignorante del) BIP-65. Para los clientes antiguos, el script contiene un código NOP, que se ignora.
+
+===== Otras formas de actualización por bifurcación suave
+
+La reinterpretación de los códigos de operación NOP no solo fue una opción planificada sino también un obvio mecanismo para lograr mejoras en el consenso. Recientemente, sin embargo, se introdujo otro mecanismo de bifurcación suave que no se basa en los códigos de operación NOP y que permitió un tipo muy específico de cambios en el consenso. Esto se examina con más detalle en <<segwit>>. La mejora del testigo segregado o “Segwit” es un cambio arquitectónico en la estructura de una transacción, que mueve al script de desbloqueo (el “testigo”) desde el interior de la transacción, a una estructura de datos externa (segregándola). Segwit se imaginó inicialmente como una actualización de bifurcación fuerte, ya que modificó una estructura fundamental (a la transacción misma). En noviembre de 2015, un desarrollador que trabajaba en Bitcoin Core propuso un mecanismo por el cual Segwit podría introducirse como una bifurcación suave. El mecanismo utilizado para esto es una modificación del script de bloqueo de las UTXOs creadas bajo las nuevas reglas de Segwit, de modo que los clientes viejos verían al script de bloqueo como un acertijo tonto, redimible por cualquier script de desbloqueo. Como resultado, se puede introducir el nuevo estándar Segwit sin requerir que cada nodo se actualice o se separe de la cadena principal: una bifurcación suave.
+
+Es probable que existan otros mecanismos, aún por descubrir, mediante los cuales se pueden realizar aún más actualizaciones de una manera compatible con las versiones anteriores como una bifurcación suave.
+
+==== Críticas a las Bifurcaciones Suaves
+
+((("bifurcaciones", "cambiando las reglas de consenso", "inconvenientes de la bifurcación suave")))((("bifurcaciones suaves"," inconvenientes")))Las bifurcaciones suaves basadas en los códigos de operación NOP son, relativamente hablando, muy poco conflictivas. Los códigos de operación NOP se colocaron en las listas de Comandos Scripts de Bitcoin, con el objetivo explícito de permitir actualizaciones armoniosas en la red.
+
+Sin embargo, a muchos desarrolladores les preocupa que otros métodos de actualización por bifurcación suave hagan concesiones inaceptables. Las críticas comunes a los cambios de bifurcación suave incluyen:
+
+Deuda técnica:: Debido a que las bifurcaciones suaves son más complejas técnicamente que una actualización por bifurcación fuerte, éstas introducen _deudas técnicas_, un término que se refiere a aumentar el costo futuro del mantenimiento del código debido a las concesiones de diseño realizadas en el pasado. La complejidad del código a su vez aumenta las probabilidades de errores y las vulnerabilidades de seguridad.
+
+Validación flexibilizada:: Los clientes no modificados ven las transacciones como válidas, sin evaluar las reglas de consenso modificadas. En efecto, los clientes no modificados no están validando las transacciones usando la gama completa de las nuevas reglas de consenso, ya que son ciegos a las nuevas reglas. Esto se aplica a las actualizaciones basadas en NOP, así como a otras actualizaciones de bifurcación suave.
+
+Actualizaciones irreversibles:: Debido a que las bifurcaciones suaves crean transacciones con restricciones de consenso adicionales, en la práctica se convierten en actualizaciones irreversibles. Si una actualización de bifurcación suave se revirtiese después que se hubiesen activado, cualquier transacción creada bajo las nuevas reglas podría resultar en una pérdida de fondos bajo las viejas reglas. Por ejemplo, si una transacción CLTV, se evalúa según las reglas anteriores, no hay restricción de bloqueo temporal y puede gastarse en cualquier momento. Por lo tanto, los críticos sostienen que una bifurcación suave que ha fallado y que tuvo que ser revertida debido a un error de software, casi con seguridad conducirá a la pérdida de fondos. ((("", startref="Crule10")))
+
+[[softforksignaling]]
+=== Señalizando a la Bifurcación Suave con la Versión del Bloque
+
+((("bifurcaciones", "cambiando las reglas de consenso", "activación de una bifurcación suave")))((("bifurcaciones suaves","activación")))Dado que las bifurcaciones suaves permiten que los clientes no actualizados continúen operando dentro del consenso, el mecanismo para "activar" una bifurcación suave se realiza a través de los mineros que anuncian el nivel de disposición: la mayoría de los mineros deben estar de acuerdo en que están preparados y dispuestos a hacer cumplir las nuevas reglas de consenso. Para coordinar sus acciones, existe un mecanismo de señalización que les permite mostrar su apoyo a un cambio a las reglas de consenso. Este mecanismo se introdujo con la activación de la mejora de bitcoin BIP-34 en marzo de 2013 y se reemplazó por la activación del BIP-9 en julio de 2016.
+
+==== BIP-34: Señalización y Activación
+
+((("propuestas de mejoras a bitcoin", "Bloque v2, Altura en Coinbase (BIP-34)")))La primera implementación de BIP-34, utilizó el campo de versión de bloque para permitir a los mineros señalar su nivel de preparación en pos del cambio de una regla de consenso específica. Antes de BIP-34, la versión de bloque fue establecida en "1" por _convenio_ mas no establecida por _consenso_.
+
+BIP-34 definió un cambio en las reglas de consenso que requería que el campo coinbase (la entrada) de la transacción coinbase contuviera la altura del bloque. Antes de BIP-34, la entrada de la transacción coinbase podía contener cualquier información arbitraria que los mineros decidieran incluir. Después de la activación de BIP-34, los bloques válidos tenían que contener un valor específico de altura de bloque al comienzo de la transacción coinbase e identificarse con un número de versión mayor o igual a "2".
+
+Para señalar tanto el cambio como la activación de BIP-34, los mineros establecieron la versión de bloque en "2", en lugar de "1". Esto no hizo que los bloques de la versión "1" fueran inválidos de inmediato. Pero una vez activado el cambio, los bloques de la versión "1" dejarían de ser válidos y todos los bloques de la versión "2" tendrían que contener la altura de bloque al comienzo de la transacción coinbase para ser válidos.
+
+BIP-34 definió un mecanismo de activación de dos pasos, basado en una ventana móvil de 1000 bloques. Un minero señalaría su predisposición individual para BIP-34 construyendo bloques con el número "2", como número de versión. Estrictamente hablando, estos bloques aún no tenían que cumplir con la nueva regla de consenso de incluir la altura de bloque en la transacción coinbase porque la regla de consenso aún no se había activado. Las reglas de consenso se activan en dos etapas:
+
+* Si el 75% (750 de los 1000 bloques más recientes) están marcados con la versión "2", entonces los bloques de la versión "2" deben contener la altura de bloque en la transacción coinbase o se rechazarán como no válidos. Los bloques de la versión "1" todavía son aceptados por la red y no necesitan contener la altura de bloque. Las viejas y nuevas reglas de consenso coexisten durante este período.
+
+* Cuando el 95% (950 de los 1000 bloques más recientes) son de la versión "2", los bloques de la versión "1" ya no se consideran válidos. Los bloques de la versión "2" son válidos solo si contienen la altura de bloque en transacción coinbase (según el umbral anterior). A partir de entonces, todos los bloques deben cumplir con las nuevas reglas de consenso, y todos los bloques válidos deben contener la altura de bloque en la transacción coinbase.
+
+Después de una señalización y activación exitosas bajo las reglas BIP-34, este mecanismo se usó dos veces más para activar bifurcaciones suaves:
+
+* https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki[BIP-66] La codificación estricta DER para firmas se activó mediante la señalización según el estilo BIP-34, pero con un número de versión en los bloques igual a "3", haciendo inválida la versión de bloques número "2".
+
+* https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki[BIP-65] +CHECKLOCKTIMEVERIFY+ se activó mediante la señalización según el estilo BIP-34 con una versión en bloque "4" e invalidando la versión "3" en bloques.
+
+Después de la activación de BIP-65, el mecanismo de señalización y activación de BIP-34 fue retirado y reemplazado por el mecanismo de señalización de BIP-9 que se describe a continuación.
+
+El estándar se define en https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki[BIP-34 (Block v2, Height in Coinbase)].
+
+==== Señalización y Activación Según BIP-9
+
+((("propuestas de mejoras a bitcoin", "Bits de versión con tiempo de espera y retraso (BIP-9)")))(((("propuestas de mejoras a bitcoin", "CHECKLOCKTIMEVERIFY (BIP-65)")))(((("propuestas de mejoras a bitcoin","Firmas estrictas DER (BIP-66)")))El mecanismo utilizado por BIP-34, BIP-66 y BIP-65 logró activar tres bifurcaciones suaves. Sin embargo, fue reemplazado porque tenía varias limitaciones:
+
+* Al usar el valor entero de la versión de bloque, solo se podía activar una bifurcación suave a la vez, por lo que se requería coordinación entre las propuestas de bifurcación suave y un acuerdo sobre su cómo decidir las prioridades y la secuencia.
+
+* Además, debido a que la versión en el bloque se incrementó, el mecanismo no ofreció una forma directa de rechazar un cambio y luego proponer uno diferente. Si los clientes antiguos todavía se estaban ejecutando, podrían confundir la señalización de un nuevo cambio como también podrían señalizar un cambio previamente rechazado.
+
+* Cada nuevo cambio reducía irrevocablemente las versiones de bloque disponibles para futuros cambios.
+
+Se propuso BIP-9 para superar estos desafíos y mejorar la velocidad y la facilidad de implementar cambios futuros.
+
+BIP-9 interpreta la versión de bloque como un campo de bits en lugar de un entero. Debido a que la versión de bloque se usó originalmente como un entero para las versiones de la 1 a la 4, solo quedarían 29 bits disponibles para usarse como campo de bits. Esto deja 29 bits que se pueden utilizar para indicar de forma independiente y simultánea la preparación para 29 propuestas diferentes.
+
+BIP-9 también establece un tiempo máximo para la señalización y activación. De esta manera, los mineros no necesitan hacer señales para siempre. Si una propuesta no se activa dentro del período indicado como +TIMEOUT+ (parámetro definido en la propuesta), la propuesta se considera rechazada. La propuesta se puede volver a enviar para señalizar con un bit diferente, renovando el período de activación.
+
+Además, después de que el +TIMEOUT+ ha expirado y una característica ha sido activada o rechazada, el bit de señalización puede reutilizarse para otra característica sin confusión. Por lo tanto, se pueden señalar hasta 29 cambios en paralelo y después del +TIMEOUT+ los bits se pueden "reciclar" para proponer nuevos cambios.
+
+[NOTE]
+====
+Si bien los bits de señalización pueden reutilizarse o reciclarse, siempre que el período de votación no se superponga, los autores de BIP-9 recomiendan que los bits se reutilicen solo cuando sea necesario; podría ocurrir un comportamiento inesperado debido a errores en el software anterior. En otras palabras, no deberíamos esperar ver la reutilización de un bit hasta que todos los 29 bits se hayan usado una vez.
+====
+
+Los cambios propuestos se identifican mediante una estructura de datos que contiene los siguientes campos:
+
+nombre:: Una breve descripción utilizada para distinguir diferentes propuestas. Muy a menudo, el BIP describe la propuesta, como "bipN", donde N es el número de BIP.
+
+bit:: De 0 a 28, el bit en la versión de bloque que usan los mineros para indicar la aprobación de esta propuesta.
+
+starttime:: Es el momento (basado en “Median Time Past”, o MTP) en que comienza la señalización, después de lo cual el valor del bit se interpreta como señal de preparación para la propuesta.
+
+endtime:: Es el momento (basado en MTP) después del cual el cambio se considera rechazado si no ha alcanzado el umbral de activación.
+
+A diferencia de BIP-34, BIP-9 cuenta la señalización de activación en intervalos completos en función del recalculo de dificultad en el período de los últimos 2016 bloques. Para cada período de recalculo, si la suma de los bloques que señalan una propuesta supera el 95% (1916 de 2016), la propuesta se activará un período de recalculo más tarde.
+
+BIP-9 ofrece un diagrama de estado para cada propuesta para ilustrar las diversas etapas y transiciones de una propuesta, como se muestra en <<bip9states>>.
+
+Las propuestas comienzan en el estado +DEFINED+, una vez que sus parámetros son conocidos (definidos) en el software bitcoin. Para los bloques con MTP posteriores de la hora de inicio, el estado de la propuesta pasa a +STARTED+. Si se supera el umbral de votación dentro de un período de recálculo y no se ha excedido el tiempo de espera del protocolo, el estado de la propuesta pasa a +LOCKED_IN+. Tras un período de recálculo posterior, la propuesta se convierte en +ACTIVE+. Las propuestas permanecen en el estado +ACTIVE+ perpetuamente una vez que se alcanza ese estado. Si transcurre el tiempo de espera antes de alcanzar el umbral de votación, el estado de la propuesta cambia a +FAILED+, lo que indica una propuesta rechazada. Las propuestas +FAILED+ permanecen en ese estado perpetuamente.
+
+[[bip9states]]
+.Diagrama de transición de estado del protocolo BIP-9
+image::images/mbc2_1010.png[Diagrama de transición de estados para propuestas BIP-9]
+
+BIP-9 se implementó por primera vez para la activación de +CHECKSEQUENCEVERIFY+ y los BIP asociados (los BIP número 68, 112 y 113). La propuesta, que se denominó "csv", se activó con éxito en julio de 2016.((("", startref="forks10a")))
+
+El estándar se define en https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki[BIP-9 (bits de versión con tiempos de espera y retraso)].
+
+=== Desarrollo de Software de Consenso
+
+((("minería y consenso", "desarrollo de software en consenso")))((("entorno de desarrollo","desarrollo de software de consenso")))El software de consenso continúa evolucionando y hay mucha discusión sobre los diversos mecanismos para cambiar las reglas de consenso. Por su propia naturaleza, bitcoin establece una barrera muy alta en lo tocante a la coordinación y el consenso para los cambios. Como sistema descentralizado, no tiene ninguna "autoridad" que pueda imponer su voluntad a los participantes de la red. El poder se distribuye entre múltiples grupos, como mineros, desarrolladores principales, desarrolladores de billeteras, casas de cambio, comerciantes y usuarios finales. Ninguna de estas agrupaciones puede tomar decisiones unilateralmente. Por ejemplo, si bien los mineros pueden cambiar teóricamente las reglas por mayoría simple (51%), están limitados por el consentimiento de los otros constituyentes. Si actúan unilateralmente, el resto de los participantes simplemente pueden negarse a seguirlos, manteniendo la actividad económica en una cadena minoritaria. Sin actividad económica (transacciones, comerciantes, billeteras, casas de cambio), los mineros acuñarían una moneda sin valor con bloques vacíos. Esta distribución en el poder significa que todos los participantes deben coordinarse, o no se pueden hacer cambios. El status quo es representado por un estado estable de este sistema con solo unos pocos cambios posibles si existe un fuerte consenso de una gran mayoría. El umbral del 95% para las bifurcaciones suaves refleja esta realidad.
+
+((("bifurcaciones fuertes")))Es importante reconocer que no existe una solución perfecta para el desarrollo en consenso. Tanto las bifurcaciones fuertes como las bifurcaciones suaves implican el hacer diversas concesiones. Para algunos tipos de cambios, las bifurcaciones suaves pueden ser una mejor opción; Para otros, las bifurcaciones fuertes pueden ser una mejor opción. No hay una elección perfecta; Ambas conllevan riesgos. La única característica constante del desarrollo de software en consenso es que el cambio es difícil y el consenso obliga a comprometerse.
+
+Algunos ven esto como una debilidad de los sistemas de consenso. Con el tiempo, Ud. puede llegar a verlos como yo, como la mayor fortaleza del sistema.

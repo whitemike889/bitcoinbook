@@ -1,0 +1,117 @@
+[[appdx_bitcore]]
+[appendix]
+
+== Bitcore
+
+
+((("Bitcore", id="bitcore16")))Bitcore este o suită de instrumente oferite de BitPay. Scopul ei este să ofere instrumente ușor de folosit pentru programatorii Bitcoin. Aproape tot codul Bitcore este scris în JavaScript. Există unele module scrise special pentru NodeJS. Modulul ”nod” al Bitcore include codul C++ al Bitcoin Core. Vă rugăm vizitați https://bitcore.io pentru mai multe informații.
+
+=== Lista de Funcționalități Bitcore
+
+* Nod-complet bitcoin (bitcore-node)
+* Explorator de blocuri (insight)
+* Utilitare pentru blocuri, tranzacții, și portofel (bitcore-lib)
+* Comunicarea directă cu rețeaua de-la-egal-la-egal bitcoin (bitcore-p2p)
+* Generare entropie pentru sămânță mnemonică (bitcore-mnemonic)
+* Protocol de plată (bitcore-payment-protocol)
+* Verificarea și semnarea mesajelor (bitcore-message)
+* Schemă de Criptare Integrată pentru Curba Eliptică (bitcore-ecies)
+* Serviciu portofel (bitcoin-wallet-service)
+* Client portofel (bitcore-wallet-client)
+* Playground (bitcore-playground)
+* Integrarea serviciilor direct cu Bitcoin Core (bitcore-node)
+
+=== Exemple din Biblioteca Bitcore
+
+==== Cerințe Preliminare
+
+* NodeJS&gt; = 4.x sau folosiți site-ul https://bitcore.io/playground[de experimenare online]
+
+Dacă utilizați NodeJS și nodul REPL:
+
+[source,bash]
+----
+$ npm install -g bitcore-lib bitcore-p2p
+----
+
+==== Exemple de Portofel folosind bitcore-lib
+
+Crearea unei noi adrese bitcoin cu cheia privată asociată:
+
+----
+> bitcore = require('bitcore-lib')
+> privateKey = new bitcore.PrivateKey()
+> address = privateKey.toAddress().toString()
+----
+
+Crearea unei chei private deterministe ierarhic și a adresei:
+
+----
+> hdPrivateKey = bitcore.HDPrivateKey()
+> hdPublicKey = bitcore.HDPublicKey(hdPrivateKey)
+> hdAddress = new bitcore.Address(hdPublicKey.publicKey).toString()
+----
+
+Crearea și semnarea unei tranzacții de la un UTXO:
+
+----
+> utxo = {
+  txId: transaction id containing an unspent output,
+  outputIndex: output index e.g. 0,
+  address: addressOfUtxo,
+  script: bitcore.Script.buildPublicKeyHashOut(addressOfUtxo).toString(),
+  satoshis: amount sent to the address
+}
+> fee = 3000 //set appropriately for conditions on the network
+> tx = new bitcore.Transaction()
+        .from(utxo)
+        .to(address, 35000)
+        .fee(fee)
+        .enableRBF()
+        .sign(privateKeyOfUtxo)
+----
+
+Înlocuiți ultima tranzacție din mempool pe baza comisionului (replace-by-fee):
+
+----
+> rbfTx = new Transaction()
+           .from(utxo)
+           .to(address, 35000)
+           .fee(fee*2)
+           .enableRBF()
+           .sign(privateKeyOfUtxo);
+> tx.serialize();
+> rbfTx.serialize();
+----
+
+Difuzarea unei tranzacții către rețeaua bitcoin
+(notă: difuzați numai tranzacții valide; consultați https://bitnodes.21.co/nodes[] pentru gazdele de-la-egal-la-egal):
+
+1. Copiați codul de mai jos într-un fișier numit _broadcast.js_.
+2. Variabilele +tx+ și +rbfTx+ sunt ieșirea din +tx.serialize()+ și +rbfTx.serialize()+.
+3. Pentru a înlocui comisionul (replace-by-fee), seamănul (peer) din rețea trebuie să suporte opțiunea +mempoolreplace+ a bitcoind și să o aibă setată pe +1+.
+4. Rulați fișerul node _broadcast.js_((("", startref="bitcore16"))):
+
+----
+var p2p = require('bitcore-p2p');
+var bitcore = require('bitcore-lib');
+var tx = new bitcore.Transaction('output from serialize function');
+var rbfTx = new bitcore.Transaction('output from serialize function');
+var host = 'ip address'; //use valid peer listening on tcp 8333
+var peer = new p2p.Peer({host: host});
+var messages = new p2p.Messages();
+peer.on('ready', function() {
+  var txs = [messages.Transaction(tx), messages.Transaction(rbfTx)];
+  var index = 0;
+  var interval = setInterval(function() {
+    peer.sendMessage(txs[index++]);
+    console.log('tx: ' + index + ' sent');
+    if (index === txs.length) {
+      clearInterval(interval);
+      console.log('disconnecting from peer: ' + host);
+      peer.disconnect();
+    }
+  }, 2000);
+});
+peer.connect();
+----

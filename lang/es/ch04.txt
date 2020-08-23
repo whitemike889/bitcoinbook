@@ -1,0 +1,836 @@
+[[ch04_keys_addresses]]
+== Llaves, Direcciones
+
+((("criptografía", "definición")))((("criptografía", see="también llaves y direcciones")))Es posible que hayas escuchado que bitcoin se basa en _criptografía_, que es una rama de las matemáticas que se usa ampliamente en seguridad informática. Criptografía significa "escritura secreta" en griego, pero la ciencia de la criptografía abarca más que la escritura secreta, que se conoce como cifrado. La criptografía también se puede usar para probar el conocimiento de un secreto sin revelar ese secreto (firma digital), o para probar la autenticidad de los datos (huella digital). Estos tipos de pruebas criptográficas son herramientas matemáticas críticas para bitcoin y se utilizan ampliamente en aplicaciones de bitcoin. ((("cifrado")))((("cifrado", see="también llaves y direcciones")))Irónicamente, el cifrado no es una parte importante de bitcoin, ya que sus datos de comunicaciones y transacciones no están cifrados y no necesitan estar cifrados para proteger los fondos. En este capítulo presentaremos algunos de los elementos de criptografía que se utilizan en bitcoin para controlar la propiedad de los fondos, en forma de llaves, direcciones y carteras.
+
+=== Introducción
+
+((("llaves digitales", see="llaves y direcciones")))((("llaves y direcciones", "descripción general de", id="KAover04")))((("firmas digitales", "propósito de")))La propiedad de bitcoin se establece a través de _llaves digitales_, _direcciones bitcoin_ y _firmas digitales_. Las llaves digitales no se almacenan realmente en la red, sino que los usuarios las crean y almacenan en un archivo o simple base de datos, denominada _cartera_. Las llaves digitales en la cartera de un usuario son completamente independientes del protocolo bitcoin y pueden ser generadas y administradas por el software de la cartera del usuario sin referencia alguna a la cadena de bloques o acceso a internet. Las llaves permiten muchas de las propiedades interesantes de bitcoin, incluidas la confianza descentralizada y el control, comprobación de propiedad y el modelo de seguridad de resistencia criptográfica.
+
+La mayoría de las transacciones de bitcoin requieren una firma digital válida para ser incluidas en la cadena de bloques, que solo se pueden generar con una llave secreta; por lo tanto, cualquier persona con una copia de esa llave tiene el control del bitcoin. ((("testigos")))La firma digital utilizada para gastar fondos también se conoce como _testigo_ (en inglés, _witness_), un término usado en criptografía. Los datos testigo en una transacción bitcoin certifican la verdadera propiedad de los fondos que se están gastando.
+
+((("llaves públicas y privadas", "par de llaves")))((("llaves públicas y privadas", see="también llaves y direcciones")))Las llaves vienen en pares que consisten en una llave privada (secreta) y una llave pública. Imagina que la llave pública es similar a un número de cuenta bancaria y que la llave privada es similar al PIN secreto, o la firma en un cheque que proporciona control sobre la cuenta. Estas llaves digitales rara vez son vistas por los usuarios de bitcoin. Normalmente se almacenan dentro del archivo de cartera y son administrados por el software de cartera de bitcoin.
+
+En la parte del pago de una transacción de bitcoin, la llave pública del destinatario está representada por su huella digital, denominada _dirección bitcoin_, que se usa de la misma manera que el nombre del beneficiario en un cheque (es decir, "Páguese a la orden de") . En la mayoría de los casos, una dirección bitcoin se genera a partir de y corresponde a una llave pública. Sin embargo, no todas las direcciones bitcoin representan llaves públicas; también pueden representar otros beneficiarios, como scripts, como veremos más adelante en este capítulo. De esta manera, las direcciones bitcoin abstraen al destinatario de fondos, flexibilizando el destino de las transacciones, de forma similar a los cheques de papel: un único instrumento de pago que puede ser usado para pagar a cuentas de personas, de empresas, pagar facturas o pagar con efectivo. La dirección bitcoin es la única representación de las llaves que los usuarios verán habitualmente, ya que esta es la parte que necesitan compartir con el mundo.
+
+Primero, presentaremos la criptografía y explicaremos las matemáticas utilizadas en bitcoin. A continuación, veremos cómo se generan, almacenan y administran las llaves. Revisaremos los diversos formatos de codificación utilizados para representar llaves privadas y públicas, direcciones, y direcciones de script. Finalmente, veremos el uso avanzado de las llaves y direcciones: vanidad, multifirma, y direcciones de script y carteras de papel.
+
+==== Criptografía de Llave Pública y Criptomonedas
+
+((("llaves y direcciones", "descripción general de", "criptografía de llave pública")))((("monedas digitales", "criptomoneda")))La criptografía de llave pública se inventó en la década de 1970 y es la base matemática para la seguridad informática y de la información.
+
+Desde la invención de la criptografía de llave pública, se han descubierto varias funciones matemáticas adecuadas, como la exponenciación de números primos y la multiplicación de curva elíptica. Estas funciones matemáticas son prácticamente irreversibles, lo que significa que son fáciles de calcular en una dirección e inviables de calcular en la dirección opuesta. Sobre la base de estas funciones matemáticas, la criptografía permite la creación de secretos digitales y firmas digitales infalsificables. Bitcoin utiliza la multiplicación de curva elíptica como base para su criptografía.
+
+En bitcoin, utilizamos la criptografía de llave pública para crear un par de llaves que controla el acceso a bitcoin. El par de llaves consiste en una llave privada y, derivada de ella, una llave pública única. La llave pública se utiliza para recibir fondos, y la llave privada se usa para firmar transacciones para gastar los fondos.
+
+Existe una relación matemática entre las llaves pública y privada que permiten que la llave privada sea utilizada para generar firmas en mensajes. Estas firmas pueden ser validadas contra la llave pública sin necesidad de revelar la llave privada.
+
+Cuando los bitcoin son gastados, el dueño actual de los bitcoin presenta su llave pública y firma (diferente cada vez, pero creada a partir de la misma llave privada) en una transacción para gastar esos bitcoin. A través de la presentación de la llave pública y la firma, todos los participantes de la red bitcoin pueden verificar y aceptar la transacción como válida, confirmando que la persona que transfirió el bitcoin era la propietaria en el momento de la transferencia.
+
+[TIP]
+====
+((("llaves y direcciones", "descripción general de", "pares de llaves")))En la mayoría de las implementaciones de carteras, las llaves privadas y públicas se almacenan juntas como un _par de llaves_ para mayor comodidad. Sin embargo, la llave pública se puede calcular a partir de la llave privada, por lo que también es posible almacenar solo la llave privada.
+====
+
+[[private_public_keys]]
+==== Llaves Privadas y Públicas
+
+((("llaves y direcciones", "descripción general", "pares de llaves privadas y públicas")))((("criptografía de curva elíptica")))((("criptografía", "criptografía de curva elíptica")))Una cartera bitcoin contiene una colección de pares de llaves, cada uno de las cuales consta de una llave privada y una pública. La llave privada (k) es un número, generalmente escogido aleatoriamente. A partir de la llave privada, utilizamos multiplicación de curva elíptica, una función criptográfica de sentido único, para generar una llave pública (K). A partir de la llave pública (K), usamos una función hash criptográfica de sentido único para generar una dirección bitcoin (A). En esta sección, comenzaremos con la generación de la llave privada, veremos las matemáticas de curva elíptica que se usa para convertirla en una llave pública y, finalmente generar una dirección bitcoin a partir de la llave pública. La relación entre la llave privada, la llave pública y la dirección bitcoin se muestra en <<k_to_K_to_A>>.
+
+[[k_to_K_to_A]]
+.Llave privada, llave pública y dirección bitcoin
+image::images/mbc2_0401.png["privk_to_pubK_to_addressA"]
+
+.¿Por Qué Usar Criptografía Asimétrica (Llaves Públicas/Privadas)?
+****
+((("asimétrica", "criptografía")))((("firmas digitales", "criptografía asimétrica y")))((("criptografía asimétrica")))¿Por qué se utiliza la criptografía asimétrica en bitcoin? No se utiliza para "cifrar" (hacer secretas) las transacciones. Más bien, la propiedad útil de la criptografía asimétrica es la capacidad de generar firmas digitales. Se puede aplicar una llave privada a la huella digital de una transacción para producir una firma numérica. Esta firma solo puede ser producida por alguien con conocimiento de la llave privada. Sin embargo, cualquier persona con acceso a la llave pública y la huella digital de la transacción puede usarla para verificar la firma. Esta útil propiedad de la criptografía asimétrica hace posible que cualquier persona pueda verificar cada firma en cada transacción, mientras se asegura que solo los propietarios de llaves privadas puedan producir firmas válidas.
+****
+
+[[private_keys]]
+==== Llaves Privadas
+
+((("llaves y direcciones", "descripción general de", "generación de llaves privadas")))((("avisos y precauciones", "protecciones de llaves privadas")))Una llave privada es simplemente un número, escogido al azar. La propiedad y el control sobre la llave privada es la raíz del control del usuario sobre todos los fondos asociados con la dirección bitcoin correspondiente. La llave privada se usa para crear las firmas requeridas para gastar bitcoin al demostrar la propiedad de los fondos utilizados en una transacción. La llave privada debe permanecer en secreto en todo momento, ya que revelarla a terceros equivale a darles el control sobre el bitcoin asegurado por esa llave. También deben hacerse copias de respaldo de la llave privada para protegerla de pérdidas accidentales, ya que si se pierde, no se puede recuperar y los fondos asegurados por ella también se pierden para siempre.
+
+[TIP]
+====
+La llave privada de bitcoin es solo un número. Puedes elegir tus llaves privadas al azar usando únicamente una moneda, lápiz y papel: lanza una moneda 256 veces y tendrás los dígitos binarios de una llave privada aleatoria que puedes usar en una cartera bitcoin. La llave pública se puede generar después a partir de la llave privada.
+====
+
+===== Generando una llave privada a partir de un número aleatorio
+
+El primer paso y el más importante para generar llaves es encontrar una fuente segura de entropía o aleatoriedad. Crear una llave de bitcoin es esencialmente lo mismo que "Elija un número entre 1 y 2^256^". El método exacto utilizado para elegir ese número no importa siempre que no sea predecible o repetible. El software bitcoin utiliza los generadores de números aleatorios del sistema operativo subyacente para producir 256 bits de entropía (aleatoriedad). Usualmente, el generador de números aleatorios del sistema operativo se inicializa mediante una fuente humana de aleatoriedad, por lo que puede que se te solicite que muevas el ratón durante unos segundos.
+
+Más precisamente, la llave privada puede ser cualquier número entre +0+ y +n - 1+ inclusive, donde n es una constante (n = 1.1578 * 10^77^, ligeramente menor que 2^256^) definida como el orden de la curva elíptica utilizada en bitcoin (ver <<elliptic_curve>>). Para crear tal llave, elegimos aleatoriamente un número de 256 bits y verificamos que sea menor que +n+. En términos de programación, esto generalmente se logra cuando una cadena más grande de bits aleatorios recopilados desde una fuente de aleatoriedad criptográficamente segura, se alimenta en el algoritmo de hash SHA256, que producirá convenientemente un número de 256 bits. Si el resultado es menor que +n+, hemos obtenido una llave privada apropiada. De lo contrario, simplemente lo intentamos de nuevo con otro número aleatorio.
+
+[WARNING]
+====
+((("números aleatorios", "generación de números aleatorios")))((("entropía", "generación de números aleatorios")))No escribas tu propio código para generar un número aleatorio ni uses un generador de números aleatorios "simple" ofrecido por tu lenguaje de programación. Utiliza un generador de números pseudoaleatorios criptográficamente seguro (CSPRNG) con una semilla a partir de una fuente de entropía suficiente. Estudia la documentación de la biblioteca del generador de números aleatorios que elijas para asegurarte de que sea criptográficamente seguro. La correcta implementación de los CSPRNG es fundamental para la seguridad de las llaves.
+====
+
+La siguiente es una llave privada (k) generada aleatoriamente que se muestra en formato hexadecimal (256 bits se muestran como 64 dígitos hexadecimales, cada uno de 4 bits):
+
+----
+1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD
+----
+
+
+[TIP]
+====
+El tamaño del espacio de llaves privadas de bitcoin, (2^256^) es un número inimaginablemente grande. Es aproximadamente 10^77^ en decimal. A modo de comparación, se estima que el universo visible contiene 10^80^ átomos.
+====
+
+((("comando dumpprivkey")))Para generar una llave nueva con el Cliente Principal de Bitcoin (ver <<ch03_bitcoin_client>>), usa el comando +getnewaddress+. Por razones de seguridad, solo muestra la llave pública, no la llave privada. Para pedir a +bitcoind+ que muestre la llave privada, usa el comando +dumpprivkey+. El comando +dumpprivkey+ muestra la llave privada en un formato Base58 que incorpora un checksum, llamado _Wallet Import Format_ (WIF), y que examinaremos con más detalle en <<priv_formats>>. Aquí hay un ejemplo de cómo generar y mostrar una llave privada usando estos dos comandos:
+
+----
+$ bitcoin-cli getnewaddress
+1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+$ bitcoin-cli dumpprivkey 1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+----
+
+El comando +dumpprivkey+ abre la cartera y extrae la llave privada generada por el comando +getnewaddress+. No es posible que +bitcoind+ conozca la llave privada de la llave pública a menos que ambas estén almacenadas en la cartera.
+
+[TIP]
+=====================================================================
+El comando +dumpprivkey+ no genera una llave privada a partir de una llave pública, ya que esto es imposible. El comando simplemente revela la llave privada que ya es conocida por la cartera y que fue generada por el comando +getnewaddress+.
+=====================================================================
+
+[role="pagebreak-before"]
+También puedes usar la herramienta de línea de comandos del Explorador de Bitcoin (ver <<appdx_bx>>) para generar y mostrar llaves privadas con los comandos +seed+, +ec-new+, y +ec-to-wif+:
+
+----
+$ bx seed | bx ec-new | bx ec-to-wif
+5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+----
+
+[[pubkey]]
+==== Llaves Públicas
+
+((("llaves y direcciones", "descripción general de", "cálculo de llave pública")))((("punto generador")))La llave pública se calcula a partir de la llave privada mediante la multiplicación de curva elíptica, que es irreversible: _K_ = _k_ * _G_, donde _k_ es la llave privada, _G_ es un punto constante llamado _punto generador_, y _K_ es la llave pública resultante. La operación inversa, conocida como "encontrar el logaritmo discreto" —calcular _k_ si se sabe __K __— es tan difícil como probar con todos los valores posibles de _k_, es decir, una búsqueda por fuerza bruta. Antes de mostrar cómo generar una llave pública a partir de una llave privada, veamos la criptografía de curva elíptica con un poco más de detalle.
+
+[TIP]
+====
+La multiplicación de curva elíptica es un tipo de función que los criptógrafos llaman una función de "trampilla": es fácil de hacer en una dirección (multiplicación) e imposible de hacer en la dirección inversa (división). El propietario de la llave privada puede crear fácilmente la llave pública y luego compartirla con todo el mundo sabiendo que nadie puede revertir la función y calcular la llave privada a partir de la llave pública. Este truco matemático es la base de las firmas digitales infalsificables y seguras que atestiguan la propiedad de los fondos de bitcoin.
+====
+
+[[elliptic_curve]]
+==== Criptografía de Curva Elíptica Explicada
+
+((("llaves y direcciones", "descripción general de", "criptografía de curva elíptica")))((("criptografía de curva elíptica", id="eliptic04")))((("criptografía", "criptografía de curva elíptica", id="Celliptic04")))La criptografía de curva elíptica es un tipo de criptografía asimétrica o de llave pública basada en el problema del logaritmo discreto expresado por suma y multiplicación sobre puntos de una curva elíptica.
+
+<<ecc-curve>> es un ejemplo de una curva elíptica, similar a las usadas por bitcoin.
+
+[[ecc-curve]]
+[role="smallerthirty"]
+.Una curva elíptica
+image::images/mbc2_0402.png["ecc-curve"]
+
+Bitcoin usa una curva elíptica específica y un conjunto de constantes matemáticas definidas en un estándar llamado +secp256k1+, establecido por el Instituto Nacional de Estándares y Tecnología (National Institute of Standards and Technology, o NIST). La curva +secp256k1+ se define mediante la siguiente función, la cual produce una curva elíptica:
+
+[latexmath]
+++++
+\begin{equation}
+{y^2 = (x^3 + 7)}~\text{over}~(\mathbb{F}_p)
+\end{equation}
+++++
+
+ó
+
+[latexmath]
+++++
+\begin{equation}
+{y^2 \mod p = (x^3 + 7) \mod p}
+\end{equation}
+++++
+
+El _mod p_ (módulo del número primo p) indica que esta curva se encuentra sobre un campo finito de orden primo _p_, también escrito como latexmath:[\( \mathbb{F}_p \)], donde p = 2^256^ – 2^32^ – 2^9^ – 2^8^ – 2^7^ – 2^6^ – 2^4^ – 1, un número primo muy grande.
+
+Debido a que esta curva se define sobre un campo finito de orden primo en vez de sobre los números reales, se ve como un patrón de puntos dispersos en dos dimensiones, lo que dificulta su visualización. Sin embargo, las matemáticas son idénticas a las de una curva elíptica sobre números reales. Como ejemplo, <<ecc-over-F17-math>> muestra la misma curva elíptica en un campo finito mucho más pequeño de orden primo 17, mostrando un patrón de puntos sobre una cuadrícula. La curva elíptica de bitcoin +secp256k1+ se puede considerar como un patrón de puntos mucho más complejo sobre una cuadrícula inconmensurablemente grande.
+
+[[ecc-over-F17-math]]
+[role="smallersixty"]
+.Criptografía de curva elíptica: visualizando una curva elíptica sobre F(p), con p=17
+image::images/mbc2_0403.png["ecc-over-F17-math"]
+
+Así que, por ejemplo, lo siguiente es un punto P con coordenadas (x,y) que es un punto en la curva +secp256k1+:
+
+----
+P = (55066263022277343669578718895168534326250603453777594175500187360389116729240, 32670510020758816978083085130507043184471273380659243275938904335757337482424)
+----
+
+<<example_4_1>> muestra cómo puedes comprobarlo tú mismo usando Python:
+
+[[example_4_1]]
+.Usando Python para confirmar que este punto está en la curva elíptica
+====
+[source, pycon]
+----
+Python 3.4.0 (default, Mar 30 2014, 19:23:13)
+[GCC 4.2.1 Compatible Apple LLVM 5.1 (clang-503.0.38)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+>>> x = 55066263022277343669578718895168534326250603453777594175500187360389116729240
+>>> y = 32670510020758816978083085130507043184471273380659243275938904335757337482424
+>>> (x ** 3 + 7 - y**2) % p
+0
+----
+====
+
+En las matemáticas de curva elíptica, hay un punto llamado "punto en el infinito", que se corresponde aproximadamente con el rol de cero en la suma. En las computadoras, a veces se representa con x = y = 0 (lo que no satisface la ecuación de curva elíptica, pero es un caso aislado simple que se puede verificar).
+
+Existe también un operador pass:[+], llamado "suma", que tiene algunas propiedades similares a la suma tradicional de números reales que aprenden los niños en la escuela. Dados dos puntos P~1~ y P~2~ en la curva elíptica, hay un tercer punto P~3~ = P~1~ + P~2~, también en la curva elíptica.
+
+Geométricamente, este tercer punto  P~3~ es calculado dibujando una línea entre P~1~ y P~2~. Esta línea intersecará la curva elíptica en exactamente un punto adicional. Llamemos a este punto P~3~' = (x, y). Luego reflejamos el eje x para obtener P~3~ = (x, –y).
+
+Existen un par de casos especiales que explican la necesidad del "punto en el infinito".
+
+Si P~1~ y P~2~ son el mismo punto, la línea "entre" P~1~ y P~2~ debe extenderse para ser la tangente sobre la curva en el punto P~1~. Esta tangente intersecará la curva en exactamente un nuevo punto. Puedes usar técnicas de cálculo para determinar la pendiente de la línea tangencial. Estas técnicas curiosamente funcionan a pesar de estar restringiendo nuestro interés a puntos sobre la curva con coordenadas de dos enteros.
+
+En algunos casos (esto es, si P~1~ y P~2~ tienen el mismo valor en x pero distinto valor en y) la línea tangente será exactamente vertical, en cuyo caso P3 = "punto en el infinito."
+
+Si P~1~ es el "punto en el infinito", entonces P~1~ + P~2~ = P~2~. De manera similar, si P~2~ es el punto en el infinito, entonces P~1~ + P~2~ = P~1~. Esto muestra cómo el punto en el infinito desempeña el rol de cero.
+
+Resulta que el pass:[+] es asociativo, lo que significa que (A pass:[+] B) pass:[+] C = A pass:[+] (B pass:[+] C). Eso significa que podemos escribir A pass:[+] B pass:[+] C sin paréntesis y sin ambigüedad.
+
+Ahora que hemos definido la suma, podemos definir la multiplicación en la forma estándar en que extiende a la suma. Para un punto P en la curva elíptica, si k es un número entero, entonces kP = P + P + P + ... + P (k veces). Nótese que k es a veces llamado un "exponente" en este caso, lo cual puede causar confusión.((("", startref="eliptic04")))((("", startref="Celliptic04")))
+
+[[public_key_derivation]]
+==== Generando una Llave Pública
+
+((("llaves y direcciones", "descripción general de", "generación de llave pública")))((("punto generador")))Comenzando con una llave privada en la forma de un número _k_ generado aleatoriamente, lo multiplicamos por un punto predeterminado en la curva llamado _punto generador_ _G_ para producir otro punto en otro lugar en la curva, que es la llave pública correspondiente _K_. El punto generador se especifica como parte del estándar +secp256k1+ y siempre es el mismo para todas las llaves en bitcoin:
+
+[latexmath]
+++++
+\begin{equation}
+{K = k * G}
+\end{equation}
+++++
+
+donde _k_ es la llave privada, _G_ es el punto generador y _K_ es la llave pública resultante, un punto en la curva. Debido a que el punto generador siempre es el mismo para todos los usuarios de bitcoin, una llave privada _k_ multiplicada por _G_ siempre dará como resultado la misma llave pública _K_. La relación entre _k_ y _K_ es fija, pero solo se puede calcular en una dirección, desde _k_ a _K_. Es por eso que una dirección bitcoin (derivada de _K_) se puede compartir con cualquier persona y no revela la llave privada del usuario (_k_).
+
+[TIP]
+====
+Una llave privada puede ser convertida a una llave pública, pero una llave pública no puede ser convertida en una llave privada ya que la matemática solo funciona en un sentido.
+====
+
+Para implementar la multiplicación de curva elíptica, tomamos la llave privada _k_ generada previamente y la multiplicamos por el punto generador G para encontrar la llave pública _K_:
+
+----
+K = 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD * G
+----
+
+La llave pública _K_ se define como un punto +K = (x,y)+:
+
+----
+K = (x, y)
+
+donde,
+
+x = F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+y = 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+----
+
+Para visualizar la multiplicación de un punto con un número entero, usaremos la curva elíptica más simple sobre los números reales&#x2014;recuerda, la matemática es la misma. Nuestro objetivo es encontrar el múltiplo _kG_ del punto generador _G_, que es lo mismo que agregar _G_ a sí mismo, _k_ veces seguidas. En las curvas elípticas, sumar un punto a sí mismo es el equivalente a dibujar una línea tangente en el punto y encontrar dónde interseca la curva nuevamente, y luego reflejar ese punto en el eje x.
+
+<<ecc_illustrated>> muestra el proceso de derivar _G_, _2G_, _4G_, como una operación geométrica en la curva.
+
+[TIP]
+====
+((("biblioteca C optimizada de secp256k1")))Bitcoin utiliza la https://github.com/bitcoin-core/secp256k1[secp256k1 optimized C library] para hacer los cálculos matemáticos de curva elíptica.((("", startref="KAover04")))
+====
+
+[[ecc_illustrated]]
+.Criptografía de curva elíptica: visualizando la multiplicación de un punto G por un entero k en una curva elíptica
+image::images/mbc2_0404.png["ecc_illustrated"]
+
+=== Direcciones Bitcoin
+
+((("direcciones y llaves", "direcciones bitcoin", id="KAaddress04")))Una dirección bitcoin es una cadena de dígitos y caracteres que se puede compartir con cualquier persona que desee enviarte dinero. Las direcciones producidas a partir de llaves públicas consisten en una serie de números y letras, que comienzan con el dígito "1". Aquí hay un ejemplo de una dirección bitcoin:
+
+----
+1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+----
+
+
+La dirección bitcoin es lo que aparece más comúnmente en una transacción como el "destinatario" de los fondos. Si comparamos una transacción de bitcoin con un cheque en papel, la dirección bitcoin es el beneficiario, que es lo que escribimos en la línea después de "Páguese a la orden de". En un cheque en papel, ese beneficiario a veces puede ser el nombre del titular de una cuenta bancaria, pero también puede incluir empresas, instituciones o incluso efectivo. Debido a que los cheques en papel no necesitan especificar una cuenta, sino que usan un nombre abstracto como destinatario de los fondos, son instrumentos de pago muy flexibles. Las transacciones de bitcoin utilizan una abstracción similar, la dirección bitcoin, para hacerlas muy flexibles. Una dirección bitcoin puede representar al propietario de un par de llaves privada/pública, o puede representar otra cosa, como un script de pago, como veremos en <<p2sh>>. Por ahora, examinemos el caso simple, una dirección bitcoin que representa, y se deriva de, una llave pública.
+
+((("direcciones", "algoritmos utilizados para crear")))La dirección bitcoin se deriva de la llave pública mediante el uso de un hash criptográfico unidireccional. Un "algoritmo de cálculo de hash" o simplemente "algoritmo hash" es una función unidireccional que produce una huella digital o "hash" de una entrada de tamaño arbitrario. Las funciones hash criptográficas se utilizan ampliamente en bitcoin: en direcciones bitcoin, en direcciones de script y en el algoritmo de Prueba-de-Trabajo de minería. Los algoritmos utilizados para crear una dirección bitcoin desde una llave pública son el Secure Hash Algorithm (SHA) y el RACE Integrity Primitives Evaluation Message Digest (RIPEMD), específicamente SHA256 y RIPEMD160.
+
+A partir de la llave pública _K_, calculamos el hash SHA256 y después calculamos el hash RIPEMD160 del resultado, produciendo un número de 160 bits (20 bytes):
+
+[latexmath]
+++++
+\begin{equation}
+{A = RIPEMD160(SHA256(K))}
+\end{equation}
+++++
+
+donde _K_ es la llave pública y _A_ es la dirección bitcoin resultante.
+
+
+[TIP]
+====
+Una dirección bitcoin _no_ es lo mismo que una llave pública. Las direcciones bitcoin se derivan de una llave pública utilizando una función unidireccional.
+====
+
+Las direcciones bitcoin casi siempre están codificadas como "Base58Check" (ver <<base58>>), que utiliza 58 caracteres (un sistema numérico Base58) y un checksum para ayudar a la legibilidad humana, evitar la ambigüedad y proteger contra errores en la transcripción y tecleo de direcciones. También se usa Base58Check de muchas otras formas en bitcoin, siempre que sea necesario que un usuario lea y transcriba correctamente un número, como una dirección bitcoin, una llave privada, una llave cifrada o un hash de script. En la siguiente sección examinaremos la mecánica de la codificación y decodificación de Base58Check y las representaciones resultantes. <<pubkey_to_address>> ilustra la conversión de una llave pública en una dirección bitcoin.
+
+[[pubkey_to_address]]
+.Llave pública a dirección bitcoin: conversión de una llave pública en una dirección bitcoin
+image::images/mbc2_0405.png["pubkey_to_address"]
+
+[[base58]]
+==== Codificación Base58 y Base58Check
+
+((("llaves y direcciones", "direcciones bitcoin", "codificación Base58 y Base58check")))((("Base58 y Base58check, codificación", id="base5804")))((("direcciones", "codificación Base58 y Base58check", id="Abase5804")))Para representar números largos de forma compacta, usando menos símbolos, muchos sistemas informáticos utilizan representaciones alfanuméricas mixtas con una base (o radix) superior a 10. Por ejemplo, mientras que el sistema decimal tradicional utiliza los 10 números del 0 al 9, el sistema hexadecimal usa 16, con las letras de la A a la F como los seis símbolos adicionales. Un número representado en formato hexadecimal es más corto que la representación decimal equivalente. Aún más compacta, la representación en Base64 usa 26 letras minúsculas, 26 letras mayúsculas, 10 números y 2 caracteres más, como &#x201c;`+`&#x201d; y "/" para transmitir datos binarios a través de medios basados ​​en texto, como el correo electrónico. Base64 se usa comúnmente para adjuntar archivos binarios al correo electrónico. Base58 es un formato de codificación binaria basado en texto desarrollado para su uso en bitcoin y utilizado en muchas otras criptomonedas. Ofrece un equilibrio entre la representación compacta, la legibilidad y la detección y prevención de errores. Base58 es un subconjunto de Base64, que usa letras y números en mayúsculas y minúsculas, pero omite algunos caracteres que con frecuencia se confunden entre sí y pueden parecer idénticos cuando se muestran en ciertas fuentes. Específicamente, Base58 es Base64 sin el 0 (número cero), O (o mayúscula), l (L minúscula), I (i mayúscula) y los símbolos &#x201c;`+`&#x201d; y "/". Puesto de forma más sencilla, es un conjunto de letras minúsculas y mayúsculas y números, sin los cuatro (0, O, l, I) mencionados. <<base58alphabet>> muestra el alfabeto Base58 completo.
+
+[[base58alphabet]]
+.Alfabeto Base58 de bitcoin
+====
+----
+123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
+----
+====
+
+
+Para agregar seguridad adicional contra errores tipográficos o de transcripción, Base58Check es un formato de codificación de Base58, usado frecuentemente en bitcoin, el cual tiene un código de verificación de errores incorporado. El checksum consiste en cuatro bytes adicionales agregados al final de los datos que se están codificando. El checksum se deriva del hash de los datos codificados y, por lo tanto, se puede utilizar para detectar y prevenir errores de transcripción y de tecleo. Cuando se presenta un código Base58Check, el software de decodificación calculará el checksum de los datos y lo comparará con el checksum incluido en el código. Si no son idénticos, se ha introducido un error y los datos de Base58Check no son válidos. Esto evita que una dirección bitcoin mal escrita sea aceptada por el software de la cartera como un destino válido, un error que de lo contrario resultaría en la pérdida de fondos.
+
+Para convertir datos (un número) al formato Base58Check, primero agregamos un prefijo a los datos, llamado "byte de versión", que sirve para identificar fácilmente el tipo de datos que están codificados. Por ejemplo, en el caso de una dirección bitcoin, el prefijo es cero (0x00 en hexadecimal), mientras que el prefijo utilizado para codificar una llave privada es 128 (0x80 en hexadecimal). Se muestra una lista de los prefijos de versión comunes en <<base58check_versions>>.
+
+A continuación computamos el checksum "doble SHA", lo que significa que aplicamos el algoritmo de hash SHA256 dos veces sobre resultado previo (prefijo y datos):
+
+----
+checksum = SHA256(SHA256(prefijo+datos))
+----
+
+Del hash de 32 bytes resultante (hash-de-un-hash), tomamos solo los primeros cuatro bytes. Estos cuatro bytes sirven como código de comprobación de errores o checksum. El checksum se concatena (se anexa) al final.
+
+El resultado está compuesto de tres elementos: un prefijo, los datos y un checksum. Este resultado es codificado usando el alfabeto Base58 descrito anteriormente. <<base58check_encoding>> ilustra el proceso de codificación Base58Check.
+
+[[base58check_encoding]]
+.Codificación Base58Check: un formato Base58, con versión y checksum para codificar datos bitcoin sin ambigüedades
+image::images/mbc2_0406.png["Base58CheckEncoding"]
+
+En bitcoin, la mayoría de los datos presentados al usuario están codificados en Base58Check para que sean compactos, fáciles de leer y facilitar la detección de errores. El prefijo de versión en la codificación Base58Check se utiliza para crear formatos fácilmente distinguibles, que cuando están codificados en Base58 contienen caracteres específicos al principio de la carga útil codificada en Base58Check. Estos caracteres facilitan a los humanos identificar el tipo de datos que están codificados y cómo usarlos. Esto es lo que diferencia, por ejemplo, una dirección bitcoin codificada en Base58Check que comienza con un 1 de una llave privada codificada en Base58Check que comienza con un 5. Algunos prefijos de versión de ejemplo y los caracteres Base58 resultantes se muestran en <<base58check_versions>>.
+
+[[base58check_versions]]
+.Prefijos de versión Base58Check y ejemplos de resultados codificados
+[options="header"]
+|=======
+|Tipo| Prefijo de versión (hexadecimal)| Prefijo del resultado Base58
+| Dirección Bitcoin | 0x00 | 1
+| Dirección Pago-a-Hash-de-Script | 0x05 | 3
+| Dirección Bitcoin para red de pruebas | 0x6F | m ó n
+| Llave Privada WIF |  0x80 | 5, K, ó L
+| Llave Privada Cifrada BIP-38 | 0x0142 | 6P
+| Llave Pública Extendida BIP-32 | 0x0488B21E | xpub
+|=======
+
+==== Formatos de Llaves
+
+((("direcciones y llaves", "direcciones bitcoin", "formatos de llaves")))Tanto las llaves privadas como las públicas se pueden representar en varios formatos diferentes. Todas estas representaciones codifican el mismo número, aunque se vean diferentes. Estos formatos se utilizan principalmente para facilitar que las personas lean y transcriban llaves sin introducir errores.
+
+[[priv_formats]]
+===== Formatos de llaves privadas
+
+((("llaves privadas y públicas", "formatos de llaves privadas")))La llave privada se puede representar en varios formatos diferentes, todos los cuales corresponden al mismo número de 256 bits. <<table_4-2>> muestra tres formatos comunes utilizados para representar llaves privadas. Se utilizan diferentes formatos en diferentes circunstancias. Los formatos hexadecimales y binarios sin formato se utilizan internamente en el software y rara vez se muestran a los usuarios. El WIF se usa para importar/exportar llaves entre carteras y, a menudo, en representaciones de llaves privadas mediante códigos QR (código de barras).
+
+[[table_4-2]]
+.Representaciones de llaves privadas (formatos de codificación)
+[options="header"]
+|=======
+|Tipo|Prefijo|Descripción
+| En crudo (en inglés, raw) | Ninguno | 32 bytes
+| Hexadecimal | Ninguno | 64 dígitos hexadecimales
+| WIF |  5 | codificación Base58Check: Base58 con prefijo de versión de 128 bits- y checksum de 32 bits
+| WIF comprimido | K ó L | Como el caso anterior, con sufijo 0x01 añadido antes de codificar
+|=======
+
+La tabla <<table_4-3>> muestra la llave privada generada en estos tres formatos.
+
+[[table_4-3]]
+.Ejemplo: Misma llave, formatos distintos
+[options="header"]
+|=======
+|Formato | Llave privada
+| Hexadecimal | 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+| WIF | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| WIF comprimido | KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+|=======
+
+Todas estas representaciones son formas distintas de mostrar el mismo número, la misma llave privada. Se ven diferentes, pero cualquiera de estos formatos puede ser convertido fácilmente a cualquier otro formato. Ten en cuenta que el "binario sin formato" (en inglés, "raw binary") no se muestra en <<table_4-3>>, ya que, por definición, cualquier codificación para visualización no pueden ser datos binarios sin formato.
+
+Usamos el comando +wif-to-ec+ de Bitcoin Explorer (ver <<appdx_bx>>) para mostrar que ambas llaves WIF representan la misma llave privada:
+
+----
+$ bx wif-to-ec 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+
+$ bx wif-to-ec KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+----
+
+===== Decodificar a partir de Base58Check
+
+Los comandos de Bitcoin Explorer (ver <<appdx_bx>>) facilitan la escritura de scripts de shell y "pipes" de línea de comandos que manipulan llaves, direcciones y transacciones de bitcoin. Puedes usar Bitcoin Explorer para decodificar el formato Base58Check en la línea de comandos.
+
+Usamos el comando +base58check-decode+ para decodificar la llave sin comprimir:
+
+----
+$ bx base58check-decode 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+wrapper
+{
+    checksum 4286807748
+    payload 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+    version 128
+}
+----
+
+El resultado contiene la llave como "payload", 128 como prefijo de versión WIF y un checksum.
+
+Observa que el "payload" de la llave comprimida es anexada con el sufijo +01+, lo que indica que la llave pública derivada debe comprimirse:
+
+----
+$ bx base58check-decode KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+wrapper
+{
+    checksum 2339607926
+    payload 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd01
+    version 128
+}
+----
+
+===== Codificar de hexadecimal a Base58Check
+
+Para codificar a Base58Check (lo opuesto al comando anterior), usamos el comando +base58check-encode+ de Bitcoin Explorer (ver <<appdx_bx>>) y proporcionamos la llave privada hexadecimal, seguida por el prefijo de versión 128 de WIF:
+
+----
+bx base58check-encode 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd --version 128
+5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+----
+
+===== Codificar desde hexadecimal (llave comprimida) a Base58Check
+
+Para codificar a Base58Check como una llave privada "comprimida" (ver <<comp_priv>>), agregamos el sufijo +01+ a la llave hexadecimal y luego codificamos como en la sección anterior:
+
+----
+$ bx base58check-encode 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd01 --version 128
+KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+----
+
+El formato resultante WIF-comprimido comienza con una "K". Esto denota que la llave privada en su interior tiene un sufijo "01" y se usará para producir solo llaves públicas comprimidas (ver <<comp_pub>>).
+
+===== Formatos de llaves públicas
+
+((("llaves públicas y privadas", "formatos de llave pública")))Las llaves públicas también se presentan de diferentes maneras, generalmente como llaves públicas _comprimidas_ o _no comprimidas_.
+
+Como vimos anteriormente, la llave pública es un punto en la curva elíptica que consiste en un par de coordenadas +(x,y)+. Generalmente se presenta con el prefijo +04+ seguido de dos números de 256 bits: uno para la coordenada _x_ del punto, el otro para la coordenada _y_. El prefijo +04+ se usa para distinguir las llaves públicas no comprimidas de las llaves públicas comprimidas que comienzan con un +02+ o un +03+.
+
+Aquí hay una llave pública generada por la llave privada que creamos previamente, mostrada como las coordenadas +x+ e +y+.
+
+----
+x = F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+y = 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+----
+
+Aquí está la misma llave pública mostrada como un número de 520 bits (130 dígitos hexadecimales) con el prefijo +04+ seguido por las coordenadas +x+ y luego +y+, como +04 x y+:
+
+++++
+<pre data-type="programlisting">
+K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A↵
+07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+</pre>
+++++
+
+[[comp_pub]]
+===== Llaves públicas comprimidas
+
+((("llaves públicas y privadas", "llaves públicas comprimidas")))Las llaves públicas comprimidas se introdujeron en bitcoin para reducir el tamaño de las transacciones y ahorrar espacio en disco en los nodos que almacenan la base de datos de la cadena de bloques de bitcoin. La mayoría de las transacciones incluyen la llave pública, que se requiere para validar las credenciales del propietario y gastar el bitcoin. Cada llave pública requiere 520 bits (prefijo + x + y), que cuando se multiplica por varios cientos de transacciones por bloque, o decenas de miles de transacciones por día, suman una cantidad significativa de datos a la cadena de bloques.
+
+Como vimos en la sección <<pubkey>>, una llave pública es un punto (x,y) en una curva elíptica. Ya que la curva expresa una función matemática, un punto en la curva representa una solución a una ecuación, y por ende, si conocemos la coordenada _x_ podemos calcular la coordenada _y_ resolviendo la ecuación y^2^ mod p = (x^3^ + 7) mod p. Esto nos permite almacenar solamente la coordenada _x_ del punto de llave pública, omitiendo la coordenada _y_ y reduciendo el tamaño de la llave y el espacio requerido para almacenarla en 256 bits. ¡Una reducción en tamaño de casi el 50% por transacción representa muchos datos ahorrados con el transcurrir del tiempo!
+
+Mientras que las llaves públicas no comprimidas llevan el prefijo +04+, las llaves públicas comprimidas comienzan con un prefijo +02+ o +03+. Veamos por qué hay dos prefijos posibles: dado que el lado izquierdo de la ecuación es __y __^2^, la solución para _y_ es una raíz cuadrada, que puede tener un valor positivo o negativo. Visualmente, esto significa que la coordenada _y_ resultante puede estar por encima o por debajo del eje x. Como puedes ver en el gráfico de la curva elíptica en <<ecc-curve>>, la curva es simétrica, lo que significa que se refleja como un espejo en el eje x. Entonces, mientras podemos omitir la coordenada _y_ tenemos que almacenar el _signo_ de _y_ (positivo o negativo); o en otras palabras, debemos recordar si estaba por encima o por debajo del eje x, ya que cada una de esas opciones representa un punto diferente y una llave pública diferente. Al calcular la curva elíptica en aritmética binaria en el campo finito de orden primo p, la coordenada _y_ es par o impar, lo que corresponde al signo positivo/negativo como se explicó anteriormente. Por lo tanto, para distinguir entre los dos valores posibles de _y_, almacenamos una llave pública comprimida con el prefijo +02+ si _y_ es par, y +03+ si es impar, lo que permite que el software deduzca correctamente la coordenada _y_ a partir de la coordenada _x_ y descomprima la llave pública a las coordenadas completas del punto. La compresión de la llave pública se ilustra en <<pubkey_compression>>.
+
+Aquí está la misma llave pública generada anteriormente, mostrada como una llave pública comprimida almacenada en 264 bits (66 dígitos hexadecimales) con el prefijo +03+ que indica que la coordenada _y_ es impar:
+
+----
+K = 03F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+----
+
+Esta llave pública comprimida corresponde a la misma llave privada, lo que significa que se genera a partir de la misma llave privada. Sin embargo, se ve diferente de la llave pública no comprimida. Más importante aún, si convertimos esta llave pública comprimida en una dirección bitcoin usando la función de doble hash (+RIPEMD160(SHA256(K))+) producirá una dirección bitcoin _diferente_. Esto puede ser confuso, porque significa que una sola llave privada puede producir una llave pública expresada en dos formatos diferentes (comprimido y no comprimido) que producen dos direcciones bitcoin diferentes. Sin embargo, la llave privada es idéntica para ambas direcciones bitcoin.
+
+[[pubkey_compression]]
+[role="smallerseventy"]
+.Compresión de llave pública
+image::images/mbc2_0407.png["pubkey_compression"]
+
+Las llaves públicas comprimidas se están convirtiendo gradualmente en la opción por defecto en los clientes de bitcoin, lo cual está teniendo un impacto significativo en la reducción del tamaño de las transacciones y, por lo tanto, de la cadena de bloques. Sin embargo, no todos los clientes admiten llaves públicas comprimidas todavía. Los clientes más recientes que admiten llaves públicas comprimidas tienen que tener en cuenta las transacciones de clientes más antiguos que no admiten llaves públicas comprimidas. Esto es especialmente importante cuando una aplicación de cartera está importando llaves privadas de otra aplicación de cartera de bitcoin, porque la nueva cartera necesita escanear la cadena de bloques para encontrar transacciones correspondientes a esas llaves importadas. ¿Qué direcciones bitcoin debe escanear la cartera de bitcoin? ¿Las direcciones bitcoin producidas por llaves públicas no comprimidas, o las direcciones bitcoin producidas por llaves públicas comprimidas? Ambas son direcciones bitcoin válidas, y pueden ser firmadas por la llave privada, ¡pero son direcciones diferentes!
+
+Para resolver este problema, cuando las llaves privadas se exportan desde una cartera, el WIF que se usa para representarlas se implementa de manera diferente en las carteras de bitcoin más nuevas, para indicar que estas llaves privadas se han utilizado para producir llaves públicas _comprimidas_ y por lo tanto direcciones bitcoin _comprimidas_. Esto permite que la cartera a la que se importa distinga entre llaves privadas que se originan en carteras más antiguas o más nuevas y busca en la cadena de bloques las transacciones con direcciones bitcoin correspondientes a las llaves públicas no comprimidas o comprimidas, respectivamente. Veamos cómo funciona esto con más detalle, en la siguiente sección.
+
+[[comp_priv]]
+===== Llaves privadas comprimidas
+
+((("llaves públicas y privadas", "llaves privadas comprimidas")))Irónicamente, el término "llave privada comprimida" es engañoso, porque cuando una llave privada se exporta como WIF-comprimido, en realidad es un byte _más largo_ que una llave privada "no comprimida". Esto se debe a que a la llave privada se añade un sufijo de un byte (mostrado como 01 en hexadecimal en <<table_4-4>>), lo que significa que la llave privada proviene de una cartera más nueva y solo debe usarse para producir llaves públicas comprimidas. Las llaves privadas no están comprimidas y no pueden comprimirse. El término "llave privada comprimida" realmente significa "llave privada de la que solo deberían derivarse llaves públicas comprimidas", mientras que "llave privada no comprimida" realmente significa "llave privada de la que solo deberían derivarse llaves públicas no comprimidas". Solo debe referirse al formato de exportación como "WIF-comprimido" o "WIF" y no referirse a la llave privada como "comprimida" para evitar una mayor confusión.
+
+<<table_4-4>> muestra la misma llave, codificada en formatos WIF y WIF-comprimido.
+
+[[table_4-4]]
+.Ejemplo: Misma llave, formatos distintos
+[options="header"]
+|=======
+|Formato | Llave privada
+| Hex | 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD
+| WIF | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| Hex-comprimido | 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD01
+| WIF comprimido | KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+|=======
+
+Observa que el formato de llave privada comprimida hexadecimal tiene un byte adicional al final (01 en hex). Si bien el prefijo de versión de codificación Base58 es el mismo (0x80) para los formatos WIF y WIF-comprimido, la adición de un byte al final del número hace que el primer carácter de la codificación Base58 cambie de 5 a una _K_ o _L_. Piensa en esto como el equivalente Base58 en la diferencia de codificación decimal entre el número 100 y el número 99. Mientras que 100 es un dígito más largo que 99, también tiene un prefijo 1 en lugar de un prefijo 9. Cuando la longitud cambia, afecta al prefijo. En Base58, el prefijo 5 cambia a _K_ o _L_ cuando la longitud del número aumenta en un byte.
+
+Recuerda, estos formatos _no_ se usan indistintamente. En una cartera más nueva que implementa llaves públicas comprimidas, las llaves privadas solo se exportarán como WIF-comprimido (con el prefijo _K_ o _L_). Si la cartera es una implementación más antigua y no utiliza llaves públicas comprimidas, las llaves privadas solo se exportarán como WIF (con un prefijo 5). El objetivo aquí es señalar a la cartera que importa estas llaves privadas si debe buscar en la cadena de bloques las direcciones y llaves públicas comprimidas o no comprimidas.
+
+Si una cartera bitcoin es capaz de implementar llaves públicas comprimidas, las usará en todas las transacciones. Las llaves privadas en la cartera se utilizarán para derivar los puntos de llave pública en la curva, los cuales serán comprimidos. Las llaves públicas comprimidas se usarán para producir direcciones bitcoin y aquellas se utilizarán en las transacciones. Al exportar llaves privadas de una nueva cartera que implementa llaves públicas comprimidas, se modifica el WIF, con la adición de un sufijo de un byte +01+ a la llave privada. La llave privada codificada en Base58Check resultante se denomina "WIF-comprimido" y comienza con la letra _K_ o _L_, en lugar de comenzar con "5" como es el caso de las llaves codificadas en WIF (no comprimidas) de las carteras más antiguas.
+
+
+[TIP]
+====
+¡"Llaves privadas comprimidas" es un nombre poco apropiado! No están comprimidas; más bien, WIF-comprimido significa que las llaves solo deben usarse para derivar llaves públicas comprimidas y sus correspondientes direcciones bitcoin. Irónicamente, una llave privada codificada "WIF-comprimido" es un byte más larga porque tiene el sufijo +01+ agregado para distinguirla de una "no comprimida".((("", startref="KAaddress04")))
+====
+
+=== Implementando Llaves y Direcciones en Cpass:[++]
+
+Veamos el proceso completo de creación de una dirección bitcoin, partiendo de una llave privada a una llave pública (un punto en la curva elíptica), a una dirección de doble hash y, por último, a la codificación Base58Check. El código C++ en <<addr_example>> muestra el proceso completo paso a paso, desde la llave privada hasta la dirección bitcoin codificada en Base58Check. El código de ejemplo utiliza la biblioteca libbitcoin presentada en <<alt_libraries>> para algunas funciones de ayuda.
+
+[[addr_example]]
+.Creando una dirección bitcoin codificada en Base58Check a partir de una llave privada
+====
+[role="c_less_space"]
+[source, cpp]
+----
+include::code/addr.cpp[]
+----
+====
+
+El código utiliza una llave privada predefinida para producir la misma dirección bitcoin cada vez que se ejecuta, como se muestra en <<addr_example_run>>.((("", startref="base5804")))((("", startref="Abase5804")))
+
+[[addr_example_run]]
+.Compilando y ejecutando el código addr
+====
+[source,bash]
+----
+# Compilando el código addr.cpp
+$ g++ -o addr addr.cpp -std=c++11 $(pkg-config --cflags --libs libbitcoin)
+# Correr el ejecutable addr
+$ ./addr
+Public key: 0202a406624211f2abbdc68da3df929f938c3399dd79fac1b51b0e4ad1d26a47aa
+Address: 1PRTTaJesdNovgne6Ehcdu1fpEdX7913CK
+----
+====
+
+[TIP]
+====
+El código en <<addr_example_run>> produce una dirección bitcoin (+1PRTT...+) a partir de una llave pública _comprimida_ (ver <<comp_pub>>). Si utilizaras la llave pública no comprimida, producirías una dirección bitcoin diferente (+14K1y...+).
+====
+
+=== Implementando Llaves y Direcciones en Python
+
+((("llaves y direcciones", "implementando en Python", id="KApython04")))((("pybitcointools")))La biblioteca de bitcoin más completa en Python es https://github.com/vbuterin/pybitcointools[pybitcointools] por Vitalik Buterin. En <<key-to-address_script>>, usamos la biblioteca pybitcointools (importada como "bitcoin") para generar y mostrar llaves y direcciones en varios formatos.
+
+[[key-to-address_script]]
+.Generación y formato de llaves y direcciones con la biblioteca pybitcointools
+====
+[source,python]
+----
+include::code/key-to-address-ecc-example.py[]
+----
+====
+
+<<key-to-address_script_run>> muestra la salida de ejecutar este código.
+
+[[key-to-address_script_run]]
+.Ejecutando key-to-address-ecc-example.py
+====
+++++
+<pre data-type="programlisting">
+$ python key-to-address-ecc-example.py
+Private Key (hex) is:
+ 3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa6
+Private Key (decimal) is:
+ 26563230048437957592232553826663696440606756685920117476832299673293013768870
+Private Key (WIF) is:
+ 5JG9hT3beGTJuUAmCQEmNaxAuMacCTfXuw1R3FCXig23RQHMr4K
+Private Key Compressed (hex) is:
+ 3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa601
+Private Key (WIF-Compressed) is:
+ KyBsPXxTuVD82av65KZkrGrWi5qLMah5SdNq6uftawDbgKa2wv6S
+Public Key (x,y) coordinates is:
+ (41637322786646325214887832269588396900663353932545912953362782457239403430124L,
+ 16388935128781238405526710466724741593761085120864331449066658622400339362166L)
+Public Key (hex) is:
+ 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec↵
+243bcefdd4347074d44bd7356d6a53c495737dd96295e2a9374bf5f02ebfc176
+Compressed Public Key (hex) is:
+ 025c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec
+Bitcoin Address (b58check) is:
+ 1thMirt546nngXqyPEz532S8fLwbozud8
+Dirección Bitcoin Comprimida (b58check) es:
+ 14cxpo3MBCYYWCgF74SWTdcmxipnGUsPw3
+</pre>
+++++
+====
+
+
+<<ec_math>> es otro ejemplo, usando la biblioteca ECDSA de Python para las matemáticas de curva elíptica y sin usar ninguna biblioteca de bitcoin especializada.
+
+[[ec_math]]
+.Un script mostrando la matemática de curva elíptica usada para llaves bitcoin
+====
+[source, python]
+----
+include::code/ec-math.py[]
+----
+====
+
+<<ec_math_run>> muestra la salida producida al ejecutar este script.
+
+[WARNING]
+====
+<<ec_math>> ((("números aleatorios", "os.urandom", see="entropía")))((("entropía", "os.urandom", see="números aleatorios")))((("números aleatorios", "generación de números aleatorios")))((("entropía", "generación de números aleatorios")))usa +os.urandom+, que muestra un generador de números aleatorios criptográficamente seguro (CSRNG) proporcionado por el sistema operativo subyacente. Precaución: Dependiendo del sistema operativo, +os.urandom+ puede que _no_ se implemente con suficiente seguridad o se inicialice correctamente y puede _no_ ser apropiado para generar llaves de bitcoin con calidad de producción.((("", startref="KApython04")))
+====
+
+[[ec_math_run]]
+.Instalando la biblioteca Python ECDSA y ejecutando el script ec_math.py
+====
+----
+$ # Instalar el administrador de paquetes Python PIP
+$ sudo apt-get install python-pip
+$ # Instalar la biblioteca Python ECDSA
+$ sudo pip install ecdsa
+$ # Ejecutar el script
+$ python ec-math.py
+Secret:  38090835015954358862481132628887443905906204995912378278060168703580660294000
+EC point: (70048853531867179489857750497606966272382583471322935454624595540007269312627, 105262206478686743191060800263479589329920209527285803935736021686045542353380)
+BTC public key: 029ade3effb0a67d5c8609850d797366af428f4a0d5194cb221d807770a1522873
+----
+====
+
+=== Llaves y Direcciones Avanzadas
+
+((("direcciones y llaves", "formas avanzadas", id="KAadvanced04")))En las siguientes secciones veremos formas avanzadas de llaves y direcciones, tales como llaves privadas encriptadas, scripts y direcciones multifirma, direcciones de vanidad y carteras de papel.
+
+==== Llaves Privadas Encriptadas (BIP-38)
+
+((("propuestas de mejora de bitcoin", "Llaves Privadas Encriptadas (BIP-38)")))((("llaves y direcciones", "formas avanzadas", "llaves privadas encriptadas")))((("llaves públicas y privadas", "llaves privadas encriptadas")))((("contraseñas", "llaves privadas encriptadas")))((("seguridad", "contraseñas")))Las llaves privadas deben mantenerse en secreto. La necesidad de _confidencialidad_ de las llaves privadas es un tema evidente que es bastante difícil de lograr en la práctica, porque entra en conflicto con el objetivo igualmente importante de la _disponibilidad_. Mantener en privado la llave privada es mucho más difícil cuando se necesita almacenar copias de seguridad de la llave privada para evitar perderla. Una llave privada almacenada en una cartera que está encriptada por una contraseña puede ser segura, pero se debe hacer una copia de seguridad de esa cartera. A veces, los usuarios necesitan mover las llaves de una cartera a otra, por ejemplo, para actualizar o reemplazar el software de la cartera. Las copias de seguridad de las llaves privadas también se pueden almacenar en papel (consulta <<paper_wallets>>) o en un medio de almacenamiento externo, como una unidad flash USB. Pero, ¿qué pasa si la copia de seguridad es robada o se pierde? Estos conflictos en los objetivos de seguridad llevaron a la introducción de un estándar compatible y práctico para encriptar llaves privadas de manera que puedan ser comprendidas por muchas carteras y clientes de bitcoin diferentes, estandarizados por BIP-38 (ver <<appdxbitcoinimpproposals>>).
+
+BIP-38 propone un estándar común para el cifrado de llaves privadas con una frase de contraseña larga y codificado con Base58Check para que puedan almacenarse de forma segura mediante copias de seguridad, transportarse de manera segura entre carteras o guardarse en situaciones en las que la llave pudiera estar expuesta. El estándar para el cifrado utiliza el Advanced Encryption Standard (AES), un estándar establecido por el NIST y utilizado ampliamente en implementaciones de cifrado de datos para aplicaciones comerciales y militares.
+
+Un esquema de cifrado BIP-38 toma como entrada una llave privada de bitcoin, generalmente codificada en WIF, como una cadena Base58Check con el prefijo "5". Además, el esquema de cifrado BIP-38 toma una frase de contraseña, una contraseña larga, generalmente compuesta por varias palabras o una cadena compleja de caracteres alfanuméricos. El resultado del esquema de cifrado BIP-38 es una llave privada cifrada codificada en Base58Check que comienza con el prefijo +6P+. Si ves una llave que comienza con +6P+, está cifrada y requiere una frase de contraseña para convertirla (descifrarla) en una llave privada con formato WIF (prefijo +5+) que se puede usar en cualquier cartera. Muchas aplicaciones de cartera ya reconocen las llaves privadas encriptadas con BIP-38 y solicitarán al usuario una frase de contraseña para descifrar e importar la llave. Las aplicaciones de terceros, como el increíblemente útil http://bitaddress.org[Bit Address] orientado al navegador (pestaña Detalles de cartera), se pueden usar para descifrar las llaves BIP-38.
+
+El caso de uso más común para las llaves cifradas BIP-38 es para carteras de papel que se pueden utilizar como copia de seguridad de las llaves privadas en un trozo de papel. Siempre que el usuario seleccione una frase de contraseña segura, una cartera de papel con llaves privadas encriptadas con BIP-38 es increíblemente segura y una excelente manera de crear almacenamiento de bitcoin sin conexión (también conocido como "almacenamiento en frío") .
+
+Prueba las llaves cifradas en <<table_4-10>> usando bitaddress.org para ver cómo puedes obtener la llave descifrada ingresando la frase de contraseña.
+
+[[table_4-10]]
+.Ejemplo de llave privada cifrada BIP-38
+|=======
+| *Llave Privada (WIF)* | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| *Frase de contraseña* | MyTestPassphrase
+| *Llave Cifrada (BIP-38)* | 6PRTHL6mWa48xSopbU1cKrVjpKbBZxcLRRCdctLJ3z5yxE87MobKoXdTsJ
+|=======
+
+
+[[p2sh_addresses]]
+==== Pagar-al-Hash-de-un-Script (P2SH) y Direcciones Multi-firma
+
+((("direcciones y llaves", "formas avanzadas", "pay-to-script hash y direcciones multifirma")))((("Pay-to-Script-Hash (P2SH)", "direcciones multifirma y")))((("direcciones multifirma")))((("direcciones", "direcciones multifirma")))Como sabemos, las direcciones bitcoin tradicionales comienzan con el número “1” y se derivan de la llave pública, que se deriva de la llave privada. Aunque cualquiera puede enviar bitcoin a una dirección "1", ese bitcoin solo se puede gastar presentando la correspondiente firma de llave privada y el hash de llave pública.
+
+((("propuestas de mejora de bitcoin", "Pay to Script Hash (BIP-16)")))Las direcciones bitcoin que comienzan con el número “3” son direcciones pago-a-script-hash (P2SH, pay-to-script-hash), a veces denominadas erróneamente direcciones multifirma. Designan al beneficiario de una transacción bitcoin como el hash de un script, en lugar del propietario de una llave pública. La función se introdujo en enero de 2012 con BIP-16 (consulte <<appdxbitcoinimpproposals>>) y está siendo ampliamente adoptado porque proporciona la oportunidad de agregar funcionalidad a la dirección en sí. A diferencia de las transacciones que "envían" fondos a direcciones bitcoin "1" tradicionales, también conocidas como pago-a-llave-pública-hash (P2PKH, pay-to-public-key-hash), los fondos enviados a direcciones "3" requieren algo más que la presentación de un hash de llave pública y una firma de llave privada como prueba de propiedad. Los requisitos se designan en el momento en que se crea la dirección, dentro del script, y todas las entradas a esta dirección serán bloqueadas con los mismos requisitos.
+
+Una dirección P2SH se crea a partir de un script de transacción, que define quién puede gastar una salida de transacción (para más detalles, ver <<p2sh>>). La codificación de una dirección P2SH implica usar la misma función de doble-hash que se utilizó durante la creación de una dirección bitcoin, solo que se aplica al script en lugar de a la llave pública:
+
+----
+hash de script = RIPEMD160(SHA256(script))
+----
+
+El "hash del script" resultante está codificado con Base58Check con un prefijo de versión de valor 5, lo que resulta en una dirección codificada que comienza con un +3+. Un ejemplo de una dirección P2SH es +3F6i6kwkevjR7AsAd4te2YB2zZyASEm1HM+, que se puede derivar mediante los comandos de Bitcoin Explorer, +script-encode+, +sha256+, +ripemd160+, y +base58check-encode+ (ver <<appdx_bx>>) como sigue:
+
+----
+$ echo \
+'DUP HASH160 [89abcdefabbaabbaabbaabbaabbaabbaabbaabba] EQUALVERIFY CHECKSIG' > script
+$ bx script-encode < script | bx sha256 | bx ripemd160 \
+| bx base58check-encode --version 5
+3F6i6kwkevjR7AsAd4te2YB2zZyASEm1HM
+----
+
+[TIP]
+====
+P2SH no es necesariamente lo mismo que una transacción multifirma estándar. Una dirección P2SH representa _la mayor parte de las veces_ un script multi-firma, pero también puede representar un script que codifique otros tipos de transacciones.
+====
+
+===== Direcciones multifirma y P2SH
+
+Actualmente, la implementación más común de la función P2SH es el script de dirección multi-firma. Como su nombre indica, el script subyacente requiere más de una firma para demostrar la propiedad y, por lo tanto, gastar fondos. La función de multi-firma de bitcoin está diseñada para requerir M firmas (también conocido como el "umbral") de un total de N llaves, conocido como un multi-firma de M-de-N, donde M es igual o menor que N. Por ejemplo , Bob, el propietario de la cafetería de <<ch01_intro_what_is_bitcoin>> podría usar una dirección de multi-firma que requiera de 1-de-2 firmas, una de las llaves de su propiedad y la otra llave perteneciente a su cónyuge, lo que garantiza que cualquiera de los dos pueda firmar para gastar una salida de transacción que se encuentre bloqueada en esta dirección. Esto sería similar a una "cuenta conjunta" tal como se aplica en la banca tradicional, donde cualquiera de los cónyuges puede gastar con una sola firma. O Gopesh,((("casos de uso", "servicios contractuales en el extranjero")) el diseñador web pagado por Bob para crear un sitio web, podría tener una dirección multi-firma 2-de-3 para su negocio que garantice que no se pueden gastar los fondos a menos que dos de los socios firmen la transacción.
+
+Exploraremos cómo crear transacciones que gastan fondos de direcciones P2SH (y multifirma) en <<transactions>>.
+
+==== Direcciones de Vanidad
+
+((("llaves y direcciones", "formas avanzadas", "direcciones de vanidad")))((("direcciones de vanidad", id="vanity04")))((("direcciones", "direcciones de vanidad", id="Avanity04")))Las direcciones de vanidad son direcciones de bitcoin válidas que contienen mensajes legibles. Por ejemplo, +1LoveBPzzD72PUXLzCkYAtGFYmK5vYNR33+ es una dirección válida que contiene las letras que forman la palabra "Love" como las primeras cuatro letras en Base-58. Las direcciones de vanidad requieren generar y probar miles de millones de llaves privadas candidatas, hasta que se encuentre una dirección bitcoin con el patrón deseado. Aunque hay algunas optimizaciones en el algoritmo de generación de vanidad, el proceso esencialmente consiste en seleccionar una llave privada al azar, derivar la llave pública, derivar la dirección bitcoin y verificar si coincide con el patrón de vanidad deseado, repitiendo miles de millones de veces hasta que se encuentre coincidencia.
+
+Una vez que se encuentra una dirección de vanidad que coincida con el patrón deseado, la llave privada de la que se deriva puede ser utilizada por el propietario para gastar bitcoin exactamente de la misma manera que cualquier otra dirección. Las direcciones de vanidad no son menos o más seguras que cualquier otra dirección. Dependen de la misma criptografía de curva elíptica (ECC) y de SHA como cualquier otra dirección. No es más fácil encontrar la llave privada de una dirección que comienza con un patrón de vanidad de lo que sería cualquier otra dirección.
+
+En <<ch01_intro_what_is_bitcoin>>, presentamos a Eugenia, directora de caridad para niños que opera en Filipinas. Digamos que Eugenia está organizando una campaña de recaudación de fondos en bitcoin y quiere usar una dirección bitcoin de vanidad para dar a conocer la recaudación de fondos. Eugenia creará una dirección de vanidad que comienza con "1Kids" para promover la recaudación de fondos de caridad para niños. Vamos a ver cómo se crea esta dirección de vanidad y qué significa para la seguridad de la organización benéfica de Eugenia.((("casos de uso", "donaciones de caridad", startref="eugeniafour")))
+
+===== Generando direcciones de vanidad
+
+Es importante darse cuenta de que una dirección bitcoin es simplemente un número representado por símbolos en el alfabeto Base58. La búsqueda de un patrón como "1Kids" se puede ver como la búsqueda de una dirección en el rango de +1Kids11111111111111111111111111111+ a +1Kidszzzzzzzzzzzzzzzzzzzzzzzzzzzz+. Hay aproximadamente 58^29^ (aproximadamente 1.4 * 10^51^) direcciones en ese rango, todas comenzando con "1Kids". <<table_4-11>> muestra el rango de direcciones que tienen el prefijo 1Kids.
+
+[[table_4-11]]
+.El rango de direcciones de vanidad comenzando con "1Kids"
+|=======
+| *Desde* | +1Kids11111111111111111111111111111+
+| | +1Kids11111111111111111111111111112+
+| | +1Kids11111111111111111111111111113+
+| | +...+
+| *Hasta* | +1Kidszzzzzzzzzzzzzzzzzzzzzzzzzzzzz+
+|=======
+
+Veamos el patrón "1Kids" como un número y la frecuencia con la que podríamos encontrar este patrón en una dirección bitcoin (ver <<table_4-12>>). De promedio, un ordenador de sobremesa sin ningún hardware especializado puede buscar aproximadamente 100.000 llaves por segundo.
+
+[[table_4-12]]
+.La frecuencia de un patrón de vanidad (1KidsCharity) y el tiempo de búsqueda promedio en una PC de escritorio
+[options="header"]
+|=======
+| Longitud | Patrón | Frecuencia | Tiempo de búsqueda promedio
+| 1 | 1K | 1 en 58 llaves | < 1 milisegundos
+| 2 | 1Ki| 1 en 3.364 | 50 milisegundos
+| 3 | 1Kid | 1 en 195.000 | < 2 segundos
+| 4 | 1Kids | 1 en 11 millones | 1 minuto
+| 5 | 1KidsC | 1 en 656 milliones | 1 hora
+| 6 | 1KidsCh | 1 en 38 mil millones | 2 días
+| 7 | 1KidsCha | 1 en 2.2 billones | 3–4 meses
+| 8 | 1KidsChar | 1 en 128 billones | 13–18 años
+| 9 | 1KidsChari | 1 en 7 mil billones | 800 años
+| 10 | 1KidsCharit | 1 en 400 mil billones | 46.000 años
+| 11 | 1KidsCharity | 1 en 23 trillones | 2,5 millones de años
+|=======
+
+
+Como se puede ver, Eugenia no podrá crear la dirección de vanidad "1KidsCharity" en el corto plazo, incluso si tuviera acceso a varios miles de computadoras. Cada carácter adicional aumenta la dificultad en un factor de 58. Los patrones con más de siete caracteres se encuentran generalmente con hardware especializado, tales como escritorios hechos a medida con múltiples GPU. Estos son a menudo "plataformas" de minería de bitcoin reutilizadas que ya no son rentables para la minería de bitcoin pero que se pueden usar para encontrar direcciones de vanidad. Las búsquedas por vanidad en los sistemas de GPU son varios órdenes de magnitud más rápidas que las de una CPU de propósito general.
+
+Otra forma de encontrar una dirección de vanidad es subcontratar el trabajo a un grupo de mineros de vanidad, como en el pool http://vanitypool.appspot.com[Vanity Pool]. Un pool es un servicio que permite ganar bitcoin a las personas con hardware de GPU buscando direcciones de vanidad para otros. Por un pequeño pago (0.01 bitcoin o aproximadamente $5 al momento de escribir este artículo), Eugenia puede externalizar la búsqueda de una dirección de vanidad con un patrón de siete caracteres y obtener resultados en unas pocas horas en lugar de tener que realizar una búsqueda de CPU durante meses.
+
+Generar una dirección de vanidad es un ejercicio de fuerza bruta: probar una llave aleatoria, verificar la dirección resultante para ver si coincide con el patrón deseado, repetir hasta tener éxito. <<vanity_miner_code>> muestra un ejemplo de un "minero de vanidad", un programa diseñado para encontrar direcciones de vanidad, escrito en C++. El ejemplo utiliza la biblioteca libbitcoin, que presentamos en <<alt_libraries>>.
+
+[[vanity_miner_code]]
+.Minero de direcciones de vanidad
+====
+[source,cpp]
+----
+include::code/vanity-miner.cpp[]
+----
+====
+
+[NOTE]
+====
+<<vanity_miner_run>> utiliza +std::random_device+. Dependiendo de la implementación, puede reflejar un generador de números aleatorios criptográficamente seguro (CSRNG) proporcionado por el sistema operativo subyacente. En el caso de un sistema operativo similar a Unix como Linux, se basa en +/dev/urandom+. El generador de números aleatorios que se utiliza aquí es para fines de demostración, y _no_ es apropiado para generar llaves de bitcoin de calidad de producción, ya que no está implementado con suficiente seguridad.
+====
+
+El código de ejemplo debe compilarse usando un compilador de pass:[C++] y enlazado con la biblioteca libbitcoin (que debe instalarse primero en ese sistema). Para ejecutar el ejemplo, lanza el ejecutable ++vanity-miner++ sin parámetros (ver <<vanity_miner_run>>) e intentará encontrar una dirección de vanidad que empiece por "1kid".
+
+[[vanity_miner_run]]
+.Compilando y ejecutando el ejemplo de vanity-miner
+====
+[source,bash]
+----
+$ # Compilar el código con g++
+$ g++ -o vanity-miner vanity-miner.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # Ejecutar el ejemplo
+$ ./vanity-miner
+Found vanity address! 1KiDzkG4MxmovZryZRj8tK81oQRhbZ46YT
+Secret: 57cc268a05f83a23ac9d930bc8565bac4e277055f4794cbd1a39e5e71c038f3f
+$ # Ejecutarlo otra vez para obtener un resultado distinto
+$ ./vanity-miner
+Found vanity address! 1Kidxr3wsmMzzouwXibKfwTYs5Pau8TUFn
+Secret: 7f65bbbbe6d8caae74a0c6a0d2d7b5c6663d71b60337299a1a2cf34c04b2a623
+# Usar "time" para ver cuánto tarda en encontrar un resultado
+$ time ./vanity-miner
+Found vanity address! 1KidPWhKgGRQWD5PP5TAnGfDyfWp5yceXM
+Secret: 2a802e7a53d8aa237cd059377b616d2bfcfa4b0140bc85fa008f2d3d4b225349
+
+real	0m8.868s
+user	0m8.828s
+sys	0m0.035s
+----
+====
+
+El código de ejemplo tardará unos segundos en encontrar una coincidencia para el patrón de tres caracteres "kid", como podemos ver cuando usamos el comando +time+ de Unix para medir el tiempo de ejecución. Cambia el patrón +search+ en el código fuente y ¡mira cuánto tiempo más se tarda para los patrones de cuatro o cinco caracteres!
+
+===== Seguridad de direcciones de vanidad
+
+((("seguridad", "direcciones de vanidad")))Las direcciones de vanidad se pueden usar para mejorar _y_ para anular las medidas de seguridad; son verdaderamente una espada de doble filo. Cuando se usa para mejorar la seguridad, una dirección distintiva hace que sea más difícil para los adversarios sustituirla por tu propia dirección y engañar así a los clientes para que les paguen a ellos en lugar de a ti. Desafortunadamente, las direcciones de vanidad también hacen posible que cualquiera pueda crear una dirección que _se parezca_ a cualquier dirección aleatoria, o incluso a otra dirección de vanidad, engañando de esta manera a tus clientes.
+
+Eugenia podría publicitar una dirección generada aleatoriamente (por ejemplo, +1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy+) a la cual la gente podría enviar sus donaciones. O podría generar una dirección de vanidad que comience con 1Kids para hacerla más distintiva.
+
+En ambos casos, uno de los riesgos del uso de una dirección fija única (en lugar de una dirección dinámica separada por donante) es que un ladrón podría ser capaz de infiltrarse en su sitio web y reemplazarla con su propia dirección, desviando así las donaciones a sí mismo. Si ha anunciado su dirección de donación en diferentes lugares, los usuarios pueden inspeccionar visualmente la dirección antes de hacer un pago para asegurarse de que es la misma que vieron en su sitio web, en su correo electrónico y en su propaganda. En el caso de una dirección aleatoria como +1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy+, el usuario medio querrá quizá inspeccionar los primeros caracteres "1J7mdg" y estar convencido de que la dirección coinde. Mediante el uso de un generador de direcciones de vanidad, una persona con la intención de robar podría sustituir la dirección original con otra de aspecto similar, generada rápidamente mediante la coincidencia en sus primeros caracteres, como se muestra en <<table_4-13>>.
+
+[[table_4-13]]
+.Generando direcciones de vanidad para coincidir con una dirección aleatoria
+|=======
+| *Dirección Aleatoria Original* | 1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+| *Vanidad (coincidencia de 4 caracteres)* | 1J7md1QqU4LpctBetHS2ZoyLV5d6dShhEy
+| *Vanidad (coincidencia de 5 caracteres)* | 1J7mdgYqyNd4ya3UEcq31Q7sqRMXw2XZ6n
+| *Vanidad (coincidencia de 6 caracteres)* | 1J7mdg5WxGENmwyJP9xuGhG5KRzu99BBCX
+|=======
+
+So does a vanity address increase security? If Eugenia generates the vanity address +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, users are likely to look at the vanity pattern word _and a few characters beyond_, for example noticing the "1Kids33" part of the address. That would force an attacker to generate a vanity address matching at least six characters (two more), expending an effort that is 3,364 times (58 × 58) higher than the effort Eugenia expended for her 4-character vanity. Essentially, the effort Eugenia expends (or pays a vanity pool for) "pushes" the attacker into having to produce a longer pattern vanity. If Eugenia pays a pool to generate an 8-character vanity address, the attacker would be pushed into the realm of 10 characters, which is infeasible on a personal computer and expensive even with a custom vanity-mining rig or vanity pool. What is affordable for Eugenia becomes unaffordable for the attacker, especially if the potential reward of fraud is not high enough to cover the cost of the vanity address generation.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
+
+[[paper_wallets]]
+==== Carteras de Papel
+
+((("direcciones y llaves", "formas avanzadas", "carteras de papel")))((("carteras de papel", id="paperw04")))((("carteras", "tipos de", "carteras de papel", id="Wpaper04")))Las carteras de papel son llaves privadas de bitcoin impresas en papel. A menudo, la cartera de papel también incluye la dirección bitcoin correspondiente por conveniencia, pero esto no es necesario porque puede ser derivada a partir de la llave privada. Las carteras de papel son una forma muy efectiva de crear copias de seguridad o almacenamiento de bitcoin sin conexión, también conocido como "almacenamiento en frío". Como mecanismo de respaldo, una cartera de papel puede proporcionar seguridad contra la pérdida de la llave debido a un percance en la computadora, como un fallo del disco duro, un robo o una eliminación accidental. Como un mecanismo de "almacenamiento en frío", si las llaves de la cartera de papel se generan sin conexión y nunca se almacenan en un sistema informático, son mucho más seguras contra piratas informáticos, keyloggers y otras amenazas informáticas en línea.
+
+Las carteras de papel vienen en muchas formas, tamaños y diseños, pero a un nivel muy básico son simplemente una llave y una dirección impresas en papel. <<table_4-14>> muestra la forma más sencilla de una cartera de papel.
+
+[[table_4-14]]
+.Forma más simple de una cartera de papel: una impresión de la dirección bitcoin y de la llave privada.
+[options="header"]
+|=======================
+|Dirección pública|Llave privada (WIF)
+|1424C2F4bC9JidNjjTUZCbUxv6Sa1Mt62x|5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+|=======================
+
+
+Las carteras de papel se pueden generar fácilmente utilizando una herramienta web JavaScript en _bitaddress.org_. Esta página contiene todo el código necesario para generar llaves y carteras de papel, incluso completamente desconectado de Internet. Para usarlo, guarda la página HTML en la unidad local o en una unidad flash USB externa. Desconéctate de Internet y abre el archivo en un navegador. Aún mejor, arranca el ordenador utilizando un sistema operativo original, como por ejemplo, un CD-ROM de arranque del sistema operativo Linux. Cualquier llave generada con esta herramienta sin conexión se puede imprimir en una impresora local mediante un cable USB (no inalámbrica), creando así carteras de papel cuyas llaves sólo existen en el papel y nunca han sido almacenados en ningún sistema en línea. Para implementar una solución sencilla pero muy eficaz de "almacenamiento en frío", pon esas carteras de papel en una caja fuerte a prueba de fuego y "envía" bitcoin a tu dirección bitcoin. <<paper_wallet_simple>> muestra una cartera de papel generada desde el sitio bitaddress.org.
+
+[[paper_wallet_simple]]
+.Un ejemplo de una cartera de papel simple de bitaddress.org
+image::images/mbc2_0408.png[]
+
+((("propuestas de mejora de bitcoin", "Llaves Privadas Encriptadas (BIP-38)")))La desventaja del sistema de cartera de papel simple es que las llaves impresas son vulnerables al robo. Un ladrón que es capaz de tener acceso al papel puede robar o fotografiar las llaves y tomar el control de los bitcoin bloqueados con dichas llaves. Un sistema de almacenamiento de la cartera de papel más sofisticado se utiliza en BIP-38 mediante el uso de llaves privadas encriptadas. Las llaves impresas en la cartera de papel están protegidas por una frase de contraseña que el propietario ha memorizado. Sin la frase de contraseña, las llaves encriptadas son inútiles. Sin embargo, todavía son superiores a una cartera protegida con una frase de contraseña porque las llaves nunca han estado en línea y deben ser recuperadas físicamente de un almacenamiento seguro o protegido físicamente. <<paper_wallet_encrypted>> muestra una cartera de papel con una llave privada encriptada (BIP-38) creada en el sitio bitaddress.org.
+
+[[paper_wallet_encrypted]]
+.Un ejemplo de una cartera de papel cifrada de bitaddress.org. La frase de contraseña es "test."
+image::images/mbc2_0409.png[]
+
+[WARNING]
+====
+Aunque se puede depositar fondos en una cartera de papel varias veces, se debe retirar todos los fondos solo una vez, gastando todo. Esto se debe a que en el proceso de desbloqueo y gasto de fondos, algunas billeteras pueden generar una dirección de cambio si gasta menos del monto total. Si la computadora que se usa para firmar la transacción se ve comprometida, se corre el riesgo de exponer la llave privada, dando acceso a los fondos en la dirección de cambio. Al gastar el saldo completo de una cartera de papel de una vez, se reduce el riesgo del compromiso de la llave. Si solo necesita una pequeña cantidad, envíe los fondos restantes a una nueva cartera de papel en la misma transacción.
+====
+
+Paper wallets come in many designs and sizes, with many different features. Some are intended to be given as gifts and have seasonal themes, such as Christmas and New Year's themes. Others are designed for storage in a bank vault or safe with the private key hidden in some way, either with opaque scratch-off stickers, or folded and sealed with tamper-proof adhesive foil. Figures <<paper_wallet_bpw>> through <<paper_wallet_spw>> show various examples of paper wallets with security and backup features.
+
+[[paper_wallet_bpw]]
+.Un ejemplo de una cartera de papel de bitcoinpaperwallet.com con la llave privada en una solapa plegable
+image::images/mbc2_0410.png[]
+
+[[paper_wallet_bpw_folded]]
+.La cartera de papel de bitcoinpaperwallet.com con la llave privada oculta
+image::images/mbc2_0411.png[]
+
+Otros diseños cuentan con copias adicionales de la llave y de la dirección, en forma de fichas separables similares a talones de boletos, lo que le permite almacenar múltiples copias para protegerse contra incendios, inundaciones u otros desastres naturales.((("", startref="KAadvanced04")))((("", startref="Wpaper04")))((("", startref="paperw04")))
+
+[[paper_wallet_spw]]
+.Un ejemplo de una cartera de papel con copias adicionales de las llaves en un "talón" de respaldo
+image::images/mbc2_0412.png[]

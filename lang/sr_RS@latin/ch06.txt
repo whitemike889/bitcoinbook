@@ -1,0 +1,740 @@
+[[ch06]]
+[[transactions]]
+== Transakcije
+
+[[ch06_intro]]
+=== Uvod
+
+((("transactions", "defined")))((("warnings and cautions", see="also security")))Transakcije su najvažniji deo bitkoin sistema. Sve ostalo u bitkoinu je dizajnirano tako da transakcije mogu da se kreiraju, šire na mreži, validiraju i na kraju dodaju u globalnu knjigu transakcija (blokčejn). Transakcije su strukture podataka koje kodiraju prenos vrednosti između učesnika bitkoin sistema. Svaka transakcija je javni unos u bitkoin blokčejnu, globalnoj knjizi dvostrukog unosa.
+
+U ovom poglavlju ćemo ispitati sve različite oblike transakcija, šta sadrže, kako se kreiraju, kako se verifikuju i kako postaju deo trajne evidencije svih transakcija. Kada u ovom poglavlju koristimo izraz "novčanik", mislimo na softver koji konstruiše transakcije, a ne samo na bazu ključeva.
+
+[[tx_structure]]
+=== Detaljno o transakcijama
+
+((("use cases", "buying coffee", id="alicesix")))U <<ch02_bitcoin_overview>>, pogledajte transakciju kojom je Alisa platila kafu u Bobovom kafiću koristeći block explorer (blok pretraživač) (<<alices_transactions_to_bobs_cafe>>).
+
+Aplikacija block explorer-a prikazuje transakciju od Alisine "adrese" do Bobove "adrese". Ovo je prilično pojednostavljeni prikaz onoga što sadrži transakcija. U stvari, kao što ćemo videti u ovom poglavlju, većinu prikazanih informacija konstruiše block explorer i zapravo one nisu u transakciji.
+
+[[alices_transactions_to_bobs_cafe]]
+.Alisina transakcija u Bobovom kafiću
+image::images/mbc2_0208.png["Alice Coffee Transaction"]
+
+[[transactions_behind_the_scenes]]
+==== Transakcije&#x2014;Iza kulisa
+
+((("transactions", "behind the scenes details of")))Iza kulisa, stvarna transakcija izgleda veoma različito od transakcije koju pruža tipični blok explorer. U stvari, većina konstrukcija na visokom nivou koje vidimo u različitim korisničkim interfejsima bitkoin aplikacije _zapravo ne postoje_ u bitkoin sistemu.
+
+Možemo da koristimo Bitcoin Core-ov interfejs komandne linije (+getrawtransaction+ i +decoderawtransaction+) da izvučemo Alisinu „sirovu“ transakciju, da je dekodiramo i vidimo šta ona sadrži. Rezultat izgleda ovako:
+
+[[alice_tx]]
+.Alisina dekodirana transakcija
+[source,json]
+----
+{
+  "version": 1,
+  "locktime": 0,
+  "vin": [
+    {
+      "txid": "7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18",
+      "vout": 0,
+      "scriptSig" : "3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813[ALL] 0484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adf",
+      "sequence": 4294967295
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.01500000,
+      "scriptPubKey": "OP_DUP OP_HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 OP_EQUALVERIFY OP_CHECKSIG"
+    },
+    {
+      "value": 0.08450000,
+      "scriptPubKey": "OP_DUP OP_HASH160 7f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8 OP_EQUALVERIFY OP_CHECKSIG",
+    }
+  ]
+}
+----
+
+Možda ste primetiti nekoliko stvari u ovoj transakciji, uglavnom onih  koje nedostaju! Gde je Alisina adresa? Gde je Bobova adresa? Gde je 0,1 ulaz "poslat" Alisi? U bitkoinu nema kovanica, nema pošiljalaca, primalaca, nema balansa, nema računa i nema adrese. Sve te stvari konstruisane su na višem nivou zarad korisnika, kako bi stvari bile lakše razumljive.
+
+Možda ste primetili mnogo čudnih i nerešivih polja i heksadecimalnih stringova. Ne brinite, detaljno ćemo objasniti svako polje prikazano u ovom poglavlju.
+
+[[tx_inputs_outputs]]
+=== Transakcijski izlazi i ulazi
+
+((("transactions", "outputs and inputs", id="Tout06")))((("outputs and inputs", "outputs defined")))((("unspent transaction outputs (UTXO)")))((("UTXO sets")))((("transactions", "outputs and inputs", "output characteristics")))((("outputs and inputs", "output characteristics")))Temelj bitkoin transakcije je _izlaz transakcije_. Izlazni podaci su nedeljivi delovi bitkoin valute, snimljeni na blokčejnu i priznati kao validni u celoj mreži. Bitkoin puni čvorovi prate sve nepotrošene i potrošene izlaze, poznate kao _nepotrošeni transakcijski izlazi_ ili _Unspent Transaction Output_ ili _UTXO_. Kolekcija svih UTXO-a poznata je kao _UTXO skup_ i trenutno ima na milione UTXO-a. UTXO skup raste kako se novi UTXO stvara, a smanjuje kada se konzumira UTXO. Svaka transakcija predstavlja promenu (promenu stanja) u skupu UTXO-a.
+
+((("balances")))Kada kažemo da je novčanik korisnika "dobio" bitkoin, misli se na to da je novčanik otkrio UTXO koji se može potrošiti sa jednim od ključeva kojima upravlja taj novčanik. Dakle, "saldo" ili "balans" korisnika bitkoina je suma svih UTXO-a koje korisnik može da potroši i koji mogu biti razbacani među stotinama transakcija i stotinama blokova. Koncept balansa kreira aplikacija bitkoin novčanika. Novčanik izračunava korisnikov balans skeniranjem blokčejna i sabira vrednosti bilo kojeg UTXO-a koji novčanik može da potroši pomoću ključeva koje kontroliše. Većina novčanika održava bazu podataka ili koristi uslugu baze podataka gde čuva skup svih UTXO-a koje može potrošiti sa ključevima koje kontroliše.
+
+((("satoshis")))Izlaz transakcije može imati bilo koju (celobrojnu) vrednost izraženu kao višebrojni satošiji. Baš kao što se dolari mogu podeliti na dva decimalna mesta kao centi, bitkoin može da se podeli na osam decimalnih mesta kao satoši. Iako izlaz može imati bilo koju vrednost, jednom kreiran je nedeljiv. Ovo je važno svojstvo izlaza koje treba naglasiti: izlazi su _diskretne_ i _nedeljive_ jedinice vrednosti, denominirane u celobrojnim satošijima. Neiskorišćeni izlaz može da se potroši samo u celosti jednom transakcijom.
+
+((("change, making")))Ako je UTXO veći od željene vrednosti transakcije, mora se potrošiti u celosti i kusur mora biti generisan u transakciji. Drugim rečima, ako imate UTXO vredan 20 bitkoina i želite da platite samo 1 bitkoin, vaša transakcija mora da potroši  čitavih 20-bitkoina UTXO-a i da napravi dva izlaza: jedan izlaz od 1 bitkoina željenom primaocu i drugi izlaz od 19 bitkoina za "kusur" nazad u novčanik. Kao rezultat nedeljive prirode izlaznih transakcija, većina bitkoin transakcija će morati da generiše kusur.
+
+Zamislite da kupac kupi napitak od 1,50 USD, dohvati se novčanika i pokuša da pronađe kombinaciju kovanica i novčanica kako bi pokrio troškove od 1,50 USD. Kupac će odabrati tačan iznos ako je dostupan, npr. novčanicu od dolara i dve četvrtine (četvrtina je 0,25 dolara), ili kombinaciju manjih apoena (šest četvrtina), ili ako je potrebno, veće jedinice kao što je novčanica od 5 dolara. Ako vlasniku radnje preda previše novca, recimo, 5 USD, očekuje kusur od 3,50 USD, koji će vratiti u novčanik i imati na raspolaganju za buduće transakcije.
+
+Slično tome, bitkoin transakcija mora biti kreirana od korisničkog UTXO-a, bez obzira na apoene koje korisnik ima na raspolaganju. Korisnici ne mogu da preseku UTXO na pola, baš kao što nije moguće preseći novčanicu na pola i upotrebiti je. Novčanik aplikacija korisnika obično bira iz korisnikovih raspoloživih UTXO-a da sastavi iznos koji je veći ili jednak željenom iznosu transakcije.
+
+Kao i u stvarnom životu, bitkoin aplikacija može da koristi nekoliko strategija da zadovolji iznos kupovine: kombinovanje više manjih jedinica, pronalaženje tačnog kusura ili korišćenje jedne UTXO jedinice veće od vrednosti transakcije uz vraćanje kusura. Ovo složeno sastavljanje potrošivog UTXO-a vrši se pomoću novčanika korisnika i nevidljiva je za korisnike. To je važno samo ako programirate sirove transakcije jednog UTXO-a.
+
+Transakcija troši prethodno zabeležene nepotrošene izlaze transakcija i stvara nove izlaze transakcija koje može iskoristiti buduća transakcija. Na ovaj način delovi bitkoin vrednosti prelaze od vlasnika do vlasnika u lancu transakcija koje troše i stvaraju UTXO-e.
+
+((("transactions", "coinbase transactions")))((("coinbase transactions")))((("mining and consensus", "coinbase transactions")))Izuzetak u izlaznom i ulaznom lancu je posebna vrsta transakcije koja se zove transakcija _coinbase-a_, što je prva transakcija u svakom bloku. Ovu transakciju postavlja "pobednički" rudar i stvara potpuno novi bitkoin koji se tom rudaru plaća kao nagrada za rudarenje. Ova posebna transakcija coinbase-a ne troši UTXO; umesto toga, ima posebnu vrstu ulaza koji se zove „coinbase“. Ovako nastaje bitkoin valuta tokom procesa rudarenja, kao što ćemo videti u <<mining>>.
+
+[TIP]
+====
+Šta je prvo nastalo? Ulazi ili izlazi, kokoš ili jaje? Precizno govoreći, prvo su nastali izlazi zbog transakcija coinbase-a, koji generišu novi bitkoin, nemaju ulaze i ne proizvode izlaze ni iz čega.
+====
+
+[[tx_outs]]
+==== Izlazi transakcija
+
+((("transactions", "outputs and inputs", "output components")))((("outputs and inputs", "output parts")))Svaka bitkoin transakcija stvara izlaze koji se beleže u bitkoin knjizi (ledger). Skoro svi ovi izlazi, sa jednim izuzetkom (vidi <<op_return>>) kreiraju komade bitkoina koji mogu da se potroše, nazvane UTXO, a zatim ih cela mreža prepoznaje i postaju dostupni vlasniku za buduću transakciju.
+
+UTXO-e prati svaki bitkoin klijent sa punim čvorom u UTXO skupu. Nove transakcije konzumiraju (troše) jedan ili više ovih izlaza iz UTXO skupa.
+
+Izlazi transakcija sastoje iz dva dela:
+
+* Količine bitkoina, denominirana u _satošijima_, najmanjoj bitkoin jedinici
+* Kriptografska zagonetka koja određuje uslove potrebne da bi se potrošio izlaz
+
+((("locking scripts")))((("scripting", "locking scripts")))((("witnesses")))((("scriptPubKey")))Kriptografska zagonetka je takođe poznata kao _skripta za zaključavanje_ (locking script), _skripta svedoka_ (witness script), ili +scriptPubKey+.
+
+Jezik transakcionih skripti, korišćen u ranije pomenutoj skripti za zaključavanje, detaljno je obrađen u <<tx_script>>.
+
+Pogledajte Alisinu transakciju (prikazanu prethodno u <<transactions_behind_the_scenes>>) i pogledajte da li mogu da se identifikuju izlazi. U JSON formatu, izlazi su u nizu (listi) nazvanom +vout+:
+
+[source,json]
+----
+"vout": [
+  {
+    "value": 0.01500000,
+    "scriptPubKey": "OP_DUP OP_HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 OP_EQUALVERIFY
+    OP_CHECKSIG"
+  },
+  {
+    "value": 0.08450000,
+    "scriptPubKey": "OP_DUP OP_HASH160 7f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8 OP_EQUALVERIFY OP_CHECKSIG",
+  }
+]
+----
+
+Kao što vidite transakcija sadrži dva izlaza. Svaki izlaz je definisan vrednošću i kriptografskom zagonetkom. U formatu koji pokazuje Bitcoin Core, vrednost je prikazana u bitkoinu, ali u samoj transakciji je zabeležena kao celi broj označen u satošijima. Drugi deo svakog izlaza je kriptografska zagonetka koja postavlja uslove za trošenje. Bitcoin Core ovo prikazuje kao +scriptPubKey+ i prikazuje nam skriptu u obliku čitljivim za ljude.
+
+O temi zaključavanja i otključavanja UTXO-a diskutovaće se kasnije u <<tx_lock_unlock>>. Skripting jezik koji se koristi za skriptu u +scriptPubKey+ obradićemo u  <<tx_script>>. Ali pre nego što se pozabavimo tim temama, moramo da shvatimo celokupnu strukturu ulaza i izlaza transakcija.
+
+===== Serijalizacija transakcija&#x2014;izlazi
+
+((("transactions", "outputs and inputs", "structure of")))((("outputs and inputs", "structure of")))((("serialization", "outputs")))Kad se transakcije prenose preko mreže ili razmenjuju između aplikacija, one su _serijalizovane_. Serijalizacija je proces pretvaranja unutrašnje reprezentacije strukture podataka u format koji se može preneti bajt po bajt, takođe poznat kao tok bajtova (byte stream). Serijalizacija se najčešće koristi za kodiranje struktura podataka za prenos preko mreže ili za skladištenje u fajlovima. Format serijalizacije izlaza transakcije prikazan je u <<tx_out_structure>>.
+
+[[tx_out_structure]]
+. Serijalizacija izlazne transakcije
+[options="header"]
+|=======
+| Veličina | Polje | Opis
+| 8 bajtova (little-endian) | Iznos | Vrednost bitkoina u satošijima (10^-8^ bitkoin)
+| 1&#x2013;9 bajta (VarInt) | Veličina skripte za zaključavanje | Dužina skripte za zaključavanje u bajtovima
+| Promenljiva | Skripta za zaključavanje | Skripta koji definiše uslove potrebne za potrošnju izlaza
+|=======
+
+Većina bitkoin biblioteka i programskih okvira ne skladišti transakcije interno kao bajt tokove, jer bi to zahtevalo kompleksnu analizu svaki put kada je potrebno da pristupite jednom polju. Radi praktičnosti i čitljivosti, bitkoin biblioteke interno skladište transakcije u strukturama podataka (obično objektno orijentisane strukture).
+
+((("deserialization")))((("parsing")))((("transactions", "parsing")))Proces pretvaranja prezentacije transakcije iz oblika toka bajtova u interni format strukture podataka biblioteke naziva se _deserijalizacijom_ ili _raščlanjivanjem (parsing) transakcije_. Proces pretvaranja nazad u tok bajtova za prenos preko mreže, hešovanje ili skladištenje na disku naziva se _serijalizacijom_. Većina bitkoin biblioteka ima ugrađene funkcije za serijalizaciju i deserijalizaciju transakcija.
+
+Pogledajte da li možete ručno dekodirati Alisinu transakciju iz serijalizovanog heksadecimalnog oblika, pronalazeći neke elemente koje smo prethodno videli. Odeljak koji sadrži dva izlaza je označen u <<example_6_1>> da vam pomogne:
+
+[[example_6_1]]
+.Alisina transakcija, serijalizovana i predstavljena u heksadecimali
+====
++0100000001186f9f998a5aa6f048e51dd8419a14d8a0f1a8a2836dd73+
++4d2804fe65fa35779000000008b483045022100884d142d86652a3f47+
++ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039+
++ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813+
++01410484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade84+
++16ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc1+
++7b4a10fa336a8d752adfffffffff02+*+60e31600000000001976a914ab6+*
+*+8025513c3dbd2f7b92a94e0581f5d50f654e788acd0ef800000000000+*
+*+1976a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac+*
++00000000+
+====
+
+Evo male pomoći:
+
+* Postoje dva izlaza u označenom odeljku, svaki serijalizovan kao što je prikazano u <<tx_out_structure>>.
+* Vrednost 0,015 bitkoina je 1,500,000 satošija. To je +16 e3 60+ u heksadecimali.
+* U serijalizovanoj transakciji, vrednost +16 e3 60+ je kodirana u little-endian redosledu bajta (prvo ide najmanje-značajan-bajt) , tako da izgleda kao +60 e3 16+.
+* Dužina +scriptPubKey+-a je 25 bajtova, što je +19+ u heksadecimali.
+
+[[tx_inputs]]
+==== Ulazi transakcije
+
+((("transactions", "outputs and inputs", "input components")))((("outputs and inputs", "input components")))((("unspent transaction outputs (UTXO)")))((("UTXO sets")))Ulazi transakcije identifikuju (kroz reference) koji će UTXO biti potrošen i pružaju dokaz o vlasništvu putem skripte za otključavanje.
+
+Da bi napravio transakciju, novčanik bira između UTXO-a kojim upravlja i UTXO-a sa dovoljno vrednosti da izvrši traženo plaćanje. Nekad je jedan UTXO dovoljan, a nekad je potrebno više od jednog. Za svaki UTXO koji će biti potrošen za plaćanje, novčanik kreira jedan ulaz koji ukazuje na UTXO i otključava ga skriptom za otključavanje.
+
+Pogledajte detaljnije komponente ulaza. Prvi deo ulaza je referenca na UTXO koristeći heš te transakcije i izlazni indeks, koji identifikuje specifični UTXO u toj transakciji. Drugi deo je skripta za otključavanje, koju novčanik konstruiše da zadovolji uslove potrošnje postavljene u UTXO-u. Najčešće je skripta za otključavanje digitalni potpis i javni ključ koji dokazuje vlasništvo nad bitkoinom. Međutim, ne sadrže sve skripte za otključavanje potpise. Treći deo je redni broj o kome će kasnije biti reči.
+
+Razmotrite naš primer u <<transactions_behind_the_scenes>>. Ulazi za transakcije su niz (lista) koji se zove +vin+:
+
+[[vin]]
+.Ulazi transakcije u Alisinoj transakciji
+[source,json]
+----
+"vin": [
+  {
+    "txid": "7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18",
+    "vout": 0,
+    "scriptSig" : "3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813[ALL] 0484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adf",
+    "sequence": 4294967295
+  }
+]
+----
+
+Kao što vidite na listi postoji samo jedan ulaz (jer je jedan UTXO sadržavao dovoljnu vrednost da izvrši ovo plaćanje). Ulaz ima četiri elementa:
+
+* ((("transaction IDs (txd)")))ID transakcije, referencira transakciju koja sadrži UTXO koji se troši
+* Izlazni indeks (+vout+), identifikuje koji se UTXO iz te transakcije referencira (prvi je nula)
+*  +scriptSig+, koji ispunjava uslove postavljene UTXO-u, otključavajući ih za potrošnju
+* Redni broj (o kome će biti reči kasnije)
+
+U Alisinoj transakciji, ulazni podaci pokazuju na ID transakcije:
+
+----
+7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18
+----
+
+i izlazni indeks +0+ (tj. prvi UTXO kreiran sa tom transakcijom). Alisin novčanik konstruiše skriptu za otključavanje tako što prvo preuzme referencirani UTXO, ispita skriptu za zaključavanje, a zatim ga upotrebi za izgradnju neophodne skripte za otključavanje kako bi zadovoljio njen uslov.
+
+Gledajući samo ulaz, možda ste primetili da o ovom UTXO-u ne znamo ništa, osim reference transakcije koja ga sadrži. Ne znamo njegovu vrednost (iznos u satošijima) i ne poznajemo skriptu za zaključavanje koja postavlja uslove za potrošnju. Da bismo pronašli ove informacije, moramo pronaći referencirani UTXO od te prvobitne transakcije. Obratite pažnju pošto vrednost ulaza nije izričito navedena, moramo koristiti referencirani UTXO i da bismo izračunali naknade koje će biti plaćene u ovoj transakciji (vidi  <<tx_fees>>).
+
+Nije samo Alisin novčanik taj koji mora da traži UTXO referencu na ulazima. Jednom kada se ova transakcija emituje na mreži, svaki čvor za potvrdu će takođe morati da izvuče taj UTXO na koji se poziva ulaz transakcije kako bi se potvrdila transakcija.
+
+Transakcije same po sebi izgledaju nepotpune jer nemaju kontekst. One referenciraju UTXO u njihovim ulazima, ali bez izvlačenja tog UTXO-a ne možemo znati vrednost ulaza ni njihove uslove zaključavanja. Kada pišete bitkoin softver, dok dekodirate transakciju sa namerom da je potvrdite ili prebrojite naknade ili proverite skriptu za otključavanje, vaš kod će prvo morati da skine referencirani UTXO iz blokčejna kako bi izgradio kontekst, koji je impliciran, ali ne i prisutan u UTXO referenci ulaza. Na primer, da biste izračunali iznos plaćen u naknadama, morate znati sumu vrednosti ulaza i izlaza. Ali bez izvučenog UTXO-a navedenog u ulazima nećete znati njihovu vrednost. Tako na prvi pogled jednostavna operacija poput brojanja naknada u jednoj transakciji ustvari uključuje više koraka i podataka iz više transakcija.
+
+Možemo koristiti isti niz naredbi sa Bitcoin Core-om koje smo koristili prilikom preuzimanja Alisine transakcije (+getrawtransaction+ i +decoderawtransaction+). Pomoću toga možemo dobiti UTXO referencu za prethodni ulaz i da ga pogledamo:
+
+[[alice_input_tx]]
+.Alisin UTXO iz prethodne transakcije, naveden u ulazu
+[source,json]
+----
+"vout": [
+   {
+     "value": 0.10000000,
+     "scriptPubKey": "OP_DUP OP_HASH160 7f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8 OP_EQUALVERIFY OP_CHECKSIG"
+   }
+ ]
+----
+
+Vidimo da ovaj UTXO ima vrednost 0,1 BTC i da ima skriptu za zaključavanje (+scriptPubKey+) koja sadrži "OP_DUP OP_HASH160...".
+
+[TIP]
+====
+Da bismo u potpunosti razumeli Alisinu transakciju moramo prethodno pogledati jednu (ili više) transakcija koje se navode kao ulazi. Funkcija koja skida prethodne transakcije i neiskorišćene izlaze transakcija veoma je česta i postoji u skoro svim bitkoin bibliotekama i API-ima.
+====
+
+===== Serijalizacija transakcija&#x2014;ulazi
+
+((("serialization", "inputs")))((("transactions", "outputs and inputs", "input serialization")))((("outputs and inputs", "input serialization")))Transakcije su serijalizovane za prenos na mrežu, njihovi ulazi se kodiraju u tok bajtova (byte stream) kao što je prikazano u <<tx_in_structure>>.
+
+[[tx_in_structure]]
+.Serijalizacija ulaza transakcije
+[options="header"]
+|=======
+| Veličina | Polje | Opis
+| 32 bajta | Heš transakcije | Referenca transakcije koja sadrži UTXO za potrošnju
+| 4 bajta | Izlazni indeks | Redni broj UTXO-a koji je za potrošnju; prvi je 0
+| 1&#x2013;9 bajta (VarInt) | Veličina skripte za otključavanje | Dužina skripte u bajtovima
+| Promenljiva | Skripta za otključavanje | Skripta koja ispunjava uslove UTXO skripte za zaključavanje
+| 4 bajta | Redni broj | Koristi se za vreme zaključavanja ili nekorišćenje (0xFFFFFFFF)
+|=======
+
+Kao i kod izlaza, pokušajte da nađete ulaze iz Alisine transakcije u serijalizovanom formatu. Prvo, ulazi se dekodiraju:
+
+[source,json]
+----
+"vin": [
+  {
+    "txid": "7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18",
+    "vout": 0,
+    "scriptSig" : "3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813[ALL] 0484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adf",
+    "sequence": 4294967295
+  }
+],
+----
+
+Pogledajte da li možete da identifikujete ova polja u serijalizovanoj heksadecimali u <<example_6_2>>:
+
+[[example_6_2]]
+.Alisina transakcija, serijalizovana i predstavljena u heksadecimali
+====
++0100000001+*+186f9f998a5aa6f048e51dd8419a14d8a0f1a8a2836dd73+*
+*+4d2804fe65fa35779000000008b483045022100884d142d86652a3f47+*
+*+ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039+*
+*+ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813+*
+*+01410484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade84+*
+*+16ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc1+*
+*+7b4a10fa336a8d752adfffffffff+*+0260e31600000000001976a914ab6+
++8025513c3dbd2f7b92a94e0581f5d50f654e788acd0ef800000000000+
++1976a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac00000+
++000+
+====
+
+Nagoveštaji:
+
+* ID transakcije se serijalizuje u obrnutom redosledu bajta, pa počinje sa (heks) +18+ i završava sa +79+
+* Indeks izlaza je 4-bajtna grupa nula, lako ih je prepoznati
+* Dužina +scriptSig+ je 139 bajta, ili +8b+ u heksadecimali
+* Redni broj je postavljen na +FFFFFFFF+, opet se lako prepozna((("", startref="alicesix")))
+
+[[tx_fees]]
+==== Naknade za transakcije
+
+((("transactions", "outputs and inputs", "transaction fees")))((("fees", "transaction fees")))((("mining and consensus", "rewards and fees")))Većina transakcija uključuje naknade za transakcije, koje pružaju nadoknadu bitkoin rudarima za osiguravanje mreže. Naknade takođe služe kao sigurnosni mehanizam, tako što je ekonomski neisplativo za napadače da preplave mrežu transakcijama. Rudarenje i naknade i nagrade koje rudari prikupljaju detaljnije su prikazani u <<mining>>.
+
+Ovaj odeljak ispituje kako su naknade za transakcije uključene u tipičnu transakciju. Većina novčanika automatski izračunava i uključuje naknade za transakcije. Međutim, ako transakcije konstruišete programaski ili koristite interfejs komandne linije, morate ručno da evidentirate i uključite ove naknade.
+
+Naknade za transakcije služe kao podsticaj za uključivanje (rudarenje) transakcije u sledeći blok i da bi obeshrabrile zloupotrebu sistema nametanjem malog troška svakoj transakciji. Naknade za transakciju prikuplja rudar koji izrudari blok i beleži transakciju na blokčejnu.
+
+Naknade za transakcije izračunavaju se na osnovu veličine transakcije u kilobajtima, a ne vrednosti transakcije u bitkoinu. Sve u svemu, naknade za transakcije određuju se na osnovu tržišnih snaga unutar bitkoin mreže. Rudari daju prednost transakcijama na osnovu mnogo različitih kriterijuma, uključujući naknade, a mogu čak i da obrade transakcije besplatno pod određenim okolnostima. Naknade za transakcije utiču na prioritet obrade, što znači da će verovatno transakcija sa zadovoljavajućim naknadama biti uključena u sledeći blok, dok transakcija sa nedovoljnom naknadom ili bez naknada može biti odložena, obrađena na bazi kad stignu rudari nakon nekoliko blokova, a može i da upošte ne bude obrađena. Naknade za transakcije nisu obavezne i transakcije bez naknade mogu na kraju biti obrađene; međutim, uključivanje naknada za transakcije podstiče prvenstvo obrade.
+
+Vremenom se razvijao način na koji se obračunavaju naknade za transakcije i njihov uticaj na davanje prioriteta transakcijama. Na početku su naknade za transakcije bile fiksne i konstantne širom mreže. Postepeno, struktura naknada je popustila i na nju mogu uticati tržišne snage, zasnovane na kapacitetu mreže i obimu transakcija. Od početka 2016. godine bar su ograničenja kapaciteta u bitkoinu stvorila konkurenciju među transakcijama, što je rezultiralo višim naknadama, a besplatne transakcije su postale stvar prošlosti. Transakcije bez naknade ili sa vrlo niskom naknadom se retko rudare, a ponekad se i ne šire u mreži.
+
+((("fees", "fee relay policies")))((("minrelaytxfee option")))U Bitcoin Core-u, smernice za relej naknade postavljaju se sa opcijom +minrelaytxfee+. Trenutni difolt +minrelaytxfee+ je 0,00001 bitkoin ili stotina millibitkoina po kilobajtu. Zato se po difoltu transakcije sa naknadom manjom od 0,00001 bitkoina tretiraju kao besplatne i prenose se samo ako u mempool-u ima prostora; u suprotnom se one odbacuju. Bitkoin čvorovi mogu ignorisati difolt smernicu naknade za releje prilagođavanjem vrednosti +minrelaytxfee+.
+
+((("dynamic fees")))((("fees", "dynamic fees")))Bilo koja bitkoin usluga koja stvara transakcije, uključujući novčanike, razmene, maloprodajne aplikacije, itd., _mora_ provesti dinamične naknade. Dinamične naknade se mogu implementirati zahvaljujući usluzi procene naknada koju pružaju treća lica ili pomoću ugrađenog algoritma za procenu naknada. Ako niste sigurni, počnite sa uslugom trećeg lica i kad steknete iskustvo, dizajnirajte i implementirajte sopstveni algoritam, ako ne želite da zavisite od trećeg lica.
+
+Algoritmi za procenu naknade izračunavaju odgovarajuću naknadu na osnovu kapaciteta i naknada koje nude "konkurentske" transakcije. Ovi algoritmi se kreću od jednostavnih (prosečna ili srednja naknada u poslednjem bloku) do sofisticiranih (statistička analiza). Oni procenjuju potrebnu naknadu (u satošijima po bajtu), koja će transakciji dati veliku verovatnoću da bude izabrana i uključena u određeni broj blokova. Većina usluga nudi korisnicima mogućnost izbora naknada visokog, srednjeg ili niskog prioriteta. Veliki prioritet znači da korisnici plaćaju veće naknade, ali će transakcija verovatno biti uključena u sledeći blok. Srednji i niski prioritet znači da korisnici plaćaju niže naknade za transakcije, ali transakcije mogu mnogo duže da potraju.
+
+((("bitcoinfees (third-party service)")))Mnoge novčanik aplikacije koriste usluge trećih lica za izračunavanje naknade. Jedan od popularnih servisa je https://bitcoinfees.earn.com/[_https://bitcoinfees.earn.com/_], koji pruža API i vizuelnu grafiku koja prikazuje naknadu u satošijima po bajtu za različite prioritete.
+
+[TIP]
+====
+((("static fees")))((("fees", "static fees")))Statičke naknade više nisu održive na bitkoin mreži. Novčanici koji postavljaju statičke naknade stvoriće loše korisničko iskustvo jer će se transakcije često "zaglaviti" i ostati nepotvrđene. Korisnici koji ne razumeju bitkoin transakcije i naknade negoduju zbog "zaglavljenih" transakcija jer misle da su izgubili novac.
+====
+
+Dijagram u <<bitcoinfeesearncom>> prikazuje procenu naknada u realnom vremenu pri povećanju od 10 satošija po bajtu i očekivano vreme potvrde (u minutima i broju blokova) za transakcije sa naknadama u svakom rasponu. Za svaki raspon naknada (npr. 61&#x2013;70 satošija po bajtu), dve horizontalne trake prikazuju broj nepotvrđenih transakcija (1405) i ukupan broj transakcija u protekla 24 sata (102,975), sa naknadama u tom rasponu. Na osnovu dijagrama, preporučena naknada visokog prioriteta u tom trenutku je bila 80 satošija po bajtu, a naknada će verovatno rezultirati transakcijom  rudarenom u prvom sledećem bloku (nula blok kašnjenja). Sa te tačke gledišta, srednja veličina transakcije je 226 bajta, tako da bi preporučena naknada za veličinu transakcije bila 18.080 satošija (0,00018080 BTC).
+
+Podaci o proceni naknade mogu se pronaći putem jednostavnog HTTP REST API-ja, na https://bitcoinfees.earn.com/api/v1/fees/recommended[https://bitcoinfees.earn.com/api/v1/fees/recommended]. Na primer, u komandnoj liniji koristeći +curl+ naredbu:
+
+.Korišćenje API-ja za procenu naknade
+----
+$ curl https://bitcoinfees.earn.com/api/v1/fees/recommended
+
+{"fastestFee":80,"halfHourFee":80,"hourFee":60}
+----
+
+API vraća JSON objekat sa trenutnom procenom naknade na najbržu potvrdu (+fastestFee+), potvrdu unutar tri bloka (+halfHourFee+) i šest blokova (+hourFee+), u satošijima po bajtu.
+
+[[bitcoinfeesearncom]]
+.Usluga procene naknade bitcoinfees.earn.com
+image::images/mbc2_0602.png[Usluga procene naknade bitcoinfees.earn.com]
+
+==== Dodavanje naknade transakcijama
+
+Struktura podataka transakcija nema polje za naknade. Umesto toga, naknade se podrazumevaju kao razlika između zbira ulaza i zbira izlaza. Svaki višak koji ostane nakon što se svi izlazi oduzmu od svih ulaza je naknada koju rudari skupe:
+
+[[tx_fee_equation]]
+.Transakcione naknade podrazumevaju se kao višak ulaza umanjenih za izlaze:
+----
+Naknade = Zbir(ulaza) - Zbir(izlaza)
+----
+
+Ovo je malo zbunjujući element transakcija i važna je stvar koju treba razumeti, jer ako pravite sopstvene transakcije morate se osigurati da greškom ne uključite veliku naknadu premalom potrošnjom ulaza. To znači da morate uneti račun za sve ulaze ako je potrebno kreirajući kusur, ili ćete na kraju dati rudarima jednu veoma veliku napojnicu!
+
+Na primer, ako koristite UTXO od 20 bitkoina da biste uplatili 1 bitkoin, morate uključiti izlaz za kusur od 19 bitkoina nazad u vaš novčanik. U suprotnom, "ostatak" od 19 bitkoina će se računati kao naknada za transakciju i naplatiće je rudar koji izrudari vašu transakciju u bloku. Iako biste dobili prvenstvo pri obradi i usrećili rudara, verovatno vam to ne bi bila namera.
+
+[WARNING]
+====
+((((„upozorenja i upozorenja“, „promenite izlaze“)))Ako zaboravite da dodate izlaz kusura u ručno napravljenoj transakciji, platićete kusur kao naknadu za transakciju. "Zadržite kusur!" možda nije ono što ste nameravali.
+====
+
+((("use cases", "buying coffee")))Da videli kako to funkcioniše u praksi. Pogledajte opet Alisinu kupovinu kafe. Alisa želi da potroši 0,015 bitkoina za plaćanje kafe. Da bi se osigurala da će ova transakcija odmah biti obrađena, ona želi da uključi naknadu za transakciju, recimo 0,001. To će značiti da će ukupni trošak transakcije biti 0,016. Njen novčanik zato mora da sadrži skup UTXO-a koji u zbiru iznosi 0,016 bitkoina ili više, i da po potrebi kreira kusur. Recimo da njen novčanik ima na raspolaganju 0,2-bitkoin UTXO-a. Prema tome treba da potroši ovaj UTXO, kreira jedan izlaz za Bobov kafić od 0,015, a drugi izlaz od 0,184 bitkoina kusura za sopstveni novčanik, ostavljajući 0,001 bitkoina nekorišćenih, kao implicitnu naknadu za transakciju.
+
+((("use cases", "charitable donations")))((("charitable donations")))Pogledajmo sada drugi scenario. Eugenija, direktorka dobrotvorne organizacije za decu na Filipinima, završila je prikupljanje sredstava za kupovinu školskih knjiga za decu. Primila je nekoliko hiljada malih donacija od ljudi širom sveta, ukupno 50 bitkoina, tako da je njen novčanik pun veoma malih plaćanja (UTXO-a). Sada želi da kupi stotine školskih knjiga od lokalnog izdavača plaćajući u bitkoinu.
+
+Eugenijina novčanik aplikacija pokušava da konstruiše jednu veću transakciju iz raspoloživog UTXO skupa koji se sastoji od mnogo manjih iznosa. To znači da će nastala transakcija za ulaze birati između više od sto malih vrednosti UTXO-a i da će imati samo jedan izlaz, i to za plaćanje izdavača knjige. Transakcija sa više ulaza biće veća od jednog kilobajta, možda nekoliko kilobajta. Kao rezultat zahtevaće mnogo veću naknadu od transakcije veličine medijane.
+
+Eugenijina novčanik aplikacija izračunaće odgovarajuću naknadu mereći veličinu transakcije i množeći je sa naknadom po kilobajtu. Mnogi novčanici će preplatiti naknade za veće transakcije, kako bi se osigurali da će transakcija brzo biti obrađena. Naknada nije veća zato što Eugenija troši više novca, već zato što je njena transakcija složenija i veća - naknada ne zavisi od bitkoin vrednosti transakcije.((("", startref="Tout06")))
+
+[[tx_script]]
+[role="pagebreak-before less_space_h1"]
+=== Skripte za transakcije i njihov jezik
+
+((("transactions", "scripts and Script language", id="Tsript06")))((("scripting", "transactions and", id="Stransact06")))Jezik skripte za bitkoin transakcije, nazvan _Script_ , je jezik sličan Forth-u koji izvršava komande sa obrnutom poljskom notacijom. Ako vam to zvuči nerazumljivo verovatno niste proučavali programske jezike iz 1960-ih, što je u redu&#x2014;sve će biti objašnjeno u ovom poglavlju. Skripta za zaključavanje postavljena na UTXO-u i skripta za otključavanje napisane su u ovom skripting jeziku. Kada je transakcija validirana, skripta za otključavanje na svakom ulazu izvršava se zajedno sa odgovarajućom skriptom za zaključavanje kako bi se videlo da li zadovoljava uslov potrošnje.
+
+Skripta je veoma jednostavan jezik koji je osmišljen da bude ograničenog obima i da se može izvršiti na čitavom nizu hardvera, možda podjednako jednostavan kao i ugrađeni sistemi. Zahteva minimalnu obradu, ali ne može da radi mnoge maštovite stvari koje čine moderni programski jezici. Ovo je namerna bezbednosna funkcija, zbog njegove upotrebe pri validaciji novca koji može da se programira.
+
+((("Pay-to-Public-Key-Hash (P2PKH)")))Danas većina transakcija obrađenih putem bitkoin mreže ima oblik "Plaćanje na Bobovu bitkoin adresu" i zasniva se na skripti zvanoj Pay-to-Public-Key-Hash. Međutim, bitkoin transakcije nisu ograničene na skriptu "Plaćanje na Bobovu bitkoin adresu". U stvari skripte za zaključavanje mogu da se napišu tako da izraze veliku raznovrsnost složenih uslova. Da bismo razumeli ove složenije skripte, prvo moramo da razumemo osnove skripti za transakcije i njihov jezik.
+
+U ovom odeljku prikazaćemo osnovne komponente skripting jezika za bitkoin transakcije i pokazati kako se koristi za izražavanje jednostavnih uslova potrošnje i kako se ti uslovi mogu ispuniti skriptom za otključavanje.
+
+[TIP]
+====
+((("programmable money")))Validacija bitkoin transakcije se ne zasniva na statičnom modelu, već se postiže izvršavanjem skripting jezika. Ovaj jezik omogućava izražavanje skoro beskonačnog broja različitih uslova. Ovako bitkoin dobija moć "programabilnog novca".
+====
+
+
+==== Tjuringova nepotpunost
+
+((("Turing incompleteness")))Jezik skripta za bitkoin transakcije sadrži mnogo operatora, ali je namerno ograničen na jedan važan način - ne postoje petlje ni složene mogućnosti kontrole protoka, osim uslovne kontrole protoka. Ovo osigurava da jezik nije _Tjuring potpun_, što znači da skripte imaju ograničenu složenost i predvidljiva vremena izvršenja. Skripta nije jezik opšte namene. ((("denial-of-service attacks")))((("denial-of-service attacks", see="also security")))((("security", "denial-of-service attacks")))Ova ograničenja osiguravaju da se jezik ne može koristiti za stvaranje beskonačne petlje ili drugog oblika "logičke bombe", koji bi mogao biti ugrađen u transakciju tako da izazove napad uskraćivanja usluge (DoS attack) na bitkoin mreži. Zapamtite, svaku transakciju potvrđuje svaki puni čvor na bitkoin mreži. Ograničen jezik sprečava da se mehanizam za proveru transakcija iskoristi kao slaba tačka.
+
+==== Stateless verifikacija (bez stanja)
+
+((("stateless verification")))Jezik skripta za bitkoin transakcije je bez stanja (stateless), jer nema stanja pre izvršenja skripte ili je stanje sačuvano nakon izvršenja skripte. Zbog toga se u njemu nalaze sve informacije potrebne za izvršavanje skripti. Skripta će se predvidljivo izvršiti na isti način kao na nekom drugom sistemu. Ako vaš sistem verifikuje skriptu, možete biti sigurni da će i svaki drugi sistem u bitkoin mreži takođe potvrditi skriptu, što znači da je validna transakcija validna za sve i da svi to znaju. Ova predvidljivost rezultata je suštinska prednost bitkoin sistema.
+
+[[tx_lock_unlock]]
+==== Konstrukcija skripti (zaključavanje + otključavanje)
+
+Bitkoin mehanizam za proveru transakcija oslanja se na dve vrste skripti za validaciju transakcija: skripte za zaključavanje i skripte za otključavanje.
+
+((("locking scripts")))((("unlocking scripts")))((("scripting", "locking scripts")))Skripta za zaključavanje je uslov potrošnje koji se postavlja na izlaz: ona određuje uslove koji moraju biti ispunjeni da bi se potrošili rezultati u budućnosti. ((("scriptPubKey")))Istorijski se skripta za zaključavanje zvala _scriptPubKey_, jer je obično sadržavala javni ključ ili bitkoin adresu (heš javnog ključa). U ovoj knjizi nazivamo je "skripta za zaključavanje" kako bi pokazali mnogo širi spektar mogućnosti ove skripting tehnologije. U većini bitkoin aplikacija, ono što nazivamo skriptom za zaključavanje pojaviće se u izvornom kodu kao +scriptPubKey+. ((("witnesses")))((("cryptographic puzzles")))Videćete i skriptu za zaključavanje koja se naziva _witness skripta_ (vidite <<segwit>>) ili uopštenije _kriptografska zagonetka_. Svi ovi pojmovi znače istu stvar, na različitim nivoima apstrakcije.
+
+Skripta za otključavanje je skripta koja "rešava" ili zadovoljava uslove postavljene na izlazima skripti za zaključavanje i omogućava trošenje rezultata. Skripte za otključavanje deo su svakog ulaza transakcije. Uglavnom sadrže digitalni potpis koji proizvodi novčanik korisnika iz njegovog privatnog ključa. ((("scriptSig")))Istorijski se skripta za otključavanje zvala _scriptSig_, jer je obično sadržavala digitalni potpis. U većini bitkoin aplikacija, izvorni kod za skriptu za otključavanje se zove +scriptSig+. Videćete i da se skripta za otključavanje naziva _witness_ (pogledajte <<segwit>>). U ovoj knjizi nazivamo je "skripta za otključavanje" kako bismo istakli mnogo širi obim zahteva za skriptu zaključavanja, jer ne moraju sve skripte za otključavanje da sadrže potpise.
+
+Svaki čvor za potvrdu bitkoina potvrdiće transakcije izvršavajući skriptu za zaključavanje i otključavanje zajedno. Svaki ulaz sadrži skriptu za otključavanje i odnosi se na prethodno postojeći UTXO. Softver za proveru kopiraće skriptu za otključavanje, preuzeti UTXO na koji se poziva ulaz i kopirati skriptu za zaključavanje iz tog UTXO-a. Zatim se skripte za otključavanje i zaključavanje izvršavaju u redosledu. Ulaz je validan ako skripta za otključavanje ispunjava uslove skripte za zaključavanje (vidite  <<script_exec>>). Svi unosi se nezavisno validiraju kao deo ukupne validacije transakcije.
+
+Imajte na umu da je UTXO trajno snimljen u blokčejnu i samim tim je nepromenljiv i na njega ne utiču neuspeli pokušaji da se potroši referencom u novoj transakciji. Samo validna transakcija koja u potpunosti zadovoljava uslove izlaza rezultira time da se izlaz smatra "potrošenim" i ukloni iz skupa neiskorišćenih izlaza transakcija (skup UTXO-a).
+
+<<scriptSig_and_scriptPubKey>> je primer skripte za otključavanje i zaključavanje za najčešći tip bitkoin transakcije (plaćanje hešom javnog ključa), prikazujući kombinovanu skriptu koja je rezultat pridruživanja skripti za otključavanje i zaključavanje pre validacije skripte.
+
+[[scriptSig_and_scriptPubKey]]
+.Kombinovanje scriptSig i scriptPubKey da bi se procenila skripta za transakciju
+image::images/mbc2_0603.png["scriptSig_and_scriptPubKey"]
+
+===== Stek izvršne skripte
+
+Bitkoin skripting jezik je jezik baziran na steku, jer koristi strukturu podataka koja se zove _stek_. Stek je vrlo jednostavna struktura podataka koja se može vizualizovati kao špil karata. Stek omogućava dve operacije: push i pop. Push dodaje kartu na vrh špila. Pop sklanja gornju kartu sa špila karata. Operacije na špilu karata mogu delovati samo na kartu na vrhu. Struktura podataka steka se takođe naziva i "Last-in-First-Out" (zadnji-koji-ulazi-prvi-izlazi) ili "LIFO" red.
+
+Skripting jezik izvršava skriptu obrađujući svaku stavku s leva na desno. Brojevi (konstante podataka) se stavljaju na stek. Operatori stave ili skinu jedan ili više parametara sa steka, obrađuju ih i mogu da  stave rezultat na stek. Na primer, +OP_ADD+ će skinuti dve stavke sa steka, sabrati ih i staviti dobijenu sumu na stek.
+
+Uslovni operateri procenjuju stanje, proizvodeći Bulov rezultat TRUE ili FALSE. Na primer, +OP_EQUAL+ skida dva predmeta sa steka i stavi TRUE (TRUE je predstavljen brojem 1) ako su jednaki ili FALSE (predstavljeno nulom) ako nisu jednaki. Bitkoin skripte za transakciju obično sadrže uslovnog operatora, tako da mogu proizvesti TRUE rezultat koji označava važeću transakciju.
+
+===== Jednostavna skripta
+
+Sada ćemo primeniti ono što smo naučili o skriptama i stekovima na nekoliko jednostavnih primera.
+
+U <<simplemath_script>>, skripta +2 3 OP_ADD 5 OP_EQUAL+ demonstrira operatora aritmetičkog sabiranja +OP_ADD+, sabirajući dva broja i stavljajući rezultat na stek, a zatim uslovni operator +OP_EQUAL+, koji proverava da li je rezultirajući zbir jednak +5+. Ukratko, prefiks +OP_+ je izostavljen u primeru. Za više detalja o dostupnim operatorima i skript funkcijama pogledajte <<tx_script_ops>>.
+
+Iako se većina skripti za zaključavanje odnosi na heš javnog ključa (u osnovi, bitkoin adresu), zahtevajući dokaz o vlasništvu da bi se trošila sredstva, skripta ne mora biti tako složena. Svaka kombinacija skripti za zaključavanje i otključavanje koja rezultira u TRUE vrednosti je validna. Jednostavna aritmetika koju smo koristili kao primer skripting jezika takođe je validna skripta za zaključavanje, koja se može koristiti za zaključavanje izlaza transakcije.
+
+Koristite deo primera aritmetičke skripte kao skriptu za zaključavanje:
+
+----
+3 OP_ADD 5 OP_EQUAL
+----
+
+koji može da se zadovolji transakcijom koja sadrži ulaz sa skriptom za otključavanje:
+
+----
+2
+----
+
+Softver za proveru kombinuje skripte za zaključavanje i otključavanje, a rezultirajuća skripta je:
+
+----
+2 3 OP_ADD 5 OP_EQUAL
+----
+
+Kao što smo videli u detaljnom primeru <<simplemath_script>>, kada se izvrši ova skripta, rezultat je +OP_TRUE+, što transakciju čini važećom. Ne samo da je ovo validna skripta za zaključavanje izlaza transakcija, već rezultirajući UTXO može da potroši svako ko ima aritmetičke veštine i zna da broj 2 zadovoljava skriptu.
+
+[TIP]
+====
+((("transactions", "valid and invalid")))Transakcije su validne ako je gornji rezultat na steku +TRUE+ (obeležen kao ++&#x7b;0x01&#x7d;++), bilo koja druga vrednost sem nule ili ako je stek prazan nakon izvršenja skripte. Transakcije su nevažeće ako je vrednost na vrhu steka + FALSE + (prazna vrednost dužine nula, označena kao ++&#x7b;&#x7d;++) ili ako izvršavanje skripte izričito zaustavi operator, kao +OP_VERIFY+, +OP_RETURN+ ili uslovni terminator kao +OP_ENDIF+. Vidi <<tx_script_ops>> za detalje.
+====
+
+[[simplemath_script]]
+Provera bitkoin skripti jednostavnom matematikom
+image::images/mbc2_0604.png["TxScriptSimpleMathExample"]
+
+[role="pagebreak-before"]
+Sledi nešto složenija skripta, koja izračunava ++2 + 7 - 3 + 1++. Primetićete da kada skripta sadrži nekoliko operatora zaredom, stek omogućava da na rezultate jednog operatora deluje sledeći operator:
+
+----
+2 7 OP_ADD 3 OP_SUB 1 OP_ADD 7 OP_EQUAL
+----
+
+Pokušajte sami da potvrdite prethodnu skriptu koristeći papir i olovku. Kada se izvršenje skripte završi, na steku bi trebalo da imate vrednost +TRUE+.
+
+[[script_exec]]
+===== Odvojeno izvršavanje skripti za otključavanje i zaključavanje
+
+((("security", "locking and unlocking scripts")))U originalnom bitkoin klijentu skripte za otključavanje i zaključavanje su bile povezane i izvršavane jedna za drugom. Iz sigurnosnih razloga je to promenjeno 2010, zbog ranjivosti koja je omogućila skriptama za otključavanje sa nepravilnim oblikovanjem da gurnu podatke u stek i pokvare skripte za zaključavanje. U trenutnoj implementaciji skripte se izvršavaju odvojeno sa stekom koji se prenosi između dva izvršenja, kao što je opisano u nastavku.
+
+Prvo se izvršava skripta za otključavanje sa mehanizmom za izvršenje steka. Ako se skripta za otključavanje izvrši bez grešaka (npr. nema preostalih "visećih" operatora), glavni stek se kopira i skripta za zaključavanje se izvršava. Ako je rezultat izvršenja skripte za zaključavanje sa podacima na steku kopiranim iz skripte za otključavanje "TRUE", skripta za otključavanje je uspešno rešila uslove nametnute skriptom za zaključavanje, prema tome, ulaz je validna autorizacija za trošenje UTXO-a. Ako bilo kakav rezultat osim "TRUE" ostane nakon izvršenja kombinovane skripte, ulaz je nevežeći, jer nije ispunio uslove potrošnje postavljene na UTXO-u.
+
+
+[[p2pkh]]
+==== Pay-to-Public-Key-Hash (P2PKH)
+
+((("Pay-to-Public-Key-Hash (P2PKH)")))Većina transakcija obrađenih na bitkoin mreži troši rezultate zaključane skriptom Pay-to-Public-Key-Hash (plati hešu javnog ključa) ili "P2PKH". Ovi izlazi sadrže skriptu za zaključavanje koja zaključava izlaz u hešu javnog ključa, poznatijem kao bitkoin adresa. Izlaz zaključan pomoću P2PKH skripte može da se otključa (potroši) predstavljanjem javnog ključa i digitalnog potpisa stvorenog odgovarajućim privatnim ključem (vidi <<digital_sigs>>).
+
+((("use cases", "buying coffee")))Na primer, pogledajmo ponovo Alisino plaćanje u Bobovom kafiću. Alisa je uplatila 0,015 bitkoina na bitkoin adresu kafića. Taj izlaz transakcije imao bi ovakvu skriptu za zaključavanje:
+
+----
+OP_DUP OP_HASH160 <heš javnog ključa kafića> OP_EQUALVERIFY OP_CHECKSIG
+----
+
++Heš javnog ključa kafića+ je ekvivalentan bitkoin adresi kafića, bez Base58Check kodiranja. Većina aplikacija prikazala bi _heš javnog ključa_ u heksadecimalnom formatu, a ne poznatu bitkoin adresu u Base58Check formatu koji započinje sa "1".
+
+Prethodna skripta za zaključavanje može da se zadovolji skriptom za otključavanje ovog oblika:
+
+----
+<potpis kafića> <javni kljuć kafića>
+----
+
+Dve skripte zajedno formiraju sledeću kombinovanu skriptu za proveru:
+
+----
+<potpis kafića> <javni kljuć kafića> OP_DUP OP_HASH160
+<heš javnog ključa kafića> OP_EQUALVERIFY OP_CHECKSIG
+----
+
+Kada se izvrši ova kombinovana skripta će biti TRUE samo ako skripta za otključavanje odgovara uslovima koje postavlja skripta za zaključavanje. Drugim rečima, rezultat će biti TRUE ako skripta za otključavanje ima validan potpis iz privatnog ključa kafića koji odgovara hešu javnog ključa postavljenim kao prepreka.
+
+Figures <<P2PubKHash1>> and <<P2PubKHash2>> show (in two parts) a step-by-step execution of the combined script, which will prove this is a valid transaction.((("", startref="Tsript06")))((("", startref="Stransact06")))
+
+[[P2PubKHash1]]
+.Evaluacija skripte za P2PKH transakciju (deo 1 od 2)
+image::images/mbc2_0605.png["Tx_Script_P2PubKeyHash_1"]
+
+[[P2PubKHash2]]
+.Evaluacija skripte za P2PKH transakciju (deo 2 od 2)
+image::images/mbc2_0606.png["Tx_Script_P2PubKeyHash_2"]
+
+[[digital_sigs]]
+=== Digitalni potpisi (ECDSA)
+
+((("transactions", "digital signatures and", id="Tdigsig06")))Do sada nismo ulazili ni u kakve detalje o "digitalnim potpisima". U ovom odeljku ćemo pogledati kako funkcionišu digitalni potpisi i kako mogu predstaviti dokaz o vlasništvu privatnog ključa bez otkrivanja tog privatnog ključa.
+
+((("digital signatures", "algorithm used")))((("Elliptic Curve Digital Signature Algorithm (ECDSA)")))Algoritam za digitalni potpis koji se koristi u bitkoinu je _Elliptic Curve Digital Signature Algorithm (ECDSA)_ ili _algoritam digitalnog potpisa eliptičke krive_. ECDSA je algoritam koji se koristi za digitalni potpis zasnovan na eliptičkoj krivi para ključeva privatnog/javnog, kao što je opisano u <<elliptic_curve>>. ECDSA koriste funkcije skripti +OP_CHECKSIG+, +OP_CHECKSIGVERIFY+, +OP_CHECKMULTISIG+ i +OP_CHECKMULTISIG+, i +OP_CHECKMULTISIGVERIFY+. Svaki put kada ih vidite u skripti za zaključavanje, skripta za otključavanje mora da sadrži ECDSA potpis.
+
+((("digital signatures", "purposes of")))Digitalni potpis ima tri svrhe u bitkoinu (pogledajte sledeći odvojeni odlomak). Prvo, potpis dokazuje da je vlasnik privatnog ključa, što implicira da je vlasnik sredstava _ovlašćen_ za trošenje tih sredstava. Drugo, dokaz o autorizaciji je _nepobitan_ (nemoguće ga je oboriti dokazima). Treće, potpis dokazuje da transakciju (ili specifične delove transakcije) niko nije i _ne može da modifikuje_ nakon potpisivanja.
+
+Imajte na umu da je svaki ulaz transakcije nezavisno potpisan. Ovo je ključna činjenica, jer ni potpise ni ulaze ne moraju posedovati ni stavljati isti "vlasnici". U stvari posebna šema transakcija koja se zove "CoinJoin" koristi ovu činjenicu za kreiranje transakcija sa više lica radi privatnosti.
+
+[NOTE]
+====
+Svaki ulaz transakcije i svaki potpis koji ona može da sadrži je _potpuno_ nezavisan od bilo kog drugog ulaza ili potpisa. Više lica može da sarađuje na konstruisanju transakcija i pojedinačnom potpisivanju samo jednog ulaza.
+====
+
+[[digital_signature_definition]]
+.Vikipedijina definicija "digitalnog potpisa"
+****
+((("digital signatures", "defined")))Digitalni potpis je matematička šema za demonstriranje autentičnosti digitalne poruke ili dokumenata. Važeći digitalni potpis daje primaocu povod da veruje da je poruku kreirao poznati pošiljalac (autentifikacija), da pošiljalac ne može poreći da je poruku poslao (nepobitnost ili nonrepudiation) i da poruka nije promenjena u tranzitu (integritet).
+
+_ Izvor: https://en.wikipedia.org/wiki/Digital_signature_
+****
+
+==== Kako rade digitalni potpisi
+
+((("digital signatures", "how they work")))Digitalni potpis je _matematička šema_ koja ima dva dela. Prvi deo je algoritam za kreiranje potpisa, koji koristi privatni ključ (ključ za potpis), iz poruke (transakcija). Drugi deo je algoritam koji omogućava bilo kome da proveri potpis, s obzirom na poruku i javni ključ.
+
+===== Pravljenje digitalnog potpisa
+
+U bitkoin implementaciji algoritma ECDSA, "poruka" koja se potpisuje je transakcija ili tačnije heš određenog podskupa podataka u transakciji (vidite <<sighash_types>>). Ključ za potpis je privatni ključ korisnika. Rezultat je potpis:
+
+latexmath:[\(Sig = F_{sig}(F_{hash}(m), dA)\)]
+
+gde je:
+
+* _dA_ privatni ključ za potpisivanje
+* _m_ transakcija (ili njeni delovi)
+* _F_~_hash_~ funkcija hešovanja
+* _F_~_sig_~ algoritam za potpisivanje
+* _Sig_ je rezultirajući potpis
+
+Više detalja o matematici ECDSA možete naći u <<ecdsa_math>>.
+
+Funkcija _F_~_sig_~ proizvodi potpis +Sig+ koji se sastoji od dve vrednosti, koje se obično nazivaju +R+ i +S+:
+
+----
+Sig = (R, S)
+----
+
+((("Distinguished Encoding Rules (DER)")))Kada su dve vrednosti +R+ i +S+ izračunate, one se serijalizuju u tok bajtova pomoću standardne međunarodne šeme kodiranja nazvane _Distinguished Encoding Rules_, ili _DER_.
+
+[[seralization_of_signatures_der]]
+===== Serijalizacija potpisa (DER)
+
+Pogledajte transakciju koju je Alisa napravila još jednom ((("use cases", "buying coffee", id="alicesixtwo"))). U ulazu transakcije nalazi se skripta za otključavanje koja sadrži sledeći DER-kodirani potpis iz Alisinog novčanika:
+
+----
+3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e381301
+----
+
+Taj potpis je serijalizovani tok bajtova sa vrednostima +R+ i +S+ koji je proizveo Alisin novčanik, kako bi dokazao da ona poseduje privatni ključ ovlašćen da troši taj izlaz. Format serijalizacije se sastoji od devet elemenata, i to sledećih:
+
+* +0x30+&#x2014;označava početak DER sekvence
+* +0x45+&#x2014;dužina sekvence (69 bajta)
+  * +0x02+&#x2014;sledi ceo broj
+  * +0x21+&#x2014;dužina celog broja (33 bajta)
+  * +R+&#x2014;++00884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb++
+  * +0x02+&#x2014;sledi drugi celi broj
+  * +0x20+&#x2014;dužina celog broja (32 bajta)
+  * +S+&#x2014;++4b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813++
+* Sufiks (+0x01+) koji označava vrstu korišćenog heša (+SIGHASH_ALL+)
+
+Pogledajte da li možete da dekodirate Alisin serijalizovani (DER-kodirani) potpis pomoću ove liste. Važni brojevi su +R+ i +S+; ostatak podataka je deo DER šeme kodiranja.
+
+==== Provera potpisa
+
+((("digital signatures", "verifying")))Da biste proverili potpis, morate da imate potpis (+R+ i +S+), serijalizovanu transakciju i javni ključ (koji odgovara privatnom ključu koji je korišćen za kreiranje potpisa). U suštini provera potpisa znači: "Samo vlasnik privatnog ključa koji je generisao ovaj javni ključ može dati potpis na ovoj transakciji."
+
+Algoritam za proveru potpisa uzima poruku (heš transakcije ili njene delove), javni ključ potpisnika i potpis (+R+ i +S+ vrednosti), i vraća TRUE ako potpis važi za ovu poruku i javni ključ.
+
+[[sighash_types]]
+==== Vrste heš potpisa (SIGHASH)
+
+((("digital signatures", "signature hash types")))((("commitment")))Digitalni potpisi se primenjuju na poruke, koje su u slučaju bitkoina same transakcije. Potpis podrazumeva _obavezivanje_ potpisnika na specifične podatake transakcije. U najjednostavnijem obliku, potpis se odnosi na celu transakciju i na taj način obavezuje sve ulaze, izlaze i druga polja transakcije. Međutim, potpis može da se odnosi samo na podskup podataka u transakciji, što je korisno za brojne scenarije, koje ćete videti u ovom odeljku.
+
+((("SIGHASH flags")))Bitkoin potpisi imaju način da naznače koji deo podataka transakcije je uključen u hešu potpisanim privatnim ključem pomoću +SIGHASH+ oznake. Oznaka +SIGHASH+ je jedan bajt koji je dodat potpisu. Svaki potpis ima +SIGHASH+ oznaku i može se razlikovati od ulaza do ulaza. Transakcija sa tri potpisana ulaza može imati tri potpisa sa različitim +SIGHASH+ oznakama, a svaki potpis potpisuje (obavezuje) različite delove transakcije.
+
+Zapamtite, svaki ulaz može da sadrži potpis u skripti za otključavanje. Kao rezultat, transakcija koja sadrži nekoliko ulaza može imati potpise sa različitim +SIGHASH+ oznakama koje izvršavaju različite delove transakcije u svakom od ulaza. Imajte na umu i da bitkoin transakcije mogu da sadrže ulaze različitih "vlasnika", koji mogu da potpišu samo jedan ulaz u delimično izgrađenoj (i nevažećoj) transakciji, sarađujući sa drugima da prikupe sve potrebne potpise za pravljenje validne transakcije. Mnoge od +SIGHASH+ oznaka imaju smisla samo ako mislite da više učesnika sarađuje van bitkoin mreže i ažurira delimično potpisanu transakciju.
+
+[role="pagebreak-before"]
+Postoje tri +SIGHASH+ oznake: +ALL+, +NONE+, i +SINGLE+, kao što je prikazano u  <<sighash_types_and_their>>.
+
+[[sighash_types_and_their]]
+.SIGHASH tipovi i njihova značenja
+[options="header"]
+|=======================
+| + SIGHASH + oznaka| Vrednost | Opis
+| + SVE + | 0x01 | Potpis se odnosi na sve ulaze i izlaze
+| + NONE + | 0x02 | Potpis se odnosi na sve ulaze i nijedan od izlaza
+| + SINGLE + | 0x03 | Potpis se odnosi na sve ulaze, ali samo na jedan izlaz sa istim brojem indeksa kao i na potpisanom ulazu
+|=======================
+
+Pored toga, postoji oznaka za modifikacije +SIGHASH_ANYONECANPAY+, koja se može kombinovati sa svakom od prethodnih oznaka. Kada je postavljeno +ANYONECANPAY+, potpisan je samo jedan ulaz, a ostatak (i njihovi redni brojevi) su otvoreni za modifikaciju. +ANYONECANPAY+ ima vrednost +0x80+ i primenjuje se bitnim OR (ILI), što rezultira kombinovanim oznakama kao što je prikazano u <<sighash_types_with_modifiers>>.
+
+[[sighash_types_with_modifiers]]
+.SIGHASH tipovi sa modifikatorima i njihovim značenjima
+[options="header"]
+|=======================
+| SIGHASH oznaka | Vrednost | Opis
+| ALL\|ANYONECANPAY | 0x81 | Potpis se odnosi na jedan ulaz i sve izlaze
+| NONE\|ANYONECANPAY | 0x82 | Potpis se odnosi na jedan ulaz i nijedan od izlaza
+|SINGLE\|ANYONECANPAY | 0x83 | Potpis se odnosi na jedan ulaz i na izlaz sa istim brojem indeksa
+|=======================
+
+Zbir svih kombinacija oznaka su ovde <<sighash_combinations>>.
+
+[[sighash_combinations]]
+.Pregled različitih kombinacija SIGHASH-a
+image::images/sighash_combinations.png["Zbir različitih kombinacija SIGHASH oznaka"]
+
+Način na koji se +SIGHASH+ oznake primenjuju tokom potpisivanja i verifikacije je taj da se napravi kopija transakcije i određena polja unutar nje iseku (podešeni na dužinu nula i ispražnjeni). Rezultirajuća transakcija je serijalizovana. Na kraju serijalizacije transakcije dodaje se +SIGHASH+ oznaka i rezultat se hešuje. Sam heš je "poruka" koja se potpisuje. Zavisno od toga koja se +SIGHASH+ oznaka koristi, različiti delovi transakcije se odsecaju. Dobijeni heš zavisi od različitih podskupova podataka u transakciji. Uključivanjem +SIGHASH+-a kao poslednjeg koraka pre hešovanja, potpis takođe obavezuje +SIGHASH+ tip, tako da ga nije moguće menjati (npr., od strane rudara).
+
+[NOTE]
+====
+Sve vrste +SIGHASH+-a potpisuju transakciju +nLocktime+ polja (vidi <<transaction_locktime_nlocktime>>). Pored toga, sam tip +SIGHASH+ dodaje se u transakciju pre potpisivanja, tako da se ne može izmeniti kada se jednom potpiše.
+====
+
+Na primeru Alisine transakcije (pogledajte spisak u <<seralization_of_signatures_der>>), videli smo da je poslednji deo potpisa kodiranog DER-om +01+, što je +SIGHASH_ALL+ oznaka. Ovo zaključava podatke o transakciji, tako da Alisin potpis obavezuje stanje svih ulaza i izlaza. Ovo je najčešći oblik za potpis.
+
+Pogledajte neke druge +SIGHASH+ vrste i kako mogu du se koriste u praksi:
+
++ALL|ANYONECANPAY+ :: ((("charitable donations")))((("use cases", "charitable donations")))Ova konstrukcija može da se koristi za pravljenje transakcije "crowdfunding&#x201d;-a. Neko ko pokušava da prikupi fondove može da konstruiše transakciju sa jednim jedinim izlazom. Taj jedini izlaz uplaćuje "ciljni" iznos osobi koja prikuplja sredstva. Takva transakcija očigledno nije validna, jer nema ulaza. Međutim, drugi mogu da je izmene dodavajući svoj sopstveni ulaz kao donaciju. Oni potpisuju sopstveni ulaz sa +ALL|ANYONECANPAY+. Ako se ne skupi dovoljno ulaza da bi se dostigla vrednost izlaza, transakcija je nevažeća. Svaka donacija je "zalog", koji sakupljač sredstava ne može da podigne dok se celokupni ciljni iznos ne prikupi. 
+
++NONE+ :: Ova konstrukcija se može koristiti za kreiranje "čeka na donosioca" ili "praznog čeka" na određeni iznos. Obavezuje ulaz, ali omogućava promenu skripte za zaključavanja izlaza. Svako može upisati svoju bitkoin adresu u skriptu za zaključavanje izlaza i otkupiti transakciju. Međutim, sama izlazna vrednost zaključava se potpisom.
+
++NONE|ANYONECANPAY+ :: Ova konstrukcija može da se koristi za izgradnju "skupljača prašine" (dust collector). Korisnici koji imaju sitni UTXO u svojim novčanicima ne mogu da ih potroše bez troškova koji koštaju više od vrednosti prašine. Sa ovom vrstom potpisa UTXO prašina može da se donira bilo kome ko je skuplja i da je potroši kad god poželi.
+
+((("Bitmask Sighash Modes")))Postoje neki predlozi za izmenu ili proširenje sistema +SIGHASH+-a. Jedan takav predlog je _Bitmask Sighash Modes_, Glenn Willen-a od Blockstream-a, u okviru projekta Elements. Cilj je stvaranje fleksibilne zamene za +SIGHASH+ tipove koji dozvoljavaju "samovoljno upisivanje bitmaske ulaza i izlaza od strane rudara" koje mogu izraziti "složenije šeme pretplatnih ugovora, kao što su potpisane ponude sa promenom u podeljenoj razmeni imovine".
+
+[NOTE]
+====
+Ne možete da vidite +SIGHASH+ oznake predstavljene kao opciju u novčanik aplikaciji korisnika. Uz nekoliko izuzetaka novčanici grade P2PKH skript i potpisuju se sa +SIGHASH_ALL+ oznakom. Da biste koristili drugu oznaku +SIGHASH+-a, morate da napišete softver za konstrukciju i potpisivanje transakcija. Što je još važnije, +SIGHASH+ oznake mogu da se koriste u specijalnim namenskim bitkoin aplikacijama koje omogućavaju nove upotrebe.
+====
+
+[[ecdsa_math]]
+==== ECDSA Matematika
+
+((("Elliptic Curve Digital Signature Algorithm (ECDSA)")))Kao što je prethodno pomenuto, potpisi se stvaraju matematičkom funkcijom _F_~_sig_~  koja proizvodi potpis sastavljen od dve vrednosti _R_ i _S_. U ovom odeljku ćemo detaljnije pogledati funkciju _F_~_sig_~.
+
+((("public and private keys", "key pairs", "ephemeral")))Algoritam potpisa prvo generiše _efemerni_ (privremeni) par privatnog/javnog ključa. Ovaj privremeni par ključeva koristi se da se izračunaju vrednosti _R_ i _S_, nakon transformacije koja uključuje privatni ključ za potpis i heš transakcije.
+
+Privremeni par ključeva zasnovan je na nasumičnom broju _k_, koji se koristi kao privremeni privatni ključ. Iz _k_ generišemo odgovarajući privremeni javni ključ _P_ (izračunat sa _P = k*G_, na isti način se dobijaju bitkoin javni ključevi; pogledajte  <<pubkey>>). Vrednost _R_ digitalnog potpisa je x koordinata efemernog javnog ključa _P_.
+
+Odatle algoritam izračunava vrednost _S_ potpisa, tako da:
+
+_S_ = __k__^-1^ (__Hash__(__m__) + __dA__ * __R__) _mod n_
+
+gde je:
+
+* _k_ je efemerni privatni ključ
+* _R_ je k koordinata efemernog javnog ključa
+* _dA_ privatni ključ za potpisivanje
+* _m_ su podaci o transakciji
+* _n_ je prost red eliptičke krive
+
+Verifikacija je inverzna funkcija generisanju potpisa, koja koristi _R_, _S_ vrednosti i javni ključ za izračunavanje vrednosti _P_, koja je tačka na eliptičkoj krivoj (efemerni javni ključ koji se koristi u kreiranju potpisa):
+
+_P_ = __S__^-1^ * __Hash__(__m__) * _G_ + __S__^-1^ * _R_ * _Qa_
+
+gde je:
+
+* _R_ i _S_ su vrednosti potpisa
+* _Qa_ je Alisin javni ključ
+* _m_ su podaci o transakciji koji su potpisani
+* _G_ je tačka generatora eliptičke krive
+
+Ako je x koordinata izračunate tačke _P_ jednaka _R_, tada verifikator može zaključiti da je potpis validan.
+
+Imajte na umu da pri verifikaciji potpisa privatni ključ nije ni poznat ni otkriven.
+
+[TIP]
+====
+ECDSA je neminovno prilično komplikovan matematički predmet; potpuno objašnjenje je van okvira ove knjige. Brojni sjajni vodiči na mreži vas vode korak po korak kroz materiju: potražite "ECDSA explained" ili probajte ovde: http://bit.ly/2r0HhGB[].
+====
+
+==== Značaj nausmičnosti u potpisima
+
+((("digital signatures", "randomness in")))Kao što ste videli u <<ecdsa_math>>, algoritam za generisanje potpisa koristi nasumični ključ _k_, kao osnovu za efemerni par privatnih/javnih ključeva. Vrednost _k_ nije važna, _pod uslovom da je nasumična_. Ako se ista vrednost _k_ koristi za proizvodnju dva potpisa u različitim porukama (transakcijama), tada _privatni ključ_ potpisa može bilo ko da izračuna. Ponovna upotreba iste vrednosti _k_ u algoritmu potpisa dovodi do izlaganja privatnog ključa!
+
+[WARNING]
+====
+((("warnings and cautions", "digital signatures")))Ako se ista vrednost _k_ koristi u algoritmu za potpisivanje u dve različite transakcije, privatni ključ može da se izračuna i izloži svetu!
+====
+
+Ovo nije samo teorijska mogućnost. Videli ste da ovaj problem dovodi do izlaganja privatnih ključeva u nekoliko različitih implementacija algoritma za potpisivanje transakcija u bitkoinu. Ljudima su ukradena sredstva zbog nenamerne ponovne upotrebe vrednosti _k_. Najčešći razlog ponovne upotrebe vrednosti _k_ je nepravilno inicijalizovan generator nasumičnih brojeva.
+
+((("random numbers", "random number generation")))((("entropy", "random number generation")))((("deterministic initialization")))Da biste izbegli ovu ranjivost, najbolja praksa u industriji je da se ne generiše _k_ pomoću generatora nasumičnih brojeva sa semenom entropije, već da se koristi deterministički generator nasumičnih brojeva, koji koristi same podatke transakcije kao seme. Ovo osigurava da svaka transakcija proizvede drugačiji _k_. Standardni algoritam u industriji za determiničku inicijalizaciju _k_ definisan je na https://tools.ietf.org/html/rfc6979[RFC 6979], koji je objavila grupa Internet Engineering Task Force.
+
+Ako implementirate algoritam za potpisivanje transakcija bitkoina, _morate_ koristiti RF 6979 ili sličan determinističko-nasumični algoritam kako bi osigurali generisanje različitog _k_ za svaku transakciju. ((("", startref="Tdigsig06")))
+
+=== Bitkoin adrese, balansi i druge apstrakcije
+
+((("transactions", "higher-level abstractions", id="Thigher06")))Ovo poglavlje smo započeli otkrivši da transakcije izgledaju drugačije "iza kulisa" od načina na koji su predstavljene u novčanicima, blokčejn explorerima i drugim aplikacijama za korisnike. Mnogi pojednostavljeni i poznati koncepti iz ranijih poglavlja, poput bitkoin adresa i balansa, izgleda da izostaju iz strukture transakcija. Videli smo da transakcije same po sebi ne sadrže bitkoin adrese, nego rade pomoću skripti koje zaključavaju i otključavaju diskretne vrednosti bitkoina. Balansi nisu prisutni nigde u ovom sistemu, ali ipak svaka aplikacija novčanika na vidnom mestu prikazuje balans korisničkog novčanika.
+
+Sada kada smo istražili šta je zapravo uključeno u bitkoin transakciju, možemo da ispitamo kako apstrakcije višeg nivoa potiču od naizgled primitivnih komponenti transakcije.
+
+Pogledajmo ponovo kako je Alisina transakcija predstavljena na popularnom block exploreru (<<alice_transaction_to_bobs_cafe>>).
+
+[[alice_transaction_to_bobs_cafe]]
+.Alisina transakcija u Bobovom kafiću
+image::images/mbc2_0208.png["Alice Coffee Transaction"]
+
+Na levoj strani transakcije blokčejn explorer prikazuje Alisinu bitkoin adresu kao "pošiljaoca". U stvari ove informacije nisu u samoj transakciji. Kada blokčejn explorer referencira transakciju, on takođe navodi i prethodnu transakciju povezanu sa ulazom nove transakcije i izvlači prvi izlaz iz te starije transakcije. Unutar tog izlaza je skripta za zaključavanje koja zaključava UTXO u hešu Alisinog javnog ključa (P2PKH skript). Blokčejn explorer je izvadio heš javnog ključa i kodirao ga pomoću Base58Check-a za proizvodnju i prikazivanje bitkoin adrese koja predstavlja taj javni ključ.
+
+Slično tome, sa desne strane, blokčejn explorer pokazuje dva izlaza; prvi ka Bobovoj bitkoin adresi, a drugi ka Alisinoj bitkoin adresi (za kusur). Da bi stvorio ove bitkoin adrese blokčejn explorer je izvukao skriptu za zaključavanje sa svakog izlaza, prepoznao je kao P2PKH skriptu i odatle izvadio heš javnog ključa. Konačno, blokčejn explorer je ponovo kodirao heš javnog ključa sa Base58Checkom kako bi proizveo i prikazao bitkoin adrese.
+
+Ako kliknete na Bobovu bitkoin adresu, blokčejn explorer će vam pokazati <<the_balance_of_bobs_bitcoin_address>>.
+
+[[the_balance_of_bobs_bitcoin_address]]
+.Balans Bobove bitkoin adrese
+image::images/mbc2_0608.png["Balans Bobove bitkoin adrese"]
+
+Blokčejn explorer prikazuje balans Bobove bitkoin adrese. Ali nigde u bitkoin sistemu ne postoji koncept "balansa". Umesto toga ovde prikazane vrednosti konstruiše blokčejn explorer na sledeći način.
+
+Kako bi konstruisao iznos "Total Received" (ukupno dobijeno), blokčejn explorer će najpre dekodirati Base58Check kodiranu bitkoin adresu kako bi pronašao 160-bitni heš Bobovog javnog ključa koji je kodiran u adresi. Zatim će blokčejn explorer pretražiti bazu podataka transakcija, tražeći izlaze sa skriptama zaključavanja P2PKH koji sadrže heš Bobovog javnog ključa. Sabiranjem vrednosti svih izlaza, blokčejn explorer može da proizvede ukupnu primljenu vrednost.
+
+Izgradnja trenutnog balansa (prikazanog kao "Final Balance") zahteva malo više posla. Blokčejn explorer čuva posebnu bazu podataka o trenutno nepotrošenim izlazima, skup UTXO-a. Da bi održao ovu bazu podataka, blokčejn explorer mora da prati bitkoin mrežu, doda novostvoreni UTXO i ukloni potrošeni UTXO u realnom vremenu (realtime) kada se pojavi u nepotvrđenim transakcijama. Ovo je komplikovan proces koji zavisi od praćenja transakcija tokom njihovog širenja, kao i od održavanja konsenzusa sa bitkoin mrežom kako bi se osiguralo da se sledi pravilan lanac. Ponekad blokčejn explorer nije sinhronizovan i njegova perspektiva UTXO skupa je nepotpuna ili netačna.
+
+Iz UTXO skupa blokčejn explorer sabira vrednost svih neiskorišćenih izlaza koji upućuju na Bobov heš javnog ključa i stvara "Finalni Balans", broj prikazan korisniku.
+
+Da bi stvorio ovu sliku, sa ova dva "balansa", blokčejn explorer mora da indeksira i pretražuje desetine, stotine, pa čak i stotine hiljada transakcija.
+
+Ukratko, informacije predstavljene korisnicima putem novčanik aplikacija, blokčejn explorera i drugih bitkoin korisničkih interfejsa, često se sastoje od apstrakcija višeg nivoa koje se dobijaju pretraživanjem različitih transakcija, pregledom njihovog sadržaja i manipulacijom podataka koji se nalaze u njima. Predstavljajući ovaj pojednostavljeni pogled na bitkoin transakcije koje podsećaju na bankarske čekove od jednog pošiljaoca do primaoca, ove aplikacije moraju izostaviti mnogo osnovnih detalja. Oni se uglavnom fokusiraju na uobičajene vrste transakcija: P2PKH sa SIGHASH_ALL potpisima na svakom ulazu. Dakle, dok bitkoin aplikacije mogu da predstave više od 80% svih transakcija na jednostavan način za čitanje, ponekad se nađu transakcije koje odstupaju od norme. Transakcije koje sadrže složenije skripte za zaključavanje, različite SIGHASH oznake ili mnogo ulaza i izlaza, pokazuju jednostavnost i slabost tih apstrahovanja.
+
+Svakog dana se na blokčejnu potvrđuju stotine transakcija koje ne sadrže P2PKH izlaze. blokčejn exploreri im često predstavljaju crvene poruke upozorenja u kojima se kaže da ne mogu dekodirati adresu. Sledeći link sadrži najnovije "neobične transakcije" koje nisu u potpunosti dekodirane: https://blockchain.info/strange-transactions[].
+
+Kao što ćemo videti u sledećem poglavlju, to nisu nužno neobične transakcije. To su transakcije koje sadrže složenije skripte za zaključavanje od uobičajnih P2PKH. Naučićemo kako dekodirati i razumeti složenije skripte i aplikacije koje one podržavaju.((("", startref="Thigher06")))((("", startref="alicesixtwo")))

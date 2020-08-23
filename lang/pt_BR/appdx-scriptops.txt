@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[appendix]
+== Operadores de Linguagem de Script de Transação, Constantes e Símbolos
+
+[NOTE]
+====
+Tabelas e descrições provenientes de https://en.bitcoin.it/wiki/Script [].
+====
+
+<<tx_script_ops_table_pushdata>> mostra os operadores para adicionar valores no stack.((("transactions", "scripts and Script language", id="TRlang14")))((("scripting", "Script language operators, constants, and symbols", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+.Adiciona um valor no stack
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| OP_0 or OP_FALSE | 0x00 | Um array vazio é adicionado no stack
+| 1 to 75 | 0x01 to 0x4b | Push the next N bytes onto the stack, where N is 1 to 75 bytes
+| OP_PUSHDATA1 | 0x4c | O próximo script byte contém N, adiciona os seguintes N bytes no stack
+| OP_PUSHDATA2 | 0x4d | Os próximos dois script bytes contém N, adiciona os seguintes N bytes no stack
+| OP_PUSHDATA4 | 0x4e | Os próximos quatro script bytes contém N, adiciona os seguintes N bytes no stack
+| OP_1NEGATE | 0x4f | Adiciona o valor "–1" no stack
+| OP_RESERVED | 0x50 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_1 or OP_TRUE| 0x51 | Adiciona o valor "1" no stack
+| OP_2 a OP_16 | 0x52 a 0x60 |  Para OP_N, adiciona o valor "N" no stack, por exemplo, OP_2 adiciona "2"
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> mostra operadores de controle de fluxo condicional.
+
+[[tx_script_ops_table_control]]
+.Controle de fluxo condicional
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| OP_NOP | 0x61 | Não fazer nada
+| OP_VER | 0x62 | Suspenso&#x2014;Transação inválida, a menos que seja encontrada em uma cláusula OP_IF não-executada
+| OP_IF | 0x63 | Executa as declarações a seguir se o topo do stack não for 0
+| OP_NOTIF | 0x64 | Executa as declarações a seguir se o topo do stack não for 0
+| OP_VERIF | 0x65 | Interrupção&#x2014;Transação inválida
+| OP_VERNOTIF | 0x66 | Interrupção&#x2014;Transação inválida
+| OP_ELSE | 0x67 | Executa apenas se as declarações anteriores não foram executadas
+| OP_ENDIF | 0x68 | Termina o bloco OP_IF, OP_NOTIF, OP_ELSE
+| OP_VERIFY | 0x69 | Verifica o topo do stack, suspende e invalida a transação se não for TRUE
+| OP_RETURN | 0x6a | Interrompe e invalida a transação
+|=======
+
+<<tx_script_ops_table_timelock>> mostra operadores usados para timelocks.
+
+[[tx_script_ops_table_timelock]]
+.Operações timelock
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| OP_CHECKLOCKTIMEVERIFY (antigamente OP_NOP2) | 0xb1 | Marca uma transação como inválida se o item do topo do stack é maior do que o campo nLockTime da transação, caso contrário, a avaliação do script continua como se um OP_NOP tivesse sido executado. A transação é também inválida se 1. o stack estiver vazio; ou 2. o item no topo do stack é negativo; ou 3. o item no topo do stack é maior ou igual a 500000000 enquanto o campo nLockTime da transação é menor do que 500000000, ou vice-versa; ou 4. o campo nSequence do input é igual a 0xffffffff. A semântica precisa é descrita no BIP-65 
+| OP_CHECKSEQUENCEVERIFY (antigamente OP_NOP3) | 0xb2 | Marca a transação como inválida se o tempo de travamento relativo do input (imposto pelo BIP 0068 com nSequence) não é igual ou maior do que o valor do item no topo do stack. A semântica precisa é descrita no BIP-112|
+|=======
+
+<<tx_script_ops_table_stack>> mostra os operadores usados para manipular o stack.
+
+[[tx_script_ops_table_stack]]
+.Operações de stack
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| OP_TOALTSTACK | 0x6b | Exibe o item do topo do stack e o empurra para o stack alternativo
+| OP_FROMALTSTACK | 0x6c | Exibe o item do topo do stack alternativo e o empurra para o stack
+| OP_2DROP | 0x6d | Exibe os dois itens do topo do stack
+| OP_2DUP | 0x6e | Duplica os dois itens no topo do stack
+| OP_3DUP | 0x6f | Duplica os três itens no topo do stack
+| OP_2OVER | 0x70 | Copia o terceiro e quarto itens do stack para o topo
+| OP_2ROT | 0x71 | Move o quinto e sexto itens no stack para o topo
+| OP_2SWAP | 0x72 | Troca os dois pares de itens no topo do stack
+| OP_IFDUP | 0x73 | Duplica o item no topo do stack se ele não for 0
+| OP_DEPTH | 0x74 | Conta os itens no stack e empurra o resultado da contagem
+| OP_DROP | 0x75 | Exibe o item do topo do stack
+| OP_DUP | 0x76 | Duplica o item no topo do stack
+| OP_NIP | 0x77 | Exibe o segundo item do stack
+| OP_OVER | 0x78 | Copia o segundo item do stack e o empurra para o topo
+| OP_PICK | 0x79 | Exibe o valor N do topo, então copia o Nº item para o topo do stack
+| OP_ROLL | 0x7a | Exibe o valor N do topo, então move o Nº item para o topo do stack
+| OP_ROT | 0x7b | Inverte os três itens do topo do stack
+| OP_SWAP | 0x7c | Permuta os dois itens do topo no stack
+| OP_TUCK | 0x7d | Copy the top item and insert it between the top and second item
+|=======
+
+<<tx_script_ops_table_splice>> mostra os operadores de string.
+
+[[tx_script_ops_table_splice]]
+.Operações de pedaços de string
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| _OP_CAT_ | 0x7e | Desativado (concatena os dois itens do topo)
+| _OP_SUBSTR_ | 0x7f | Desativado (retorna substring)
+| _OP_LEFT_ | 0x80 | Desativado (retorna left substring)
+| _OP_RIGHT_ | 0x81 | Desativado (retorna right substring)
+| OP_SIZE | 0x82 | Calcula o comprimento da string do item do topo e empurra o resultado 
+|=======
+
+<<tx_script_ops_table_binmath>> mostra os operadores de aritimética binária e de lógica booleana.
+
+[[tx_script_ops_table_binmath]]
+.Aritmética binária e condicionais
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| _OP_INVERT_ | 0x83 | Desativado (Inverte os bits do item do topo)
+| _OP_AND_ | 0x84 | Desativado (Booleano AND dos dois itens do topo)
+| _OP_OR_ | 0x85 | Desativado (Booleano OR dos dois itens do topo)
+| _OP_XOR_ | 0x86 | Desativado (Booleano XOR dos dois itens do topo)
+| OP_EQUAL | 0x87 | Empurra TRUE (1) se os dois itens do topo forem exatamente iguais, caso contrário empurra FALSE (0)
+| OP_EQUALVERIFY | 0x88 | O mesmo que o OP_EQUAL, mas executa o  OP_VERIFY após para suspender se não for TRUE
+| OP_RESERVED1 | 0x89 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_RESERVED2 | 0x8a | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>> mostra operadores numéricos (aritméticos).
+
+[[tx_script_ops_table_numbers]]
+.Operadores numéricos
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| OP_1ADD | 0x8b | Adiciona 1 ao item do topo   
+| OP_1SUB | 0x8c | Subtrai 1 do item do topo
+| _OP_2MUL_ | 0x8d | Desativado (multiplica o item do topo por 2)
+| _OP_2DIV_ | 0x8e | Desativado (divide o item do topo por 2)
+| OP_NEGATE | 0x8f | Inverte o sinal do item do topo
+| OP_ABS | 0x90 | Muda o sinal do item do topo para positivo
+| OP_NOT | 0x91 | Se o item do topo é 0 ou 1 Booleano o inverte, caso contrário retorna 0
+| OP_0NOTEQUAL | 0x92 | Se o item do topo é zero, retorna 0, caso contrário retorna 1
+| OP_ADD | 0x93 | Exibe os dois itens do topo, soma os dois e empurra o resultado
+| OP_SUB | 0x94 | Exibe os dois itens do topo, subtrai o primeiro do segundo e empurra o resultado
+| _OP_MUL_ | 0x95 | Disabled (multiply top two items)
+| _OP_DIV_ | 0x96 | Disabled (divide second item by first item)
+| _OP_MOD_ | 0x97 | Disabled (remainder divide second item by first item)
+| _OP_LSHIFT_ | 0x98 | Disabled (shift second item left by first item number of bits)
+| _OP_RSHIFT_ | 0x99 | Disabled (shift second item right by first item number of bits)
+| OP_BOOLAND | 0x9a | Booleano AND dos dois itens do topo
+| OP_BOOLOR | 0x9b | Booleano OR dos dois itens do topo
+| OP_NUMEQUAL | 0x9c | Retorna TRUE se os dois itens do topo são iguais a números
+| OP_NUMEQUALVERIFY | 0x9d | O mesmo que o NUMEQUAL, então OP_VERIFY para suspender se não for TRUE
+| OP_NUMNOTEQUAL | 0x9e | Retorna TRUE se os dois itens do topo não são iguais a números
+| OP_LESSTHAN | 0x9f | Retorna TRUE se o segundo item for menor que o item do topo
+| OP_GREATERTHAN | 0xa0 | Retorna TRUE se o segundo item for maior do que o item do topo
+| OP_LESSTHANOREQUAL | 0xa1 | Retorna TRUE se o segundo item for menor ou igual ao item do topo
+| OP_GREATERTHANOREQUAL | 0xa2 | Retorna TRUE se o segundo item for maior ou igual ao item do topo
+| OP_MIN | 0xa3 | Retorna o menor dos dois itens do topo 
+| OP_MAX | 0xa4 | Retorna o maior dos dois itens do topo
+| OP_WITHIN | 0xa5 | Retorna TRU se o terceiro item estiver entre o segundo item (ou for igual) e o primeiro item
+|=======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> mostra os operadores de funções criptográficas.
+
+[[tx_script_ops_table_crypto]]
+.Operações criptográficas e de hashing
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| OP_RIPEMD160 | 0xa6 | Retorna o hash RIPEMD160 do item do topo
+| OP_SHA1 | 0xa7 | Retorna o hash SHA1 do item do topo
+| OP_SHA256 | 0xa8 | Retorna o hash SHA256 do item do topo
+| OP_HASH160 | 0xa9 | Retorna o hash RIPEMD160(SHA256(x)) do item do topo
+| OP_HASH256 | 0xaa | Retorna o hash SHA256(SHA256(x)) do item do topo
+| OP_CODESEPARATOR | 0xab | Marca o início dos dados verificados pela assinatura
+| OP_CHECKSIG | 0xac | Exibe uma chave pública e assinatura e valida a assinatura para os dados hashados da transação, retorna TRUE se corresponde
+| OP_CHECKSIGVERIFY | 0xad | O mesmo que o CHECKSIG, então OP_VERIFY para suspender se não for TRUE
+| OP_CHECKMULTISIG | 0xae | Executa o CHECKSIG para cada par de assinatura e chave pública fornecido. Todos devem corresponder. Um bug na implementação exibe um valor extra, use o prefixo OP_NOP como uma solução temporária
+| OP_CHECKMULTISIGVERIFY | 0xaf | O mesmo que o CHECKMULTISIG, então OP_VERIFY para suspender se não for TRUE
+|=======
+
+<<tx_script_ops_table_nop>> mostra símbolos não-operadores.
+
+[[tx_script_ops_table_nop]]
+.Não-operadores
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| OP_NOP1 to OP_NOP10 | 0xb0 to 0xb9 | Does nothing, ignored
+|=======
+
+
+<<tx_script_ops_table_internal>> mostra os códigos de operador reservados para serem usados pelo analisador interno de script.((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+.Códigos OP reservados para uso interno pelo parser
+[options="header"]
+|=======
+| Símbolo | Valor (hex) | Descrição
+| OP_SMALLDATA | 0xf9 | Representa o campo de dados pequeno 
+| OP_SMALLINTEGER | 0xfa | Representa um campo pequeno de dados numerais
+| OP_PUBKEYS | 0xfb | Representa os campos de chave pública
+| OP_PUBKEYHASH | 0xfd | Representa o campo do hash da chave pública
+| OP_PUBKEY | 0xfe | Representa um campo de chave pública
+| OP_INVALIDOPCODE | 0xff | Representa qualquer código OP que não está atualmente designado
+|=======

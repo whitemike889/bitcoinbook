@@ -1,0 +1,836 @@
+[[ch04_keys_addresses]]
+== Ključevi, adrese
+
+((("cryptography", "defined")))((("cryptography", see="also keys and addresses")))Možda ste već čuli da je bitkoin zasnovan na _kriptografiji_, što je grana matematike koja je u širokoj upotrebi u računarskoj sigurnosti. Kriptografija na grčkom znači "tajno pisanje", ali kriptografija kao nauka obuhvata više nego samo tajno pisanje, koje se zove šifrovanje. Kriptografija se takođe može koristiti da bi se dokazalo poznavanje neke tajne, a da se pri tome ta tajna ne otkrije (digitalni potpis) ili da bi se dokazala autentičnost podataka (digitalni otisak prsta). Ove vrste kriptografskih dokaza su matematički alati od presudne važnosti za bitkoin i uveliko se koriste u bitkoin aplikacijama. ((("encryption")))((("encryption", see="also keys and addresses")))Ironično, šifrovanje nije važan deo bitkoina, jer njegove komunikacije i podaci o transakcijama nisu šifrovani i ne moraju da budu šifrovani da bi se sredstva zaštitila. U ovom poglavlju upoznaćemo deo kriptografije koji se u bitkoinu koristi za kontrolu vlasništva nad sredstvima u obliku ključeva, adresa i novčanika.
+
+=== Uvod
+
+((("digital keys", see="keys and addresses")))((("keys and addresses", "overview of", id="KAover04")))((("digital signatures", "purpose of")))Vlasništvo nad bitkoinom uspostavlja se putem _digitalnih ključeva_, _bitkoin adresa_ i _digitalnih potpisa_. Digitalni ključevi se zapravo ne čuvaju u mreži, već ih korisnici kreiraju i snimaju u fajl ili jednostavnu bazu podataka, koja se naziva _novčanik_. Digitalni ključevi u korisničkom novčaniku potpuno su nezavisni od bitkoin protokola i mogu da se generišu i upravljaju softverom novčanika korisnika bez obzira na blokčejn ili pristup internetu. Mnoga zanimljiva svojstva bitkoina moguća su zahvaljujući ključevima, uključujući decentralizovano poverenje i kontrolu, potvrdu o vlasništvu i sigurnosni model na bazi kriptografskog dokaza.
+
+Većina bitkoin transakcija zahteva da se u blokčejn uključi tačan digitalni potpis, koji može da se generiše samo tajnim ključem; prema tome, svako ko ima kopiju tog ključa ima kontrolu nad bitkoinom. ((("witnesses")))Digitalni potpis koji se koristi za trošenje sredstava zove se _svedok (witness)_, to je izraz koji se koristi u kriptografiji. Podaci svedoka u jednoj bitkoin transakciji svedoče o stvarnom vlasništvu sredstava koja se troše.
+
+((("public and private keys", "key pairs")))((("public and private keys", see="also keys and addresses")))Ključevi dolaze u parovima koji se sastoje od privatnog (tajnog) ključa i javnog ključa. Javni ključ se može predstaviti kao broj bankarskog računa, a privatni ključ kao tajni PIN ili potpis na čeku, koji pruža kontrolu nad računom. Ove digitalne ključeve korisnici bitkoina retko viđaju. Najvećim delom se čuvaju u fajlu novčanika i njima upravlja softver bitkoin novčanika.
+
+U delu transakcije koji se odnosi na plaćanje, javni ključ primaoca predstavljen je digitalnim otiskom prsta, zvanim _bitkoin adresa_, koji se koristi na isti način kao i ime korisnika na čeku (tj. "Plati na nalog") . U većini slučajeva bitkoin adresa se iz javnog ključa generiše i odgovara mu. Međutim, ne predstavljaju sve bitkoin adrese javne ključeve; oni mogu da predstavljaju i druge korisnike, kao što su skripte, što ćemo videti kasnije u ovom poglavlju. Na ovaj način bitkoin izostavlja primaoca sredstva, čineći odredišta transakcija fleksibilnim, slično papirnim čekovima: jedno plaćanje može da se koristi za uplaćivanje na račune ljudi, uplaćivanje na račune kompanija, plaćanje računa ili plaćanje u gotovini. Bitkoin adresa je jedini prikaz ključeva koje će korisnici rutinski videti, jer je ovo deo koji trebaju da podele sa svetom.
+
+Prvo ćemo napraviti uvod u kriptografiju i objasniti matematiku koja se koristi u bitkoinu. Zatim ćemo pogledati kako se ključevi generišu, čuvaju i kako se njima upravlja. Pregledaćemo razne formate kodiranja koji se koriste za predstavljanje privatnih i javnih ključeva, adresa i skript adresa. Konačno, razmotrićemo naprednu upotrebu ključeva i adresa: vanity adrese, multisignature (sa više potpisa) adrese i skript adrese i papirne novčanike.
+
+==== Kriptografija javnog ključa i kriptovalute
+
+((("keys and addresses", "overview of", "public key cryptography")))((("digital currencies", "cryptocurrency")))Kriptografija javnog ključa je izumljena 1970-ih i ona je matematička osnova za računarsku i informacionu bezbednost.
+
+Od pronalaska kriptografije javnog ključa, otkriveno je nekoliko odgovarajućih matematičkih funkcija, kao što su stepenovanje prostih brojeva (prime number exponentiation) i množenje na eliptičkoj krivoj (elliptic curve multiplication). Ove matematičke funkcije su praktično nepovratne, što znači da ih je lako izračunati u jednom pravcu, a nemoguće u suprotnom. Na osnovu tih matematičkih funkcija kriptografija omogućava stvaranje digitalnih tajni i digitalnih potpisa koji ne mogu da se falsifikuju. Bitkoin koristi množenje na eliptičkoj krivi kao osnovu za svoju kriptografiju.
+
+U bitkoinu koristimo kriptografiju javnog ključa kako bismo stvorili par ključeva koji kontrolišu pristup bitkoinu. Par ključeva sastoji se od privatnog ključa i - izvedenog iz njega - jedinstvenog javnog ključa. Javni ključ koristi se za primanje sredstava, a privatni ključ se koristi za potpisivanje transakcija za trošenje sredstava.
+
+Postoji matematički odnos između javnog i privatnog ključa koji omogućava da se privatni ključ koristi za generisanje potpisa na porukama. Ovaj potpis se može proveriti korišćenjem javnog ključa bez otkrivanja privatnog ključa.
+
+Kada se bitkoin troši, trenutni vlasnik bitkoina predstavlja svoj javni ključ i potpis (svaki put različit, ali napravljen iz istog privatnog ključa) u transakciji za trošenje tih bitkoina. Kroz predstavljanje javnog ključa i potpisa, svi u bitkoin mreži mogu da provere i prihvate transakciju kao validnu, dajući potvrdu da ih je osoba koja ih je prebacila, posedovala u trenutku prenosa.
+
+[TIP]
+====
+((("keys and addresses", "overview of", "key pairs")))U većini implementacija novčanika, privatni i javni ključevi se zajedno skladište kao _par ključeva (key pair)_. Međutim, javni ključ može da se izračuna iz privatnog ključa, tako da je moguće skladištenje samo privatnog ključa.
+====
+
+[[private_public_keys]]
+==== Privatni i javni ključevi
+
+((("keys and addresses", "overview of", "private and public key pairs")))((("elliptic curve cryptography")))((("cryptography", "elliptic curve cryptography")))Bitkoin novčanik sadrži kolekciju parova ključeva, od kojih se svaki sastoji od privatnog i javnog ključa. Privatni ključ (k) je broj koji se obično bira nasumično. Da bismo izračunali javni ključ (K), koristimo privatni ključ uz pomoć množenja na eliptičkoj krivoj sa jednosmernom kriptografskom funkcijom. Iz javnog ključa (K) koristimo jednosmernu kriptografsku heš (hash) funkciju za generisanje bitkoin adrese (A). U ovom delu ćemo započeti generisanjem privatnog ključa, pogledati matematiku eliptičke krive koja se koristi za pretvaranje toga u javni ključ i, na kraju, generisanje bitkoin adrese iz javnog ključa. Odnos između privatnog ključa, javnog ključa i bitkoin adrese prikazan je u <<k_to_K_to_A>>
+
+[[k_to_K_to_A]]
+.Privatni ključ, javni ključ i bitkoin adresa
+image::images/mbc2_0401.png["privk_to_pubK_to_addressA"]
+
+.Zašto koristiti asimetričnu kriptografiju (javne/privatne ključeve)?
+****
+((("cryptography", "asymmetric")))((("digital signatures", "asymmetric cryptography and")))((("asymmetric cryptography")))Zašto se asimetrična kriptografija koristi u bitkoinu? Ne koristi se da bi se "šifrovale" (ućinile tajnim) transakcije. Umesto toga, korisno svojstvo asimetrične kriptografije je sposobnost generisanja _digitalnih potpisa (digital signatures)_. Privatni ključ se može primeniti na digitalni otisak prsta transakcije kako bi se proizveo numerički potpis. Ovaj potpis može dati samo neko ko poznaje privatni ključ. Međutim, svako ko ima pristup javnom ključu i otisku transakcije može ih koristiti da _proveri_ potpis. Ovo korisno svojstvo asimetrične kriptografije omogućava bilo kome da proveri svaki potpis svake transakcije, a istovremeno osigurava da samo vlasnici privatnih ključeva mogu napraviti ispravne potpise.
+****
+
+[[private_keys]]
+==== Privatni ključevi
+
+((("keys and addresses", "overview of", "private key generation")))((("warnings and cautions", "private key protection")))Privatni ključ je jednostavno broj, izabran nasumično. Vlasništvo i kontrola nad privatnim ključem je koren korisničke kontrole nad svim sredstvima povezanim sa odgovarajućom bitkoin adresom. Privatni ključ se koristi za kreiranje potpisa potrebnih za trošenje bitkoina, tako što dokazuju vlasništvo nad sredstvima koja se koriste u transakciji. Privatni ključ mora ostati tajna u svakom trenutku, jer otkrivanje te tajne trećim licima bilo bi isto kao i da im se da kontrola nad bitkoinom koji je zaštićen tim ključem. Privatni ključ takođe mora biti bekapovan i zaštićen od slučajnog gubitka, jer u slučaju gubitka, ne bi se mogao vratiti i sredstva koja obezbeđuje bi bila takođe zauvek izgubljena.
+
+[TIP]
+====
+Privatni ključ bitkoina je samo broj. Možete da izaberete privatne ključeve nasumično koristeći samo novčić, olovku i papir: bacite novčić 256 puta i imate binarne cifre nasumičnog privatnog ključa koji možete koristiti u bitkoin novčaniku. Javni ključ se zatim može generisati iz privatnog ključa.
+====
+
+===== Generisanje privatnog ključa iz slučajnog broja
+
+Prvi i najvažniji korak u generisanju ključeva je pronalaženje sigurnog izvora entropije ili nasumičnosti. Stvaranje bitkoin ključa u osnovi je isto kao i "izaberite broj između 1 i 2^256^", Tačan metod koji koristite da izaberete taj broj nije važan sve dok nije predvidljiv ili ponovljiv. Bitkoin softver koristi generatore nasumičnih brojeva operativnog sistema kako bi proizveo 256 bita entropije (nasumičnosti). Obično, OS generatore nasumičnih brojeva pokreće ljudski izvor nasumičnosti, zbog čega će vam možda zatražiti da nekoliko sekundi mlatarate mišem.
+
+Tačnije, privatni ključ može biti bilo koji broj između +0+ i +n - 1+ uključeno, gde je n konstanta (n = 1.1578 * 10^77^, nešto manje od 2 ^256^) definisana kao red eliptičke krive koja se koristi u bitkoinu (vidi <<elliptic_curve>>). Da bismo stvorili takav ključ, nasumično biramo 256-bitni broj i proverimo da je manji od +n+. U programskom smislu, to se obično postiže dodavanjem većeg niza nasumičnih bitova, sakupljenih iz kriptografski sigurnog izvora nasumičnosti, u heš algoritam SHA256, koji će prikladno proizvesti 256-bitni broj. Ako je rezultat manji od +n+, imamo odgovarajući privatni ključ. U suprotnom, jednostavno probamo ponovo sa drugim nasumičnim brojem.
+
+[WARNING]
+====
+((("random numbers", "random number generation")))((("entropy", "random number generation")))Nemojte praviti svoj kod za kreiranje nasumičnog broja, niti koristiti „jednostavan“ generator nasumičnih brojeva koji nudi vaš programski jezik. Koristite kriptografski siguran generator pseudonasumičnih brojeva (CSPRNG) sa semenom (seed) iz izvora dovoljne entropije. Proučite dokumentaciju biblioteke generatora nasumičnih brojeva koju odaberete da biste bili sigurni da je kriptografski sigurna. Ispravna implementacija CSPRNG je presudna za sigurnost ključeva.
+====
+
+Sledi nasumično generisani privatni ključ (k) prikazan u heksadecimalnom formatu (256 bita prikazano kao 64 heksadecimalnih cifara, svaka 4 bita):
+
+----
+1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD
+----
+
+
+[TIP]
+====
+Veličina prostora privatnog ključa bitkoina (2 ^256^) je neverovatno veliki broj. To je otprilike 10^77^ u decimalnom obliku. Radi poređenja, procenjuje se da vidljivi univerzum sadrži 10^80^ atoma.
+====
+
+((("dumpprivkey command")))Da biste generisali novi ključ sa Bitcoin Core klijentom (pogledajte <<ch03_bitcoin_client>>), koristite naredbu +getnewaddress+. Iz sigurnosnih razloga prikazuje samo javni ključ, a ne i privatni ključ. Da biste pitali +bitcoind+ da otkrije privatni ključ, koristite naredbu +dumpprivkey+. Naredba +dumpprivkey+ prikazuje privatni ključ u formatu checksum-kodiranom Base58 koji se zove _Wallet Import Format_ (WIF), a koji ćemo detaljnije ispitati u <<priv_formats>>. Evo primera generisanja i prikazivanja privatnog ključa pomoću ove dve naredbe:
+
+----
+$ bitcoin-cli getnewaddress
+1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+$ bitcoin-cli dumpprivkey 1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+----
+
+Naredba +dumpprivkey+ otvara novčanik i izvlači privatni ključ koji je generisan naredbom +getnewaddress+. Nije moguće da +bitcoind+ zna privatni ključ na osnovu javnog ključa, osim ako oba nisu sačuvana u novčaniku.
+
+[TIP]
+=====================================================================
+Naredba +dumpprivkey+ ne generiše privatni ključ iz javnog ključa, jer je to nemoguće. Naredba jednostavno otkriva privatni ključ koji je već poznat u novčaniku i koji je generisan naredbom +getnewaddress+.
+=====================================================================
+
+[role="pagebreak-before"]
+Možete koristiti i alat za komandnu liniju Bitcoin Explorer (pogledajte <<appdx_bx>>) za generisanje i prikazivanje privatnih ključeva sa komandama +seed+, +ec-new+, i +ec-to-wif+:
+
+----
+$ bx seed | bx ec-new | bx ec-to-wif
+5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+----
+
+[[pubkey]]
+==== Javni ključevi
+
+((("keys and addresses", "overview of", "public key calculation")))((("generator point")))Javni ključ se izračunava iz privatnog ključa pomoću množenja na eliptičkoj krivoj, što je nepovratno: _K_=_k_*_G_, gde je _k_ privatni ključ, _G_ je konstantna tačka koja se zove _ generator point_, a _K_ je rezultirajući javni ključ. Obrnuta operacija, poznata kao "pronalaženje diskretnog logaritma" - izračunavanje _k_ ako znate __K __ - je teška koliko i isprobavanje svih mogućih vrednosti za  _k_, tj. pretraga na sirovu snagu. Pre nego što pokažemo kako generisati javni ključ iz privatnog ključa, pogledajmo kriptografiju eliptičke krive malo detaljnije.
+
+[TIP]
+====
+Množenje na eliptičkoj krivoj je vrsta funkcije koju kriptografi nazivaju funkcijom "trap door" (vrata u podu): lako je to učiniti u jednom smeru (množenje), a nemoguće izvršiti u obrnutom smeru (deljenje). Vlasnik privatnog ključa lako može kreirati javni ključ, a zatim ga podeliti sa svetom, znajući da niko ne može preokrenuti funkciju i izračunati privatni ključ iz javnog ključa. Ovaj matematički trik postaje osnova sigurnih digitalnih potpisa koje je nemoguće falsifikovati i koji dokazuju vlasništvo nad bitkoin sredstvima.
+====
+
+[[elliptic_curve]]
+==== Objašnjenje kriptografije eliptičke krive
+
+((("keys and addresses", "overview of", "elliptic curve cryptography")))((("elliptic curve cryptography", id="eliptic04")))((("cryptography", "elliptic curve cryptography", id="Celliptic04")))Kriptografija eliptičke krive je jedna vrsta asimetrične ili kriptografije javnog ključa, koja se zasniva na diskretnom problemu logaritma, izraženim sabiranjem i množenjem na tačkama eliptičke krive.
+
+<<ecc-curve>> je primer eliptičke krive, slične onoj koju koristi bitkoin.
+
+[[ecc-curve]]
+[role="smallerthirty"]
+.Eliptička kriva
+image::images/mbc2_0402.png["ecc-curve"]
+
+Bitkoin koristi specifičnu eliptičku krivu i skup matematičkih konstanti, kao što je definisano u standardu zvanom +secp256k1+, koji je ustanovio National Institute of Standards and Technology (NIST). Kriva +secp256k1+ je definisana sledećom funkcijom, koja proizvodi eliptičku krivu:
+
+[latexmath]
+++++
+\begin{equation}
+{y^2 = (x^3 + 7)}~\text{over}~(\mathbb{F}_p)
+\end{equation}
+++++
+
+ili
+
+[latexmath]
+++++
+\begin{equation}
+{y^2 \mod p = (x^3 + 7) \mod p}
+\end{equation}
+++++
+
+_mod p_ (po modulu prostog broja p) označava da je ta kriva nad konačnim poljem prostog reda _p_, takođe napisanog kao latexmath:[\( \mathbb{F}_p \)], gde je p = 2^256^ - 2^32^ - 2^9^ - 2^8^ - 2^7^ - 2^6^ - 2^4^ - 1, veoma veliki prost broj.
+
+Pošto je ta kriva definisana nad konačnim poljem prostog reda, a ne nad poljem realnih brojeva, ona izgleda kao šema tačaka razbacanih u dve dimenzije, što otežava vizualizaciju. Međutim, matematika je identična onoj kao na eliptičkoj krivi nad realnim brojevima. Na primer, <<ecc-over-F17-math>> prikazuje istu eliptičku krivu nad mnogo manjim konačnim poljem prostog reda 17, prikazujući šemu tačaka na koordinatnoj mreži. Eliptička kriva +secp256k1+ bitkoina može se smatrati mnogo kompleksnijom šemom tačaka na neshvatljivo velikoj mreži.
+
+[[ecc-over-F17-math]]
+[role="smallersixty"]
+.Kriptografija eliptičke krive: vizualizacija eliptičke krive preko F(p), sa p=17
+image::images/mbc2_0403.png["ecc-over-F17-math"]
+
+Dakle, na primer, sledeće je tačka P sa koordinatama (x,y) koja je tačka na +secp256k1+ krivoj:
+
+----
+P = (55066263022277343669578718895168534326250603453777594175500187360389116729240, 32670510020758816978083085130507043184471273380659243275938904335757337482424)
+----
+
+<<example_4_1>> pokazuje kako to možete sami da proverite pomoću Python-a:
+
+[[example_4_1]]
+.Koristite Python za potvrdu da je ta tačka na eliptičkoj krivoj
+====
+[source, pycon]
+----
+Python 3.4.0 (default, Mar 30 2014, 19:23:13)
+[GCC 4.2.1 Compatible Apple LLVM 5.1 (clang-503.0.38)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+>>> x = 55066263022277343669578718895168534326250603453777594175500187360389116729240
+>>> y = 32670510020758816978083085130507043184471273380659243275938904335757337482424
+>>> (x ** 3 + 7 - y**2) % p
+0
+----
+====
+
+U matematici eliptičke krive postoji tačka koja se zove "beskonačno daleka tačka", što otprilike odgovara ulozi nule pri sabiranju. Na računarima je to ponekad predstavljeno x = y = 0 (što ne zadovoljava jednačinu eliptičke krive, ali to je jednostavan poseban slučaj koji se može proveriti).
+
+Postoji takođe i pass:[+] operator, zvani "adicija", koji ima neka svojstva slična tradicionalnom sabirnju realnih brojeva koje uče deca  u osnovnoj školi. Za date dve tačke P~1~ i P~2~ na eliptičkoj krivoj, postoji i treća tačka P~3~ = P~1~ + P~2~, takođe na eliptičkoj krivoj.
+
+Geometrijski, ova treća tačka P~3~ se izračunava crtanjem linije između P~1~ i P~2~. Ova linija seče eliptičku krivu na tačno jednom dodatnom mestu. Nazovite ovu tačku P~3~' = (x,y). Zatim je preslikajte u odnosu na x-osu da biste dobili P~3~ = (x,-y).
+
+Postoji nekoliko posebnih slučajeva koji objašnjavaju potrebu za "tačkom u beskonačnosti".
+
+Ako se tačke P~1~ i P~2~ podudaraju, razmatrana prava treba da bude tangenta na krivu u tački P~1~. Tada će ta tangenta preseći krivu tačno u jednoj novoj tački. Možete koristiti tehnike iz analize da odredite nagib tangentne linije. Interesantno je da ove tehnike funkcionišu, iako ograničavamo naš interes na tačke na krivoj sa dve celobrojne koordinate!
+
+U nekim slučajevima (tj. ako P~1~ and P~2~ imaju iste x vrednosti, ali različite y vrednosti), tangenta će biti tačno vertikalna, u tom slučaju P3 = "tačka u beskonačnosti".
+
+Ako je P~1~ "tačka u beskonačnosti", tada je P~1~ + P~2~ = P~2~. Slično tome, ako je P~2~ tačka u beskonačnosti, onda je P~1~ + P~2~ = P~1~. Ovo pokazuje kako tačka u beskonačnosti igra ulogu nule.
+
+Ispada da je pass:[+] asocijativan, što znači da je (A pass:[+] B) pass:[+] C = pass:[+] (B pass:[+] C). To znači da možemo napisati A pass:[+] B pass: [+] C bez zagrade i bez dvosmislenosti.
+
+Sada kada smo definisali sabiranje, možemo definisati množenje na standardni način koji proširuje sabiranje. Za tačku P na eliptičkoj krivoj, ako je k ceo broj, tada je kP = P + P + P + ... + P (k puta). Imajte na umu da se k ponekad zbunjujuće naziva "eksponent" u tom slučaju.((("", startref="eliptic04")))((("", startref="Celliptic04")))
+
+[[public_key_derivation]]
+==== Generisanje javnog ključa
+
+((("keys and addresses", "overview of", "public key generation")))((("generator point")))Počevši od privatnog ključa u obliku nasumično generisanog broja _k_, množimo ga pomoću unapred određene tačke na krivoj nazvane _generator tačka_ _G_ da proizvedemo drugu tačku negde drugde na krivoj, a to je odgovarajući javni ključ _K_. Tačka generatora je navedena kao deo +secp256k1+ standarda i uvek je ista za sve ključeve u bitkoinu:
+
+[latexmath]
+++++
+\begin{equation}
+{K = k * G}
+\end{equation}
+++++
+
+gde je _k_ privatni ključ, _G_ je generator tačka, a _K_ rezultirajući javni ključ, tačka na krivoj. Pošto je tačka generatora uvek ista za sve korisnike bitkoina, privatni ključ _k_ pomnožen sa _G_ uvek će rezultirati istim javnim ključem _K_. Odnos između _k_ i _K_ je fiksiran, ali se može izračunati samo u jednom pravcu, od _k_ do _K_. Zato se bitkoin adresa (izvedena iz _K_) može podeliti sa bilo kime i ona ne otkriva korisnikov privatni ključ (_k_).
+
+[TIP]
+====
+Privatni ključ se može pretvoriti u javni ključ, ali javni ključ ne može biti pretvoren u privatni ključ, jer u ovom slučaju matematika deluje samo u jednom smeru.
+====
+
+Služeći se množenjem na eliptičkoj krivoj, uzimamo prethodno generisani privatni ključ _k_ i množimo ga sa generator tačkom G da bismo pronašli javni ključ _K_:
+
+----
+K = 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD * G
+----
+
+Javni ključ _K_ je definisan kao tačka +K = (x,y)+:
+
+----
+K = (x, y)
+
+gde,
+
+x = F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+y = 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+----
+
+Da bismo prikazali množenje tačke sa celim brojem, koristićemo jednostavniju eliptičku krivu nad poljem realnih brojeva - zapamtite, matematika je ista. Naš cilj je da pronađemo proizvod _kG_ generator tačke _G_, što je isto kao i dodavanje _G_ samom sebi, _k_ puta zaredom. U eliptičkim krivama dodavanje tačke samoj sebi je ekvivalent crtanja tangentne linije na tački i pronalaženja mesta gde se ona ponovo seče, i odražava tu tačku na osi k.
+
+<<ecc_illustrated>> prikazuje postupak za izvođenje _G_, _2G_, _4G_, kao geometrijsku operaciju na krivi.
+
+[TIP]
+====
+((("secp256k1 optimized C library")))Bitkoin koristi https://github.com/bitcoin-core/secp256k1[secp256k1 optimizovanu C biblioteku] za matematiku eliptičke krive.((("", startref="KAover04")))
+====
+
+[[ecc_illustrated]]
+.Kriptografija eliptičke krive: vizualizacija množenja tačke G celim brojem k na eliptičkoj krivoj
+image::images/mbc2_0404.png["ecc_illustrated"]
+
+=== Bitkoin adrese
+
+((("keys and addresses", "bitcoin addresses", id="KAaddress04")))Bitkoin adresa je niz cifara i znakova koji se mogu podeliti sa svima koji žele da vam pošalju novac. Adrese proizvedene iz javnih ključeva sastoje se od niza brojeva i slova, počevši od cifre "1" Evo primera bitkoin adrese:
+
+----
+1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+----
+
+
+Bitkoin adresa je ono što se najčešće pojavljuje u transakciji kao "primalac" sredstava. Ako uporedimo bitkoin transakciju sa papirnim čekom, bitkoin adresa je korisnik, što upisujemo na liniju nakon „Plati u ime“. Na papirnom čeku, taj korisnik ponekad može biti ime vlasnika bankovnog računa, ali može uključivati i korporacije, institucije ili čak gotovinu. Pošto na papirnim čekovima ne treba da se navede račun, već se kao primalac sredstava koristi apstraktno ime, to su veoma fleksibilni instrumenti plaćanja. Bitkoin transakcije koriste sličnu apstrakciju, bitkoin adresu, kako bi postale vrlo fleksibilne. Bitkoin adresa može predstavljati vlasnika para privatnih/javnih ključeva ili može predstavljati nešto drugo, kao što je skripta za plaćanje, kao što ćemo videti u <<p2sh>>. Za sada istražujemo jednostavan slučaj, bitkoin adresu koja predstavlja javni ključ, i izvedena je iz njega.
+
+((("addresses", "algorithms used to create")))Bitkoin adresa se dobija iz javnog ključa korišćenjem jednosmernog kriptografskog hešovanja. "Algoritam hešovanja" ili jednostavno "hash algoritam" je jednosmerna funkcija koja proizvodi otisak prsta ili "heš" ulaza proizvoljne veličine. Kriptografske heš funkcije se uveliko koriste u bitkoinu: u bitkoin adresama, skriptama i rudarskom algoritmu Proof-of-Work (dokaz rada). Algoritmi koji se koriste za pravljenje bitkoin adrese iz javnog ključa su Secure Hash Algorithm (SHA) (algoritam sigurnog heša) i RACE Integrity Primitives Evaluation Message Digest (RIPEMD), tačnije SHA256 i RIPEMD160.
+
+Polazeći od javnog ključa _K_, izračunali smo SHA256 heš, a zatim računamo RIPEMD160 heš tog rezultata, stvarajući 160-bitni (20-bajtni) broj:
+
+[latexmath]
+++++
+\begin{equation}
+{A = RIPEMD160(SHA256(K))}
+\end{equation}
+++++
+
+gde je _K_ javni ključ i _A_ je rezultirajuća bitkoin adresa.
+
+
+[TIP]
+====
+Bitkoin adresa _nije_ isto što i javni ključ. Bitkoin adrese se izvode iz javnog ključa pomoću jednosmerne funkcije.
+====
+
+Bitkoin adrese su gotovo uvek kodirane u "Base58Check-u" (vidi <<base58>>), koji koristi 58 znakova (sistem brojeva Base58) i kontrolni broj da bi se poboljšala čitljivost za ljude, izbegla neodređenost i zaštitila od grešaka u prenosu i unošenju adresa. Base58Check se takođe koristi na mnoge druge načine u bitkoinu, kad god korisnik zatraži da pročita i pravilno prenese broj, kao što je bitkoin adresa, privatni ključ, šifrovani ključ ili heš skript. U sledećem odeljku ćemo ispitati mehaniku kodiranja i dekodiranja Base58Check i rezultirajuće reprezentacije. <<pubkey_to_address>> ilustruje konverziju javnog ključa u bitkoin adresu.
+
+[[pubkey_to_address]]
+.Konverzija javnog ključa u bitkoin adresu
+image::images/mbc2_0405.png["pubkey_to_address"]
+
+[[base58]]
+==== Base58 i Base58Check Kodiranje
+
+((("keys and addresses", "bitcoin addresses", "Base58 and Base58check encoding")))((("Base58 and Base58check encoding", id="base5804")))((("addresses", "Base58 and Base58check encoding", id="Abase5804")))Da bi predstavili duge brojeve na sažetiji način, koristeći manje simbola, mnogi računarski sistemi koriste mešane alfanumeričke reprezentacije sa bazom (ili radiksom) većom od 10. Na primer, dok tradicionalni decimalni sistem koristi 10 brojeva od 0 do 9, heksadecimalni sistem koristi 16, a slova A do F kao šest dodatnih simbola. Broj predstavljen u heksadecimalnom formatu kraći je od ekvivalentnog decimalnog oblika. Još kompaktnija, Base64 reprezentacija koristi 26 malih slova, 26 velikih slova, 10 brojeva i još 2 znaka, poput "+" i "/" za prenos binarnih podataka preko tekst baziranih medija, kao imejla. Base64 se najčešće koristi za dodavanje binarnih priloga u imejl. Base58 je tekst bazirani format binarnog kodiranja, razvijen za upotrebu u bitkoinu i korišćen je u mnogim drugim kriptovalutama. Nudi ravnotežu između kompaktne reprezentacije, čitljivosti i otkrivanja i sprečavanja grešaka. Base58 je podskup Base64, koji koristi velika i mala slova i brojeve, ali izostavlja neke znakove koji se često zamene jedan za drugi i koji mogu da izgledaju isto kada su prikazani u određenim fontovima. Konkretno, Base58 je Base64 bez 0 (broj nula), O (veliki o), l (mali L), I (veliki i), i simbola "+" i "/". Ili, jednostavnije rečeno, to je skup malih i velikih slova i brojeva bez četiri spomenuta (0, O, l, I).  <<base58alphabet>> prikazuje celu abecedu Base58.
+
+[[base58alphabet]]
+.Bitkoinova Base58 abeceda
+====
+----
+123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
+----
+====
+
+
+Da bi se stekla dodatna sigurnost pri izbegavanju grešaka u kucanju ili transkripciji, Base58Check je oblik kodiranja Base58, često korišćen u bitkoinu, koji ima ugrađeni kod za proveru grešaka. Kontrolni broj su dodatna četiri bajta dodata na kraju podataka koji se kodiraju. Kontrolni broj je izveden iz heša kodiranih podataka i zbog toga se može koristiti za otkrivanje i sprečavanje grešaka u kucanju ili transkripciji. Kad se predstavi sa Base58Check kodom, softver za dekodiranje izračunaće kontrolni broj podataka i uporediti ga sa kontrolnim brojem koji je uključen u kod. Ako se ova dva ne poklapaju, uvedena je greška i podaci Base58Check nisu validni. Ovo sprečava softver novčanika da prihvati pogrešno unetu bitkoin adresu kao validno odredište, što je greška koja bi u suprotnom rezultirala gubitkom sredstava.
+
+Da bismo pretvorili podatke (broj) u Base58Check format, podacima prvo dodamo prefiks, zvani "verzioni bajt", koji služi za lako prepoznavanje vrste podataka koji su kodirani. Na primer, u slučaju bitkoin adrese, prefiks je nula (0k00 u heksadecimali), dok je prefiks korišćen kod kodiranja privatnog ključa 128 (0x80 u heksadecimali). Lista uobičajenih prefiksa verzija prikazana je u  <<base58check_versions>>.
+
+Zatim računamo kontrolni broj "dupli-SHA", što znači da dva puta primenimo heš-algoritam SHA256 na prethodni rezultat (prefiks i podatke):
+
+----
+checksum = SHA256(SHA256(prefix+data))
+----
+
+Iz dobijenog 32-bajt-heša (hash-of-a-hash) uzimamo samo prva četiri bajta. Ova četiri bajta služe kao kod za proveru grešaka ili kontrolni broj (checksum). Kontrolni broj je dodat (priložen) na kraju.
+
+Rezultat se sastoji od tri stavke: prefiksa, podataka i kontrolne sume. Ovaj rezultat se kodira pomoću prethodno opisane abecede Base58. <<base58check_encoding>> ilustruje postupak kodiranja Base58Check.
+
+[[base58check_encoding]]
+.Base58Check kodiranje: je Base58 format za nedvosmisleno kodiranje bitkoin podataka koji je verzioniran i ima kontrolni broj.
+image::images/mbc2_0406.png["Base58CheckEncoding"]
+
+U bitkoinu je većina podataka predstavljenih korisniku kodirana u Base58Check-u kako bi bila kompaktna, laka za čitanje i sa lako uočljivim greškama. Prefiks verzije u Base58Check kodiranju koristi se za stvaranje lako prepoznatljivih formata, koji kada se kodiraju u Base58 sadrže određene znakove na početku Base58Check kodiranih podatka. Ovi znakovi olakšavaju ljudima da identifikuju vrstu podataka koji su kodirani i kako ih koriste. Ovo čini razliku između, na primer, bitkoin adrese kodirane Base58Check-om, koja počinje sa 1, i privatnog ključa WIF kodiranog Base58Check-om, koji počinje sa 5. Neki primeri prefiks verzije i rezultirajući Base58 znakovi prikazani su u <<base58check_versions>>.
+
+[[base58check_versions]]
+.Base58Check prefiks verzije i kodirani primer rezultata
+[options="header"]
+|=======
+|Type| Version prefix (hex)| Base58 result prefix
+| Bitcoin Address | 0x00 | 1
+| Pay-to-Script-Hash Address | 0x05 | 3
+| Bitcoin Testnet Address | 0x6F | m or n
+| Private Key WIF |  0x80 | 5, K, or L
+| BIP-38 Encrypted Private Key | 0x0142 | 6P
+| BIP-32 Extended Public Key | 0x0488B21E | xpub
+|=======
+
+==== Formati ključeva
+
+((("keys and addresses", "bitcoin addresses", "key formats")))I privatni i javni ključevi mogu biti predstavljeni u nekoliko različitih formata. Svi ti prikazi kodiraju isti broj, iako izgledaju drugačije. Ovi formati se prvenstveno koriste kako bi ljudima bilo lakše da čitaju i prebacuju ključeve bez unošenja grešaka.
+
+[[priv_formats]]
+===== Formati privatnih ključeva
+
+((("public and private keys", "private key formats")))Privatni ključ može biti predstavljen u više različitih formata, koji svi odgovaraju istom 256-bitnom broju. <<table_4-2>> prikazuje tri uobičajena formata koji se koriste za predstavljanje privatnih ključeva. Različiti formati se koriste u različitim okolnostima. Heksadecimal i sirovi binarni formati koriste se interno u softveru i retko se prikazuju korisnicima. WIF se koristi za import/eksport ključeva između novčanika i često se koristi u QR kodu (bar kodu) reprezentacije privatnih ključeva.
+
+[[table_4-2]]
+.Reprezentcije privatnih ključeva (formati kodiranja)
+[options="header"]
+|=======
+|Type|Prefix|Description
+| Raw | None | 32 bytes
+| Hex | None | 64 hexadecimal digits
+| WIF | 5 | Base58Check kodiranje: Base58 sa prefiksom verzije 128- i 32-bitnog kontrolnog broja
+| WIF-komprimovani | K ili L | Kao gore, sa dodavanjem sufiksa 0x01 pre kodiranja
+|=======
+
+<<table_4-3>> prikazuje privatni ključ generisan u ova tri formata.
+
+[[table_4-3]]
+.Primer: Isti ključ u različitim formatima
+[options="header"]
+|=======
+|Format | Privatni ključ
+| Hex | 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+| WIF | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| WIF-compressed | KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+|=======
+
+Sve ove reprezentacije su različiti načini prikazivanja istog broja, istog privatnog ključa. Izgledaju drugačije, ali bilo koji format može se lako pretvoriti u bilo koji drugi format. Imajte na umu da "sirovi binarni fajl" nije prikazan u <<table_4-3>> pošto bilo koje kodiranje ovde, po definiciji, ne bi bili sirovi binarni podaci.
+
+Koristimo naredbu +wif-to-ec+ iz Bitcoin Explorer-a (vidi <<appdx_bx>>) da pokažemo da oba WIF ključa predstavljaju isti privatni ključ:
+
+----
+$ bx wif-to-ec 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+
+$ bx wif-to-ec KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+----
+
+===== Dekodiranje iz Base58Check
+
+Naredbe Bitcoin Explorer-a (pogledajte <<appdx_bx>>) olakšavaju pisanje shell script-e i "cevi" komandne linije (command line pipes) koje manipulišu bitkoin ključevima, adresama i transakcijama. Pomoću Bitcoin Explorera možete da dekodirate Base58Check format u komandnoj liniji.
+
+Koristimo naredbu +base58check-decode+ da dekodiramo nekompresovani ključ:
+
+----
+$ bx base58check-decode 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+wrapper
+{
+    checksum 4286807748
+    payload 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+    version 128
+}
+----
+
+Rezultat sadrži ključ u podacima, WIF prefiks verzije 128 i kontrolni broj.
+
+Primetite da su podaci kompresovanog ključa dodati sufiksom +01+, što znači da se izvedeni javni ključ treba kompresovati:
+
+----
+$ bx base58check-decode KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+wrapper
+{
+    checksum 2339607926
+    payload 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd01
+    version 128
+}
+----
+
+===== Kodirajte iz heksadecimale u Base58Check
+
+Da bismo kodirali u Base58Check (suprotno prethodnoj komandi), koristimo naredbu +base58check-encode+ iz Bitcoin Explorer-a (pogledajte <<appdx_bx>>) i unosimo heksadecimalni privatni ključ, nakon čega sledi prefiks WIF verzije 128:
+
+----
+bx base58check-encode 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd --version 128
+5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+----
+
+===== Kodirajte iz heksadecimale (kompresovani ključ) u Base58Check
+
+Da bismo kodirali u Base58Check kao "kompresovani" privatni ključ (pogledajte <<comp_priv>>), dodajte sufiks +01+ heksadecimalnom ključu i zatim ga kodiramo kao u prethodnom odeljku:
+
+----
+$ bx base58check-encode 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd01 --version 128
+KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+----
+
+Rezultirajući WIF kompresovani format počinje sa slovom "K." Ovo označava da privatni ključ unutra ima sufiks "01" i koristiće se za proizvodnju samo kompresovanih javnih ključeva (vidi  <<comp_pub>>).
+
+===== Formati javnih ključeva
+
+((("public and private keys", "public key formats")))Javni ključevi su takođe predstavljeni na različite načine, obično kao _kompresovani_ ili _dekompresovani_ javni ključevi.
+
+Kao što smo prethodno videli, javni ključ je tačka na eliptičkoj krivoj koja se sastoji od para koordinata +(x,y)+. Obično je predstavljen prefiksom +04+, a zatim slede dva 256-bitna broja: jedan za _x_ koordinatu tačke, drugi za _y_ koordinatu. Prefiks +04+ koristi se za razlikovanje dekompresovanih javnih ključeva od kompresovanih javnih ključeva koji počinju sa +02+ ili +03+.
+
+Evo javnog ključa generisanog privatnim ključem koji smo kreirali ranije, prikazanog kao koordinate +x+ i +y+:
+
+----
+x = F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+y = 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+----
+
+Evo istog javnog ključa prikazanog kao 520-bitni broj (130 heksadecimalnih cifra) sa prefiksom +04+, a zatim +x+, a zatim +y+ koordinate, kao +04 x y+:
+
+++++
+<pre data-type="programlisting">
+K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A↵
+07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+</pre>
+++++
+
+[[comp_pub]]
+===== Kompresovani javni ključevi
+
+((("public and private keys", "compressed public keys")))Kompresovani javni ključevi su uvedeni u bitkoin kako bi se smanjila veličina transakcija i uštedeo prostor na disku na čvorovima u kojima se čuvaju baze podataka bitkoin blokčejna. Većina transakcija uključuje javni ključ koji je potreban da bi se potvrdila vlasnička akreditiva i potrošili bitkoini. Svaki javni ključ zahteva 520 bita (prefiks + x + y), koji pomnožen sa nekoliko stotina transakcija po bloku, ili desetinama hiljada transakcija dnevno, dodaje značajnu količinu podataka u blokčejnu.
+
+Kao što smo videli u odeljku <<pubkey>>, javni ključ je tačka (x,y) na eliptičkoj krivoj. Pošto kriva izražava matematičku funkciju, tačka na krivoj predstavlja rešenje jednačine i, sa tim, ako znamo koordinatu _x_, možemo izračunati _y_ koordinatu rešavanjem jednačine y^2^ mod p = (x^3^ + 7) mod p. To nam omogućava da zaštitimo samo _x_ koordinatnu tačku javnog ključa, izostavljajući _y_ koordinatu i smanjujući veličinu ključa i prostor potreban za njegovo skladištenje na 256 bita. Smanjenje veličine za skoro 50% u svakoj transakciji dovodi do puno podataka ušteđenih tokom vremena!
+
+Dok nekompresovani javni ključevi imaju prefiks +04+, kompresovani javni ključevi počinju sa prefiksom +02+ ili +03+. Pogledajmo zašto postoje dva moguća prefiksa: pošto je leva strana jednačine __y__^2^, rešenje za _y_ je kvadratni koren, koji može imati pozitivnu ili negativnu vrednost. Vizuelno, to znači da rezultirajuća _y_ koordinata može biti iznad ili ispod ose k. Kao što vidite kod eliptičke krive u <<ecc-curve>>, ona je simetrična, što znači da se preslikava kao ogledalo na k-osi. Dakle, iako možemo da izostavimo _y_ koordinatnu liniju, moramo da sačuvamo _predznak_ od _y_ (pozitivno ili negativno); ili drugim rečima, moramo se setiti da li je bio iznad ili ispod ose k, jer svaka od tih opcija predstavlja drugačiju tačku i drugačiji javni ključ. Prilikom izračunavanja eliptičke krive u binarnoj aritmetici na konačnom polju prostog reda p, _y_ koordinata je parna ili neparna, što odgovara pozitivnom/negativnom znaku kao što je ranije objašnjeno. Zato, da bismo razlikovali dve moguće vrednosti _y_, čuvamo kompresovani javni ključ sa prefiksom +02+ ako je _y_ parni broj, i +03+ ako je neparni, omogućavajući softveru da ispravno zaključi koja je _y_ koordinata na osnovu _x_ koordinirate i dekompresuje javni ključ do potpunih koordinata tačke. Kompresovanje javnog ključa prikazano je u <<pubkey_compression>>.
+
+Evo istog generisanog javnog ključa, prikazanog kao kompresovani javni ključ sačuvan u 264 bita (66 heksadecimalnih cifra) sa prefiksom +03+ koji označava da je _y_ koordinata neparna:
+
+----
+K = 03F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+----
+
+Ovaj kompresovani javni ključ odgovara istom privatnom ključu, što znači da je generisan iz istog privatnog ključa. Međutim, izgleda drugačije od nekompresovanog javnog ključa. Još važnije, ako ovaj kompresovani javni ključ pretvorimo u bitkoin adresu koristeći dvostruku heš funkciju (+RIPEMD160(SHA256(K))+), proizvešće _drugačiju_ bitkoin adresu. To može biti zbunjujuće, jer znači da jedan privatni ključ može proizvesti javni ključ izražen u dva različita formata (kompresovani i nekompresovani) koji proizvode dve različite bitkoin adrese. Međutim, privatni ključ je identičan za obe bitkoin adrese.
+
+[[pubkey_compression]]
+[role="smallerseventy"]
+.Kompresovanje javnog ključa
+image::images/mbc2_0407.png["pubkey_compression"]
+
+Kompresovani javni ključevi postepeno postaju difolt kod bitkoin klijenta, što ima značajan uticaj na smanjivanje veličine transakcija i samim tim blokčejna. Međutim, ne podržavaju još uvek svi klijenti kompresovane javne ključeve. Noviji klijenti koji podržavaju kompresovane javne ključeve moraju da vode računa o transakcijama starijih klijenata koji ne podržavaju kompresovane javne ključeve. Ovo je posebno važno kada novčanik aplikacija uvozi privatne ključeve iz druge bitkoin novčanik aplikacije, jer novi novčanici treba da skeniraju blokčejn kako bi pronašli transakcije koje odgovaraju ovim importiranim ključevima. Koje bitkoin adrese treba da traži bitkoin novčanik? Bitkoin adrese proizvedene nekompresovanim javnim ključevima ili bitkoin adrese proizvedene kompresovanim javnim ključevima? Obe su validne bitkoin adrese i mogu se potpisati privatnim ključem, ali imaju različite adrese!
+
+Da bi rešili ovaj problem, kada se privatni ključevi eksportiraju iz novčanika, WIF koji se koristi za njihovo predstavljanje je različito implementiran u novijim bitkoin novčanicima, da bi se ukazalo na to da su ti privatni ključevi korišćeni za izradu _kompresovanih_ javnih ključeva i shodno tome za _kompresovane_ bitkoin adrese. Ovo omogućava novčaniku koji uvozi da napravi razliku između  privatnih ključeve koji potiču iz starijih, odnosno novijih novčanika i pretraži blokčejn u potrazi za transakcijama sa bitkoin adresama koje odgovaraju nekompresovanim, odnosno kompresovanim javnim ključevim. Pogledajmo kako ovo funkcioniše detaljnije u sledećem odeljku.
+
+[[comp_priv]]
+===== Kompresovani privatni ključevi
+
+((("public and private keys", "compressed private keys")))Ironično je da je izraz "kompresovani privatni ključ" pogrešan naziv, jer kada se privatni ključ eksportuje kao kompresovan u WIF formatu, on je zapravo jedan bajt _duži_ nego  "nekompresovan" privatni ključ. To je zato što privatni ključ ima dodatni jednobajtni sufiks (prikazan kao 01 u heksadecimalu u <<table_4-4>>), što označava da je privatni ključ noviji novčanik i da ga treba koristiti samo za proizvodnju kompresovanih javnih ključeva. Privatni ključevi sami po sebi nisu kompresovani i ne mogu se kompresovati. Izraz "kompresovan privatni ključ" zapravo znači "privatni ključ iz kog treba biti izveden samo kompresovani javni ključ", dok "nekompresovan privatni ključ" zapravo znači "privatni ključ iz kog treba da budu izvedeni samo nekompresovani javni ključevi". Kako biste izbegli dalju konfuziju, trebalo bi da isključivo o formatu eksportiranja govorite kao o "kompresovanom WIF-u" ili "WIF.u", a kada govorite o privatnom ključu da ne koristite izraz "kompresovan".
+
+<<table_4-4>> prikazuje isti ključ, kodiran u WIF i kompresovanim WIF formatima.
+
+[[table_4-4]]
+.Primer: Isti ključ u različitim formatima
+[options="header"]
+|=======
+|Format | Privatni ključ
+| Hex | 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD
+| WIF | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| Hex-compressed | 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD01
+| WIF-compressed | KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+|=======
+
+Obratite pažnju da heksadecimalni, kompresovani format privatnog ključa ima jedan dodatni bajt na kraju (01 u heksadecimali). Iako je prefiks verzije kodiranja Base58 isti (0x80) za WIF i kompresovani WIF format, dodavanje jednog bajta na kraju broja ima efekat da se prvi znak Base58 kodiranja promeni iz 5 u ili _K_ ili _L_. Zamislite ovo kao ekvivalent Base58 decimalnog kodiranja koji se razlikuje između broja 100 i broja 99. Dok je broj 100 za jednu cifru duži od broja 99, on takođe ima prefiks 1 umesto prefiksa 9. Kako se dužina menja, tako ona utiče i na prefiks. U Base58 prefiks 5 se menja u _K_ ili _L_ ako se dužina broja povećava za jedan bajt.
+
+Zapamtite, ovi formati se _ne_ koriste naizmenično. U novijem novčaniku koji implementira kompresovane javne ključeve, privatni ključevi će se samo izvesti kao kompresovani WIF (sa prefiksom _K_ ili _L_). Ako je novčanik starije implementacije i ne koristi kompresovane javne ključeve, privatni ključevi će se izvoziti samo kao WIF (sa prefiksom 5). Ovde je cilj prijaviti novčaniku koji importira ove privatne ključeve da li mora pretraživati blokčejn u potrazi za kompresovanim ili nekompresovanim javnim ključevima i adresama.
+
+Ako je bitkoin novčanik u stanju da implementira kompresovane javne ključeve, koristiće ih u svim transakcijama. Privatni ključevi u novčaniku koristiće se za dobijanje tačaka javnog ključa na krivoj, koje će se kompresovati. Kompresovani javni ključevi koristiće se za proizvodnju bitkoin adresa, a oni će se koristiti u transakcijama. Prilikom eksporta privatnih ključeva iz novog novčanika koji implementira kompresovane javne ključeve, WIF se modifikuje, uz dodatak jednobajtnog sufiksa +01+ na privatni ključ. Rezultirajući privatni ključ kodiran Base58Check-om naziva se „kompresovani WIF“ i započinje slovom _K_ ili _L_, umesto da započinje sa "5" kao što je slučaj sa ključevima koji su kodirani sa nekompresovanim WIF-om starijih novčanika.
+
+
+[TIP]
+====
+"Kompresovani privatni ključevi" su pogrešan naziv! Oni nisu kompresovani; kompresovani WIF znači da ključeve treba koristiti samo za dobijanje kompresovanih javnih ključeva i odgovarajućih bitkoin adresa. Ironično je da je privatni ključ koji je kodiran "kompresovanim WIF-om" jedan bajt duži jer ima dodani sufiks +01+ da bi ga razlikovao od "nekompresovanih".((("", startref="KAaddress04")))
+====
+
+=== Implementacija ključeva i adresa u Cpass-u: [++]
+
+Pogledajmo kompletan proces kreiranja bitkoin adrese iz privatnog ključa, javnog ključa (tačke na eliptičkoj krivoj), dvostruko hešovane adrese i na kraju kodiranja Base58Check-a. C ++ kod u <<addr_example>> prikazuje kompletan postupak korak po korak, od privatnog ključa do bitkoin adrese kodirane Base58Check-a. Primer koda koristi biblioteku libbitcoin koja je uvedena u <<alt_libraries>> za neke pomoćne funkcije.
+
+[[addr_example]]
+.Kreiranje Base58Check-kodirane bitkoin adrese od privatnog ključa
+====
+[role="c_less_space"]
+[source, cpp]
+----
+include::code/addr.cpp[]
+----
+====
+
+Kod koristi unapred definisani privatni ključ za proizvodnju iste bitkoin adrese svaki put kada se pokrene, kao što je prikazano u <<addr_example_run>>.((("", startref="base5804")))((("", startref="Abase5804")))
+
+[[addr_example_run]]
+.Kompajliranje i pokretanje addr koda
+====
+[source,bash]
+----
+# Kompajlirajte addr.cpp kod
+$ g++ -o addr addr.cpp -std=c++11 $(pkg-config --cflags --libs libbitcoin)
+# Pokrenite addr izvršni fajl
+$ ./addr
+Public key: 0202a406624211f2abbdc68da3df929f938c3399dd79fac1b51b0e4ad1d26a47aa
+Address: 1PRTTaJesdNovgne6Ehcdu1fpEdX7913CK
+----
+====
+
+[TIP]
+====
+Kod u <<addr_example_run>> proizvodi bitkoin adresu (+1PRTT...+) iz _kompresovanog_ javnog ključa (vidi <<comp_pub>>). Ako biste umesto toga koristili nekompresovani javni ključ, on bi proizveo drugu bitkoin adresu (+14K1y...+)
+====
+
+=== Implementacija ključeva i adresa u Python-u
+
+((("keys and addresses", "implementing in Python", id="KApython04")))((("pybitcointools")))Najobimnija biblioteka bitkoina u Python-u je https://github.com/vbuterin/pybitcointools[pybitcointools] Vitalika Buterina. U <<key-to-address_script>>, koristimo biblioteku pybitcointools (importirana kao "bitcoin") za generisanje i prikazivanje ključeva i adresa u različitim formatima.
+
+[[key-to-address_script]]
+.Generisanje ključa i adrese i formatiranje pomoću biblioteke pybitcointools
+====
+[source,python]
+----
+include::code/key-to-address-ecc-example.py[]
+----
+====
+
+<<key-to-address_script_run>> prikazuje izlaz dobijen pokretanjem ovog koda.
+
+[[key-to-address_script_run]]
+.Pokrenuti key-to-address-ecc-example.py
+====
+++++
+<pre data-type="programlisting">
+$ python key-to-address-ecc-example.py
+Privatni ključ (u heksadecimali) je:
+ 3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa6
+Privatni ključ (u decimali) je:
+ 26563230048437957592232553826663696440606756685920117476832299673293013768870
+Privatni ključ (WIF) je:
+ 5JG9hT3beGTJuUAmCQEmNaxAuMacCTfXuw1R3FCXig23RQHMr4K
+Kompresovani privatni ključ (u heksadecimali) je:
+ 3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa601
+Privatni ključ (WIF kompresovan) je:
+ KyBsPXxTuVD82av65KZkrGrWi5qLMah5SdNq6uftawDbgKa2wv6S
+Koordinate javnog ključa (x,y) su:
+ (41637322786646325214887832269588396900663353932545912953362782457239403430124L,
+ 16388935128781238405526710466724741593761085120864331449066658622400339362166L)
+Javni ključ (u heksadecimali) je:
+ 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec↵
+243bcefdd4347074d44bd7356d6a53c495737dd96295e2a9374bf5f02ebfc176
+Kompresovani javni ključ (u heksadecimali) je:
+ 025c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec
+Bitkoin adresa (b58check) je:
+ 1thMirt546nngXqyPEz532S8fLwbozud8
+Kompresovana bitkoin adresa (b58check) je:
+ 14cxpo3MBCYYWCgF74SWTdcmxipnGUsPw3
+</pre>
+++++
+====
+
+
+<<ec_math>> je još jedan primer, korišćenje Python ECDSA biblioteke za matematiku eliptičke krive i bez korišćenja specijalizovanih bitkoin biblioteka.
+
+[[ec_math]]
+.Skripta koja prikazuje matematiku eliptičke krive koja se koristi za bitkoin ključeve
+====
+[source, python]
+----
+include::code/ec-math.py[]
+----
+====
+
+<<ec_math_run>> prikazuje izlaz proizveden pokretanjem ove skripte.
+
+[WARNING]
+====
+<<ec_math>> ((("random numbers", "os.urandom", see="entropy")))((("entropy", "os.urandom", see="random numbers")))((("random numbers", "random number generation")))((("entropy", "random number generation")))koristi +os.urandom+, koji ima kriptografski siguran generator nasumičnih brojeva (CSRNG) koji pruža operativni sistem. Oprez: Zavisno od operativnog sistema, +os.urandom+ može biti implementiran sa _nedovoljno_ sigurnosti ili sa pravilno postavljenim semenom (seed-om) i može biti _nepogodan_ za generisanje bitkoin ključeva proizvodnog kvaliteta. ((("", startref="KApython04")))
+====
+
+[[ec_math_run]]
+.Instaliranje biblioteke Python ECDSA i pokretanje skripte ec_math.py
+====
+----
+$ # Install Python PIP package manager
+$ sudo apt-get install python-pip
+$ # Install the Python ECDSA library
+$ sudo pip install ecdsa
+$ # Run the script
+$ python ec-math.py
+Secret:  38090835015954358862481132628887443905906204995912378278060168703580660294000
+EC point: (70048853531867179489857750497606966272382583471322935454624595540007269312627, 105262206478686743191060800263479589329920209527285803935736021686045542353380)
+BTC public key: 029ade3effb0a67d5c8609850d797366af428f4a0d5194cb221d807770a1522873
+----
+====
+
+=== Napredni ključevi i adrese
+
+((("keys and addresses", "advanced forms", id="KAadvanced04")))U narednim odeljcima razmotrićemo napredne forme ključeva i adresa, kao što su šifrovani privatni ključevi, skripte, adrese i multisignature adresa (adresa sa više potpisa), vanity adrese i papirne novčanike.
+
+==== Šifrovani privatni ključevi (BIP-38)
+
+((("bitcoin improvement proposals", "Encrypted Private Keys (BIP-38)")))((("keys and addresses", "advanced forms", "encrypted private keys")))((("public and private keys", "encrypted private keys")))((("passwords", "encrypted private keys")))((("security", "passwords")))Privatni ključevi moraju ostati tajni. Potreba za _poverljivošću_ privatnih ključa je truizam koji je u praksi prilično teško postići jer je u konfliktu sa jednako važnim sigurnosnim ciljem _dostupnosti_. Držati privatni ključ tajnim mnogo je teže kada je potrebno sačuvati sigurnosne kopije privatnog ključa kako se ne bi izgubio. Privatni ključ u novčaniku koji je šifrovan lozinkom možda je siguran, ali taj novčanik treba da bude bekapovan. Ponekad korisnici moraju premeštati ključeve iz jednog novčanika u drugi - na primer da apdejtuju ili zamene softver za novčanik. Rezervne kopije privatnog ključa mogu se takođe sačuvati na papiru (vidi <<paper_wallets>>) ili na eksternim medijumima za čuvanje podataka, kao što je USB memorija. Ali šta ako se rezervna kopija ukrade ili izgubi? Ovi konfliktni bezbednosni  ciljevi doveli su do uvođenja prenosivog i pogodnog standarda za šifrovanje privatnih ključeva na način koji mogu da razumeju mnogi različiti novčanici i bitkoin klijenti, a koji je standardizovan u BIP-38 (videti <<appdxbitcoinimpproposals>>).
+
+BIP-38 predlaže zajednički standard za šifrovanje privatnih ključeva sa lozinkom (passphrase) i za njihovo kodiranje sa Base58Check, tako da se mogu sigurno čuvati na bekap medijima, sigurno transportovati među novčanicima ili čuvati pod bilo kojim drugim uslovima kojima je ključ možda izložen. Standard za šifrovanje koristi Advanced Encryption Standard (AES), standard koji je uspostavio NIST i koji se široko koristi u implementacijama šifrovanja podataka za komercijalne i vojne aplikacije.
+
+Šema enkripcije BIP-38 uzima kao ulaz privatni ključ bitkoina, obično kodiran u WIF-u, kao niz Base58Check sa prefiksom "5." Pored toga, šema enkripcije BIP-38 sadrži passphrase—dugačku lozinku—obično sastavljenu od nekoliko reči ili složenog niza alfanumeričkih znakova. Rezultat BIP-38 šeme šifrovanja je šifrovani privatni ključ koji je kodiran sa Base58Check-om koji počinje sa prefiksom +6P+. Ako vidite ključ koji počinje sa +6P+, šifrovan je i zahteva lozinku da bi ga pretvorili (dešifrovali) nazad u privatni ključ u formatu WIF (prefiks +5+) koji se može koristiti u bilo kojem novčaniku. Mnoge aplikacije za novčanik sada prepoznaju privatne ključeve šifrovane prema BIP-38 standardu i od korisnika će zatražiti lozinku da se dešifruje i uveze ključ. Aplikacije trećih lica, kao što je neverovatno koristan http://bitaddress.org[Bit Address] (Wallet Details tab), mogu se koristiti za dešifrovanje ključeva BIP-38.
+
+Najčešći slučaj upotrebe BIP-38 šifrovanih ključeva je za novčanike od papira koji se mogu koristiti za pravljenje sigurnosnih kopija privatnih ključeva na komadu papira. Sve dok korisnik odabere snažnu lozinku, papirni novčanik sa šifrovanim BIP-38 privatnim ključevima je neverovatno siguran i odličan način za kreiranje oflajn skladišta bitkoina (poznat i kao "cold storage").
+
+Testirajte šifrovane ključeve u <<table_4-10>> pomoću bitaddress.org da vidite kako možete dobiti dešifrovani ključ unoseći lozinku.
+
+[[table_4-10]]
+.Primer privatnog ključa šifrovanog sa BIP-38
+|=======
+| *Private Key (WIF)* | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| *Passphrase* | MyTestPassphrase
+| *Encrypted Key (BIP-38)* | 6PRTHL6mWa48xSopbU1cKrVjpKbBZxcLRRCdctLJ3z5yxE87MobKoXdTsJ
+|=======
+
+
+[[p2sh_addresses]]
+==== Pay-to-Script Hash (P2SH) i Multisig Adrese
+
+((("keys and addresses", "advanced forms", "pay-to-script hash and multisig addresses")))((("Pay-to-Script-Hash (P2SH)", "multisig addresses and")))((("multisig addresses")))((("addresses", "multisig addresses")))Kao što znamo, tradicionalne adrese bitkoina počinju brojem "1" i potiču iz javnog ključa, koji je izveden iz privatnog ključa. Iako svako može poslati bitkoin na "1" adresu, taj bitkoin se može potrošiti samo pokazivanjem odgovarajućeg potpisa sa privatnog ključa i heša javnog ključa.
+
+((("bitcoin improvement proposals", "Pay to Script Hash (BIP-16)")))Bitkoin adrese koje počinju brojem "3" su adrese pay-to-script-hash-a (P2SH), ponekad pogrešno nazivane multisignature (više potpisa) ili multisig adrese. Oni korisnika bitkoin transakcije označavaju kao heš skript, umesto vlasnika javnog ključa. Ova osobina je uvedena u januaru 2012. sa BIP-16 (vidi <<appdxbitcoinimpproposals>>), a široko je prihvaćena jer pruža mogućnost dodavanja funkcionalnosti samoj adresi. Za razliku od transakcija koje "šalju" sredstva na tradicionalne "1" bitkoin adrese, poznate i kao pay-to-public-key-hash (P2PKH), sredstva poslata na "3" adrese zahtevaju nešto više od prezentacije jednog heša javnog ključa i jednog potpisa privatnog ključa kao dokaz vlasništva. Zahtevi su označeni u vreme kreiranja adrese, u okviru skripti, i svi ulazi na ovu adresu će dobiti "prepreku" sa istim zahtevima.
+
+P2SH adresa se kreira iz skripte transakcije, koja definiše ko može potrošiti izlaz transakcije (za više detalja pogledajte <<p2sh>>). Kodiranje P2SH adrese uključuje upotrebu iste dvostruke heš funkcije kao i tokom kreiranja bitkoin adrese, samo primenjenu na skriptu umesto na javni ključ:
+
+----
+script hash = RIPEMD160(SHA256(script))
+----
+
+Rezultat "script hash-a" je kodiran Base58Check sa prefiksom verzije 5, što rezultira šifrovanom adresom koja počinje sa +3+. Primer P2SH adrese je +3F6i6kvkevjR7AsAd4te2IB2zZiASEm1HM+, koji se može izvesti pomoću komandi Bitcoin Explorer +script-encode+, +sha256+, +ripemd160+, i +base58check-encode+ (see <<appdx_bx>>) na sledeći način:
+
+----
+$ echo \
+'DUP HASH160 [89abcdefabbaabbaabbaabbaabbaabbaabbaabba] EQUALVERIFY CHECKSIG' > script
+$ bx script-encode < script | bx sha256 | bx ripemd160 \
+| bx base58check-encode --version 5
+3F6i6kwkevjR7AsAd4te2YB2zZyASEm1HM
+----
+
+[TIP]
+====
+P2SH nije nužno isto kao i multisignature standardna transakcija. P2SH adresa _najčešće_ predstavlja multisignature skriptu (sa više potpisa), ali može predstaviti i skriptu koja kodira druge vrste transakcija.
+====
+
+===== Multisignature adrese i P2SH
+
+Trenutno je najčešća implementacija P2SH funkcije skripta sa više potpisa (multisignature address script). Kao što ime govori, osnovna skripta zahteva više od jednog potpisa da bi se dokazalo vlasništvo i samim tim trošila sredstva. Osobina bitkoin multisignature-a je dizajnirana da zahteva M potpise (takođe poznate kao "prag") od ukupno N ključeva, poznatih kao M-of-N multisig, gde je M jednak ili manji od N. Na primer, Bob, vlasnik kafića iz <<ch01_intro_what_is_bitcoin>>, mogao je koristiti multisignature adresu koja zahteva 1-od-2 potpisa od ključa koji mu pripada i ključa koji pripada njegovoj supruzi, osiguravajući da bilo ko od njih može potpisati da potroši izlaz transakcije zaključan na ovoj adresi. Ovo bi bilo slično "zajedničkom računu" koji se primenjuje u tradicionalnom bankarstvu, gde bilo koji partner može trošiti sredstva jednim potpisom. Ili Gopesh, ((("use cases", "offshore contract services"))) web dizajner kome je Bob platio da mu napravi web stranicu, možda ima 2-od-3 multisignature adrese za svoje preduzeće što osigurava da sredstva ne mogu biti potrošena ukoliko najmanje dva poslovna partnera ne potpišu transakciju.
+
+Istražićemo kako napraviti transakcije koje troše sredstva iz P2SH (i multisig) adresa u <<transactions>>.
+
+==== Vanity adrese
+
+((("keys and addresses", "advanced forms", "vanity addresses")))((("vanity addresses", id="vanity04")))((("addresses", "vanity addresses", id="Avanity04")))Vanity (sujetne) adrese su validne bitkoin adrese koje sadrže čitljive poruke. Na primer, +1LoveBPzzD72PUKSLzCkIAtGFImK5vINR33+ je validna adresa koja sadrži slova koja formiraju reč "Love" kao prva četiri Base-58 slova. Vanity adrese zahtevaju generisanje i testiranje milijardi kandidata privatnih ključeva dok se ne nađe bitkoin adresa sa željenim obrascem. Iako postoje neke optimizacije u algoritmu vanity generisanja, proces u osnovi uključuje nasumično biranje privatnog ključa, generisanje javnog ključa, dobijanje bitkoin adrese i proveravanje da li odgovara željenom vanity obrascu, ponavljajući to milijarde puta dok se ne nađe dobar spoj.
+
+Jednom kada se pronađe vanity adresa koja odgovara željenom obrascu, privatni ključ iz kojeg je izveden vlasnik može je upotrebiti za trošenje bitkoina na potpuno isti način kao i bilo koju drugu adresu. Vanity adrese nisu ništa manje, a ni više sigurne u odnosu na bilo koje druge adrese. One zavise od iste kriptografije eliptičke krive (ECC) i SHA kao i svaka druga adresa. Ne možete ništa lakše da pronađete privatni ključ adrese koja počinje sa vanity obrascem nego bilo koju drugu adresu.
+
+U <<ch01_intro_what_is_bitcoin>>, predstavili smo Eugeniju, direktorku dobrotvorne oganizacije za decu, koja radi na Filipinima. Recimo da Eugenija organizuje prikupljanje bitkoina i želi da iskoristi vanity bitkoin adresu da objavi prikupljanje sredstava. Eugenija će stvoriti vanity adresu koja počinje sa "1Kids" kako bi promovisala dečji dobrotvorni fond. Da vidimo kako će stvoriti vanity adresu i šta ona znači za sigurnost Eugenijine dobrotvorne organizacije. ((("use cases", "charitable donations", startref="eugeniafour")))
+
+===== Generisanje vanity (sujetne) adrese
+
+Važno je shvatiti da je bitkoin adresa jednostavno broj predstavljen simbolima u abecedi Base58. Potraga za tekstom poput "1Kids" može se posmatrati kao traženje adrese u rasponu od +1Kids11111111111111111111111111111+ do +1Kidszzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz+. U tom rasponu ima otprilike 58^29^ (otprilike 1,4 * 10^51^) adresa, a sve započinju sa "1Kids". <<table_4-11>> prikazuje raspon adresa sa prefiksom 1Kids.
+
+[[table_4-11]]
+. Raspon vanity adresa koje počinju sa „1Kids“
+|=======
+| *From* | +1Kids11111111111111111111111111111+
+| | +1Kids11111111111111111111111111112+
+| | +1Kids11111111111111111111111111113+
+| | +...+
+| *To* | +1Kidszzzzzzzzzzzzzzzzzzzzzzzzzzzzz+
+|=======
+
+Posmatrajmo tekst „1Kids“ kao broj i pogledajmo koliko često možemo da ga pronađemo u bitkoin adresi (pogledajte <<table_4-12>>). Prosečni računar bez ikakvog specijalizovanog hardvera može da pretraži oko 100.000 ključeva u sekundi.
+
+[[table_4-12]]
+.Frekvencija vanity obrasca (1KidsChariti) i prosečno vreme pretrage na radnom računaru
+[options="header"]
+|=======
+| Length | Pattern | Frequency | Average search time
+| 1 | 1K | 1 in 58 keys | < 1 milliseconds
+| 2 | 1Ki| 1 in 3,364 | 50 milliseconds
+| 3 | 1Kid | 1 in 195,000 | < 2 seconds
+| 4 | 1Kids | 1 in 11 million | 1 minute
+| 5 | 1KidsC | 1 in 656 million | 1 hour
+| 6 | 1KidsCh | 1 in 38 billion | 2 days
+| 7 | 1KidsCha | 1 in 2.2 trillion | 3–4 months
+| 8 | 1KidsChar | 1 in 128 trillion | 13–18 years
+| 9 | 1KidsChari | 1 in 7 quadrillion | 800 years
+| 10 | 1KidsCharit | 1 in 400 quadrillion | 46,000 years
+| 11 | 1KidsCharity | 1 in 23 quintillion | 2.5 million years
+|=======
+
+
+Kao što vidite, Eugenija neće skoro napraviti vanity adresu "1KidsCharity", čak i ako bi imala pristup nekolicini hiljada računara. Svaki dodatni znak povećava težinu za faktor 58. Tekstovi sa više od sedam znakova obično se nalaze sa specijalizovanim hardverom, kao sto su prilagođeni računari sa više GPU-a. To su često preusmereni "uređaji za rudarenje bitkoina" koji više nisu profitabilni za rudarenje bitkoina, ali se mogu koristiti za pronalaženje vanity adresa. Vanity pretraga na GPU sistemima je mnogo brža nego na CPU-u sa opštom namenom
+
+Drugi način za pronalaženje vanity adrese je prenošenje posla u pool vanity rudara, kao što je http://vanitypool.appspot.com[Vanity Pool]. Vanity Pool je usluga koja omogućava onima sa GPU hardverom da zarade na bitkoinima tražeći vanity adrese za ostale. Za malu uplatu (0,01 bitcoin ili približno 5 USD u vreme pisanja ovog teksta), Eugenija može da istraži obrazac vanity adrese sa sedam znakova i da dobije rezultate za nekoliko sati umesto da mesecima traži sa CPU-om.
+
+Generisanje vanity adresa je gruba sila: isprobajte slučajni ključ, proverite krajnju adresu da biste videli da li odgovara željenom tekstu, ponavljajte dok ne bude uspešno. <<vanity_miner_code>> prikazuje primer "vanity miner", programa namenjenog pronalaženju vanity adresa, napisanih u C++ -u. Ti primeri koriste biblioteku libbitcoin koju smo upoznali sa <<alt_libraries>>.
+
+[[vanity_miner_code]]
+.Rudar vanity adresa
+====
+[source,cpp]
+----
+include::code/vanity-miner.cpp[]
+----
+====
+
+[NOTE]
+====
+<<vanity_miner_run>> koristi +std::random_device+. U zavisnosti od implementacije, može odražavati CSRNG koji pruža operativni sistem. U slučaju Unix operativnog sistema, kao što je Linux, on izvlači nasumične brojeve iz +/dev/urandom+. Generator nasumičnih brojeva koji se ovde koristi je u demonstrativne svrhe i _nije_ primeren za generisanje bitkoin ključeva produktivnog kvaliteta jer nije implementiran sa dovoljno sigurnosti.
+====
+
+Primer koda mora biti sastavljen pomoću kompajlera pass:[C++] i povezan sa bibliotekom libbitcoin (koja prvo mora biti instalirana na tom sistemu). Da biste pokrenuli primer, pokrenite izvršni program ++vanity-miner++ bez parametara (pogledajte <<vanity_miner_run>>) i pokušaće da pronađe vanity adresu koja počinje sa "1kid."
+
+[[vanity_miner_run]]
+.Kompajliranje i pokretanje primera vanity rudara
+====
+[source,bash]
+----
+$ # kompajliraj kod sa g++
+$ g++ -o vanity-miner vanity-miner.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # Pokreni primer
+$ ./vanity-miner
+Found vanity address! 1KiDzkG4MxmovZryZRj8tK81oQRhbZ46YT
+Secret: 57cc268a05f83a23ac9d930bc8565bac4e277055f4794cbd1a39e5e71c038f3f
+$ # Ponovo pokrenite za drugačiji rezultat
+$ ./vanity-miner
+Found vanity address! 1Kidxr3wsmMzzouwXibKfwTYs5Pau8TUFn
+Secret: 7f65bbbbe6d8caae74a0c6a0d2d7b5c6663d71b60337299a1a2cf34c04b2a623
+# Koristite "time" da vidite koliko vremena je potrebno da biste pronašli rezultat
+$ time ./vanity-miner
+Found vanity address! 1KidPWhKgGRQWD5PP5TAnGfDyfWp5yceXM
+Secret: 2a802e7a53d8aa237cd059377b616d2bfcfa4b0140bc85fa008f2d3d4b225349
+
+real	0m8.868s
+user	0m8.828s
+sys	0m0.035s
+----
+====
+
+Za ovaj primer koda biće potrebno nekoliko sekundi da se pronađe preklapanje sa tekstom od tri slova "kid", kao što možemo videti ako koristimo Unix naredbu +time+ za merenje vremena izvršenja. Promenite tekst +search+ u izvornom kodu i pogledajte koliko treba vremena za tekstove od četiri ili pet znakova!
+
+===== Sigurnost vanity adrese
+
+((("security", "vanity addresses")))Vanity adrese mogu se koristiti da se poboljšaju _ i_ poraze sigurnosne mere; one su mač sa dve oštrice. Upotrebljena da bi se poboljšala sigurnost, prepoznatljiva adresa otežava suparnicima podmetanje sopstvene adrese i varanje kupaca kako bi njima plaćali umesto vama. Nažalost, vanity adrese takođe omogućavaju svima da kreiraju adresu koja _liči_ na bilo koju nasumičnu adresu ili čak i drugu vanity adresu, što zavarava vašu mušteriju.
+
+Eugenija bi mogla reklamirati nasumično generisanu adresu (npr. +1J7mdg5rbKiUHENIdk39VVVK7fsLpEoKSZi+) na koju ljudi mogu poslati svoje donacije. Ili bi mogla da generiše vanity adresu koja počinje sa 1Kids, kako bi je učinila prepoznatljivijom.
+
+U oba slučaja, jedan od rizika upotrebe jedne fiksne adrese (umesto posebne dinamične adrese po donatoru) je taj da će lopov moći da se infiltrira na vašu web lokaciju i zameniti je sopstvenom adresom, preusmeravajući tako donacije sebi. Ako ste reklamirali svoju adresu za donacije na više različitih mesta, vaši korisnici mogu vizuelno da je pregledaju pre nego što izvrše uplatu kako bi se uverili da je ista kao ona koju su videli na vašoj web lokaciji, u vašem imejlu i na letku. U slučajne adrese kao +1J7mdg5rbKiUHENIdk39VVVK7fsLpEoKSZi+, prosečni korisnik će možda pregledati prvih nekoliko znakova „1J7mdg“ i biti uveren da se adresa poklapa. Koristeći generator vanity adresa, neko ko ima nameru da krade zamenom slične adrese može brzo da generiše adrese koje se poklapaju u prvih nekoliko znakova, kao što je prikazano u <<table_4-13>>.
+
+[[table_4-13]]
+.Generisanje vanity adresa koje se poklapaju sa nasumičnom adresom
+|=======
+| *Original Random Address* | 1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+| *Vanity (4-character match)* | 1J7md1QqU4LpctBetHS2ZoyLV5d6dShhEy
+| *Vanity (5-character match)* | 1J7mdgYqyNd4ya3UEcq31Q7sqRMXw2XZ6n
+| *Vanity (6-character match)* | 1J7mdg5WxGENmwyJP9xuGhG5KRzu99BBCX
+|=======
+
+So does a vanity address increase security? If Eugenia generates the vanity address +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, users are likely to look at the vanity pattern word _and a few characters beyond_, for example noticing the "1Kids33" part of the address. That would force an attacker to generate a vanity address matching at least six characters (two more), expending an effort that is 3,364 times (58 × 58) higher than the effort Eugenia expended for her 4-character vanity. Essentially, the effort Eugenia expends (or pays a vanity pool for) "pushes" the attacker into having to produce a longer pattern vanity. If Eugenia pays a pool to generate an 8-character vanity address, the attacker would be pushed into the realm of 10 characters, which is infeasible on a personal computer and expensive even with a custom vanity-mining rig or vanity pool. What is affordable for Eugenia becomes unaffordable for the attacker, especially if the potential reward of fraud is not high enough to cover the cost of the vanity address generation.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
+
+[[paper_wallets]]
+==== Papirni novčanici
+
+((("keys and addresses", "advanced forms", "paper wallets")))((("paper wallets", id="paperw04")))((("wallets", "types of", "paper wallets", id="Wpaper04")))Papirni novčanici su bitkoin privatni ključevi odštampani na papiru. Često papirni novčanik sadrži i odgovarajuću bitkoin adresu radi praktičnosti, ali to nije neophodno jer se ona može izvući iz privatnog ključa. Papirni novčanici su vrlo efikasan način kreiranja rezervnih kopija ili vanmrežnog čuvanja bitkoina, poznat i kao "cold storage" (hladno skladištenje). Kao rezervni mehanizam, papirni novčanik može pružiti sigurnost protiv gubitka ključa zbog greške u računaru kao što je kvar hard diska, krađe ili slučajnog brisanja. Kao mehanizam "hladnog skladištenja", ako se ključevi za papirni novčanik generišu van mreže i nikada se ne sačuvaju na računarskom sistemu, oni su mnogo sigurniji od hakera, keylogger-a i drugih računarskih pretnji na mreži.
+
+Papirni novčanici postoje u mnogo oblika, veličina i dizajna, ali na vrlo osnovnom nivou su samo ključ i adresa ispisani na papiru. <<table_4-14>> prikazuje najjednostavniji oblik novčanika.
+
+[[table_4-14]]
+.Najjednostavniji oblik papirnog novčanika - odštampana bitkoin adresa i privatni ključ
+[options="header"]
+|=======================
+| Javna adresa | Privatni ključ (WIF)
+|1424C2F4bC9JidNjjTUZCbUxv6Sa1Mt62x|5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+|=======================
+
+
+Papirni novčanici se mogu lako generisati pomoću alata kao što je JavaScript generator sa stranice _bitaddress.org_. Ova stranica sadrži sav kod potreban za generisanje ključeva i papirnih novčanika, čak iako uopšte niste povezani na internet. Da biste ga koristili, sačuvajte HTML stranicu na lokalnom disku ili na spoljnoj USB fleš memoriji. Prekinite internet vezu i otvorite fajl u pretraživaču. Još bolje, podignite računar koristeći netaknuti operativni sistem, kao što je Linux OS sa sistemom za pokretanje sa CD-ROM-a. Svi ključevi generisani ovim alatom dok ste van mreže mogu se štampati na lokalnom štampaču preko USB kabla (ne bežično), stvarajući papirne novčanike čiji ključevi postoje samo na papiru i nikada nisu bili smešteni u bilo koji mrežni sistem. Stavite ove papirne novčanike u vatrootporni sef i „pošaljite“ bitkoin na njihovu bitkoin adresu da biste implementirali jednostavno, ali veoma efikasno rešenje "hladnog skladištenja". <<paper_wallet_simple>> prikazuje papirni novčanik generisan sa web lokacije bitaddress.org.
+
+[[paper_wallet_simple]]
+.Primer jednostavnog papirnog novčanika sa adrese bitaddress.org
+image::images/mbc2_0408.png[]
+
+((("bitcoin improvement proposals", "Encrypted Private Keys (BIP-38)")))Nedostatak jednostavnog sistema papirnog novčanika je taj što su štampani ključevi podložni krađi. Lopov koji može dobiti pristup papiru može ga ukrasti ili fotografisati ključeve i preuzeti kontrolu nad bitkoinom zaključanim tim ključevima. Sofisticiraniji sistem za skladištenje novčanih papira koristi privatne ključeve šifrovane BIP-38. Ključevi ispisani na papirnom novčaniku zaštićeni su lozinkom koju je vlasnik upamtio. Bez lozinke, šifrovani ključevi su beskorisni. Ipak, oni su i dalje superiorniji od novčanika zaštićenog lozinkom, jer ključevi nikada nisu bili na mreži i moraju se fizički preuzeti iz sefa ili drugog fizički zaštićenog skladišta. <<paper_wallet_encrypted>> prikazuje novčanik na papiru sa šifrovanim privatnim ključem (BIP-38) kreiranim na web lokaciji bitaddress.org.
+
+[[paper_wallet_encrypted]]
+.Primer šifrovanog papirnog novčanika sa adrese bitaddress.org. Lozinka je "test".
+image::images/mbc2_0409.png[]
+
+[WARNING]
+====
+Iako možete uložiti sredstva u papirni novčanik nekoliko puta, trebalo bi da povučete sva sredstva samo jednom, trošeći sve bitkoine na njima. To je zato što bi tokom otključavanja i trošenja sredstava neki novčanici mogli da generišu promenjivu adresu ako potrošite manje od celog iznosa. Ako je računar koji koristite za potpisivanje transakcije ugrožen, rizikujete da iznesete privatni ključ i pristupite sredstvima na adresi za kusur. Trošeći celokupni ulog papirnog novčanika odjednom, smanjujete rizik od kompromisa. Ako vam je potreban samo mali iznos, preostala sredstva pošaljite u papirni novčanik u istoj transakciji.
+====
+
+Paper wallets come in many designs and sizes, with many different features. Some are intended to be given as gifts and have seasonal themes, such as Christmas and New Year's themes. Others are designed for storage in a bank vault or safe with the private key hidden in some way, either with opaque scratch-off stickers, or folded and sealed with tamper-proof adhesive foil. Figures <<paper_wallet_bpw>> through <<paper_wallet_spw>> show various examples of paper wallets with security and backup features.
+
+[[paper_wallet_bpw]]
+.Primer papirnog novčanika sa bitcoinpaperwallet.com sa privatnim ključem na preklopnom poklopcu
+image::images/mbc2_0410.png[]
+
+[[paper_wallet_bpw_folded]]
+.bitcoinpapervallet.com novčanik sa skrivenim privatnim ključem
+image::images/mbc2_0411.png[]
+
+Ostali dizajni sadrže dodatne kopije ključa i adrese, u obliku odvojivih delova sličnih karti za više vožnji, što vam omogućava da stavite višestruke kopije na sigurna mesta da biste se zaštitili od požara, poplave ili drugih prirodnih katastrofa. ((("", startref="KAadvanced04")))((("", startref="Wpaper04")))((("", startref="paperw04")))
+
+[[paper_wallet_spw]]
+.Primer papirnog novčanika sa dodatnim kopijama ključa na rezervnom "delu karte za prevoz"
+image::images/mbc2_0412.png[]

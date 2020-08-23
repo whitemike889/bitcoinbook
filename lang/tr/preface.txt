@@ -1,0 +1,170 @@
+[preface]
+Önsöz
+
+=== Bitcoin Kitabının Yazılması
+
+((("bitcoin", "benefits of", id="BCbasicbenefits0")))((("decentralized systems", "bitcoin as")))I first stumbled upon bitcoin in mid-2011. My immediate reaction was more or less "Pfft! Nerd money!" and I ignored it for another six months, failing to grasp its importance. This is a reaction that I have seen repeated among many of the smartest people I know, which gives me some consolation. The second time I came across bitcoin, in a mailing list discussion, I decided to read the whitepaper written by Satoshi Nakamoto to study the authoritative source and see what it was all about. ((("digital currencies", "bitcoin vs. others")))I still remember the moment I finished reading those nine pages, when I realized that bitcoin was not simply a digital currency, but a network of trust that could also provide the basis for so much more than just currencies. The realization that "this isn't money, it's a decentralized trust network," started me on a four-month journey to devour every scrap of information about bitcoin I could find. I became obsessed and enthralled, spending 12 or more hours each day glued to a screen, reading, writing, coding, and learning as much as I could. I emerged from this state of fugue, more than 20 pounds lighter from lack of consistent meals, determined to dedicate myself to working on bitcoin.
+
+Two years later, after creating a number of small startups to explore various bitcoin-related services and products, I decided that it was time to write my first book. Bitcoin was the topic that had driven me into a frenzy of creativity and consumed my thoughts; it was the most exciting technology I had encountered since the internet. It was now time to share my passion about this amazing technology with a broader audience.
+
+=== Hedef Kitle
+
+((("intended audience")))This book is mostly intended for coders. If you can use a programming language, this book will teach you how cryptographic currencies work, how to use them, and how to develop software that works with them. The first few chapters are also suitable as an in-depth introduction to bitcoin for noncoders—those trying to understand the inner workings of bitcoin and cryptocurrencies.
+
+=== Kapak Üzerinde Neden Böcekler Var?
+
+((("decentralized systems", "in nature")))The leafcutter ant is a species that exhibits highly complex behavior in a colony super-organism, but each individual ant operates on a set of simple rules driven by social interaction and the exchange of chemical scents (pheromones). Per Wikipedia: "Next to humans, leafcutter ants form the largest and most complex animal societies on Earth." Leafcutter ants don't actually eat leaves, but rather use them to farm a fungus, which is the central food source for the colony. Get that? These ants are farming!
+
+Karıncalar kast tabanlı bir topluluk oldukları ve yavruları doğuran bir kraliçeye sahip oldukları halde bir karınca topluluğunda lider ya da merkezi bir yetkili yoktur. Oldukça zeki ve karmaşık davranışlar sergileyen milyonlarca üyesi bulunan bir topluluk 
+
+Doğa gösteriyor ki, merkezi olmayan sistemler merkezi bir yetkiye, hiyerarşiye ya da karmaşık şeylere ihtiyaç duymaksızın,  esnek olabilir ve acil karmaşıklık ile inanılmaz gelişmişlik meydana getirebilir .
+
+((("decentralized systems", "benefits of")))Bitcoin is a highly sophisticated decentralized trust network that can support myriad financial processes. Yet, each node in the bitcoin network follows a few simple mathematical rules. The interaction between many nodes is what leads to the emergence of the sophisticated behavior, not any inherent complexity or trust in any single node. Like an ant colony, the bitcoin network is a resilient network of simple nodes following simple rules that together can do amazing things without any central coordination.((("", startref="BCbasicbenefits0")))
+
+=== Kitapta Kullanılan Kaideler
+
+((("typographical conventions")))The following typographical conventions are used in this book:
+
+_Italic_:: Yeni terimleri, URL'leri, e-posta adreslerini, dosya adlarını ve dosya uzantılarını gösterir.
+
++Constant width+:: Program listeleri, buna ek olarak paragrafların içindeki değişkenler, işlev isimleri, veritabanları, veri çeşitleri, ortam değişkenleri, ifadeler ve   anahtar kelimeler gibi program elemanlarından bahsetmek için kullanılır.
+
+**`Constant width bold`**:: Kullanıcılar tarafından harfi harfine yazılmış olan komutları ya da diğer metinleri gösterir.
+
+_++Constant width italic++_:: Kullanıcıların sağladığı değerlerle ya da bağlamla belirlenen değerler ile değiştirilmiş olan metinleri gösterir.
+
+
+[BAHŞİŞ]
+====
+This icon signifies a tip or suggestion.
+====
+
+[NOT]
+====
+This icon signifies a general note.
+====
+
+[WARNING]
+====
+Bu simge bir uyarı ya da ihtar belirtir.
+====
+
+=== Kod Örnekleri
+
+((("code examples, obtaining and using", id="codeuse00")))The examples are illustrated in Python, C++, and using the command line of a Unix-like operating system such as Linux or macOS. All code snippets are available in the GitHub repository (https://github.com/bitcoinbook/bitcoinbook[https://github.com/bitcoinbook/bitcoinbook]) in the _code_ subdirectory of the main repo. Fork the book code, try the code examples, or submit corrections via GitHub.
+
+Tüm kod parçacıkları uyan diller için, yorumlayıcı ve derleyicilerin minimum yüklemesi ile çoğu işletim sistemi üzerinde tekrarlanabilir. Biz gerekli olan temel yükleme talimatlarını sunuyoruz ve  bu talimatların çıktısını adım adım açıklıyoruz.
+
+Bazı kod parçacıkları ve kod çıktısı yazmak için yeniden düzenlendi. Bu gibi durumlarda, yeni satır karakterini takiben gelen satırlar ters slash ile ayrıldı. Örnekleri kopyalarken bu iki satırı kaldırın ve tekrar satıra gelin.  Örnekte gösterilmiş olan sonucun aynısını göreceksiniz.
+
+Tüm kod parçacıkları mümkün olan gerçek değer ve hesaplamaları kullanır, böylece örnekten örneğe inşa edebilir ve aynı değerleri hesaplamak için yazdığın herhangi bir koddaki aynı sonucu görürsün. Örneğin, özel anahtarlar ve bunlara bağlı açık anahtarlar ile adresler gerçektir. Model işlemler, bloklar ve blok zinciri referansları  gerçek bitcoin blok zincirinde tanıtılmıştır ve açık muhasebe defterinin bir parçasıdır. Böylece onları herhangi bir bitcoin sistemi üzerinde inceleyebilirsin.
+
+=== Kod Örneklerinin Kullanımı
+
+Bu kitap işinizi halletmeye yardımcı olmak için burada. Genel olarak bu kitapta sunulan örnek kodları kendi program ve dokümanlarınız da kullanabilirsiniz. Kodun önemli bir bölümünü çoğaltmadıkça izin almak için bizimle irtibata geçmenize gerek yoktur. Mesela, bu kitaptan birçok kod parçacığını kullanarak yazdığınız bir program  için izin almanıza gerek yoktur. O’Reilly kitaplarının CD örneklerini dağıtmak ya da satmak için izin almanız gerekir. Bu kitabı gerekçe göstererek bir soruyu cevaplamak ve örnek kodları alıntılamak için  izin almanıza gerek yoktur. Ürün dokümantasyonlarınıza bu kitaptan önemli miktarda örnek kod eklemek için izin almanız gerekir.
+
+((("attribution")))We appreciate, but do not require, attribution. An attribution usually includes the title, author, publisher, and ISBN. For example: “_Mastering Bitcoin_ by Andreas M. Antonopoulos (O’Reilly). Copyright 2017 Andreas M. Antonopoulos, 978-1-491-95438-6.”
+
+((("open source licenses")))Some editions of this book are offered under an open source license, such as https://creativecommons.org/licenses/by-nc/4.0/[CC-BY-NC], in which case the terms of that license apply.
+
+If you feel your use of code examples falls outside fair use or the permission given above, feel free to contact us at pass:[<a href="mailto:permissions@oreilly.com">permissions@oreilly.com</a>].
+
+=== Bitcoin Addresses and Transactions in This Book
+
+((("getting started", "warnings and cautions")))((("warnings and cautions", "avoid sending money to addresses appearing in book")))((("keys and addresses", "warnings and cautions")))((("transactions", "warnings and cautions")))((("blockchain applications", "warnings and cautions")))((("QR codes", "warnings and cautions")))The bitcoin addresses, transactions, keys, QR codes, and blockchain data used in this book are, for the most part, real. That means you can browse the blockchain, look at the transactions offered as examples, retrieve them with your own scripts or programs, etc.
+
+However, note that the private keys used to construct addresses are either printed in this book, or have been "burned." That means that if you send money to any of these addresses, the money will either be lost forever, or in some cases everyone who can read the book can take it using the private keys printed in here.
+
+[WARNING]
+====
+DO NOT SEND MONEY TO ANY OF THE ADDRESSES IN THIS BOOK. Your money will be taken by another reader, or lost forever.((("", startref="codeuse00")))
+====
+
+=== O'Reilly Safari
+
+[role = "safarienabled"]
+[NOT]
+====
+pass:[<a href="http://oreilly.com/safari" class="orm:hideurl"><em class="hyperlink">Safari</em></a>] (formerly Safari Books Online) is a membership-based training and reference platform for enterprise, government, educators, and individuals.
+====
+
+Members have access to thousands of books, training videos, Learning Paths, interactive tutorials, and curated playlists from over 250 publishers, including O’Reilly Media, Harvard Business Review, Prentice Hall Professional, Addison-Wesley Professional, Microsoft Press, Sams, Que, Peachpit Press, Adobe, Focal Press, Cisco Press, John Wiley & Sons, Syngress, Morgan Kaufmann, IBM Redbooks, Packt, Adobe Press, FT Press, Apress, Manning, New Riders, McGraw-Hill, Jones & Bartlett, and Course Technology, among others.
+
+For more information, please visit pass:[<a href="http://oreilly.com/safari" class="orm:hideurl"><em>http://oreilly.com/safari</em></a>].
+
+=== Bizimle Nasıl İrtibat Kurabilirsiniz
+
+((("comments and questions")))((("contact information")))Please address comments and questions concerning this book to the publisher:
+
+++++
+<ul class="simplelist">
+  <li>O’Reilly Media, Inc.</li>
+  <li>1005 Gravenstein Highway North</li>
+  <li>Sebastopol, CA 95472</li>
+  <li>800-998-9938 (in the United States or Canada)</li>
+  <li>707-829-0515 (international or local)</li>
+  <li>707-829-0104 (fax)</li>
+</ul>
+++++
+
+To comment or ask technical questions about this book, send email to pass:[<a class="email" href="mailto:bookquestions@oreilly.com"><em>bookquestions@oreilly.com</em></a>].
+
+Kitaplarımız, kurslarımız, konferanslarımız hakkında daha fazla bilgi almak ve haberler için sitemizi ziyaret ediniz link:$$http://www.oreilly.com$$[].
+
+Facebook'ta bizi bulun: link:$$http://facebook.com/oreilly$$[]
+
+Bizi Twitter'da takip edin: link:$$http://twitter.com/oreillymedia$$[]
+
+Bizi YouTube'dan izleyin: link:$$http://www.youtube.com/oreillymedia$$[]
+
+[role="pagebreak-before"]
+=== Contacting the Author
+
+You can contact me, Andreas M. Antonopoulos, on my personal site:
+link:$$https://antonopoulos.com/$$[]
+
+Information about _Mastering Bitcoin_ as well as the Open Edition and translations are available on:
+link:$$https://bitcoinbook.info/$$[]
+
+Follow me on Facebook:
+link:$$https://facebook.com/AndreasMAntonopoulos$$[]
+
+Follow me on Twitter:
+link:$$https://twitter.com/aantonop$$[]
+
+Follow me on Linkedin:
+link:$$https://linkedin.com/company/aantonop$$[]
+
+Many thanks to all my patrons who support my work through monthly donations. You can follow my Patreon page here:
+link:$$https://patreon.com/aantonop$$[]
+
+=== Teşekkürler
+
+((("acknowledgments", id="acknowledge0")))This book represents the efforts and contributions of many people. I am grateful for all the help I received from friends, colleagues, and even complete strangers, who joined me in this effort to write the definitive technical book on cryptocurrencies and bitcoin.
+
+Bitcoin teknolojisi ve bitcoin toplumu arasında bir ayrım yapmak mümkün değildir ve bu kitap teknoloji üzerine bir kitap olduğu kadar bu topluluğunda bir ürünüdür. Bu kitap üzerine çalışmam en başından en sonuna kadar tüm bitcoin topluluğu tarafından teşvik edildi, alkışlandı, desteklendi ve ödüllendirildi. Hepsinden çok,  bu kitap iki yıl boyunca harika bir topluluğun parçası olmama izin verdi. Bu topluluğa beni kabul ettikleri için ne kadar teşekkür etsem azdır.  Konferanslarda, etkinliklerde, seminerlerde, buluşmalarda, pizza toplantılarında ve özel küçük toplantılarda rastladığım, bunun yanında benimle Twitter, Reddit, bitcointalk.org ve Github üzerinden iletişim kuran ve bu kitapta etkisi bulunan adı anılacak çok fazla insan var. Bu kitapta bulunan her fikir, kıyaslama, soru, cevap ve açıklama bir noktada topluluk ile etkileşimlerim yoluyla ilham alınmış, test edilmiş ve geliştirilmiştir. Tüm destekleriniz için teşekkürler; siz olmadan bu kitap olmazdı. Sonsuza kadar minnettarım.
+
+The journey to becoming an author starts long before the first book, of course. My first language (and schooling) was Greek, so I had to take a remedial English writing course in my first year of university. I owe thanks to Diana Kordas, my English writing teacher, who helped me build confidence and skills that year. Later, as a professional, I developed my technical writing skills on the topic of data centers, writing for _Network World_ magazine. I owe thanks to John Dix and John Gallant, who gave me my first writing job as a columnist at _Network World_ and to my editor Michael Cooney and my colleague Johna Till Johnson who edited my columns and made them fit for publication. Writing 500 words a week for four years gave me enough experience to eventually consider becoming an author.
+
+Thanks also to those who supported me when I submitted my book proposal to O'Reilly, by providing references and reviewing the proposal. Specifically, thanks to John Gallant, Gregory Ness, Richard Stiennon, Joel Snyder, Adam B. Levine, Sandra Gittlen, John Dix, Johna Till Johnson, Roger Ver, and Jon Matonis. Special thanks to Richard Kagan and Tymon Mattoszko, who reviewed early versions of the proposal and Matthew Taylor, who copyedited the proposal.
+
+Thanks to Cricket Liu, author of the O'Reilly title _DNS and BIND_, who introduced me to O'Reilly. Thanks also to Michael Loukides and Allyson MacDonald at O'Reilly, who worked for months to help make this book happen. Allyson was especially patient when deadlines were missed and deliverables delayed as life intervened in our planned schedule. For the second edition, I thank Timothy McGovern for guiding the process, Kim Cofer for patiently editing, and Rebecca Panzer for illustrating many new diagrams.
+
+The first few drafts of the first few chapters were the hardest, because bitcoin is a difficult subject to unravel. Every time I pulled on one thread of the bitcoin technology, I had to pull on the whole thing. I repeatedly got stuck and a bit despondent as I struggled to make the topic easy to understand and create a narrative around such a dense technical subject. Eventually, I decided to tell the story of bitcoin through the stories of the people using bitcoin and the whole book became a lot easier to write. I owe thanks to my friend and mentor, Richard Kagan, who helped me unravel the story and get past the moments of writer's block. I thank Pamela Morgan, who reviewed early drafts of each chapter in the first and second edition of the book, and asked the hard questions to make them better. Also, thanks to the developers of the San Francisco Bitcoin Developers Meetup group as well as Taariq Lewis and Denise Terry for helping test the early material. Thanks also to Andrew Naugler for infographic design.
+
+During the development of the book, I made early drafts available on GitHub and invited public comments. More than a hundred comments, suggestions, corrections, and contributions were submitted in response. Those contributions are explicitly acknowledged, with my thanks, in <<github_contrib>>. Most of all, my sincere thanks to my volunteer GitHub editors Ming T. Nguyen (1st edition) and Will Binns (2nd edition), who worked tirelessly to curate, manage and resolve pull requests, issue reports, and perform bug fixes on GitHub.
+
+Kitabın ilk taslağı oluşturulduğunda, birkaç tur teknik incelemeden geçti. Kapsamlı incelemeleri, yorum ve destekleri için Cricket Liu ve Lorne Lantz'a teşekkür ederim. 
+
+Several bitcoin developers contributed code samples, reviews, comments, and encouragement. Thanks to Amir Taaki and Eric Voskuil for example code snippets and many great comments; Chris Kleeschulte for contributing the Bitcore appendix; Vitalik Buterin and Richard Kiss for help with elliptic curve math and code contributions; Gavin Andresen for corrections, comments, and encouragement; Michalis Kargakis for comments, contributions, and btcd writeup; and Robin Inge for errata submissions improving the second print. In the second edition, I again received a lot of help from many Bitcoin Core developers, including Eric Lombrozo who demystified Segregated Witness, Luke Dashjr who helped improve the chapter on transactions, Johnson Lau who reviewed Segregated Witness and other chapters, and many others. I owe thanks to Joseph Poon, Tadge Dryja, and Olaoluwa Osuntokun who explained Lightning Network, reviewed my writing, and answered questions when I got stuck.
+
+Kitaplara ve kelimelere olan sevgimi, beni bütün duvarları kitaplar ile kaplı bir evde büyüten annem Theresa'ya borçluyum. Annem teknofobisi olmasına rağmen 1982 yılında bana ilk bilgisayarımı da aldı. Babam Menelaos, ilk kitabını 80 yaşında yayınlayan, bana mantıklı ve analitik düşünmeyi öğreten ve bilim ve mühendislik aşkı kazandıran bir inşaat mühendisiydi.
+
+Beni bu yolculuğumda destekleyen herkese teşekkürler.
+
+
+////
+Github contributor acknowledgments in a new file...
+////
+
+include::github_contrib.asciidoc[]

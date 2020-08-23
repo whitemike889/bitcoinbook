@@ -1,0 +1,181 @@
+[[appdx_bx]]
+[appendix]
+
+== Bitcoin Explorer (bx) Commands
+
+((("Bitcoin Explorer (bx) commands", id="BX18_1", range="startofrange")))Bitcoin Explorer (bx) merupakan sebuah baris perintah yang menawarkan beragam perintah untuk manajemen key dan konstruksi transaksi. Ini adalah bagian dari library bitcoin libbitcoin.
+
+----
+Usage: bx COMMAND [--help]
+
+Info: Perintah bx command adalah:
+
+address-decode
+address-embed
+address-encode
+address-validate
+base16-decode
+base16-encode
+base58-decode
+base58-encode
+base58check-decode
+base58check-encode
+base64-decode
+base64-encode
+bitcoin160
+bitcoin256
+btc-to-satoshi
+ec-add
+ec-add-secrets
+ec-multiply
+ec-multiply-secrets
+ec-new
+ec-to-address
+ec-to-public
+ec-to-wif
+fetch-balance
+fetch-header
+fetch-height
+fetch-history
+fetch-stealth
+fetch-tx
+fetch-tx-index
+hd-new
+hd-private
+hd-public
+hd-to-address
+hd-to-ec
+hd-to-public
+hd-to-wif
+help
+input-set
+input-sign
+input-validate
+message-sign
+message-validate
+mnemonic-decode
+mnemonic-encode
+ripemd160
+satoshi-to-btc
+script-decode
+script-encode
+script-to-address
+seed
+send-tx
+send-tx-node
+send-tx-p2p
+settings
+sha160
+sha256
+sha512
+stealth-decode
+stealth-encode
+stealth-public
+stealth-secret
+stealth-shared
+tx-decode
+tx-encode
+uri-decode
+uri-encode
+validate-tx
+watch-address
+wif-to-ec
+wif-to-public
+wrap-decode
+wrap-encode
+----
+
+Untuk informasi lebih lanjut, lihat di https://github.com/libbitcoin/libbitcoin-explorer[Bitcoin Explorer homepage] dan https://github.com/libbitcoin/libbitcoin-explorer/wiki[Bitcoin Explorer user documentation].
+
+=== Contoh penggunaan Perintah bx
+
+Mari kita lihat beberapa contoh dari penggunaan perintah Bitcoin Explorer untuk bereksperimen dengan key dan address.
+
+Generate nilai "seed" acak menggunakan perintah +seed+, yang digunakan untuk mengoperasikan generator angka acak. Lanjutkan seed itu ke perintah +ec-new+ untuk generate private key baru. Kita menyimpan standar output ke dalam file private_key_:
+
+----
+$ bx seed | bx ec-new > private_key
+$ cat private_key
+73096ed11ab9f1db6135857958ece7d73ea7c30862145bcc4bbc7649075de474
+----
+
+Sekarang, generate public key dari private key itu menggunakan perintah +ec-to-public+. Kita lanjutkan _private_key_ file ke dalam input standar dan simpan output standar dari perintah tersebut menjadi sebuah file baru _public_key_ baru:
+
+----
+$ bx ec-to-public < private_key > public_key
+$ cat public_key
+02fca46a6006a62dfdd2dbb2149359d0d97a04f430f12a7626dd409256c12be500
+----
+
+Kita dapat memformat ulang +public_key+ sebagai sebuah address menggunakan perintah +ec-to-address+. Kita lanjut _public_key_ menjadi input standar:
+
+----
+$ bx ec-to-address < public_key
+17re1S4Q8ZHyCP8Kw7xQad1Lr6XUzWUnkG
+----
+
+Proses generate key dalam hal ini memproduksi sebuah type-0 wallet nondeterministic. Artinya setiap key itu dihasilkan dari seed independen. Perintah Bitcoin Explorer dapat juga digunakan untuk generate keys deterministic, Sesuai dengan BIP-32. Dalam hal ini, sebuah key "master" dibuat dari sebuah seed lalu diperpanjang secara deterministic untuk membuat cabang subkeys, menghasilkan sebuah type-2 wallet deterministic.
+
+Pertama, kita gunakan perintah +seed+ dan +hd-new+ untuk membuat master key yang akan digunakan sebagai dasar untuk bisa diturunkan menjadi sebuah hierarki key:
+
+----
+$ bx seed > seed
+$ cat seed
+eb68ee9f3df6bd4441a9feadec179ff1
+
+$ bx hd-new < seed > master
+$ cat master
+xprv9s21ZrQH143K2BEhMYpNQoUvAgiEjArAVaZaCTgsaGe6LsAnwubeiTcDzd23mAoyizm9cApe51gNfLMkBqkYoWWMCRwzfuJk8RwF1SVEpAQ
+----
+
+Sekarang kita gunakan perintah +hd-private+ untuk generate key "account" yang lebih kuat dan urutan dua private key di dalam akun:
+
+----
+$ bx hd-private --hard < master > account
+$ cat account
+xprv9vkDLt81dTKjwHB8fsVB5QK8cGnzveChzSrtCfvu3aMWvQaThp59ueufuyQ8Qi3qpjk4aKsbmbfxwcgS8PYbgoR2NWHeLyvg4DhoEE68A1n
+
+$ bx hd-private --index 0 < account
+xprv9xHfb6w1vX9xgZyPNXVgAhPxSsEkeRcPHEUV5iJcVEsuUEACvR3NRY3fpGhcnBiDbvG4LgndirDsia1e9F3DWPkX7Tp1V1u97HKG1FJwUpU
+
+$ bx hd-private --index 1 < account
+xprv9xHfb6w1vX9xjc8XbN4GN86jzNAZ6xHEqYxzbLB4fzHFd6VqCLPGRZFsdjsuMVERadbgDbziCRJru9n6tzEWrASVpEdrZrFidt1RDfn4yA3
+----
+
+Selanjutnya, kita gunakan perintah +hd-public+ untuk generate urutan yang sesuai dari dua public key:
+
+----
+$ bx hd-public --index 0 < account
+xpub6BH1zcTuktiFu43rUZ2gXqLgzu5F3tLEeTQ5t6iE3aQtM2VMTxMcyLN9fYHiGhGpQe9QQYmqL2eYPFJ3vezHz5wzaSW4FiGrseNDR4LKqTy
+
+$ bx hd-public --index 1 < account
+xpub6BH1zcTuktiFx6CzhPbGjG3UYQ13WR16CmtbPiagEKpEVtpyjshWyMaMV1cn7nUPUkgQHPVXJVqsrA8xWbGQDhohEcDFTEYMvYzwRD7Juf8
+----
+
+Public key juga dapat diturunkan dari private key yang berelasi menggunakan perintah +hd-to-public+:
+
+----
+$ bx hd-private --index 0 < account | bx hd-to-public
+xpub6BH1zcTuktiFu43rUZ2gXqLgzu5F3tLEeTQ5t6iE3aQtM2VMTxMcyLN9fYHiGhGpQe9QQYmqL2eYPFJ3vezHz5wzaSW4FiGrseNDR4LKqTy
+
+$ bx hd-private --index 1 < account | bx hd-to-public
+xpub6BH1zcTuktiFx6CzhPbGjG3UYQ13WR16CmtbPiagEKpEVtpyjshWyMaMV1cn7nUPUkgQHPVXJVqsrA8xWbGQDhohEcDFTEYMvYzwRD7Juf8
+----
+
+Kita dapat menghasilkan sejumlah key yang tidak terbatas pada rantai deterministik, semua berasal dari satu seed. Teknik ini digunakan di banyak aplikasi wallet untuk menghasilkan key yang dapat dicadangkan serta dipulihkan menggunakan sebuah nilai seed. Hal ini lebih mudah daripada harus membuat cadangan wallet beserta semua key yang dihasilkan secara acak di setiap kali membuat key baru.
+
+Seed dapat di encoded menggunakan perintah + mnemonic-encode +:
+
+----
+$ bx hd-mnemonic < seed > words
+adore repeat vision worst especially veil inch woman cast recall dwell appreciate
+----
+
+Seed dapat di decoded menggunakan perintah +mnemonic-decode+:
+
+----
+$ bx mnemonic-decode < words
+eb68ee9f3df6bd4441a9feadec179ff1
+----
+
+Encoding mnemonic dapat membuat seed lebih mudah untuk direkam ataupun diingat.(((range="endofrange", startref="BX18_1")))

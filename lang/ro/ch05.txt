@@ -1,0 +1,490 @@
+[[ch05_wallets]]
+== Portofele
+
+((("portofele", "definit")))Cuvântul portofel este folosit la descrierea câtorva lucruri diferite în bitcoin.
+
+La un nivel înalt, un portofel este o aplicație care are rolul de interfață cu utilizatorul. Portofelul controlează accesul la banii utilizatorului, gestionează cheile și adresele, urmărește soldul și crează și semnează tranzacții.
+
+Mai restrâns, din perspectiva programatorului, cuvântul ”portofel” se referă la structura de date utilizată pentru stocarea și gestionarea cheilor unui utilizator.
+
+În acest capitol vom analiza al doilea sens, în care portofelele sunt containere pentru chei private, de obicei implementate ca fișiere structurate sau baze de date simple.
+
+=== Prezentare Generală a Tehnologiei Portofelului
+
+În această secțiune vom rezuma diferitele tehnologii utilizate pentru a construi portofele bitcoin ușor de utilizat, sigure și flexibile.
+
+((("portofele", "conținutul"))) O concepție greșită comună despre bitcoin este aceea că portofelele bitcoin conțin bitcoin. De fapt, portofelul conține doar chei. ”Monedele” sunt înregistrate în lanțul-de-blocuri în rețeaua bitcoin. Utilizatorii controlează monedele din rețea prin semnarea tranzacțiilor cu cheile din portofele. ((("brelocuri")))Într-un sens, un portofel bitcoin este un _breloc_.
+
+[TIP]
+====
+Portofelele Bitcoin conțin chei, nu monede. Fiecare utilizator are un portofel care conține chei. Portofelele sunt mai de grabă brelocuri care conțin perechi de chei private/publice (vezi <<private_public_keys>>). Utilizatorii semnează tranzacții cu cheile, dovedind astfel că dețin ieșirile tranzacției (monedele lor). Monedele sunt stocate în lanțul-de-blocuri sub formă de ieșiri de tranzacție (adesea notate ca vout sau txout).
+====
+
+((("portofele", "tipuri de", "distincții primare"))) Există două tipuri principale de portofele, deosebite prin faptul că cheile pe care le conțin sunt legate între ele sau nu.
+
+((("porofele JBOK", seealso="portofele")))((("portofele", "tipuri de", "portofele JBOK")))((("portofele nondeterministice", seealso="portofele")))Primul tip este un _portofel nedeterminist_, unde fiecare cheie este generată independent dintr-un număr aleatoriu. Cheile nu au legătură între ele. Acest tip de portofel este cunoscut și sub denumirea de portofel JBOK datorită sintagmei ”Just a Bunch Of Keys” (Doar o grămadă de chei).
+
+((("portofele deterministe", seealso="portofele")))Cel de-al doilea tip de portofel este un _portofel determinist_, unde toate cheile sunt derivate dintr-o singură cheie principală (master key), cunoscută sub numele de _sămânță_ (seed). Toate cheile din acest tip de portofel sunt legate între ele și pot fi generate din nou dacă cineva are sămânța originală. ((("metode de derivare a cheilor")))Există o serie de metode diferite de _derivare a cheilor_ utilizate în portofelele deterministe. ((("portofele deterministe ierarhice (HD)", seealso="portofele"))) Cea mai frecventă metodă de derivare folosește o structură de tip arbore și este cunoscută sub numele de portofel _determinist ierarhic_ sau portofel _HD_ (hierarchical deterministic).
+
+((("cuvinte cod mnemonic")))Portofelele deterministe sunt inițializate dintr-o sămânță (seed). Pentru a le face mai ușor de utilizat, semințele sunt codate ca și cuvinte în limba engleză, cunoscute și sub denumirea de ”cuvinte cod mnemonic”.
+
+Următoarele secțiuni prezintă fiecare dintre aceste tehnologii la un nivel înalt.
+
+[[random_wallet]]
+==== Portofele Nedeterministe (Aleatoare)
+
+((("portofele", "tipuri de", "portofele nedeterministe (aleatoare")))În primul portofel bitcoin (acum numit Bitcoin Core), portofelele erau colecții de chei private generate aleatoriu. De exemplu, clientul inițial Bitcoin Core pre-generează 100 de chei private aleatorii la prima pornire și generează mai multe chei după cum este necesar, folosind fiecare cheie o singură dată. Astfel de portofele sunt înlocuite cu portofele deterministe, deoarece sunt greoi de gestionat, de creat copii de rezervă și de importat. Dezavantajul cheilor aleatorii este că, dacă generați multe, trebuie să păstrați copii ale tuturor, ceea ce înseamnă că portofelul trebuie să fie copiat în mod frecvent. Fiecare cheie trebuie să fie salvată sau fondurile pe care le controlează sunt pierdute irevocabil dacă portofelul devine inaccesibil. Acest lucru este în conflict direct cu principiul evitării reutilizării adreselor, utilizând fiecare adresă bitcoin pentru o singură tranzacție. Reutilizarea adreselor reduce confidențialitatea prin asocierea mai multor tranzacții și adrese între ele. Un portofel nedeterministic de Tip-0 este o alegere slabă, în special dacă doriți să evitați refolosirea adreselor, deoarece asta înseamnă gestionarea multor chei, ceea ce aduce cu sine necesitatea creării frecvente a copiilor de rezervă. Deși clientul Bitcoin Core include un portofel de Tip-0, utilizarea acestui portofel este descurajată de către dezvoltatorii Bitcoin Core. <<Type0_wallet>> prezintă un portofel nedeterminist, care conține o colecție de chei aleatorii independente.
+
+[TIP]
+====
+Utilizarea portofelelor nedeterministe este descurajată pentru orice altceva decât teste simple. Ele sunt pur și simplu prea greoaie pentru a face copii de rezervă și a le utiliza. În schimb, utilizați un portofel bazat-pe-standardele-industriei cu o sămânță (seed) mnemonică ca rezervă.
+====
+
+[[Type0_wallet]]
+[role="smallersixty"]
+.Portofel neteterminist de Tip-0 (aleator): o colecție de chei generate aleatoriu
+image::images/mbc2_0501.png["Portofel Ne-Deterministic"]
+
+==== Portofele Deterministe (Cu Sămânță)
+
+((("portofele", "tipuri de", "portofele deterministe (cu sămânță)")))Portofelele deterministe sau cu ”sămânță” (seed) sunt portofele care conțin chei private  derivate dintr-o sămânță comună, prin utilizarea unei funcții rezumat (hash) unidirecționale. Sămânța este un număr generat la întâmplare combinat cu alte date, precum un număr de indice sau ”cod de lanț” (vezi <<hd_wallets>>) pentru a obține cheile private. Într-un portofel determinist, sămânța este suficientă pentru a recupera toate cheile derivate și, prin urmare, o copie de rezervă la momentul creării este suficientă. Sămânța este de asemenea suficientă pentru un export sau import de portofel, permițând migrarea ușoară a tuturor cheilor utilizatorului între diferite implementări de portofel.  <<Type1_wallet>> prezintă o diagramă logică a unui portofel determinist.
+
+[[Type1_wallet]]
+[role="smallersixty"]
+.Portofel Tip-1 determinist (cu sămânță): o secvență deterministă de chei derivate dintr-o sămânță
+image::images/mbc2_0502.png["Portofel Determinist"]
+
+[[hd_wallets]]
+==== Portofele HD (BIP-32 / BIP-44)
+
+((("portofele", "tipuri de", "portofele deterministe ierarhic")))((("portofele deterministe ierarhic")))((("propunere de îmbunătățire bitcoin", "Portofele Deterministe Ierarhic (BIP-32/BIP-44)")))Portofelele deterministe au fost dezvoltate pentru a facilita derivarea mai multor chei dintr-o singură ”sămânță” (seed). Cea mai avansată formă de portofele deterministe este portofelul HD (Hierarchical Deterministic) definit de standardul BIP-32. Portofelele HD conțin chei derivate într-o structură de tip arbore, astfel încât o cheie părinte poate deriva o secvență de chei copii, fiecare dintre ele putând deriva o secvență de chei nepoți și așa mai departe, la o adâncime infinită. Această structură de arbore este ilustrată în <<Type2_wallet>>.
+
+[[Type2_wallet]]
+.Portofel HD Tip-2: un arbore de chei generate dintr-o singură sămânță
+image::images/mbc2_0503.png["Portofel HD"]
+
+Portofelele HD oferă două avantaje majore față de cheile aleatorii (nedeterministe). În primul rând, structura de arbore poate fi utilizată pentru a exprima o semnificație organizatorică suplimentară, cum ar fi atunci când o ramură specifică de sub-chei este folosită pentru a primi plăți și o ramură diferită este folosită pentru a primi restul la plățile efectuate. Ramurile de chei pot fi de asemenea utilizate în setări corporative, alocând ramuri diferite departamentelor, filialelor, funcțiilor specifice sau categoriilor de contabilitate.
+
+Al doilea avantaj al portofelelor HD este că utilizatorii pot crea o secvență de chei publice fără a avea acces la cheile private corespunzătoare. Acest lucru permite portofelelor HD să fie utilizate pe un server nesigur sau să fie folosite doar pentru primire de fonduri, emițând o cheie publică diferită pentru fiecare tranzacție. Cheile publice nu trebuie să fie pre-încărcate sau derivate în avans, însă serverul nu are cheile private care pot cheltui fondurile.
+
+==== Semințe și Coduri Mnemonice (BIP-39)
+
+((("portofele", "tehnologia", "semințe și coduri mnemonice")))((("cuvinte cod mnemonic")))((("propunere de îmbunătățire bitcoin", "Cuvinte Cod Mnemonic (BIP-39)")))Portofelele HD sunt un mecanism foarte puternic pentru a gestiona multe chei și adrese. Ele sunt chiar mai utile dacă sunt combinate cu un mod standardizat de a crea semințe dintr-o secvență de cuvinte în limba engleză ușor de transcris, exportat și importat în portofele. Aceasta este cunoscută sub numele de _mnemonică_, iar standardul este definit de BIP-39. Astăzi, majoritatea portofelelor bitcoin (precum și portofelele pentru alte criptomonede) folosesc acest standard și pot importa și exporta semințe pentru copii de rezervă și pentru recuperare folosind mnemonice interoperabile.
+
+Să privim acest lucru dintr-o perspectivă practică. Care dintre următoarele semințe este mai ușor de transcris, înregistrat pe hârtie, citit fără greșeală, exportat și importat într-un alt portofel?
+
+.O sămânță pentru un portofel determinist, în hexa
+----
+0C1E24E5917779D297E14D45F14E1A1A
+----
+
+.O sămânță pentru un portofel determinist, dintr-o mnemonică de 12 cuvinte
+----
+army van defense carry jealous true
+garbage claim echo media make crunch
+----
+
+==== Cele mai Bune Practici pentru Portofele
+
+((("portofele", "cele mai bune practici pentru")))((("propuneri de îmbunătățire bitcoin", "Structură HD Multifuncțională pentru Portofel (BIP-43)")))Pe măsură ce tehnologia portofelului bitcoin s-a maturizat, au apărut anumite standarde ale industriei care fac ca portofelele bitcoin să fie interoperabile, ușor de utilizat, sigure și flexibile. Aceste standarde sunt:
+
+* Cuvinte cod mnemonic, bazate pe BIP-39
+* Portofele HD, bazate pe BIP-32
+* Structura portofel HD multifuncțională, bazată pe BIP-43
+* Portofele multivalută și multicont, bazate pe BIP-44
+
+Aceste standarde s-ar putea schimba sau pot deveni învechite prin evoluțiile viitoare, dar deocamdată formează un set de tehnologii cuplate care au devenit standardul de facto pentru portofelul bitcoin.
+
+Standardele au fost adoptate de o gamă largă de portofele software și hardware bitcoin, ceea ce face ca aceste portofele să fie interoperabile. Un utilizator poate exporta o mnemonică generată pe unul dintre aceste portofele și să o importe într-un alt portofel, recuperând toate tranzacțiile, cheile și adresele.
+
+((("portofele hardware")))((("portofele hardware", see="de asemenea portofele")))Un exemplu de portofele software care acceptă aceste standarde include (listate alfabetic) Breadwallet, Copay, Multibit HD și Mycelium. Exemple de portofele hardware care acceptă aceste standarde includ (enumerate alfabetic) Keepkey, Ledger și Trezor.
+
+Secțiunile următoare examinează fiecare dintre aceste tehnologii în detaliu.
+
+[TIP]
+====
+Dacă implementați un portofel bitcoin, acesta ar trebui să fie construit ca un portofel HD, cu o sămânță (seed) codificată ca și cod mnemonic pentru recuperare, urmând standardele BIP-32, BIP-39, BIP-43 și BIP-44, așa cum este descris în următoarele secțiuni.
+====
+
+==== Utilizarea unui Portofel Bitcoin
+
+((("portofele", "utilizarea portofelelor bitcoin")))În <<user-stories>>  l-am introdus pe Gabriel, (((”cazuri de utilizare”, ”magazin web”, id = ”gabrielfive”))) un tânăr întreprinzător din Rio de Janeiro, care are un magazin web simplu care vinde tricouri, căni de cafea și autocolante cu brandul bitcoin.
+
+((("portofele", "tipuri de", "portofele hardware")))Gabriel folosește un portofel bitcoin hardware Trezor (<<a_trezor_device>>) pentru a-și gestiona în siguranță bitcoin-ul. Trezor este un dispozitiv USB simplu cu două butoane care stochează cheile (sub forma unui portofel HD) și semnează tranzacții. Portofelele Trezor implementează toate standardele industriei discutate în acest capitol, astfel încât Gabriel nu se bazează pe nicio tehnologie proprie sau soluție de la un singur furnizor.
+
+[[a_trezor_device]]
+.Un dispozitiv Trezor: un portofel bitcoin HD în hardware
+image::images/mbc2_0504.png[alt]
+
+Când Gabriel a folosit Trezor pentru prima dată, dispozitivul a generat o mnemonică și o sămânță (seed) dintr-un generator de numere aleatoriu încorporat în hardware. În această fază de inițializare, portofelul a afișat pe ecran o secvență numerotată de cuvinte, unul câte unul  (vezi <<trezor_mnemonic_display>>).
+
+[[trezor_mnemonic_display]]
+.Trezor afișând unul dintre cuvintele mnemonice
+image::images/mbc2_0505.png["Afișarea unui cuvânt mnemonic de către portofelul Trezor"]
+
+Notând acestă mnemonică, Gabriel a creat o copie de rezervă (vezi <<mnemonic_paper_backup>>)  care poate fi folosită pentru recuperare în caz de pierdere sau deteriorare a dispozitivului Trezor. Acestă mnemonică poate fi utilizată pentru recuperarea într-un nou Trezor sau în oricare dintre numeroasele portofele software sau hardware compatibile. Rețineți că succesiunea cuvintelor este importantă, astfel încât copiile mnemonice de rezervă pe hârtie au spații numerotate pentru fiecare cuvânt. Gabriel trebuie să înregistreze cu atenție fiecare cuvânt în spațiul numerotat pentru a păstra secvența corectă.
+
+[[mnemonic_paper_backup]]
+.Copia de rezervă de hârtie a lui Gabriel
+[cols="<,^,<,^", width="80%"]
+|===
+|*1.*| _army_ |*7.*| _garbage_
+|*2.*| _van_ |*8.*| _claim_
+|*3.*| _defense_ |*9.*| _echo_
+|*4.*| _carry_ |*10.*| _media_
+|*5.*| _jealous_ |*11.*| _make_
+|*6.*| _true_ |*12.*| _crunch_
+|===
+
+[NOTE]
+====
+O mnemonică de 12 cuvinte este afișată în <<mnemonic_paper_backup>>, pentru simplitate. De fapt, majoritatea portofelelor hardware generează o mnemonică mai sigură fomată din 24 de cuvinte. Mnemonica este utilizată în același mod, indiferent de lungime.
+====
+
+Pentru prima implementare a magazinului său web, Gabriel folosește o singură adresă bitcoin, generată pe dispozitivul său Trezor. Această adresă unică este utilizată de către toți clienții pentru toate comenzile. După cum vom vedea, această abordare are unele dezavantaje și poate fi îmbunătățită cu un portofel HD.((("", startref="gabrielfive")))
+
+=== Detalii despre Tehnologia Portofelului
+
+Să examinăm acum în detaliu fiecare dintre standardele importante ale industriei, care sunt utilizate de multe portofele bitcoin.
+
+[[mnemonic_code_words]]
+==== Cuvinte Cod Mnemonic (BIP-39)
+
+((("portofele", "tehnologia", "cuvinte cod mnemonic")))((("cuvinte cod mnemonic", id="mnemonic05")))((("propuneri de îmbunătățire bitcoin", "Cuvinte Cod Mnemonic (BIP-39)", id="BIP3905")))Cuvintele cod mnemonic sunt secvențe de cuvinte care reprezintă (codifică) un număr aleator folosit ca sămânță (seed) pentru a obține un portofel determinist. Secvența de cuvinte este suficientă pentru a recrea sămânța și de acolo pentru a recrea portofelul și toate cheile derivate. O aplicație portofel care implementează portofele deterministe cu cuvinte mnemonice va arăta utilizatorului o secvență de 12 până la 24 de cuvinte atunci când acesta crează un portofel. Acea secvență de cuvinte este copia de rezervă a portofelului și poate fi folosită pentru a recupera și recrea toate cheile din aceași aplicație sau din alte aplicații portofel compatibile. Cuvintele mnemonice facilitează crearea copiilor de rezervă pentru că sunt ușor de citit și de transcris corect, în comparație cu o secvență aleatoare de numere.
+
+[TIP]
+====
+(((”portofele mentale”)))Cuvintele mnemonice sunt deseori confundate cu ”portofelele mentale”. Nu sunt același lucru. Diferența principală este că un set de portofele mentale este format din cuvinte alese de utilizator, în timp ce cuvintele mnemonice sunt create la întâmplare de portofel și prezentate utilizatorului. Această diferență importantă face ca cuvintele mnemonice să fie mult mai sigure, deoarece oamenii sunt surse foarte slabe de aleatoriu.
+====
+
+Codurile mnemonice sunt definite în BIP-39 (vezi <<appdxbitcoinimpproposals>>). Rețineți că BIP-39 este o implementare a unui standard de cod mnemonic. ((("Portofelul Electrum", seealso="portofele")))Există un standard diferit, cu un set diferit de cuvinte, folosit de portofelul Electrum și care precedă BIP-39. BIP-39 a fost propus de compania din spatele portofelului hardware Trezor și este incompatibil cu implementarea Electrum. Cu toate acestea, BIP-39 a obținut acum un sprijin larg al industriei în zeci de implementări interoperabile și ar trebui să fie considerat standardul de facto al industriei.
+
+BIP-39 definește crearea unui cod și a unei semințe mnemonice, pe care le descriem aici în nouă etape. Pentru claritate, procesul este împărțit în două părți: etapele 1 până la 6 sunt prezentate în  <<generating_mnemonic_words>> și etapele 7 până la 9 sunt prezentate în <<mnemonic_to_seed>>.
+
+[[generating_mnemonic_words]]
+===== Generarea de cuvinte mnemonice
+
+Cuvintele mnemonice sunt generate automat de portofel folosind procesul standardizat definit în BIP-39. Portofelul pornește de la o sursă de entropie, adaugă o sumă de control (checksum) și apoi mapează entropia la lista de cuvinte:
+
+1. Creați o secvență aleatorie (entropie) de 128 până la 256 biți.
+2. Creați o sumă de control a secvenței aleatorii luând primii (lungimea-entropiei/32) biți ai rezumatului (hash-ului) său SHA256.
+3. Adăugați suma de control la sfârșitul secvenței aleatorii.
+4. Împărțiți rezultatul în segmente de lungime de 11 biți.
+5. Mapați fiecare valoare de 11 biți către un cuvânt din dicționarul predefinit de 2048 de cuvinte.
+6. Codul mnemonic este succesiunea de cuvinte.
+
+<<generating_entropy_and_encoding>>  arată modul în care se utilizează entropia pentru a genera cuvinte mnemonice.
+
+[[generating_entropy_and_encoding]]
+[role="smallerseventy"]
+.Generarea entropiei și codificarea sub formă de cuvinte mnemonice
+image::images/mbc2_0506.png["Generarea entropiei și codificarea sub formă de cuvinte mnemonice"]
+
+<<table_4-5>> arată relația dintre mărimea datelor de entropie și lungimea codurilor mnemonice formate din cuvinte.
+
+[[table_4-5]]
+.Coduri mnemonice: entropia și lungimea cuvintelor
+[options="header"]
+|=======
+| Entropie (biți) | Sumă de control (biți) | Entropie *+* sumă de control (biți) | Lungime mnemonică (cuvinte)
+| 128 | 4 | 132 | 12
+| 160 | 5 | 165 | 15
+| 192 | 6 | 198 | 18
+| 224 | 7 | 231 | 21
+| 256 | 8 | 264 | 24
+|=======
+
+[[mnemonic_to_seed]]
+===== De la mnemonică la sămânță (seed)
+
+((("funcția de întindere")))((("funcția PBKDF2")))Cuvintele mnemonice reprezintă o entropie cu o lungime de 128 până la 256 biți. Entropia este apoi utilizată pentru a obține o sămânță mai lungă (512 biți) prin utilizarea funcției PBKDF2 de întindere (stretching) a cheilor. Sămânța produsă este apoi utilizată pentru a construi un portofel determinist și pentru a-i deduce cheile.
+
+((("sare")))((("frază-de-acces"))) Funcția de întindere (stretching) a cheii are doi parametri: mnemonica și o _sare_ (salt). Scopul unei sări într-o funcție de întindere a cheilor este de a face dificilă construirea unui tabel de căutare care să permită un atac prin forță brută. În standardul BIP-39, sarea are un alt scop - permite introducerea unei fraze care servește ca un factor suplimentar de securitate care protejează sămânța, așa cum vom descrie mai detaliat în <<mnemonic_passphrase>>.
+
+Procesul descris în etapele 7 până la 9 continuă din procesul descris anterior în <<generating_mnemonic_words>>:
+
+ 
+[start=7]
+	. Primul parametru al funcției PBKDF2 de întindere (stretching) a cheilor este _mnemonica_ produsă la pasul 6.
+	. Al doilea parametru pentru funcția PBKDF2 de întindere (stretching) a cheilor este o _sare_. Sarea (salt) este compusă din constanta  **`mnemonic`** concatenată cu o frază-de-acces opțională furnizată de utilizator.
+	. PBKDF2 întinde parametrii (mnemonica și sarea) folosind 2048 de runde de rezumat cu algoritmul HMAC-SHA512, producând o valoare de 512 biți ca ieșire finală. Acea valoare de 512 biți este sămânța.
+ 
+ 
+
+<<fig_5_7>>  arată cum se folosește o mnemonică pentru a genera o sămânță.
+
+[[fig_5_7]]
+.De la mnemonică la sămânță
+image::images/mbc2_0507.png["De la mnemonică la sămânță"]
+
+[TIP]
+====
+Funcția de întindere (stretching) a cheilor, cu rundele sale de 2048 de rezumări (hashing), este o protecție foarte eficientă împotriva atacurilor prin forță brută împotriva mnemonicei sau a frazei-de-acces. Este extrem de costisitor (ca efort de calcul) să încercați mai mult de câteva mii de fraze și combinații mnemonice, în timp ce numărul de semințe (seeds) derivate posibile este vast (2^512^).
+====
+
+Tables <<mnemonic_128_no_pass>>, and <<mnemonic_256_no_pass>> show some examples of mnemonic codes and the seeds they produce (either with or without a passphrase).
+
+[[mnemonic_128_no_pass]]
+.Cod mnemonic de entropie pe 128 biți, fără frază-de-acces, sămânța rezultată
+[cols="h,"]
+|=======
+| *Entropie (128 biți)*| _0c1e24e5917779d297e14d45f14e1a1a_
+| *Mnemonică (12 cuvinte)* | _army van defense carry jealous true garbage claim echo media make crunch_
+| *Frază-de-acces*| (none)
+| *Sămânță (512 biți)* | _5b56c417303faa3fcba7e57400e120a0ca83ec5a4fc9ffba757fbe63fbd77a89a1a3be4c67196f57c39_
+_a88b76373733891bfaba16ed27a813ceed498804c0570_
+|=======
+
+[[mnemonic_128_w_pass]]
+.Cod mnemonic de entropie pe 128 biți, cu frază-de-acces, sămânța rezultată
+[cols="h,"]
+|=======
+| *Entropie (128 biți)*| _0c1e24e5917779d297e14d45f14e1a1a_
+| *Mnemonică (12 cuvinte)* | _army van defense carry jealous true garbage claim echo media make crunch_
+| *Frază-de-access*| SuperDuperSecret
+| *Sămânță  (512 biți)* | _3b5df16df2157104cfdd22830162a5e170c0161653e3afe6c88defeefb0818c793dbb28ab3ab091897d0_
+_715861dc8a18358f80b79d49acf64142ae57037d1d54_
+|=======
+
+
+[[mnemonic_256_no_pass]]
+.Cod mnemonic de entropie pe 256 de biți, fără frază-de-acces, sămânța rezultată
+[cols="h,"]
+|=======
+| *Entropie (256 biți)* | _2041546864449caff939d32d574753fe684d3c947c3346713dd8423e74abcf8c_
+| *Mnemonică (24 cuvinte)* | _cake apple borrow silk endorse fitness top denial coil riot stay wolf
+luggage oxygen faint major edit measure invite love trap field dilemma oblige_
+| *Frază-de-acces*| (none)
+| *Sămânță (512 biți)* | _3269bce2674acbd188d4f120072b13b088a0ecf87c6e4cae41657a0bb78f5315b33b3a04356e53d062e5_
+_5f1e0deaa082df8d487381379df848a6ad7e98798404_
+|=======
+
+[[mnemonic_passphrase]]
+===== Fraza-de-acces opțională în BIP-39
+
+((("fraze-de-acces")))Standardul BIP-39 permite utilizarea unei fraze-de-acces opționale în derivarea seminței (seed). Dacă nu se utilizează o frază-de-acces, mnemonica este întinsă (stretched) cu o sare (salt) constând din textul constant **`mnemonic`**, producând o sămânță specifică de 512 biți din orice mnemonică dată. Dacă se folosește o frază-de-acces, funcția de întindere produce o sămânță _diferită_ din aceeași mnemonică. De fapt, având o singură mnemonică, fiecare frază-de-acces posibilă rezultă într-o sămânță diferită. În esență, nu există o frază-de-acces ”greșită”. Toate frazele-de-acces sunt valide și toate conduc la semințe diferite, formând un set vast de portofele posibile neinițializate. Setul de portofele posibile este atât de mare (2^512^) încât nu există nici o posibilitate practică de a folosi forța brută sau de a ghici accidental un portofel care este în uz.
+
+[TIP]
+====
+Nu există fraze-de-acces ”greșite” în BIP-39. Fiecare frază-de-acces conduce la un portofel, care, dacă nu a fost folosit anterior, va fi gol.
+====
+
+Fraza-de-acces opțională creează două caracteristici importante:
+
+* Un al doilea factor (ceva memorat) care face ca o mnemonică să fie inutilă de la sine, protejând copiile de rezervă mnemonice împotriva compromiterii de către un hoț.
+
+* O formă de negare plauzibilă sau ”portofel momeală”, unde o frază-de-acces aleasă duce la un portofel cu o sumă mică de fonduri folosite pentru a distrage un atacator de la portofelul ”real” care conține majoritatea fondurilor.
+
+Cu toate acestea, este important să rețineți că utilizarea unei fraze-de-acces introduce, de asemenea, riscul de pierdere:
+
+* Dacă proprietarul portofelului este incapacitat sau mort și nimeni altcineva nu cunoaște fraza-de-acces, sămânța este inutilă și toate fondurile stocate în portofel se pierd pentru totdeauna.
+
+* În schimb, dacă proprietarul face o copie de rezervă a frazei-de-acces în același loc cu sămânța, atunci scopul unui al doilea factor își pierde rostul.
+
+În timp ce frazele-de-acces sunt foarte utile, acestea ar trebui utilizate doar în combinație cu un proces planificat cu atenție pentru copii de rezervă și pentru recuperare, având în vedere posibilitatea de a supravețui mai mult decât proprietarul și permițând familiei sale să recupereze averea în criptomonedă.
+
+===== Lucrul cu coduri mnemonice
+
+BIP-39 este implementat ca o bibliotecă în mai multe limbaje de programare diferite:
+
+https://github.com/trezor/python-mnemonic[python-mnemonic]:: Implementarea referință a standardului de către echipa SatoshiLabs care a propus BIP-39, în Python
+
+https://github.com/bitcoinjs/bip39[bitcoinjs/bip39]:: O implementare a BIP-39, ca parte a bibliotecii populare bitcoinJS, în JavaScript
+
+https://github.com/libbitcoin/libbitcoin/blob/master/src/wallet/mnemonic.cpp[libbitcoin/mnemonic]:: O implementare a BIP-39, ca parte a bibliotecii Libbitcoin, în pass:[<span class="keep-together">C++</span>]
+
+Există, de asemenea, un generator BIP-39 implementat într-o pagină web de sine stătătoare (standalone), extrem de utilă pentru testare și experimentare. <<a_bip39_generator_as_a_standalone_web_page>> arată o pagină web statică care generează mnemonice, semințe și chei private extinse.
+
+[[a_bip39_generator_as_a_standalone_web_page]]
+.Un generator BIP-39 ca o pagină web de sine stătătoare
+image::images/mbc2_0508.png["Pagina web a generatorului BIP-39"]
+
+((("", startref="mnemonic05")))((("", startref="BIP3905")))Pagina (https://iancoleman.github.io/bip39/) poate fi folosită offline într-un browser, sau accesată online.
+
+==== Crearea unui Portofel HD din Sămânță
+
+((("portofele", "tehnologia", "crearea portofelelor HD din sămânța rădăcină")))((("semințe rădăcină")))((("portofele deterministic ierarhic")))Portofelele HD sunt create dintr-o singură _sămânță rădăcină_ (root seed), care este un număr aleatoriu pe 128, 256 sau 512 biți. Cel mai frecvent, această sămânță este generată de o _mnemonică_ așa cum a fost detaliat în secțiunea anterioară.
+
+Fiecare cheie din portofelul HD (determinist ierarhic) este derivată deterministic din această sămânță rădăcină (root seed), ceea ce face posibilă recrearea întregului portofel HD din această sămânță în orice portofel HD compatibil. Acest lucru vă ajută să creați o copie de rezervă, să restaurați, să exportați și să importați portofele HD care conțin mii sau chiar milioane de chei, prin simpla transferare a mnemonicei din care se obține sămânța rădăcină.
+
+Procesul de creare a cheilor principale (master keys) și a codului de lanț principal (master chain code) pentru un portofel HD este prezentat în <<HDWalletFromSeed>>.
+
+[[HDWalletFromSeed]]
+.Crearea cheilor principale și a codului lanțului dintr-o sămânță rădăcină
+image::images/mbc2_0509.png["HDWalletFromRootSeed"]
+
+Sămânța rădăcină (root seed) este folosită ca intrare în algoritmul HMAC-SHA512 și rezumatul (hash-ul) obținut este utilizat pentru a crea o _cheie privată principală_ (m) și un _cod de lanț principal_ (c).
+
+Cheia privată principală (m) generează apoi o cheie publică principală (M) folosind procesul de înmulțire a curbei eliptice _m * G_ pe care l-am văzut în <<pubkey>>.
+
+Codul de lanț (c) este utilizat pentru a introduce entropie în funcția care creează cheile copil din cheile părinte, așa cum vom vedea în secțiunea următoare.
+
+===== Derivarea cheii private copil
+
+((("derivarea cheilor copil (CKD)")))((("chei publice și private", "derivarea cheilor copil (CKD)")))Portofelele HD folosesc o funcție de _derivare a cheilor copil_ (child key derivation - CKD) pentru a deriva chei copil din cheile părinte.
+
+Funcțiile de derivare a cheilor copil se bazează pe o funcție rezumat (hash) unidirecțională care combină:
+
+* O cheie părinte privată sau publică (cheie comprimată ECDSA)
+* O sămânță numită cod de lanț (256 biți)
+* Un număr de indice (32 biți)
+
+Codul lanțului (chain code) este utilizat pentru a introduce date aleatorii deterministe în proces, astfel încât cunoașterea indicelui și a unei chei copil nu este suficientă pentru a obține alte chei copil. Cunoașterea cheii unui copil nu face posibilă găsirea fraților săi, decât dacă aveți și codul lanțului. Sămânța de cod de lanț inițială (aflată la rădăcina arborelui) este derivată din sămânța originală, în timp ce codurile ulterioare de lanț pentru copii sunt derivate din fiecare cod de lanț părinte.
+
+Aceste trei elemente (cheie părinte, cod de lanț și indice) sunt combinate și rezumate (hashed) pentru a genera chei copii, după cum urmează.
+
+Cheia publică părinte, codul lanțului și numărul de indice sunt combinate și rezumate (hashed) cu algoritmul HMAC-SHA512 pentru a produce un rezumat (hash) de 512 biți. Acest rezumat de 512 biți este împărțit în două jumătăți de 256 biți. Cei 256 biți din jumătatea dreaptă a rezumatului devin codul lanțului pentru copil. Ceilalți 256 biți din jumătatea stângă a rezumatului sunt adăugați la cheia privată părinte pentru a produce cheia privată pentru copil. În <<CKDpriv>>, vedem acest lucru ilustrat cu indicele setat la 0 pentru a produce copilul ”zero” (primul indice) al părintelui.
+
+[[CKDpriv]]
+.Extinderea unei chei private părinte pentru a crea o cheie privată copil
+image::images/mbc2_0510.png["ChildPrivateDerivation"]
+
+Modificarea indicelui ne permite să extindem părintele și să creăm ceilalți copii din secvență, de exemplu, Copil 0, Copil 1, Copil 2, etc. Fiecare cheie părinte poate avea 2.147.483.647 (2^31^) copii (2^31^ este jumătate din întregul interval 2^32^ disponibil, deoarece cealaltă jumătate este rezervată unui tip special de derivare despre care vom vorbi mai târziu în acest capitol).
+
+Repetând procesul cu un nivel mai jos, fiecare copil poate deveni la rândul său părinte și poate să-și creeze propriii copii, într-un număr infinit de generații.
+
+===== Utilizarea cheilor derivate din copil
+
+Cheile private copii nu se disting de cheile nedeterministice (aleatorii). Deoarece funcția de derivare este o funcție unidirecțională, cheia copil nu poate fi utilizată pentru a găsi cheia părinte. De asemenea, cheia copilului nu poate fi folosită pentru a găsi vreun frate. Dacă aveți al n-ulea copil, nu puteți găsi frații săi, cum ar fi copilul n-1 sau copilul n+1, sau alți copii care fac parte din secvență. Doar cheia părinților și codul de lanț pot deriva toți copiii. Fără codul lanțului pentru copii, nici cheia copil nu poate fi folosită pentru a obține vreun nepot. Aveți nevoie atât de cheia privată a copilului, cât și de codul lanțului copilului pentru a începe o nouă ramură și pentru a deriva nepoți.
+
+Deci, la ce se poate folosi cheia privată a copilului de una singură? Poate fi folosită pentru a crea o cheie publică și o adresă bitcoin. Apoi, poate fi folosită pentru a semna tranzacții pentru a cheltui orice a fost plătit la adresa respectivă.
+
+[TIP]
+====
+Cheia privată copil, cheia publică corespunzătoare și adresa bitcoin sunt toate imposibil de deosebit față de chei și adrese create la întâmplare. Faptul că fac parte dintr-o secvență nu este vizibil în afara funcției de portofel HD care le-a creat. Odată create, acestea funcționează exact ca și cheile ”normale”.
+====
+
+===== Chei extinse
+
+((("chei publice și private", "chei extinse")))((("chei extinse")))Așa cum am văzut anterior, funcția de derivare a cheilor poate fi folosită pentru a crea copii la orice nivel al arborelui, bazat pe cele trei intrări: o cheie, un cod de lanț și indicele copilului dorit. Cele două ingrediente esențiale sunt cheia și codul lanțului, iar combinate sunt denumite o _cheie extinsă_. Termenul ”cheie extinsă” ar putea fi, de asemenea, interpretat și ca ”cheie extensibilă”, deoarece o astfel de cheie poate fi folosită pentru a deriva copii.
+
+Cheile extinse sunt stocate și reprezentate pur și simplu ca o concatenare a cheii de 256 biți și a codului de lanț de 256 biți într-o secvență de 512 biți. Există două tipuri de chei extinse. O cheie privată extinsă este combinația unei chei private și a unui cod de lanț și poate fi utilizată pentru a obține cheile private ale copiilor (și de la ele, cheile publice ale copiilor). O cheie publică extinsă este o cheie publică și un cod de lanț, care pot fi utilizate pentru a crea chei publice pentru copii (_doar publice_), așa cum este descris în <<public_key_derivation>>.
+
+Gândiți-vă la o cheie extinsă ca la rădăcina unei ramuri din structura de arbore a portofelului HD. Cu rădăcina ramurii, puteți obține restul ramurii. Cheia privată extinsă poate crea o ramură completă, în timp ce cheia publică extinsă poate crea _doar_ o ramură de chei publice.
+
+[TIP]
+====
+O cheie extinsă constă dintr-o cheie privată sau publică și un cod de lanț. O cheie extinsă poate crea copii, generând propria ramură în structura arborelui. Distribuirea unei chei extinse oferă acces la întreaga ramură.
+====
+
+Cheile extinse sunt codificate folosind Base58Check, pentru a le exporta și importa cu ușurință între portofele compatibile BIP-32. Codificarea Base58Check pentru cheile extinse utilizează un număr special de versiune care are ca rezultat prefixele ”xprv” și ”xpub” atunci când sunt codificate în caractere Base58 pentru a le face ușor de recunoscut. Deoarece cheia extinsă este de 512 sau 513 biți, este, de asemenea, mult mai lungă decât alte șiruri codate Base58Check pe care le-am văzut anterior.
+
+Iată un exemplu de cheie extinsă _privată_, codificată în Base58Check:
+
+----
+xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c
+----
+
+Iată cheia _publică_ extinsă corespunzătoare, codificată în Base58Check:
+
+----
+xpub67xpozcx8pe95XVuZLHXZeG6XWXHpGq6Qv5cmNfi7cS5mtjJ2tgypeQbBs2UAR6KECeeMVKZBPLrtJunSDMstweyLXhRgPxdp14sk9tJPW9
+----
+
+[[public__child_key_derivation]]
+===== Derivarea cheii publice copil
+
+((("chei publice și private", "derivare cheii publice copil")))Așa cum am menționat anterior, o caracteristică foarte utilă a portofelelor HD este capacitatea de a deriva cheile publice pentru copii din cheile publice părinte, _fără_ a avea cheile private. Aceasta ne oferă două modalități de a obține o cheie publică a copilului: fie de la cheia privată a copilului, fie direct de la cheia publică a părintelui.
+
+Prin urmare, o cheie publică extinsă poate fi utilizată pentru a deriva toate cheile _publice_ (și doar cheile publice) din acea ramură a structurii portofelului HD.
+
+Această scurtătură poate fi folosită pentru a crea implementări foarte sigure care folosesc exclusiv chei publice, unde un server sau o aplicație are o copie a unei chei publice extinse și nu are nici o cheie privată. Acest tip de implementare poate produce un număr infinit de chei publice și de adrese bitcoin, dar nu poate cheltui banii trimiși la respectivele adrese. Între timp, pe un alt server mai sigur, cheia privată extinsă poate deriva toate cheile private corespunzătoare pentru a semna tranzacții și a cheltui banii.
+
+O aplicație obișnuită a acestei soluții este instalarea unei chei publice extinse pe un server web care servește o aplicație de comerț electronic. Serverul web poate utiliza funcția de derivare a cheii publice pentru a crea o nouă adresă bitcoin pentru fiecare tranzacție (de exemplu, pentru un coș de cumpărături pentru clienți). Serverul web nu va avea chei private care ar fi vulnerabile la furt. Fără portofele HD, singura modalitate de a face acest lucru este de a genera mii de adrese bitcoin pe un server securizat separat și apoi de a le preîncărca pe serverul de comerț electronic. Această abordare este greoaie și necesită o întreținere constantă pentru a vă asigura că serverul de comerț electronic nu ”rămâne fără” chei.
+
+((("stocare la rece")))((("stocare", "stocare la rece")))((("portofele hardware")))O altă aplicație comună a acestei soluții este pentru portofelele de stocare la rece sau hardware. În acel scenariu, cheia privată extinsă poate fi stocată pe un portofel de hârtie sau pe un dispozitiv hardware (cum ar fi un portofel hardware Trezor), în timp ce cheia publică extinsă poate fi păstrată online. Utilizatorul poate crea adrese de ”recepționare” după bunul plac, în timp ce cheile private sunt stocate în siguranță offline. Pentru a cheltui fondurile, utilizatorul poate utiliza cheia privată extinsă pe un client bitcoin care nu se conectează online sau poate semna tranzacții de pe portofelul hardware (de exemplu, Trezor). <<CKDpub>> ilustrează mecanismul de extindere a unei chei publice părinte pentru a obține cheile publice ale copilului.
+
+[[CKDpub]]
+.Extinderea unei chei publice părinte pentru a crea o cheie publică copil
+image::images/mbc2_0511.png["ChildPublicDerivation"]
+
+==== Utilizarea unei Chei Publice Extinse într-un Magazin Web
+
+((("portofele", "tehnologia", "folosirea cheilor publice în magazinele web")))Să vedem cum sunt folosite portofelele HD continuând povestea noastră cu magazinul web al lui Gabriel.((("utilizări", "magazin web", id="gabrielfivetwo")))
+
+Gabriel și-a înființat magazinul web din pasiune, bazat pe o simplă pagină Wordpress. Magazinul său era destul de simplu cu doar câteva pagini și un formular de comandă cu o singură adresă bitcoin.
+
+Gabriel a folosit prima adresă bitcoin generată de dispozitivul său Trezor ca principală adresă bitcoin pentru magazinul său. În acest fel, toate plățile primite erau plătite la o adresă controlată de portofelul său hardware Trezor.
+
+Clienții trimiteau o comandă folosind formularul și trimiteau plata pe adresa de bitcoin publicată de Gabriel, declanșând un e-mail cu detaliile comenzii pentru ca Gabriel să le proceseze. Cu doar câteva comenzi în fiecare săptămână, acest sistem a funcționat suficient de bine.
+
+Cu toate acestea, micul magazin web a devenit destul de apreciat și a atras multe comenzi din partea comunității locale. Curând, Gabriel a fost copleșit. Cu toate comenzile care plăteau aceeași adresă, a devenit dificil să facă potrivirea corect dintre comenzi și tranzacții, mai ales atunci când mai multe comenzi pentru aceeași sumă erau primite la intervale scurte de timp.
+
+Portofelul HD a lui Gabriel oferă o soluție mult mai bună prin posibilitatea de a deriva chei publice copii fără a cunoaște cheile private. Gabriel poate încărca o cheie publică extinsă (xpub) pe site-ul său web, care poate fi folosită pentru a obține o adresă unică pentru fiecare comandă a clienților. Gabriel poate cheltui fondurile folosind Trezor, dar xpub-ul încărcat pe site-ul web poate doar genera adrese și primi fonduri. Această caracteristică a portofelelor HD este o funcționalitate excelentă de securitate. Site-ul  lui Gabriel nu conține chei private și, prin urmare, nu are nevoie de un nivel ridicat de securitate.
+
+Pentru a exporta xpub-ul, Gabriel folosește software-ul web împreună cu portofelul hardware Trezor. Dispozitivul Trezor trebuie conectat pentru a exporta cheile publice. Rețineți că portofelele hardware nu vor exporta niciodată cheile private - acestea rămân întotdeauna pe dispozitiv. <<export_xpub>> arată interfața web pe care Gabriel o folosește pentru a exporta xpub-ul.
+
+[[export_xpub]]
+.Exportarea unui xpub dintr-un portofel hardware Trezor
+image::images/mbc2_0512.png["Exportarea xpub-ului din Trezor"]
+
+Gabriel copiază xpub-ul pe magazinul lui online care utilizează plata cu bitcoin. El folosește _Mycelium Gear_, un plugin open source pentru magazine web pentru o varietate de platforme de găzduire web. Mycelium Gear folosește xpub pentru a genera o adresă unică pentru fiecare achiziție.((("", startref="gabrielfivetwo")))
+
+===== Derivarea întărită a cheii copil
+
+((("chei publice și private", "derivarea întărită a cheii copil")))((("derivare întărită")))Posibilitatea de a deriva o ramură de chei publice dintr-un xpub este foarte utilă, dar vine cu un potential risc. Accesul la un xpub nu oferă acces la cheile private ale copiilor. Cu toate acestea, deoarece xpub conține codul de lanț, dacă este cunoscută o cheie privată a copilului sau a fost cumva dezvăluită (leaked), ea poate fi folosită cu codul de lanț pentru a obține toate celelalte chei private pentru copii. O cheie privată cu un singur copil dezvăluit (leaked), împreună cu un cod de lanț părinte, dezvăluie toate cheile private ale tuturor copiilor. Mai rău, cheia privată pentru copii împreună cu un cod de lanț părinte pot fi folosite pentru a deduce cheia privată părinte.
+
+Pentru a contracara acest risc, portofelele HD utilizează o funcție de derivare alternativă numită _derivare întărită_, care ”rupe” relația dintre cheia publică părinte și codul lanțului copil. Funcția de derivare întărită utilizează cheia privată părinte pentru a deriva codul lanțului copil, în loc de cheia publică părinte. Aceasta creează un ”firewall” în secvența părinte/copil, cu un cod de lanț care nu poate fi utilizat pentru a compromite o cheie privată a unui părinte sau a unui frate. Funcția de derivare întărită pare aproape identică cu derivarea normală a cheii private pentru copii, cu excepția faptului că cheia privată părinte este utilizată ca intrare pentru funcția rezumat, în loc de cheia publică părinte, așa cum se vede în diagrama din <<CKDprime>>.
+
+[[CKDprime]]
+.Derivarea întărită a unei chei copil; omite cheia publică părinte
+image::images/mbc2_0513.png["ChildHardPrivateDerivation"]
+
+[role="pagebreak-before"]
+Când se utilizează funcția de derivare privată întărită, cheia privată și codul lanțului copil rezultat sunt complet diferite de cea care ar rezulta din funcția normală de derivare. ”Ramura” de chei rezultate poate fi utilizată pentru a produce chei publice extinse care nu sunt vulnerabile, deoarece codul de lanț pe care îl conțin nu poate fi exploatat pentru a dezvălui vreo cheie privată. Prin urmare, derivarea întărită este folosită pentru a crea un ”gol” în arbore deasupra nivelului în care sunt utilizate cheile publice extinse.
+
+În termeni simpli, dacă doriți să vă folosiți de comoditatea unui xpub pentru a obține ramuri de chei publice, fără să vă expuneți la riscul unui cod de lanț dezvăluit, ar trebui să îl derivați de la un părinte întărit, mai degrabă decât de la un părinte normal. Ca o bună practică, copiii de nivel 1 ai cheilor principale (master)  sunt întotdeauna obținuți prin derivare întărită, pentru a preveni compromiterea cheilor principale.
+
+===== Numere de indice  pentru derivare normală și întărită
+
+Numărul de indice utilizat în funcția de derivare este un număr întreg pe 32 de biți. Pentru a distinge cu ușurință între cheile derivate prin funcția normală de derivare față de cheile obținute prin derivarea întărită, acest număr de indice este împărțit în două intervale. Numerele de indice între 0 și 2^31^-1 (0x0 până la 0x7FFFFFFF) sunt utilizate _doar_ pentru derivarea normală. Numerele de indice cuprinse între 2^31^ și 2^32^-1 (0x80000000 până la 0xFFFFFFFF) sunt utilizate _doar_ pentru derivarea întărită. Prin urmare, dacă numărul indicelui este mai mic decât 2^31^, copilul este normal, iar dacă numărul indicelui este mai mare sau egal cu 2^31^, copilul este întărit.
+
+Pentru a facilita citirea și afișarea numărului indicelui, acesta este afișat începând de la zero, dar cu simbolul prim pentru copiii întăriți . Prin urmare, prima cheie normală pentru copil este afișată ca 0, în timp ce primul copil întărit (indice 0x80000000) este afișat ca 0'. În secvență, a doua cheie întărită ar avea indicele 0x80000001 și va fi afișată ca 1', etc. Când vedeți un indice de portofel HD notat i', asta înseamnă 2^31^+i.
+
+===== Identificatorul cheii într-un portofel HD (calea)
+
+((("portofele deterministic ierarhic")))Cheile dintr-un portofel HD sunt identificate folosind o convenție de denumire a ”căii”, cu fiecare nivel al arborelui separat printr-un caracter slash (/) (vezi <<table_4-8>>). Cheile private derivate de la cheia privată principală (master) încep cu ”m”. Cheile publice derivate de la cheia publică principală (master) încep cu ”M.” Prin urmare, prima cheie privată copil a cheii private principale este m/0. Prima cheie publică copil este M/0. Al doilea nepot al primului copil este m/0/1 și așa mai departe.
+
+”Strămoșii” unei chei se citesc de la dreapta la stânga, până când ajungeți la cheia principală de la care a fost derivată. De exemplu, identificatorul m/x/y/z descrie cheia care este al z-ulea copil al cheii m/x/y, care este al y-ulea copil al cheii m/x, care este al x-ulea copil a lui m.
+
+[[table_4-8]]
+.Exemple de cale pentru un portofel HD
+[options="header"]
+|=======
+| Calea HD | Descriere Cheie
+| m/0 | Prima (0) cheie privată copil de la cheia privată principală (m)
+| m/0/0 | Prima (0) cheie privată copil de la primul copil (m/0)
+| m/0'/0 | Primul (0) copil normal de la primul copil _întărit_ (m/0')
+| m/1/0 | Prima (0) cheie privată copil de la al doilea copil (m/1)
+| M/23/17/0/0 | Prima (0) cheie publică copil de la primul copil (M/23/17/0) de la al 18-lea copil (M/23/17) de la cel de-al 24-lea copil (M/23)
+|=======
+
+===== Navigarea structurii arborescente a unui portofel HD
+
+Structura arborescentă a portofelului HD oferă o flexibilitate extraordinară. Fiecare cheie părinte extinsă poate avea 4 miliarde de copii: 2 miliarde de copii normali și 2 miliarde de copii întăriți. Fiecare dintre acești copii poate avea alte 4 miliarde de copii și așa mai departe. Arborele poate fi cât de adânc doriți, cu un număr infinit de generații. Cu toată această flexibilitate, devine destul de dificil să navigați în acest arbore infinit. Este deosebit de dificil să transferați portofele HD între implementări, deoarece posibilitățile de organizare internă a ramurilor și sub-ramurilor sunt interminabile.
+
+Două propuneri de îmbunătățire bitcoin (BIP) oferă o soluție la această complexitate prin crearea unor propuneri pentru structura arborilor portofelelor HD. BIP-43 propune utilizarea primului indice de copil întărit ca un identificator special care semnifică ”scopul” structurii arborelui. Pe baza BIP-43, un portofel HD ar trebui să utilizeze o singură ramură de nivel 1 a arborelui, numărul indicelui identificând structura și contextul restului arborelui, și astfel definindu-i scopul. De exemplu, un portofel HD care folosește numai ramura m/i'/ este destinat să semnifice un scop specific, iar acest scop este identificat cu numărul de indice ”i”.
+
+Extinzând această specificație, BIP-44 propune o structură multicont ca număr ”de scop” _44'_ în conformitate cu BIP-43. Toate portofelele HD care urmează structura BIP-44 sunt identificate prin faptul că au folosit doar o ramură a arborelui: m/44'/.
+
+BIP-44 specifică structura ca fiind formată din cinci niveluri predefinite ale arborelui:
+
+-----
+m / scop' / tip_monedă'  / cont'  / rest  / adresă_indice
+-----
+
+The first-level "purpose" is always set to +44'+. The second-level "coin_type" specifies the type of cryptocurrency coin, allowing for multicurrency HD wallets where each currency has its own subtree under the second level. There are three currencies defined for now: Bitcoin is m/44'/0', Bitcoin Testnet is m/44'/1', and Litecoin is m/44'/2'.
+
+The third level of the tree is "account," which allows users to subdivide their wallets into separate logical subaccounts, for accounting or organizational purposes. For example, an HD wallet might contain two bitcoin "accounts": m/44'/0'/0' and m/44'/0'/1'. Each account is the root of its own subtree.
+
+((("keys and addresses", see="also public and private keys")))On the fourth level, "change," an HD wallet has two subtrees, one for creating receiving addresses and one for creating change addresses. Note that whereas the previous levels used hardened derivation, this level uses normal derivation. This is to allow this level of the tree to export extended public keys for use in a nonsecured environment. Usable addresses are derived by the HD wallet as children of the fourth level, making the fifth level of the tree the "address_index." For example, the third receiving address for bitcoin payments in the primary account would be M/44'/0'/0'/0/2. <<table_4-9>> shows a few more examples.
+
+[[table_4-9]]
+.Exemple de structuri BIP-44 de portofel HD
+[options="header"]
+|=======
+| Calea HD | Descriere Cheie
+| M/44'/0'/0'/0/2 | The third receiving public key for the primary bitcoin account
+| M/44'/0'/3'/1/14 | The fifteenth change-address public key for the fourth bitcoin account
+| m/44'/2'/0'/0/1 | The second private key in the Litecoin main account, for signing transactions
+|=======

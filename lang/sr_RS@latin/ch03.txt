@@ -1,0 +1,800 @@
+[[ch03_bitcoin_client]]
+== Bitcoin Core: Referentna implementacija (izvršenje, primena u praksi)
+
+((("open source licenses")))((("Nakamoto, Satoshi")))Bitkoin je projekat sa _otvorenim kodom (open source)_ i kod je dostupan pod otvorenom (MIT) licencom, besplatan je za skidanja sa interneta i upotrebu u bilo koje svrhe. Otvoren kod je jednostavno besplatan za upotrebu. To znači da bitkoin razvija otvorena zajednica volontera. Na prvi pogled se ta zajednica sastojala samo od Satoši Nakamotoa. Do 2016. godine, izvorni kod bitkoina imao je više od 400 autora, sa desetak programera koji su radili skoro puno radno vreme i još nekoliko desetina sa skraćenim radnim vremenom. Svako može da doprinese kodu &#x2014; uključujući i vas!
+
+
+((("bitcoin whitepaper")))((("Satoshi client")))((("reference implementation", see="Bitcoin Core")))((("Bitcoin Core", "reference implementation")))Kada je Satoši Nakamoto kreirao bitkoin, softver je već bio završen pre nego što je rad reprodukovan u whitepaper-u <<satoshi_whitepaper>>. Satoši je želeo da se uveri da li funkcioniše pre nego što je o njemu pisao. Ta prva implementacija, jednostavno poznata kao "Bitkoin" ili "Satoši klijent", u velikoj meri je modifikovana i poboljšana. Razvila se u ono što je poznato kao _Bitcoin Core_ da bi se razlikovala od ostalih kompatibilnih implementacija. Bitcoin Core je _referentna implementacija_ bitkoin sistema, što znači da se radi o autoritativnoj referenci po kojoj svaki deo tehnologije treba da bude implementiran. Bitcoin Core implementira sve aspekte bitkoina, uključujući novčanike, mehanizam za proveru transakcija i blokade i potpunog klijenta u bitkoin peer-to-peer mreži.
+
+[WARNING]
+====
+((("wallets", "best practices for")))((("bitcoin improvement proposals", "Mnemonic Code Words (BIP-39)")))((("bitcoin improvement proposals", "Hierarchical Deterministic Wallets (BIP-32/BIP-44)")))Iako Bitcoin Core uključuje referentnu implementaciju novčanika, ovaj model nije namenjen da se koristi kao novčanik za korišćenje u produkciji - ni za korisnike, ni za aplikacije. Programerima aplikacija savetuje da prave novčanike služeći se savremenim standardima kao što su BIP-39 i BIP-32 (videti <<mnemonic_code_words>> i <<hd_wallets>>). BIP označava _Bitcoin Improvement Proposal (predlog za poboljšanje bitkoina)_.
+====
+
+<<bitcoin_core_architecture>> prikazuje arhitekturu Bitcoin Core-a.((("Bitcoin Core", "architecture")))
+
+[[bitcoin_core_architecture]]
+.Arhitektura Bitcoin Core-a (Izvor: Erik Lombrozo)
+image::images/mbc2_0301.png["Bitcoin Core Architecture"]
+
+
+=== Razvojno okruženje bitkoina (Bitcoin Development Environment)
+
+((("development environment", "setup", see="Bitcoin Core")))Ako ste programer, želećete da postavite razvojno okruženje sa svim alatkama, bibliotekama i softverom za podršku za pisanje bitkoin aplikacija. U ovom tehničkom poglavlju proći ćemo kroz taj proces korak po korak. Ako tekst postane previše težak (a vi u stvari ne postavljate razvojno okruženje), slobodno pređite na sledeće poglavlje, koje je manje tehničko.
+
+[[compiling_core]]
+=== Kompajliranje Bitcoin Core-a iz izvornog koda
+
+((("Bitcoin Core", "compiling from source code", id="BCsource03")))((("Bitcoin Core", "compiling from source code", "downloading")))((("code examples, obtaining and using")))Izvorni kod Bitcoin Core-a može da se preuzme kao arhiva ili kloniranjem autoritativnog izvornog repozitorijuma na GitHub-u.  ((("Bitcoin Core downloads")))Na https://bitcoincore.org/bin/[stranici za skidanje Bitcoin Core-a] odaberite najnoviju verziju i skinite kompresovanu arhivu izvornog koda, npr. +bitcoin-0.15.0.2.tar.gz+. ((("GitHub bitcoin page")))Druga mogućnost je da koristite git na komandnoj liniji i kreirate lokalnu kopiju izvornog koda sa https://github.com/bitcoin/bitcoin[GitHub bitkoin stranice].
+
+[TIP]
+====
+((("$ symbol")))((("shell commands")))((("terminal applications")))U mnogim primerima u ovom poglavlju koristićemo interfejs komandne linije operativnog sistema (takođe poznat kao "terminal", "shell" ili "command line interface"), kom se pristupa preko "terminal" aplikacije. "Shell" će prikazati prompt (ili kursor); otkucajte komandu; a "shell" će odgovoriti nekim tekstom i novim promptom za sledeću naredbu. Prompt može na vašem sistemu izgledati drugačije, ali u sledećim primerima je označen simbolom +$+. U primerima kada vidite tekst posle simbola +$+, ne unosite simbol +$+, već unesite naredbu odmah nakon njega, a zatim pritisnite Enter da biste izvršili komandu. U primerima, redovi ispod svake naredbe predstavljaju odgovore operativnog sistema na tu naredbu. Kada vidite sledeći prefiks +$+, znaćete da je to nova naredba i da trebate ponoviti postupak.
+====
+
+((("cloning source code")))((("source code, cloning", seealso="Bitcoin Core")))U ovom primeru koristimo naredbu +git+ da kreiramo lokalnu kopiju ("clone") izvornog koda:
+
+----
+$ git clone https://github.com/bitcoin/bitcoin.git
+Cloning into 'bitcoin'...
+remote: Counting objects: 102071, done.
+remote: Compressing objects: 100% (10/10), done.
+Receiving objects: 100% (102071/102071), 86.38 MiB | 730.00 KiB/s, done.
+remote: Total 102071 (delta 4), reused 5 (delta 1), pack-reused 102060
+Resolving deltas: 100% (76168/76168), done.
+Checking connectivity... done.
+$
+----
+
+[TIP]
+====
+((("distributed version control systems")))Git je najčešće korišćeni distributivni sistem za kontrolu verzija bilo kog softvera, to je suštinski deo svih softverskih alata za programere. Možda ćete morati da instalirate naredbu +git+ ili grafički korisnički interfejs za git na vaš operativni sistem ako ga već nemate.
+====
+
+Kada se operacija kloniranja gita završi, imaćete kompletnu lokalnu kopiju skladišta izvornog koda u direktorijumu _bitcoin_. Pređite u ovaj direktorijum tako što ćete ukucati ++**cd bitcoin**++:
+
+----
+$ cd bitcoin
+----
+
+==== Odabir jednog Bitcoin Core izdanja
+((("Bitcoin Core", "compiling from source code", "version selection")))Po difoltu, lokalna kopija će biti sinhronizovana sa najnovijim kodom, koja može biti nestabilna ili beta verzija bitkoina. Pre nego što sastavite kod, izaberite određenu verziju proveravanjem _taga_ izdanja. Ovo će sinhronizovati lokalnu kopiju sa određenim snimkom repozitorijuma koda koji je identifikovan pomoću argumenta _tag_. Programeri koriste oznake za označavanje specifičnih izdanja koda prema broju verzije. Prvo, da pronađemo dostupne oznake, koristimo +git tag+ naredbu:
+
+----
+$ git tag
+v0.1.5
+v0.1.6test1
+v0.10.0
+...
+v0.11.2
+v0.11.2rc1
+v0.12.0rc1
+v0.12.0rc2
+...
+----
+
+Lista tagova prikazuje sve objavljene verzije bitkoina. Po konvenciji, _release candidates_, koji su namenjeni za testiranje, imaju sufiks „rc“. Stabilna izdanja koja mogu da se izvode na proizvodnim sistemima nemaju sufiks. Sa prethodne liste odaberite verziju najviše verzije koja je u trenutku pisanja ove knjige bila v0.15.0. Da biste sinhronizovali lokalni kod sa ovom verzijom, koristite komandu +git checkout+:
+
+----
+$ git checkout v0.15.0
+HEAD is now at 3751912... Merge #11295: doc: Old fee_estimates.dat are discarded by 0.15.0
+----
+
+Potvrditie da ste željenu verziju "skinuli" izdavanjem naredbe + git status+:
+
+----
+$ git status
+HEAD detached at v0.15.0
+nothing to commit, working directory clean
+----
+
+==== Konfigurisanje Bitcoin Core Build-a
+
+((("Bitcoin Core", "compiling from source code", "build configuration")))((("documentation")))((("build documentation", seealso="Bitcoin Core")))Izvorni kod uključuje dokumentaciju koja se nalazi u velikom broju fajlova. Pregledajte glavnu dokumentaciju koja se nalazi u _README.md_ u direktorijumu _bitcoin_ tako što ćete ukucati ++**more README.md**++ u komandnoj liniji i pritisnuti taster Space da pređete na sledeću stranicu. U ovom poglavlju napravićemo bitkoin klijent komandne linije, takođe poznat kao +bitcoind+. Pregledajte uputstva za pravljenje klijenta +bitcoind+ komandne linije na vašoj platformi tako što ćete otkucati ++**more doc/build-unix.md**++. Alternativna uputstva za Mac OS i Windovs mogu se naći u direktorijumu _doc_, kao _build-osx.md_ ili _build-windovs.md_.
+
+Pažljivo pregledajte preduslove za izgrađnju koji se nalaze u prvom delu dokumentacije za izgradnju. Ovo su biblioteke koje moraju da budu prisutne u vašem sistemu pre nego što počnete da kompajlirate bitkoin. Ako ovi preduslovi izostanu, proces izgrađnje neće uspeti i staće zbog greške. Ako se to desi zato što niste ispunili neki preduslov, možete ga instalirati i zatim nastaviti postupak izgradnje od mesta na kom ste stali. Pod pretpostavkom da su preduslovi instalirani, započnite proces izgradnje sa generisanjem skripte za izgradnju (build script) pomoću _autogen.sh_.
+
+----
+$ ./autogen.sh
+...
+glibtoolize: copying file 'build-aux/m4/libtool.m4'
+glibtoolize: copying file 'build-aux/m4/ltoptions.m4'
+glibtoolize: copying file 'build-aux/m4/ltsugar.m4'
+glibtoolize: copying file 'build-aux/m4/ltversion.m4'
+...
+configure.ac:10: installing 'build-aux/compile'
+configure.ac:5: installing 'build-aux/config.guess'
+configure.ac:5: installing 'build-aux/config.sub'
+configure.ac:9: installing 'build-aux/install-sh'
+configure.ac:9: installing 'build-aux/missing'
+Makefile.am: installing 'build-aux/depcomp'
+...
+----
+
+Skripta _autogen.sh_ kreira skup skripti za automatsku konfiguraciju, koji će ispitivati vaš sistem kako bi otkrio ispravnu konfiguraciju i osigurao da li imate sve potrebne biblioteke za kompajliranje koda. Najvažnija od njih je +configure+ skripta koja nudi nekoliko različitih opcija za prilagođavanje procesa izgrađivanja. Unesite ++**./configure --help**++ da biste videli razne opcije:
+
+----
+$ ./configure --help
+`configure' configures Bitcoin Core 0.15.0 to adapt to many kinds of systems.
+
+Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+...
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+
+  --enable-wallet         enable wallet (default is yes)
+
+  --with-gui[=no|qt4|qt5|auto]
+...
+----
+
+Skript +configure+ omogućava vam da uključite ili isključite određene funkcije za +bitcoind+ upotrebom +--enable-FEATURE+ i +--disable-FEATURE+, gde je pass:[<span class="keep-together"><code>FEATURE</code></span>] zamenjen sa imenom funkcije, kako je navedeno u izlazu pomoćnog teksta. U ovom poglavlju napravićemo +bitcoind+ klijent sa svim difolt funkcijama. Nećemo koristiti konfiguracijske opcije, zato ih pregledajte da biste shvatili koje su opcije deo klijenta. Ako se nalazite u akademskom okruženju, zbog ograničenja računarske laboratorije, možda će biti potrebno da instalirate aplikacije u ličnom direktorijumu (npr., koristeći +--prefix=$HOME+).
+
+Evo nekoliko korisnih opcija koje prepisuju difolt ponašanja konfiguracionih skripta:
+
+++++
+<dl>
+<dt><code>--prefix=$HOME</code></dt>
+<dd><p>Ovo premošćava difolt lokaciju za instalaciju (koja je  <em>/usr/local/</em>) za rezultirajući izvršni program. Upotrebite <code>$HOME</code> da biste sve stavili u vaš lični direktorijum ili neku drugu putanju.</p></dd>
+
+<dt><code>--disable-wallet</code></dt>
+<dd><p>Ovo se koristi da bi se isključila referentna implementacija novčanika.</p></dd>
+
+<dt><code>--with-incompatible-bdb</code></dt>
+<dd><p>Ako pravite novčanik, dozvolite upotrebu nekompatibilne verzije Berkelei DB biblioteke. </p></dd>
+
+<dt><code>--with-gui=no</code></dt>
+<dd><p>Ne gradite grafički korisnički interfejs, za koji je potrebna Qt biblioteka. To pravi samo server i komandna linija bitkoina.</p></dd>
+</dl>
+++++
+
+Zatim pokrenite skriptu +configure+ da biste automatski našli sve potrebne biblioteke i kreirali individualnu skriptu za izgradnju za vaš sistem:
+
+----
+$ ./configure
+checking build system type... x86_64-unknown-linux-gnu
+checking host system type... x86_64-unknown-linux-gnu
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+checking for gawk... gawk
+checking whether make sets $(MAKE)... yes
+...
+[sledi više stranica o konfiguracijskim testovima]
+...
+$
+----
+
+
+Ako je sve dobro prošlo, naredba +configure+ završiće se kreiranjem prilagođene skripte za izgradnju koja će nam omogućiti da kompajliramo +bitcoind+. Ako ima nekih biblioteka koje nedostaju ili grešaka, naredba +configure+ prestaće zbog greške umesto kreiranja skripti za izgradnju. Ako se pojavi greška, to je najverovatnije zbog nedostajeće ili nekompatibilne biblioteke. Ponovo pregledajte dokumentaciju za izgradnju i proverite da li ste instalirali preduslove koji nedostaju. Zatim ponovo pokrenite +configure+ i pogledajte da li je to ispravilo grešku.
+
+==== Izrada bitkoin izvršnih datoteka
+
+((("Bitcoin Core", "compiling from source code", "core executables")))((("core executables", seealso="Bitcoin Core")))Sledeći korak je da kompajlirate izvorni kod, postupak koji može da potraje sat vremena, u zavisnosti od brzine vašeg CPU-a i raspoložive memorije. Tokom procesa kompajliranja trebalo bi da vidite izlaz svakih nekoliko sekundi ili nekoliko minuta ili grešku ako nešto pođe po zlu. Ako dođe do greške ili se proces kompajliranja prekine, on može bilo kada da se nastavi ponovnim unošenjem +make+ . Unesite ++**make**++ da biste započeli sa kompajliranjem izvršne aplikacije:
+
+----
+$ make
+Making all in src
+  CXX      crypto/libbitcoinconsensus_la-hmac_sha512.lo
+  CXX      crypto/libbitcoinconsensus_la-ripemd160.lo
+  CXX      crypto/libbitcoinconsensus_la-sha1.lo
+  CXX      crypto/libbitcoinconsensus_la-sha256.lo
+  CXX      crypto/libbitcoinconsensus_la-sha512.lo
+  CXX      libbitcoinconsensus_la-hash.lo
+  CXX      primitives/libbitcoinconsensus_la-transaction.lo
+  CXX      libbitcoinconsensus_la-pubkey.lo
+  CXX      script/libbitcoinconsensus_la-bitcoinconsensus.lo
+  CXX      script/libbitcoinconsensus_la-interpreter.lo
+
+[...sledi još mnogo poruka o kompajliranju...]
+
+$
+----
+
+Na brzom sistemu sa više CPU-a, možda biste želeli da podesite broj paralelnih procesa kompajliranja. Na primer, +make -j 2+ koristiće dva kora ako su dostupni. Ako sve prođe dobro, biće izgrađen Bitcoin Core. Trebali biste pokrenuti modularni test sa +make check+ kako biste se na prvi pogled uverili da nisu pokidane povezane biblioteke. Završni korak je instaliranje različitih izvršnih fajlova na vašem sistemu pomoću naredbe +make install+. Možda će vam biti zatraženo da unesete korisničku lozinku, jer ovaj korak zahteva administrativne privilegije:
+
+----
+$ make check && sudo make install
+Password:
+Making install in src
+ ../build-aux/install-sh -c -d '/usr/local/lib'
+libtool: install: /usr/bin/install -c bitcoind /usr/local/bin/bitcoind
+libtool: install: /usr/bin/install -c bitcoin-cli /usr/local/bin/bitcoin-cli
+libtool: install: /usr/bin/install -c bitcoin-tx /usr/local/bin/bitcoin-tx
+...
+$
+----
+
+(((("", startref="BCsource03")))Difolt instalacija za +bitcoind+ je u _/usr/local/bin_. Možete potvrditi da je Bitcoin Core ispravno instaliran tako što ćete od sistema zatražiti putanju izvršnih datoteka na sledeći način:
+
+----
+$ which bitcoind
+/usr/local/bin/bitcoind
+
+$ which bitcoin-cli
+/usr/local/bin/bitcoin-cli
+----
+
+=== Pokretanje Bitcoin Core čvora
+
+((("Bitcoin Core", "running core nodes", id="BCnode03")))((("bitcoin nodes", "running core nodes", id="BNcore03")))Bitkoin peer-to-peer mreža sastoji se od mrežnih "čvorova" (nodes), kojima uglavnom upravljaju volonteri i neke kompanije koje grade bitkoin aplikacije. Oni koji rade na bitkoin čvorovima imaju direktan i autoritativan pregled bitkoin blokčejna, sa lokalnom kopijom svih transakcija, nezavisno potvrđenih u sopstvenom sistemu. Ako pokrenete čvor, ne morate se oslanjati na neko treće lice da biste potvrdili transakciju. Naprotiv, pokretanjem bitkoin čvora doprinosite bitkoin mreži čineći je robusnijom.
+
+Međutim, za pokretanje čvora potreban je trajno povezan sistem sa dovoljno resursa za obradu svih bitkoin transakcija. Zavisno od toga da li ste odlučili da sve transakcije označite indeksom i zadržite potpunu kopiju blokčejna, trebaće vam mnogo prostora na disku i RAM-a. Od početka 2018. godine čvorovima sa punim indeksom potrebno je 2 GB RAM-a i najmanje 160 GB prostora na disku (https://blockchain.info/charts/blocks-size[]). Bitkoin čvorovi takođe prenose i primaju bitkoin transakcije i blokove, trošeći protok interneta. Ako je vaša internet veza ograničena, ima ograničenje podataka ili se meri (plaća se na gigabajt), verovatno ne bi trebalo da pokrećete bitkoin čvor na njoj ili da ga pokrenete na način koji ograničava njen protok (pogledajte <<constrained_resources>>).
+
+[TIP]
+====
+((("warnings and cautions", "core node resource requirements")))((("resource requirements")))Bitcoin Core zadržava potpunu kopiju blokčejna po difoltu sa svakom transakcijom koja se ikada dogodila na bitkoin mreži od svog početka 2009. godine. Ovaj skup podataka je velik (preko 200 gigabajta od 2019. godine), i skida se postepeno tokom nekoliko dana ili nedelja, zavisno od brzine vašeg CPU-a i internet veze. Bitcoin Core neće moći da obrađuje transakcije ili ažurira stanje na računu sve dok se ne preuzme celokupni skup podataka bločejna. Proverite da li imate dovoljno prostora na disku, propusne širine interneta i vremena da biste dovršili početnu sinhronizaciju. Možete da konfigurišete Bitcoin Core tako da smanjuje veličinu bločejna odbacivanjem starih blokova (pogledajte <<constrained_resources>>), ali će i dalje preuzimati čitav skup podataka pre nego što odbaci podatke.
+====
+
+Uprkos ovim zahtevima resursa, hiljade volontera upravlja bitkoin čvorovima. Neki rade na sistemima jednostavnim poput Raspberry Pi (računar od 35 USD, veličine špila karata). Mnogi volonteri pokreću bitkoin čvorove na iznajmljenim serverima, obično nekoj varijanti Linuxa. _Virtual Private Server_ (VPS) ili _Cloud Computing Server_ instance mogu da se koriste za pokretanje bitkoin čvora. Takvi serveri mogu da se iznajme za 25 do 50 USD mesečno od raznih provajdera.
+
+Zašto biste želeli da pokrenete čvor? Evo nekih od najčešćih razloga:
+
+* Ako razvijate bitkoin softver i morate se osloniti na bitkoin čvor sa programirajućim interfejsom (API) za pristup mreži i blokčejnu.
+
+* Ako pravite aplikacije koje moraju da potvrde transakcije u skladu sa pravilima konsenzusa bitkoina. Obično kompanije sa softverom za bitkoin puštaju u rad po nekoliko čvorova.
+
+* Ako želite da podržite bitkoin. Pokretanje čvora čini mrežu robusnijom i sposobnijom da opslužuje više novčanika, više korisnika i više transakcija.
+
+* Ako ne želite da se oslonite na neko treće lice da obradi ili potvrdi vaše transakcije.
+
+Ako čitate ovu knjigu i želite da razvijate bitkoin softver, trebalo bi da pokrenete svoj sopstveni čvor.
+
+==== Konfigurisanje Bitcoin Core čvora
+
+((("Bitcoin Core", "running core nodes", "configuring")))((("warnings and cautions", "password creation")))((("passwords", "creating")))((("security", "passwords")))Bitcoin Core će pri svakom pokretanju tražiti konfiguracionu datoteku u svom direktorijumu. U ovom odeljku ispitaćemo različite opcije konfiguracije i postaviti konfiguracioni fajl. Da biste pronašli konfiguracioni fajl, pokrenite +bitcoind -printtoconsole+ na svom terminalu i potražite prvih par linija.
+
+----
+$ bitcoind -printtoconsole
+Bitcoin version v0.15.0
+Using the 'standard' SHA256 implementation
+Using data directory /home/ubuntu/.bitcoin/
+Using config file /home/ubuntu/.bitcoin/bitcoin.conf
+...
+[još mnogo dodatnog debag teksta]
+...
+----
+
+Pritisnite Ctrl-C da bi isključili čvor nakon što odredite lokaciju konfiguracionog fajla. Konfiguracioni fajl se obično nalazi u direktorijumu _.bitcoin_ pod kućnim direktorijumom vašeg korisnika. Ne kreira se automatski, ali možete da kreirate početni konfiguracioni fajl sa copy/paste-om iz primera <<#full_index_node>>, ispod. Možete da kreirate ili izmenite konfiguracionu datoteku u željenom editoru za tekst.
+
+Bitcoin Core nudi više od 100 opcija za konfiguracije koje modifikuju ponašanje mrežnog čvora, skladištenje blokčejna i mnoge druge aspekte njegovog rada. Da biste videli spisak ovih opcija, pokrenite +bitcoind --help+:
+
+----
+$ bitcoind --help
+Bitcoin Core Daemon version v0.15.0
+
+Usage:
+  bitcoind [options]                     Start Bitcoin Core Daemon
+
+Options:
+
+  -?
+       Print this help message and exit
+
+  -version
+       Print version and exit
+
+  -alertnotify=<cmd>
+       Execute command when a relevant alert is received or we see a really
+       long fork (%s in cmd is replaced by message)
+...
+[još mnogo opcija]
+...
+
+  -rpcthreads=<n>
+       Set the number of threads to service RPC calls (default: 4)
+----
+
+((("configuration options", seealso="Bitcoin Core")))Evo nekih najvažnijih opcija koje možete da postavite u konfiguracionom fajlu ili kao parametre u komandnoj liniji od +bitcoind+:
+
+alertnotify:: Pokrenite određenu naredbu ili skriptu da pošaljete upozorenja vlasniku ovog čvora, obično imejlom.
+
+conf:: Alternativna lokacija za konfiguracioni fajl. Ovo ima smisla samo kao parametar komandne linije za +bitcoind+, jer ne može biti u konfiguracionom fajlu na koji se odnosi.
+
+datadir:: Izaberite direktorijum i fajl sistem u koji ćete staviti sve podatke blokčejna. Ovo je difolt poddirektorijum _.bitcoin_ vašeg user direktorijuma. Obezbedite da ovaj fajl sistem ima nekoliko gigabajta slobodnog prostora.
+
+prune:: Potreban prostor na disku smanjite na toliko megabajta brisanjem starih blokova. Koristite ovo na čvoru sa ograničenim resursima u koji ne može da stane u kompletan blokčejn.
+
+txindex:: Održavajte indeks svih transakcija. To znači kompletnu kopiju blokčejna koja vam omogućava programsko preuzimanje bilo koje transakcije putem ID-a.
+
+dbcache:: Veličina UTXO keša. Difolt je 300 MB. Povećajte ovo na "high-end" hardveru i smanjite veličinu na slabijem hardveru da biste uštedeli memoriju na račun sporijeg disk IO-a.
+
+maxconnections:: Podesite maksimalni broj čvorova iz kojih će sistem prihvatati veze. Ako ovo smanjite na difolt, umanjićete potrošnju internet protoka. Koristite to ako imate ograničenje podataka ili plaćate po gigabajtu.
+
+maxmempool:: Ograničite količinu transakcija koje držite u memorijskom pulu na toliko megabajta. Tako ćete smanjiti upotrebu memorije na čvorovima sa ograničenom memorijom.
+
+maxreceivebuffer/maxsendbuffer:: Ograničite keš memorije alocirane (rezervisane) po konekciji u KB. Koristite na čvorovima sa ograničenom memorijom.
+
+minrelaytxfee:: Podesite minimalnu stopu naknade za transakciju koju ćete preneti. Ispod ove vrednosti transakcija se tretira nestandardno, odbacuje se iz transakcijkog pula i ne prenosi se.
+
+
+[[txindex]]
+.Transaction Database Index i opcija txindex
+****
+((("Bitcoin Core", "running core nodes", "database options")))((("transactions", "database configuration options")))((("txindex option")))((("full indexing option")))Po difoltu, Bitcoin Core gradi bazu podataka koja sadrži _ samo_ transakcije koje se odnose na novčanik korisnika. Ako želite da pristupite _bilo kojoj_ transakciji pomoću komandi poput +getrawtransaction+ (pogledajte <<exploring_and_decoding_transanctions>>, morate konfigurisati Bitcoin Core da izgradi kompletan indeks transakcija, što se može postići opcijom +txindex+. Podesite +txindex=1+ u konfiguracionom fajlu Bitcoin Core. Ako ne postavite ovu opciju na početku, nego je kasnije stavite na "full indexing", morate ponovo da pokrenete +bitcoind+ sa opcijom +-reindex+ i sačekate da ponovo izgradi indeks.
+****
+
+<<full_index_node>> pokazuje kako možete da kombinujete prethodne opcije sa potpuno indeksiranim čvorom, koji radi kao bekend API za bitkoin aplikaciju.
+
+[[full_index_node]]
+.Primer konfiguracije čvora sa punim indeksom (potpuni klijent)
+====
+----
+alertnotify=myemailscript.sh "Alert: %s"
+datadir=/lotsofspace/bitcoin
+txindex=1
+----
+====
+
+<<constrained_resources>> prikazuje čvor sa ograničenim resursima koji radi na manjem serveru.
+
+[[constrained_resources]]
+.Primer konfiguracije sistema sa ograničenim resursima
+====
+----
+alertnotify=myemailscript.sh "Alert: %s"
+maxconnections=15
+prune=5000
+dbcache=150
+maxmempool=150
+maxreceivebuffer=2500
+maxsendbuffer=500
+----
+====
+
+Nakon što ste izmenili konfiguracioni fajl i postavili opcije koje najbolje predstavljaju vaše potrebe, možete da testirate +bitcoind+ sa tom konfiguracijom. Pokrenite Bitcoin Core sa opcijom +printtoconsole+ da biste ga pokrenuli u prvom planu sa izlazom na konzoli:
+
+----
+$ bitcoind -printtoconsole
+
+Bitcoin version v0.15.0
+InitParameterInteraction: parameter interaction: -whitelistforcerelay=1 -> setting -whitelistrelay=1
+Assuming ancestors of block 0000000000000000003b9ce759c2a087d52abc4266f8f4ebd6d768b89defa50a have valid signatures.
+Using the 'standard' SHA256 implementation
+Default data directory /home/ubuntu/.bitcoin
+Using data directory /lotsofspace/.bitcoin
+Using config file /home/ubuntu/.bitcoin/bitcoin.conf
+Using at most 125 automatic connections (1048576 file descriptors available)
+Using 16 MiB out of 32/2 requested for signature cache, able to store 524288 elements
+Using 16 MiB out of 32/2 requested for script execution cache, able to store 524288 elements
+Using 2 threads for script verification
+HTTP: creating work queue of depth 16
+No rpcpassword set - using random cookie authentication
+Generated RPC authentication cookie /lotsofspace/.bitcoin/.cookie
+HTTP: starting 4 worker threads
+init message: Verifying wallet(s)...
+Using BerkeleyDB version Berkeley DB 4.8.30: (April  9, 2010)
+Using wallet wallet.dat
+CDBEnv::Open: LogDir=/lotsofspace/.bitcoin/database ErrorFile=/lotsofspace/.bitcoin/db.log
+scheduler thread start
+Cache configuration:
+* Using 250.0MiB for block index database
+* Using 8.0MiB for chain state database
+* Using 1742.0MiB for in-memory UTXO set (plus up to 286.1MiB of unused mempool space)
+init message: Loading block index...
+Opening LevelDB in /lotsofspace/.bitcoin/blocks/index
+Opened LevelDB successfully
+
+[... još obaveštenja o startu aplikacije ...]
+----
+
+Pritisnite Ctrl-C da prekinete postupak ako ste se uverili da on učitava ispravnu konfiguraciju i radi onako kako očekujete.
+
+Da biste pokrenuli Bitcoin Core u pozadini kao proces, pokrenite ga opcijom +daemon+, kao +bitcoind -daemon+.
+
+Za praćenje napretka i statusa izvođenja vašeg bitkoin čvora koristite komandu +bitcoin-cli getblockchaininfo+:
+
+----
+$ bitcoin-cli getblockchaininfo
+----
+
+[source,json]
+----
+{
+  "chain": "main",
+  "blocks": 0,
+  "headers": 83999,
+  "bestblockhash": "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+  "difficulty": 1,
+  "mediantime": 1231006505,
+  "verificationprogress": 3.783041623201835e-09,
+  "chainwork": "0000000000000000000000000000000000000000000000000000000100010001",
+  "pruned": false,
+  [...]
+}
+----
+
+Ovo prikazuje čvor sa blokčejn visinom od 0 blokova i 83999 zaglavlja (headers). Čvor trenutno skida zaglavlje bloka najboljeg lanca i nakon toga nastavlja sa preuzimanjem punih blokova.
+
+Ako ste zadovoljni odabranim opcijama konfiguracije, trebali biste da dodate bitkoin u startup skripte vašeg operativnog sistema, tako da se on pokrene svaki put kada se operativni sistem ponovo pokreće. Naći ćete brojne primere skripti za pokretanje različitih operativnih sistema u izvornom direktorijumu _bitkoin_ pod _contrib/init_ i fajl _README.md_ koji pokazuje koji sistem koristi koju skriptu.((("", startref="BCnode03")))((("", startref="BNcore03")))
+
+=== Bitcoin Core programski interfejs aplikacije (API)
+
+((("Bitcoin Core", "Bitcoin Core API", id="BCapi03")))Bitcoin Core klijent implementira JSON-RPC interfejs kojem se takođe može pristupiti pomoću aplikacije komandne linije +bitcoin-cli+. Komandna linija nam omogućava interaktivni eksperiment sa mogućnostima koje su programski dostupne i putem API-ja.  ((("Bitcoin Core", "Bitcoin Core API", "RPC commands")))Za početak, pozovite komandu +help+ da biste videli spisak bitkoin RPC komandi na raspolaganju:
+
+[[bitcoind_commands]]
+
+----
+$ bitcoin-cli help
+addmultisigaddress nrequired ["key",...] ( "account" )
+addnode "node" "add|remove|onetry"
+backupwallet "destination"
+createmultisig nrequired ["key",...]
+createrawtransaction [{"txid":"id","vout":n},...] {"address":amount,...}
+decoderawtransaction "hexstring"
+...
+...
+verifymessage "bitcoinaddress" "signature" "message"
+walletlock
+walletpassphrase "passphrase" timeout
+walletpassphrasechange "oldpassphrase" "newpassphrase"
+----
+
+Svaka od tih naredbi može imati niz parametara. Da biste dobili dodatnu pomoć, detaljan opis i informacije o parametrima, dodajte ime naredbe nakon +help+. Na primer, da biste videli pomoć o komandi za +getblockhash+ RPC:
+
+----
+$ bitcoin-cli help getblockhash
+getblockhash height
+
+Returns hash of block in best-block-chain at height provided.
+
+Arguments:
+1. height         (numeric, required) The height index
+
+Result:
+"hash"         (string) The block hash
+
+Examples:
+> bitcoin-cli getblockhash 1000
+> curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockhash", "params": [1000] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+----
+
+Na kraju informacija za pomoć videćete dva primera RPC naredbe, koristeći +bitcoin-cli+ komandu ili HTTP klijent +curl+. Ovi primeri pokazuju kako možete nazvati komandu. Kopirajte prvi primer i pogledajte rezultat:
+
+----
+$ bitcoin-cli getblockhash 1000
+00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09
+----
+
+Rezultat je blok heš, koji je detaljnije opisan u narednim poglavljima. Za sada bi ova komanda trebala da vrati isti rezultat na vašem sistemu, pokazujući da se vaš Bitcoin Core čvor pokreće, prihvata naredbe i ima informacije o bloku 1000 koji će vam vratiti.
+
+U sledećim odeljcima pokazaćemo vam nekoliko vrlo korisnih RPC naredbi i njihov očekivani izlaz.
+
+==== Dobijanje informacija o statusu Bitcoin Core klijenta
+
+((("Bitcoin Core", "Bitcoin Core API", "status information")))Bitcoin Core pruža izveštaje o statusu na različitim modulima putem JSON-RPC interfejsa. Najvažnije komande uključuju +getblockchaininfo+, +getmempoolinfo+, +getnetworkinfo+ i +getwalletinfo+.
+
+Bitkoin +getblockchaininfo+ RPC naredba je prethodno uvedena. Naredba +getnetvorkinfo+ prikazuje osnovne informacije o statusu bitkoin mrežnog čvora. Upotrebite +bitcoin-cli+ da biste ga pokrenuli:
+
+----
+$ bitcoin-cli getnetworkinfo
+----
+[source,json]
+----
+  "version": 150000,
+  "subversion": "/Satoshi:0.15.0/",
+  "protocolversion": 70015,
+  "localservices": "000000000000000d",
+  "localrelay": true,
+  "timeoffset": 0,
+  "networkactive": true,
+  "connections": 8,
+  "networks": [
+    ...
+    detailed information about all networks (ipv4, ipv6 or onion)
+    ...
+  ],
+  "relayfee": 0.00001000,
+  "incrementalfee": 0.00001000,
+  "localaddresses": [
+  ],
+  "warnings": ""
+}
+
+----
+
+Podaci se vraćaju u JavaScript Object Notation (JSON) formatu koji se lako može "konzumirati" u svim programskim jezicima, ali je takođe i lako čitljiv. Među ovim podacima vidimo verziju bitkoin klijent softvera (150000) i bitkoin protokola (70015). Vidimo trenutni broj veza (8) i razne informacije o bitkoin mreži i konfiguraciji za ovog klijenta.
+
+[TIP]
+====
+Biće potrebno neko vreme, možda više od jednog dana, da bi +bitcoind+ klijent "pristigao" trenutnu visinu bločejna dok preuzima blokove sa drugih bitkoin klijenata. Možete proveriti njegov napredak koristeći +getblockchaininfo+ da biste videli broj poznatih blokova.
+====
+
+[[exploring_and_decoding_transanctions]]
+==== Istraživanje i dekodiranje transakcija
+
+((("Bitcoin Core", "Bitcoin Core API", "exploring and decoding transactions")))((("transactions", "exploring with Bitcoin Core API")))Naredbe: +getrawtransaction+, +decoderawtransaction+
+
+
+
+In <<cup_of_coffee>>, ((("use cases", "buying coffee", id="alicethree")))Alisa je kupila šolju kafe u Bobovom kafiću. Njena transakcija je zabeležena na blokčejnu sa ID-om transakcije (+txid+)  +0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2+. Koristimo API za pronalaženje i ispitivanje te transakcije, tako što ćemo proslediti ID transakcije kao parametar:
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getrawtransaction 0627052b6f28912f2703066a912ea577f2ce4da4caa5a↵
+5fbd8a57286c345c2f2
+
+0100000001186f9f998a5aa6f048e51dd8419a14d8a0f1a8a2836dd734d2804fe65fa35779000↵
+000008b483045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4↵
+ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813014↵
+10484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc54123363767↵
+89d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adfffffffff0260e3160000000↵
+0001976a914ab68025513c3dbd2f7b92a94e0581f5d50f654e788acd0ef8000000000001976a9↵
+147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac00000000
+</pre>
+++++
+
+
+[TIP]
+====
+((("transaction IDs (txd)")))((("malleability")))ID transakcije nije merodavan dok se transakcija ne potvrdi. Odsustvo heša za transakciju u blokčejnu ne znači da transakcija nije obrađena. To je poznato pod nazivom "transaction malleability," (mogućnost manipulisanja transakcije), jer se hešovi transakcija mogu modifikovati pre potvrde u bloku. Nakon potvrde, +txid+ je nepromenljiv i autoritativan.
+====
+
+Naredba +getrawtransaction+ vraća serijsku transakciju u heksadecimalnoj notaciji. Da bismo je dekodirali, koristimo naredbu +decoderawtransaction+, prosleđujući heks podatke kao parametar. Možete da kopirate heks koji je vratio +getrawtransaction+ i ubaciti ga kao parametar u +decoderawtransaction+:
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli decoderawtransaction 0100000001186f9f998a5aa6f048e51dd8419a14d8↵
+a0f1a8a2836dd734d2804fe65fa35779000000008b483045022100884d142d86652a3f47ba474↵
+6ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298↵
+cad530a863ea8f53982c09db8f6e381301410484ecc0d46f1918b30928fa0e4ed99f16a0fb4fd↵
+e0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa↵
+336a8d752adfffffffff0260e31600000000001976a914ab68025513c3dbd2f7b92a94e0581f5↵
+d50f654e788acd0ef8000000000001976a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8↵
+88ac00000000
+
+</pre>
+++++
+
+++++
+<pre data-type="programlisting" data-code-language="json">
+{
+  "txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+  "size": 258,
+  "version": 1,
+  "locktime": 0,
+  "vin": [
+    {
+      "txid": "7957a35fe64f80d234d76d83a2...8149a41d81de548f0a65a8a999f6f18",
+      "vout": 0,
+      "scriptSig": {
+        "asm":"3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1decc...",
+        "hex":"483045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1de..."
+      },
+      "sequence": 4294967295
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.01500000,
+      "n": 0,
+      "scriptPubKey": {
+        "asm": "OP_DUP OP_HASH160 ab68...5f654e7 OP_EQUALVERIFY OP_CHECKSIG",
+        "hex": "76a914ab68025513c3dbd2f7b92a94e0581f5d50f654e788ac",
+        "reqSigs": 1,
+        "type": "pubkeyhash",
+        "addresses": [
+          "1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA"
+        ]
+      }
+    },
+    {
+      "value": 0.08450000,
+      "n": 1,
+      "scriptPubKey": {
+        "asm": "OP_DUP OP_HASH160 7f9b1a...025a8 OP_EQUALVERIFY OP_CHECKSIG",
+        "hex": "76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac",
+        "reqSigs": 1,
+        "type": "pubkeyhash",
+        "addresses": [
+          "1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK"
+        ]
+      }
+    }
+  ]
+}
+
+</pre>
+++++
+
+Dekodiranje transakcije prikazuje sve komponente ove transakcije, uključujući ulaze i izlaze transakcija. U ovom slučaju vidimo da je transakcija koja je našoj novoj adresi pripisala 15 milibita koristila jedan ulaz i stvorila dva izlaza. Ulaz u ovu transakciju bio je izlaz iz prethodno potvrđene transakcije (prikazane kao vin +tksid+ počevši sa +7957a35fe+). Od dva izlaza jedan odgovara izlazu od 15 milibita za kredit, a drugi izlazu za kusur koji se vraća pošiljaocu.
+
+Blokčejn dalje možemo istražiti ispitivanjem prethodne transakcije na koju se poziva +txid+ u ovoj transakciji koristeći iste komande (npr. +getrawtransaction+). Preskačući iz transakcije u transakciju možemo pratiti lanac transakcija unazad, jer se kovanice (coins) prenose sa adrese vlasnika na adresu vlasnika.
+
+
+
+==== Istraživanje blokova
+
+((("Bitcoin Core", "Bitcoin Core API", "exploring blocks")))((("blocks", "exploring with Bitcoin Core API")))Komande: +getblock+, +getblockhash+
+
+((("blocks", "block height")))((("blocks", "block hash")))Istraživanje blokova je slično istraživanju transakcija. Međutim, na blokove se može pozivati ili kao na blok _height (visina bloka)_ ili kao na blok _hash (heš)_. Prvo da pronađemo blok po njegovoj visini. U <<cup_of_coffee>>, videli smo da je Alisina transakcija uključena u blok 277316.
+
+Koristimo naredbu +getblockhash+, koja uzima visinu bloka kao parametar i vraća blok heš za taj blok:
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getblockhash 277316
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+</pre>
+++++
+
+Sada kada znamo u koji blok je uključena Alisina transakcija, možemo da ga ispitamo. Koristimo naredbu +getblock+ sa blok hešom kao parametrom:
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getblock 0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b3↵
+1b2cc7bdc4
+</pre>
+++++
+
+++++
+<pre data-type="programlisting" data-code-language="json">
+{
+  "hash": "0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4",
+  "confirmations": 37371,
+  "size": 218629,
+  "height": 277316,
+  "version": 2,
+  "merkleroot": "c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e",
+  "tx": [
+    "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+    "b268b45c59b39d759614757718b9918caf0ba9d97c56f3b91956ff877c503fbe",
+    "04905ff987ddd4cfe603b03cfb7ca50ee81d89d1f8f5f265c38f763eea4a21fd",
+    "32467aab5d04f51940075055c2f20bbd1195727c961431bf0aff8443f9710f81",
+    "561c5216944e21fa29dd12aaa1a45e3397f9c0d888359cb05e1f79fe73da37bd",
+[... stotine transakcija ...]
+    "78b300b2a1d2d9449b58db7bc71c3884d6e0579617e0da4991b9734cef7ab23a",
+    "6c87130ec283ab4c2c493b190c20de4b28ff3caf72d16ffa1ce3e96f2069aca9",
+    "6f423dbc3636ef193fd8898dfdf7621dcade1bbe509e963ffbff91f696d81a62",
+    "802ba8b2adabc5796a9471f25b02ae6aeee2439c679a5c33c4bbcee97e081196",
+    "eaaf6a048588d9ad4d1c092539bd571dd8af30635c152a3b0e8b611e67d1a1af",
+    "e67abc6bd5e2cac169821afc51b207127f42b92a841e976f9b752157879ba8bd",
+    "d38985a6a1bfd35037cb7776b2dc86797abbb7a06630f5d03df2785d50d5a2ac",
+    "45ea0a3f6016d2bb90ab92c34a7aac9767671a8a84b9bcce6c019e60197c134b",
+    "c098445d748ced5f178ef2ff96f2758cbec9eb32cb0fc65db313bcac1d3bc98f"
+  ],
+  "time": 1388185914,
+  "mediantime": 1388183675,
+  "nonce": 924591752,
+  "bits": "1903a30c",
+  "difficulty": 1180923195.258026,
+  "chainwork": "000000000000000000000000000000000000000000000934695e92aaf53afa1a",
+  "previousblockhash": "0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569",
+  "nextblockhash": "000000000000000010236c269dd6ed714dd5db39d36b33959079d78dfd431ba7"
+}
+</pre>
+++++
+
+Blok sadrži 419 transakcija, a 64. navedena transakcija (+0627052b...+) je Alisino plaćanje kafe. Unos +height+ govori nam da je ovo 277316. blok u blokčejnu.
+
+==== Korišćenje programskog interfejsa Bitcoin Core-a
+
+((("Bitcoin Core", "Bitcoin Core API", "using programmatic interface")))((("programmatic interface", id="progint03")))Komanda +bitcoin-cli+ je vrlo korisna za istraživanje Bitcoin Core API-a i za testiranje funkcija. Ali suština čitavog aplikacijskog programskog interfejsa je pristupanje funkcijama na programski način. U ovom odeljku ćemo prikazati pristup Bitcoin Core-u iz drugog programa.
+
+API Bitcoin Core-a ima JSON-RPC interfejs. JSON označava JavaScript Object Notation i vrlo je zgodan način predstavljanja podataka koji i ljudi i programi mogu lako da čitaju. RPC stoji skraćeno za daljinski postupak poziva (remote procedure call), što znači da pozivamo procedure (funkcije) koje su udaljene (na Bitcoin Core čvoru) putem mrežnog protokola. U ovom slučaju mrežni protokol je HTTP ili HTTPS (za šifrovane veze).
+
+Kada smo koristili naredbu +bitcoin-cli+ da bismo dobili pomoć o komandi, pokazao nam je primer korišćenja +curl+, raznovrsnog HTTP klijenta komandne linije za konstrukciju jednog od ovih JSON-RPC poziva:
+
+----
+$ curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockchaininfo", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+----
+
+Ova naredba pokazuje da +curl+ podnosi HTTP zahtev lokalnom hostu (127.0.0.1), povezujući se sa zadatim bitkoin portom (8332) i dostavlja +jsonrpc+ zahtev za +getblockchaininfo+ metod koristeći +text/plain+ enkodiranje.
+
+Primetićete da curl traži da se zajedno sa zahtevom pošalju i ovlašćenja (credentials). Bitcoin Core će kreirati slučajnu lozinku pri svakom pokretanju i smestiti je u direktorijum podataka pod imenom +.cookie+. Aplikacija +bitcoin-cli+ može da pročita ovaj fajl sa lozinkama u direktorijumu podataka. Slično tome, možete kopirati lozinku i proslediti je curl aplikaciji (ili bilo kom višem nivou Bitcoin Core RPC omota). Alternativno, možete da kreirate statičku lozinku pomoću skripta _./share/rpcauth/rpcauth.py_ u izvornom direktorijumu Bitcoin Core-a.
+
+Ako implementirate JSON-RPC poziv u svom programu, možete da koristite generičku HTTP biblioteku za izgradnju poziva, slično kao što je prikazano u prethodnom +curl+ primeru.
+
+Međutim, postoje biblioteke u skoro svim programskim jezicima koje "obmotavaju" Bitcoin Core API da bi to bilo mnogo jednostavnije. Koristićemo biblioteku +python-bitcoinlib+ da bismo pojednostavili pristup API-ju. Zapamtite, to zahteva da imate pokrenutu instancu Bitcoin Core-a koja će se koristiti za upućivanje JSON-RPC poziva.
+
+Python skripta u <<rpc_example>> pravi jednostavan +getblockchaininfo+ poziv i ispisuje +blocks+ parametre iz podataka koje je vratio Bitcoin Core.
+
+[[rpc_example]]
+.Pokrenuti getblockchaininfo putem JSON-RPC API-ja Bitcoin Core-a
+====
+[source,python]
+----
+include::code/rpc_example.py[]
+----
+====
+
+Njegovo pokretanje nam daje sledeći rezultat:
+
+----
+$ python rpc_example.py
+394075
+----
+
+To nam govori da naš lokalni Bitcoin Core čvor ima 394075 blokova u svom blokčejnu. Nije spektakularan rezultat, ali pokazuje osnovnu upotrebu biblioteke kao pojednostavljenog interfejsa JSON-RPC API-ja Bitcoin Core-a.
+
+Iiskoristite +getrawtransaction+ i +decodetransaction+ pozive da biste preuzeli detalje plaćanja Alisine kafe. U <<rpc_transaction>>, preuzimamo Alisinu transakciju i popisujemo izlazne rezultate transakcije. Za svaki izlaz prikazujemo adresu primaoca i vrednost. Prisetimo se da je Alisina transakcija imala jedan izlaz koji plaća Bobovom kafiću i jedan izlaz za kusur nazad Alisi.
+
+[[rpc_transaction]]
+.Skidanje transakcije i iteriranje njenih izlaza
+====
+[source,python]
+----
+include::code/rpc_transaction.py[]
+----
+====
+
+Pokretanjem ovog koda dobijamo:
+
+----
+$ python rpc_transaction.py
+([u'1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA'], Decimal('0.01500000'))
+([u'1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK'], Decimal('0.08450000'))
+----
+
+Oba prethodna primera su prilično jednostavna. Ustvari ne treba vam program za pokretanje; čak biste mogli da koristite i +bitcoin-cli+ komandu. Međutim, sledeći primer zahteva nekoliko stotina RPC poziva i jasnije prikazuje upotrebu programskog interfejsa.
+
+U <<rpc_block>>, prvo povratite blok 277316, a zatim vratite svaku od 419 transakcija pozivanjem na svaku ID transakciju. Zatim ponavljamo svaki izlaz iz transakcije i sabiramo vrednosti.((("", startref="alicethree")))
+
+[[rpc_block]]
+.Skidanje jednog bloka i dodavanje svih izlaza transakcije
+====
+[source,python]
+----
+include::code/rpc_block.py[]
+----
+====
+
+Pokretanjem ovog koda dobijamo:
+
+----
+$ python rpc_block.py
+
+('Total value in block: ', Decimal('10322.07722534'))
+----
+
+Naš primer koda izračunava da je ukupna vrednost transakcije u ovom bloku 10,322.07722534 BTC (uključujući 25 BTC nagrade i 0.0909 BTC u naknadama). Uporedite to sa iznosom koji je objavio sajt za istraživanje bloka pretraživanjem blok heša ili visine bloka. Neki istraživači blokova prijavljuju ukupnu vrednost isključujući nagradu i isključujući naknade. Pogledajte da li možete uočiti razliku. ((("", startref="BCapi03")))((("", startref="progint03")))
+
+[[alt_libraries]]
+=== Alternativni klijenti, biblioteke i alati
+
+((("Bitcoin Core", "alternatives to", id="BCalt03")))((("clients, libraries, and toolkits", id="clients03")))((("libraries, clients, and toolkits", id="librar03")))((("toolkits, libraries, and clients", id="toolkit03")))((("third-party API clients", id="thirdpart03")))U bitkoin ekosistemu postoji mnogo alternativnih klijenata, biblioteka, kompleta alata, pa čak i implementacija punih čvorova. Oni se implementiraju u različitim programskim jezicima, nudeći programerima srodne interfejse u njihovom omiljenom jeziku.
+
+Sledeći odeljci navode neke od najboljih biblioteka, klijenata i alata, organizovane po programskim jezicima.
+
+==== C/C++
+https://github.com/bitcoin/bitcoin[Bitcoin Core] :: Referentna implementacija bitkoina
+https://github.com/libbitcoin/libbitcoin[libbitcoin]::  Cross-platform C++ razvojni alati, čvor i biblioteka konsenzusa
+https://github.com/libbitcoin/libbitcoin-explorer[bitcoin explorer]:: Alat komandne linije Libbitcoin
+https://github.com/jgarzik/picocoin[picocoin]:: Lagana klijentska biblioteka za C jezik za bitkoin Džefa Garzika
+
+==== JavaScript
+http://bcoin.io/[bcoin]:: Modularna i skalabilna implementacija punog čvora (full node) sa API-jem
+https://bitcore.io/[Bitcore] :: Potpuni čvor, API i biblioteka od Bitpay-a
+https://github.com/bitcoinjs/bitcoinjs-lib[BitcoinJS] :: Čista JavaScript Bitcoin biblioteka za node.js i web pretraživače
+
+==== Java
+https://bitcoinj.github.io[bitcoinj]:: Java biblioteka sa punim čvorovima
+https://bitsofproof.com[Bits of Proof (BOP)]:: Java implementacija bitkoina za velika preduzeća
+
+==== PHP
+https://github.com/bit-wasp/bitcoin-php[bitwasp/bitcoin]:: PHP bitkoin biblioteka i srodni projekti
+
+==== Python
+https://github.com/petertodd/python-bitcoinlib[python-bitcoinlib]:: Python biblioteka za bitkoin, konsenzus biblioteka i čvor Pitera Toda
+https://github.com/richardkiss/pycoin[pycoin]:: Bitkoin biblioteka Python-a Ričarda Kisa
+https://github.com/vbuterin/pybitcointools[pybitcointools]:: Bitkoin biblioteka Python-a Vitalika Buterina
+
+==== Ruby
+https://github.com/sinisterchipmunk/bitcoin-client[bitcoin-client]:: Ruby biblioteka za JSON-RPC API
+
+==== Go
+https://github.com/btcsuite/btcd[btcd]:: Bitkoin klijent sa punim čvorom na jeziku Go
+
+==== Rust
+https://github.com/apoelstra/rust-bitcoin[rust-bitcoin]:: Rust bitkoin biblioteka za serializaciju, raščlanjivanje (parsing) i API pozive
+
+==== C#
+https://github.com/MetacoSA/NBitcoin[NBitcoin]:: Obimna biblioteka bitkoina za .NET framework
+
+==== Objective-C
+https://github.com/oleganza/CoreBitcoin[CoreBitcoin]:: Bitkoin alat za ObjC i Swift
+
+Daleko više biblioteka postoji u drugim programskim jezicima, i sve više ih se stvara.((("", startref="BCalt03")))((("", startref="clients03")))((("", startref="thirdpart03")))((("", startref="toolkit03")))((("", startref="librar03")))

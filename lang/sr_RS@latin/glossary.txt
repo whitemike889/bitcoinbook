@@ -1,0 +1,250 @@
+[preface]
+== Rečnik
+
+Ovaj rečnik sadrži mnoge izraze koji se koriste u vezi sa bitkoinom. Ovi izrazi se koriste u celoj knjizi, zato zabeležite to kao referencu.
+
+adresa::
+    Bitkoin adresa izgleda slično ovoj +1DSrfJdB2AnVaFNgSbv3MZC2m74996JafV+. Sastoji se od niza slova i brojeva. U stvari je kodirana base58check kodirana verzija 160-bitnog heša javnog ključa. Baš kao što biste od nekoga tražili da vam pošalje imejl na vašu imejl adresu, isto tako biste od nekoga tražili da vam pošalje bitkoin na jednu od vaših bitkoin adresa.
+
+bip::
+    Predlozi za poboljšanje bitkoina. Skup predloga koje su poslali članovi bitkoin zajednice kako bi poboljšali bitkoin. Na primer, BIP-21 je predlog za poboljšanje šeme za uniformno identifikovanje resursa bitkoina (URI).
+
+bitkoin::
+    Naziv valutne jedinice (kovanice), mreže i softvera.
+
+blok::
+    Grupiranje transakcija, obeleženih vremenskim pečatom i otiskom prsta prethodnog bloka. Zaglavlje bloka je hešovano radi dobijanja Proof-of-Work-a, čime se potvrđuje transakcija. Validni blokovi se dodaju glavnom blokčejnu kroz mrežni konsensus
+
+blokčejn::
+	Lista validiranih blokova se vezuje za svakog svog prethodnika sve do bloka geneze (genesis block).
+
+Byzantine Generals Problem - Problem Vizantijskih Generala::
+    Pouzdan računarski sistem mora da bude u stanju da se nosi sa otkazivanjem jedne ili više njegovih komponenti. Neuspešna komponenta može da iskaže vrstu ponašanja koje se često previdi - naime, slanje konfliktnih informacija u različite delove sistema. Problem suočavanja sa ovom vrstom neuspeha izražen je apstraktno kao problem vizantijskih generala.
+
+coinbase::
+	Posebno polje koje se koristi kao jedini ulaz za transakcije coinbase-a. Coinbase omogućava da se polažu prava na nagradu za blok (block reward) i pruža do 100 bajta za proizvoljne podatke.
+	Ne treba ga mešati sa transakcijom coinbase-a.
+
+ coinbase transaction - transakcija coinbase-a::
+	Prva transakcija u bloku. Uvek je stvara rudar, a uključuje jedan coinbase.
+	Ne treba je mešati sa coinbase-om.
+
+cold storage - hladno skladištenje::
+	Odnosi se na čuvanje rezerve bitkoina van mreže. Hladno skladištenje (cold storage) se stvara kada se bitkoin privatni ključevi kreiraju i stave u sigurno oflajn okruženje. Hladno skladištenje je važno svima koji imaju bitkoine. Internet računari su ranjivi na hakere i ne bi trebalo da se koriste za čuvanje značajne količine bitkoina.
+
+confirmations - potvrde::
+	Kada se transakcija uključi u blok, ima jednu potvrdu. Čim se _još jedan_ blok izrudari na istom blokčejnu, transakcija ima dve potvrde i tako dalje. Šest ili više potvrda smatra se dovoljnim dokazom da transakcija ne može da se preokrene.
+
+consensus - konzensus::
+    Kada nekoliko čvorova, obično većina čvorova na mreži, imaju iste blokove u svom lokalno validiranom lancu najboljeg blokčejna.
+    Ne treba mešati sa pravilima konsenzusa.
+
+consensus rules - pravila konzensusa::
+    Pravila verifikacije bloka prate puni čvorovi (full nodes) da bi ostali u konsenzusu sa drugim čvorovima.
+    Ne treba mešati sa konsenzusom.
+
+difficulty - težina::
+	Postavka na nivou mreže koja kontroliše koliko je računanja potrebno za podnošenja Proof-of-Work-a (dokaza o radu).
+
+difficulty retargeting - podešavanje težine:
+	Preračunavanje težine na nivou mreže koje se javlja jednom na svakih 2,016 blokova i uzima u obzir snagu hešovanja prethodnih 2,016 blokova.
+
+difficulty target - ciljna težina::
+    Težina pri kojoj će sva računanja u mreži pronaći blokove na otprilike svakih 10 minuta.
+
+double spending - dvostruka potrošnja::
+    Dvostruka potrošnja je rezultat uspešnog trošenja novca više od jednog puta. Bitkoin se štiti od dvostruke potrošnje verifikujući svaku transakciju koja je dodata u blokčejn kako bi se osiguralo da ulazi jedne transakcije prethodno nisu potrošeni.
+
+ECDSA::
+    Algoritam digitalnog potpisa eliptičke krive (Elliptic Curve Digital Signature Algorithm) ili ECDSA je kriptografski algoritam koji Bitkoin koristi da bi osigurao da sredstva mogu da potroše samo njihovi zakoniti vlasnici.
+
+extra nonce - dodatni nonce::
+    Kako se težina povećavala, rudari su često prolazili kroz sve 4 milijarde vrednosti nonce-a, a da ne nađu blok. Kako coinbase skripta može da skladišti između 2 i 100 bajta podataka, rudari su počeli da koriste taj prostor kao dodatni nonce prostor, omogućavajući im da istražuju mnogo veći nonce prostor. To im je omogućilo da nađu mnogo veći spektar vrednosti zaglavlja bloka kako bi pronašli važeće blokove.
+
+fees - naknade::
+	Pošiljalac transakcije često uključuje naknadu za mrežu za obradu tražene transakcije. Većina transakcija zahteva minimalnu naknadu od 0,5 mBTC.
+
+fork - račva::
+    Fork (račva), poznat je kao slučajni fork. Pojavljuje se kada dva ili više blokova imaju istu visinu bloka, što račva ili deli lanac blokova. Obično se dešava kada dva ili više rudara pronađu blokove u isto vreme. Može se dogoditi i kao deo napada.
+
+genesis block - genezni blok::
+	Prvi blok u blokčejnu, korišćen za inicijalizaciju kriptovalute.
+
+hard fork - tvrda račva::
+    Hard fork (tvrda račva), takođe poznat kao Hard-Forking Change (promena tvrde račve), trajna je divergencija u blokčejnu, koja se obično javlja kada nenadograđeni čvorovi ne mogu da validiraju blokove koje su stvorili nadograđeni čvorovi koji slede novija pravila konsenzusa. Pored toga može da bude i da se druga valuta uvodi na bazi bitkoina kao što se to desilo sa Bitcoin Cash i Bitcoin Satoshi's Vision.
+    Ne treba mešati sa fork-om, soft fork-om, softverskim fork-om ili Git fork-om.
+
+hardware wallet - hardverski novčanik::
+    Hardverski novčanik je posebna vrsta bitkoin novčanika koji skladišti privatne ključeve korisnika u sigurnom hardverskom uređaju.
+
+hash - heš::
+    Digitalni otisak prsta nekog binarnog ulaza.
+
+hashlocks - heš brave::
+    Hashlock (heš brava) je vrsta opterećenja koje ograničava potrošnju izlaza sve dok se određeni podatak ne objavi javno. Hashlocks imaju korisno svojstvo da nakon što se bilo koji hashlock otvori javno, bilo koji drugi hashlock zaštićen istim ključem takođe može da se otvori. To omogućava stvaranje više izlaza koji su zaključani istim hashlockom i koji svi postaju potrošni u isto vreme.
+
+HD protokol::
+    Hijerarhijski determinističko (HD) kreiranje ključa i protokol prenosa (BIP32), omogućava kreiranje dečijih ključeva (child keys) iz roditeljskih ključeva (parent keys) u hijerarhiji.
+
+HD wallet - HD novčanik::
+    Novčanici koji koriste HD protokol za kreiranje i prenošenje ključeva (BIP32).
+
+HD wallet seed - seme HD novčanika::
+    HD novčanik semena ili seme korena (root seed) je potencijalno kratka vrednost koja se koristi za generisanje glavnog privatnog ključa (master private key) i glavnog čejn koda (master chain code) za HD novčanik.
+
+HTLC::
+    Hashed TimeLock Contract (HTLC) je vrsta plaćanja koja koristi heš brave (hashlocks) i vremenske brave (timelock) uz zahtev da primalac plaćanja ili potvrdi primanje plaćanja pre roka tako što generiše kriptografski dokaz o plaćanju, ili oduzme mogućnost traženja plaćanja, vraćajući vrednosti onome ko je pokrenuo plaćanje.
+
+KYC::
+    Znajte ko je vaš kupac (know-your-customer ili KYC) je proces poslovanja, identifikacija i potvrđivanje identiteta klijenata. Izraz se takođe koristi za bankarsku regulativu koja reguliše ove aktivnosti.
+
+LevelDB::
+    LevelDB je otvoren kod za skladištenje vrednosti ključeva na disku. LevelDB je lagana, jednonamenska biblioteka za persistiranje koja je povezana sa mnogim platformama.
+
+Lightning Network - Lightning mreža::
+    Lightning mreža (Lightning Network) je implementacija Hashed Timelock Contract-a (HTLC) sa dvosmernim kanalima plaćanja koja omogućava sigurno plaćanje preko više kanala peer-to-peer plaćanja. Ovo omogućava formiranje mreže u kojoj bilo koji vršnjak na mreži može da plati bilo kom drugom vršnjaku čak i ako nemaju direktno otvoren kanal između sebe. 
+
+Locktime - vreme zaključavanja::
+    Locktime (vreme zaključavanja), ili tehnički nLockTime je deo transakcije koji ukazuje najranije vreme ili najraniji blok kada bi se ta transakcija mogla dodati u blokčejn.
+
+mempool::
+    Bitkoin mempool (memorijski baza podatka) je skup svih podatka o transakcijama u bloku koji su verifikovani od strane bitkoin čvorova, ali još uvek nisu potvrđeni.
+
+merkle root - Merkleov koren::
+    Korenski čvor Merkleovog stabla je potomak svih hešovanih parova na stablu. Zaglavlja blokova moraju sadržati važeći Merkleov koren koji potiče od svih transakcija u tom bloku.
+
+merkle tree - Merkleovo stablo::
+    Stablo izgrađeno hešovanjem uparenih podataka (listova), zatim uparivanjem i hešovanjem rezultata dok ne ostane samo jedan heš, Merkleov koren. U bitkoinu su listovi gotovo uvek transakcije iz samo jednog bloka.
+
+miner - rudar::
+    Mrežni čvor koji pronalazi validan Proof-of-Work za nove blokove, ponavljanjem hešovanja.
+
+multisignature::
+    Multisignature (multisig) se odnosi na zahtev da je potrebno više od jednog ključa za autorizaciju bitkoin transakcije.
+
+network - mreža::
+    Peer-to-peer mreža koja širi transakcije i blokove svakom bitkoin čvoru na mreži.
+
+nonce::
+    "Nonce" (ili namera u prevodu) u bitkoin bloku je 32-bitno (4-bajtno) polje čija je vrednost postavljena tako da heš bloka sadrži niz vodećih nula. Ostala polja se ne mogu menjati, jer imaju definisano značenje.
+
+of-čejn transakcije::
+    Of-čejn transakcija je kretanje vrednosti izvan blokčejna. Dok on-čejn transakcija &#x2014;obično jednostavno nazivana __transakcija __&#x2014; menja blokčejn i zavisi od blokčejna da bi utvrdila njen validitet, Of-čejn transakcija se oslanja na druge metode za beleženje i potvrđivanje transakcije. To se koristi na primer u Lightning mreži.
+
+opcode::
+    Operacioni kodovi Bitkoin Script jezika koji stavljaju podatke ili izvršavaju funkcije u okviru pubkey skripta ili skripte potpisa.
+
+Open Assets protokol::
+    Open Assets Protokol (otvoreni imovinski protokol) je jednostavan i moćan protokol izgrađen na bazi bitkoin blokčejna. Omogućava izdavanje i prenos imovine koju su kreirali korisnici. 
+
+OP_RETURN::
+    Opcode se koristi u jednom od izlaza u OP_RETURN transakciji. Ne treba mešati sa OP_RETURN transakcijom.
+
+OP_RETURN transakcija::
+    Vrsta transakcije koja dodaje proizvoljne podatke u dokazivo nepotrošiv pubkey koji puni čvorovi ne moraju čuvati u svojoj UTXO bazi podataka. Ne treba mešati sa OP_RETURN opcode-om.
+
+orphan block - siroče blok::
+    Orphan blokovi (siroče blokovi) su blokovi čiji roditeljski blok nije obrađen od strane lokalnog čvora, pa ih još uvek ne može u potpunosti validirati. Ne treba mešati sa bajatim blokom.
+
+orphan transactions - siroče transakcije::
+    Transakcije koje ne mogu ući u mempool zbog jedne ili više nedostajućih ulaznih transakcija.
+
+output - izlaz::
+    Izlaz, izlaz transakcije ili TxOut je izlaz u jednoj transakciji koji sadrži dva polja: polje vrednosti za prenos nula ili više satošija i skripte za pubkey koja pokazuje koji uslovi moraju biti ispunjeni da bi se ti satošiji dalje trošili.
+
+P2PKH::
+    Transakcije koje plaćaju na jednu bitkoin adresu sadrže P2PKH ili Pay To PubKey Hash (plati PubKey hešu) skripte. Izlaz zaključan pomoću P2PKH skripte može da se otključa (potroši) predstavljanjem javnog ključa (pubkey-a) i digitalnog potpisa stvorenog sa odgovarajućim privatnim ključem.
+
+P2SH::
+    P2SH ili Pay-to-Script-Hash ili plati-skript-hešu je moćan novi tip transakcije koji značajno pojednostavljuje upotrebu složenih skripti transakcije. Kod P2SH složena skripta koja detaljno opisuje uslove za potrošnju izlaza (skripta otkupa) nije prikazana u skripti za zaključavanje. Umesto toga, samo je heš u skripti za zaključavanje.
+
+P2SH adresa::
+    P2SH adrese su Base58Check kodiranja 20-bajtne heš skripte, P2SH adrese koriste prefiks verzije "5", što rezultira u Base58Check-kodiranim adresama koje počinju sa "3". P2SH adrese kriju svu složenost tako da osoba koja vrši uplatu ne vidi skriptu.
+
+P2WPKH::
+    Potpis P2WSH (Pay-to-Witness-Public-Key-Hash ili plati svedoku pubkey heša) sadrži iste informacije kao i potrošnja P2PKH, ali se nalazi u polju svedoka umesto u polju scriptSig. scriptPubKey je takođe izmenjen.
+
+P2WSH::
+    Razlika između P2SH i P2WSH (Pay-to-Witness-Script-Hash) je u promeni lokacije kriptografskih dokaza iz polja scriptSig-a u polje svedoka i scriptPubKey-a koje je takođe modifikovano.
+
+paper wallet - papirni novčanik::
+    U najužem smislu, papirni novčanik je dokument koji sadrži sve podatke potrebne za generisanje bilo koje količine bitkoin privatnih ključeva, formirajući novčanik ključeva. Međutim, ljudi često koriste ovaj izraz da označe bilo koji način skladištenja bitkoina van mreže kao fizički dokument. Ova druga definicija takođe obuhvata papirne ključeve i otkupljive kodove.
+
+payment channels - kanali plaćanja::
+    Kanal mikroplaćanja ili kanal plaćanja je klasa tehnika konstruisanih tako da omogućavaju korisnicima da prave više bitkoin transakcija, a da ne izvrše sve transakcije u bitkoin blokčejnu. U uobičajenom kanalu plaćanja, u blokčejn se dodaju samo dve transakcije, ali između učesnika može biti izvršen neograničen ili gotovo neograničen broj plaćanja.
+
+pooled mining - rudarenje u pulu::
+    Pooled mining ili rudarenje u pulu je pristup u kom više klijenata doprinosi stvaranju bloka, a zatim dele nagradu za blok u skladu sa doprinosom snage obrade.
+
+Proof-of-Stake - dokaz uloga::
+    Proof-of-Stake (PoS) ili dokaz uloga je metoda kojom mreža blokova kriptovaluta teži da postigne distribuirani konsenzus. Proof-of-Stake traži od korisnika da dokažu vlasništvo nad određenom količinom valute (njihov "ulog" u valuti).
+
+Proof-of-Work - dokaz rada::
+    Podatak za koji je potrebno značajno računanje. U bitkoinu rudari moraju da pronađu numeričko rešenje algoritma SHA256 koji ispunjava cilj na nivou mreže, ciljnu težinu.
+
+reward - nagrada::
+    Iznos uključen u svaki novi blok kao nagradu rudaru koji je pronašao rešenje Proof-of-Work. Trenutno 2019. iznosi 12,5 BTC po bloku.
+
+RIPEMD-160::
+    RIPEMD-160 je 160-bitna kriptografska heš funkcija. RIPEMD-160 je ojačana verzija RIPEMD-a sa 160-bitnim heš rezultatom i očekuje se da će biti sigurna narednih deset ili više godina.
+
+satoši::
+    Satoši je najmanja denominacija bitkoina koja se može staviti na bločejn. To je ekvivalent 0,00000001 bitkoina i ime je dobio po tvorcu bitkoina, Satošiju Nakamotu. ((("satoshi")))
+
+Satoši Nakamoto::
+    Satoši Nakamoto je ime koje koristi osoba ili osobe koje su dizajnirale bitkoin i kreirali njegovu originalnu referentnu implementaciju, Bitcoin Core. Kao deo implementacije, osmislili su i prvu blokčejn bazu podataka. U tom su procesu prvi rešili problem dvostruke potrošnje za digitalne valute. Njihov stvarni identitet je ostao nepoznat.
+
+Skripta::
+    Bitkoin koristi skripting sistem za transakcije. Skripta slična Forth-u je jednostavna, bazirana na steku i obrađuje se sa leva na desno. Namerno nije Tjuring potpuna, pa je bez petlji.
+
+ScriptPubKey (ili pubkey skripta)::
+    ScriptPubKey ili pubkey skripta, je skripta koja je uključena u izlaze i koja postavlja uslove koji se moraju ispuniti kako bi se ti satošiji potrošili. Podaci za ispunjavanje uslova mogu se navesti u skripti za potpis.
+
+ScriptSig (ili signature script) - skripta potpisa::
+    ScriptSig ili signature script, odnosno skripta potpisa, su podaci koje generiše potrošač, a koji se skoro uvek koriste kao promenljive da bi se zadovoljio ScriptPubKey (pubkey skripta).
+
+secret key (aka private key) - tajni ključ (ili privatni ključ)::
+	Tajni broj koji otključava bitkoin poslat na odgovarajuću adresu. pass:[<span class="keep-together">A secret</span>] taster izgleda ovako:
++
+----
+5J76sF8L5jTtzE96r66Sf8cka9y44wdpJjMwCxR3tzLh3ibVPxh
+----
+
+Segregated Witness - odvojeni svedok::
+    Segregated Witness ili odvojeni svedok je nadogradnja bitkoin protokola u kojem su podaci potpisa („svedoka“) odvojeni od podataka pošiljalaca/primalaca radi dalje optimizacije strukture transakcija. Odvojeni svedok je realizovan kao soft fork; promena koja tehnički čini pravila bitkoin protokola restriktivnijim.
+
+SHA::
+    Algoritam sigurnog heša ili Secure Hash Algorithm ili SHA je porodica kriptografskih heš funkcija koje je objavio Nacionalni institut za standarde i tehnologiju (NIST).
+
+Simplified Payment Verification (SPV) - pojednostavljena verifikacija plaćanja::
+    SPV ili pojednostavljena verifikacija plaćanja je metoda kojom se potvrđuje da li su određene transakcije uključene u blok, bez skidanja celog bloka. Ovu metodu verifikacije često koriste lagani klijenti bitkoina.
+
+soft fork - meka račva::
+    Soft fork ili Soft-Forking Change je privremeni fork u blokčejnu koji se obično pojavljuje kada rudari koji koriste nenadograđene čvorove ne slede novo pravilo konsenzusa za koje njihovi čvorovi ne znaju.
+    Ne treba mešati sa fork, hard fork, softverski fork ili Git fork.
+
+stale block - bajat blok::
+    Blok koji je uspešno izrudaren, ali koji nije uključen u trenutno najbolji blokčejn (lanac blokova), verovatno zato što je neki drugi blok na istoj visini lanca bio prvi produžen. Ne treba mešati sa orphan blokom.
+
+timelocks - vremenske brave::
+    Timelock ili vremenska brava je vrsta zaključavanja koja ograničava potrošnju nekog bitkoina do određenog trenutka u budućnosti ili visine bloka. Vremenske brave su istaknuta karakteristika mnogih bitkoin ugovora, uključujući kanale za plaćanje i hešovane ugovore sa vremenskim bravama.
+
+transakcija::
+    Jednostavno rečeno, prenos bitkoina sa jedne adrese na drugu. Tačnije, transakcija je potpisana struktura podataka koja izražava prenos vrednosti. Transakcije se prenose preko bitkoin mreže, rudari ih skupljaju i uključuju ih u blokove, što ih čini trajnim na blokčejnu.
+
+transaction pool - transakcijski pul::
+    Neuređena kolekcija transakcija koja nije u blokovima u glavnom lancu, ali za koju imamo ulazne transakcije.
+
+Turing completeness - Tjuring potpunost::
+    Programski jezik se zove "Tjuring potpun" ako može pokrenuti bilo koji program koji Tjuring mašina može da pokrene, pod uslovom da ima dovoljno vremena i memorije.
+
+unspent transaction output (UTXO) - nepotrošeni izlaz transakcije::
+    UTXO (unspent transaction output) je nepotrošeni izlaz transakcije koji može da se potroši kao ulaz u novu transakciju.
+
+wallet - novčanik::
+    Softver koji sadrži sve vaše bitkoin adrese i tajne ključeve. Pomoću njega možete da šaljete, primate i čuvate svoj bitkoin.
+
+Wallet Import Format (WIF) - Importni format novčanika::
+    WIF ili Wallet Import Format je format razmene podataka dizajniran tako da omogućava izvoz i uvoz jednog privatnog ključa sa oznakom koja označava da li koristi kompresovani javni ključ ili ne.
+
+Neke od ovih definicija su dobijene pod CC-BY licencom sa https://en.bitcoin.it/wiki/Main_Page[Bitcoin Wiki] ili iz drugih izvora otvorene dokumentacije.

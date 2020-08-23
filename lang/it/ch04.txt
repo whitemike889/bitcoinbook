@@ -1,0 +1,836 @@
+[[ch04_chiavi_indirizzi]]
+== Chiavi, Indirizzi
+
+((("crittografia", "definito"))) ((("crittografia", vedi = "anche chiavi e indirizzi"))) Potresti aver sentito che il bitcoin è basato su _crittografia_, che è una branca della matematica ampiamente usata in sicurezza informatica. Crittografia significa "scrittura segreta" in greco, ma la scienza della crittografia comprende più della semplice scrittura segreta, che viene definita codifica. La crittografia può anche essere utilizzata per dimostrare la conoscenza di un segreto senza doverlo rivelare (firma digitale), o provare l'autenticità dei dati (impronta digitale). Questi tipi di prove crittografiche sono gli strumenti matematici fondamentali per bitcoin e ampiamente utilizzati nelle applicazioni bitcoin. ((("codifica"))) ((("codifica", vedi = "anche chiavi e indirizzi"))) Ironicamente, la crittografia non è una parte importante di bitcoin, poiché i suoi dati di comunicazione e transazione non sono codificati e non devono essere codificati per proteggere i fondi. In questo capitolo introdurremo alcune delle crittografie utilizzate in bitcoin per controllare la proprietà dei fondi, sotto forma di chiavi, indirizzi e portafogli.
+
+=== Introduzione
+
+((("chiavi digitali", vedi="chiavi e indirizzi")))((("chiavi e indirizzi", "panoramica su", id="KAover04")))((("firme digitali", "scopo di"))) La proprietà dei bitcoin si stabilisce attraverso l'uso delle _chiavi private_, _gli indirizzi bitcoin_, e _le firme digitali_. Le chiavi digitali non sono realmente conservate nella rete, ma sono invece create e conservate in un file dall'utente, o semplicemente un database, chiamato _wallet_. Le chiavi digitali contenute all'interno del portafoglio dell'utente sono completamente indipendenti dal protocollo bitcoin e possono essere generate e gestite dal software del portafoglio senza fare riferimento alla blockchain o dover accedere a internet. Le chiavi permettono molte interessanti proprietà di bitcoin, includendo anche una fiducia e un controllo decentralizzati, attestati di proprietà e un modello di _prova di sicurezza crittografica_.
+
+La maggior parte delle transazioni bitcoin richiede che una firma digitale valida sia inclusa nella blockchain, che può essere generata solo con una chiave segreta; quindi, chiunque abbia una copia di quella chiave ha il controllo dei bitcoin. ((("testimoni"))) La firma digitale utilizzata per spendere fondi è anche indicata come _witness_, un termine usato in crittografia. I dati dei testimoni in una transazione bitcoin testimoniano la vera proprietà dei fondi spesi.
+
+((("chiavi pubbliche e private", "coppia di chiavi")))((("chiavi pubbliche e private", vedi="chiavi e indirizzi")))Le chiavi vengono create a coppie; chiave privata (segreta) e chiave pubblica. Pensa alla chiave pubblica come il numero di conto corrente e alla chiave privata come un PIN segreto, o firma su un assegno, che fornisce il controllo sul conto. Queste chiavi digitali sono viste raramente da un utente bitcoin. Per la maggior parte del tempo, sono conservate all'interno di un file nel wallet e gestite dal software del wallet bitcoin
+
+Nella fase di pagamento di una transazione di bitcoin, la chiave pubblica del beneficiario è rappresentata dalla sua impronta digitale, chiamata _indirizzo bitcoin_, la quale è usata come il nome del beneficiario di un assegno (i.e., ''Pagato a favore di'') Nella maggior parte dei casi, un indirizzo bitcoin è generato da e corrisponde a una chiave pubblica. Tuttavia, non tutti gli indirizzi bitcoin rappresentano una chiave pubblica; essi possono rappresentare anche altri beneficiari, per esempio gli script, come vedremo dopo in questo capitolo. In questo modo, gli indirizzi bitcoin astraggono il destinatario dei fondi rendendo flessibili le destinazioni delle transazioni, in modo simile agli assegni cartacei: un unico strumento di pagamento che può essere usato  per pagare direttamente su conto corrente di persone e aziende, pagare le bollette o pagare in contanti. L'indirizzo Bitcoin è l'unica rappresentazione delle chiavi che gli utenti vedranno normalmente, dato che rappresenta l'informazione che dev'essere condivisa con il mondo.
+
+Prima di tutto, introdurremmo la crittografia e spiegheremo la matematica usata in bitcoin. Dopodiché, andremo a vedere come le chiavi sono formate, conservate e gestite. Andremo ad analizzare i vari format di codifica usati per rappresentare le chiavi pubbliche e private, gli indirizzi e gli indirizzi script. Per concludere, andremo ad osservare metodi avanzati di utilizzo degli indirizzi e delle chiavi: vanity, firmamultipla, indirizzi script e wallet di carta
+
+==== La Crittografia a Chiave Pubblica e le Criptovalute
+
+((("chiavi e indirizzi", "panoramica su", "crittografia chiave pubblica")))((("valute digitali", "crypto valute"))) La crittografia a chiave pubblica venne inventata nel 1970 e divenne subito una delle basi matematiche dei computer e della sicurezza informatica.
+
+Fin dall'invenzione della crittografia a chiave pubblica, sono state scoperte molte funzioni matematiche, come l'elevazione a potenza dei numeri primi e la moltiplicazione della curva ellittica. Queste funzioni matematiche sono praticamente irreversibili, sono facili da calcolare in una direzione ma impossibili da calcolare nella direzione opposta. Sulla base di queste funzioni matematiche, la crittografia consente la creazione di segreti digitali e firme digitali non falsificabili. Bitcoin usa la moltiplicazione a curva ellittica come fondamenta per la sua crittografia a chiave pubblica.
+
+In bitcoin, usiamo la crittografia a chiave pubblica per creare una coppia di chiavi che controlla l'accesso ai bitcoin. La coppia di chiavi è formata da una chiave privata e--derivata da essa--un'unica chiave pubblica. La chiave pubblica è usata per ricevere i fondi, mentre la chiave privata è usata per autorizzare le transazioni in uscita. 
+
+C'è una relazione matematica tra la chiave pubblica e quella privata che permette alla chiave privata di essere usata per generare firme sui messaggi. Questa firma può essere validata attraverso la chiave pubblica senza rivelare la chiave privata.
+
+Quando vengono spesi dei bitcoin, l&#39;attuale proprietario di bitcoin presenta la sua chiave pubblica e una firma (diversa ogni volta, ma creata dalla stessa chiave privata) in una transazione per spendere quei bitcoin. Attraverso la presentazione della chiave pubblica e della firma, tutti i membri della rete bitcoin possono verificare e accettare la transazione come valida, confermando che la persona che ha trasferito i bitcoin li abbia posseduti al momento del trasferimento.
+
+[TIP]
+====
+((("chiavi e indirizzi","panoramica su". ''coppie di chiavi''))) Nella maggior parte dei wallets, le chiavi private e pubbliche, per convenienza, sono conservate insieme come _coppia di chiavi_. Tuttavia, la chiave pubblica può essere calcolata dalla chiave privata, quindi è possibile conservare anche solo la chiave privata.
+====
+
+[[private_public_keys]]
+==== Chiavi Private e Pubbliche
+
+((("chiavi e indirizzi", "panoramica su", '' coppia di chiave pubblica e privata''))) ((( "crittografia a curva ellittica"))) ((( "crittografia", ''crittografia a curva ellittica'')))Un portafoglio bitcoin contiene una raccolta di coppie di chiavi, ognuna composta da una chiave privata e una pubblica. La chiave privata (k) è un numero, di solito scelto a caso. Dalla chiave privata, viene utilizzata la moltiplicazione a curva ellittica, una funzione di crittografia unidirezionale, per generare una chiave pubblica (K). Dalla chiave pubblica (K), viene utilizzata una funzione di hash crittografico unidirezionale per generare un indirizzo bitcoin (A). In questa sezione, si inizierà con la generazione della chiave privata, analizzando la matematica relativa alla curva ellittica che viene utilizzata per generare una chiave pubblica e, infine, generare un indirizzo bitcoin dalla chiave pubblica. Il rapporto tra la chiave privata, la chiave pubblica e l'indirizzo bitcoin è mostrato in <<k_to_K_to_A> >.
+
+[[k_to_K_to_A]]
+.Chiave privata, chiave pubblica e indirizzo bitcoin
+immagine :: images / mbc2_0401.png [ &quot;privk_to_pubK_to_addressA&quot;]
+
+Perché usare la Crittografia Asimmetrica (Chiavi Pubbliche/Private)?
+****
+((("cryptography", "asymmetric")))((("digital signatures", "asymmetric cryptography and")))((("asymmetric cryptography")))Perché la crittografia asimmetrica è usata in bitcoin? Non è usata per ''codificare'' (rendere segreta) la transazione. Piuttosto, la proprietà più utile del crittografia asimmetrica è l'abilità di generare _firme digitali_. La chiave privata può essere applicata come impronta digitale di una transazione per produrre una firma numerica. Questa firma può essere effettuata solamente da chi è a conoscenza della chiave privata. In ogni caso, chiunque abbia accesso alla chiave pubblica e all'impronta della transazione le può usare per _verificare_ la firma. Questa utile proprietà della crittografia asimmetrica rende possibile a chiunque di verificare le firme in ogni transazione, assicurando allo stesso tempo ai proprietari delle chiavi private di produrre firme valide.
+****
+
+[[private_keys]]
+==== Chiavi Private
+
+((("keys and addresses", "overview of", "private key generation")))((("warnings and cautions", "private key protection"))) Una chiave privata è semplicemente un numero scelto a caso. La proprietà e il controllo sulla chiave privata è alla base del controllo dell'utente su tutti i fondi associati all'indirizzo bitcoin corrispondente. La chiave privata viene utilizzata per creare firme, dimostrando la proprietà dei fondi utilizzati in una transazione, che sono necessarie per trasferire i bitcoin. La chiave privata deve rimanere segreta in ogni momento, perché rivelarla a terzi equivale a dare loro il controllo sui bitcoin associati a quella chiave. La chiave privata deve essere conservata e protetta da perdite accidentali, perché se persa non può essere recuperata e i fondi associati ad essa saranno anch'essi persi per sempre.
+
+[TIP]
+====
+La chiave privata di bitcoin è solo un numero. Puoi ottenere la tua chiave privata in modo casuale con solamente una moneta, una penna e un foglio: lancia la moneta 256 volte e otterrai la cifra binaria di una chiave privata casuale che potrai usare in un portafoglio bitcoin. La chiave pubblica può quindi essere generata dalla chiave privata.
+====
+
+===== Generando una chiave privata da un numero casuale
+
+Il primo e più importante passo per generare le chiavi è di trovare una fonte sicura di entropia, o casualità. Creare una chiave bitcoin é essenzialmente la stessa cosa di "Scegli un numero tra 1 e 2^256^." Il metodo esatto usato per scegliere quel numero non é importante fintanto che non è prevedibile o ripetibile. Il software bitcoin usa il generatore di numeri casuali del sistema operativo per produrre 256 bit di entropia (casualità). Di solito, il generatore di numeri casuali dell'OS è inizializzato da una fonte umana di casualità, che è il motivo per il quale qualche programma potrebbe chiederti di muovere il mouse a caso per qualche secondo. 
+
+Più precisamente, la chiave privata può essere qualsiasi numero compreso tra +0+ e + n - 1+ inclusi, dove n è una costante (n = 1.1578 * 10 ^ 77 ^, leggermente meno di 2 ^ 256 ^) definita come l&#39;ordine di la curva ellittica usata in bitcoin (vedi &lt; <elliptic_curve> &gt;). Per creare una chiave di questo tipo, selezioniamo a caso un numero a 256 bit e controlliamo che sia inferiore a + n +. In termini di programmazione, questo è solitamente ottenuto dando in pasto inserendo una stringa più grande di bit casuali, raccolti da una fonte di casualità crittograficamente sicura, all&#39;algoritmo di hash SHA256, che convenientemente produrrà un numero di 256 bit. Se il risultato è inferiore a + n +, abbiamo una chiave privata adatta. Altrimenti, semplicemente riproviamo con un altro numero casuale.
+
+[WARNING]
+====
+((("random numbers", "random number generation")))((("entropy", "random number generation")))Do not write your own code to create a random number or use a "simple" random number generator offered by your programming language. Use a cryptographically secure pseudorandom number generator (CSPRNG) with a seed from a source of sufficient entropy. Study the documentation of the random number generator library you choose to make sure it is cryptographically secure. Correct implementation of the CSPRNG is critical to the security of the keys.
+====
+
+La seguente è una chiave privata generata in modo casuale (k) mostrata nella sua rappresentazione esadecimale (256 bits mostrati come 64 cifre esadecimali, ognuna da 4 bit):
+
+----
+1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD
+----
+
+
+[TIP]
+====
+La dimensione di una chiave privata bitcoin, 2^256^ è un numero inimmaginabilmente grande. E' approssimativamente 10^77^ cifre decimali. In paragone, è stato stimato che l'universo visibile contenga 10^80^ atomi.
+====
+
+((("dumpprivkey command")))To generate a new key with the Bitcoin Core client (see <<ch03_bitcoin_client>>), use the +getnewaddress+ command. For security reasons it displays the public key only, not the private key. To ask +bitcoind+ to expose the private key, use the +dumpprivkey+ command. The +dumpprivkey+ command shows the private key in a Base58 checksum-encoded format called the _Wallet Import Format_ (WIF), which we will examine in more detail in <<priv_formats>>. Here's an example of generating and displaying a private key using these two commands:
+
+----
+$ bitcoin-cli getnewaddress
+1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+$ bitcoin-cli dumpprivkey 1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+----
+
+The +dumpprivkey+ command opens the wallet and extracts the private key that was generated by the +getnewaddress+ command. It is not possible for +bitcoind+ to know the private key from the public key unless they are both stored in the wallet.
+
+[TIP]
+=====================================================================
+The +dumpprivkey+ command does not generate a private key from a public key, as this is impossible. The command simply reveals the private key that is already known to the wallet and which was generated by the +getnewaddress+ command.
+=====================================================================
+
+[role="pagebreak-before"]
+You can also use the Bitcoin Explorer command-line tool (see <<appdx_bx>>) to generate and display private keys with the commands +seed+, +ec-new+, and +ec-to-wif+:
+
+----
+$ bx seed | bx ec-new | bx ec-to-wif
+5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+----
+
+[[pubkey]]
+==== Chiavi Pubbliche
+
+((("keys and addresses", "overview of", "public key calculation")))((("generator point")))The public key is calculated from the private key using elliptic curve multiplication, which is irreversible: _K_ = _k_ * _G_, where _k_ is the private key, _G_ is a constant point called the _generator point_, and _K_ is the resulting public key. The reverse operation, known as "finding the discrete logarithm"—calculating _k_ if you know __K__—is as difficult as trying all possible values of _k_, i.e., a brute-force search. Before we demonstrate how to generate a public key from a private key, let's look at elliptic curve cryptography in a bit more detail.
+
+[TIP]
+====
+La moltiplicazione a curva ellittica è un tipo di funzione chiamata dai crittografici _funzione ''trap door''_: è molto semplice da calcolare in una direzione (moltiplicazione) e impossibile da calcolare nella direzione opposta (divisione). Il proprietario della chiave privata può tranquillamente creare una chiave pubblica e condividerla con chiunque sapendo che nessuno può invertire la funzione e calcolare la chiave privata dalla pubblica. Questo trucchetto matematico è diventato la base per una firma digitale sicura, non falsificabile, e che provi la proprietà dei bitcoin.
+====
+
+[[elliptic_curve]]
+==== Crittografia a Curve Ellittiche
+
+((("keys and addresses", "overview of", "elliptic curve cryptography")))((("elliptic curve cryptography", id="eliptic04")))((("cryptography", "elliptic curve cryptography", id="Celliptic04")))La crittografia a curva ellittica è di tipo asimmetrico o crittografia a chiave pubblica basata su un logaritmo discreto espresso dall'addizione e la moltiplicazione di punti su una curva ellittica.
+
+<<ecc-curve>> è un esempio di curva ellittica, simile a quella usata da bitcoin.
+
+[[ecc-curve]]
+[role="smallerthirty"]
+.Una curva ellittica
+image::images/mbc2_0402.png["ecc-curve"]
+
+Bitcoin uses a specific elliptic curve and set of mathematical constants, as defined in a standard called +secp256k1+, established by the National Institute of Standards and Technology (NIST). The +secp256k1+ curve is defined by the following function, which produces an elliptic curve:
+
+[latexmath]
+++++
+\begin{equation}
+{y^2 = (x^3 + 7)}~\text{over}~(\mathbb{F}_p)
+\end{equation}
+++++
+
+o
+
+[latexmath]
+++++
+\begin{equation}
+{y^2 \mod p = (x^3 + 7) \mod p}
+\end{equation}
+++++
+
+The _mod p_ (modulo prime number p) indicates that this curve is over a finite field of prime order _p_, also written as latexmath:[\( \mathbb{F}_p \)], where p = 2^256^ – 2^32^ – 2^9^ – 2^8^ – 2^7^ – 2^6^ – 2^4^ – 1, a very large prime number.
+
+Because this curve is defined over a finite field of prime order instead of over the real numbers, it looks like a pattern of dots scattered in two dimensions, which makes it difficult to visualize. However, the math is identical to that of an elliptic curve over real numbers. As an example, <<ecc-over-F17-math>> shows the same elliptic curve over a much smaller finite field of prime order 17, showing a pattern of dots on a grid. The +secp256k1+ bitcoin elliptic curve can be thought of as a much more complex pattern of dots on a unfathomably large grid.
+
+[[ecc-over-F17-math]]
+[role="smallersixty"]
+.Crittografia a curve ellittiche: visualizzando una curva ellittica su F(p), con p=17
+image::images/mbc2_0403.png["ecc-over-F17-math"]
+
+So, for example, the following is a point P with coordinates (x,y) that is a point on the +secp256k1+ curve:
+
+----
+P = (55066263022277343669578718895168534326250603453777594175500187360389116729240, 32670510020758816978083085130507043184471273380659243275938904335757337482424)
+----
+
+<<example_4_1>> mostra come verificarlo usando Python
+
+[[example_4_1]]
+Usando Python per confermare che il punto si trova sulla curva ellittica
+====
+[source, pycon]
+----
+Python 3.4.0 (default, Mar 30 2014, 19:23:13)
+[GCC 4.2.1 Compatible Apple LLVM 5.1 (clang-503.0.38)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+>>> x = 55066263022277343669578718895168534326250603453777594175500187360389116729240
+>>> y = 32670510020758816978083085130507043184471273380659243275938904335757337482424
+>>> (x ** 3 + 7 - y**2) % p
+0
+----
+====
+
+In elliptic curve math, there is a point called the "point at infinity," which roughly corresponds to the role of zero in addition. On computers, it's sometimes represented by x = y = 0 (which doesn't satisfy the elliptic curve equation, but it's an easy separate case that can be checked).
+
+There is also a pass:[+] operator, called "addition," which has some properties similar to the traditional addition of real numbers that gradeschool children learn. Given two points P~1~ and P~2~ on the elliptic curve, there is a third point P~3~ = P~1~ + P~2~, also on the elliptic curve.
+
+Geometricamente, questo terzo punto P~3~ viene calcolato disegnando una linea tra P~1~ e P~2~. Questa linea andrà a intersecare la curva ellittica in esattamente un altro punto addizionale. Chiamiamo questo punto P~3~ = (x, y). Lo riflettiamo sull'asse x per ottenere P~3~ = (x, –y).
+
+Ci sono un paio di casi particolari che chiariscono il bisogno di "puntare all'infinito".
+
+Se P~1~ e P~2~ sono lo stesso punto, la linea "tra" P~1~ e P~2~ dovrebbe estendersi per essere la tangente sulla curva al punto P~1~. Questa tangente intersecherà la curva in esattamente un nuovo punto. Puoi utilizzare tecniche dal calcolo per determinare l'inclinazione (angolo) della linea tangente. Queste tecniche funzionano curiosamente, anche se noi stiamo restringendo il nostro interesse ai punti sulla curva con due coordinate intere!
+
+In alcuni casi (cioè se P ~ 1 ~ e P ~ 2 ~ hanno gli stessi valori x ma diversi valori y), la linea tangente sarà esattamente verticale, nel qual caso P3 = "punto all'infinito."
+
+If P~1~ is the "point at infinity," then P~1~ + P~2~ = P~2~. Similarly, if P~2~ is the point at infinity, then P~1~ + P~2~ = P~1~. This shows how the point at infinity plays the role of zero.
+
+It turns out that pass:[+] is associative, which means that (A pass:[+] B) pass:[+] C = A pass:[+] (B pass:[+] C). That means we can write A pass:[+] B pass:[+] C without parentheses and without ambiguity.
+
+Now that we have defined addition, we can define multiplication in the standard way that extends addition. For a point P on the elliptic curve, if k is a whole number, then kP = P + P + P + ... + P (k times). Note that k is sometimes confusingly called an "exponent" in this case.((("", startref="eliptic04")))((("", startref="Celliptic04")))
+
+[[public_key_derivation]]
+==== Generare una Chiave Pubblica
+
+((("keys and addresses", "overview of", "public key generation")))((("generator point")))Starting with a private key in the form of a randomly generated number _k_, we multiply it by a predetermined point on the curve called the _generator point_ _G_ to produce another point somewhere else on the curve, which is the corresponding public key _K_. The generator point is specified as part of the +secp256k1+ standard and is always the same for all keys in bitcoin:
+
+[latexmath]
+++++
+\begin{equation}
+{K = k * G}
+\end{equation}
+++++
+
+where _k_ is the private key, _G_ is the generator point, and _K_ is the resulting public key, a point on the curve. Because the generator point is always the same for all bitcoin users, a private key _k_ multiplied with _G_ will always result in the same public key _K_. The relationship between _k_ and _K_ is fixed, but can only be calculated in one direction, from _k_ to _K_. That's why a bitcoin address (derived from _K_) can be shared with anyone and does not reveal the user's private key (_k_).
+
+[TIP]
+====
+Una chiave privata può essere convertita in una chiave pubblica, ma una chiave pubblica non può essere ri-convertita in una chiave privata perchè la funzione matematica utilizzata è unidirezionale.
+====
+
+Implementing the elliptic curve multiplication, we take the private key _k_ generated previously and multiply it with the generator point G to find the public key _K_:
+
+----
+K = 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD * G
+----
+
+Public key _K_ is defined as a point +K = (x,y)+:
+
+----
+K = (x, y)
+
+dove,
+
+x = F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+y = 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+----
+
+To visualize multiplication of a point with an integer, we will use the simpler elliptic curve over real numbers&#x2014;remember, the math is the same. Our goal is to find the multiple _kG_ of the generator point _G_, which is the same as adding _G_ to itself, _k_ times in a row. In elliptic curves, adding a point to itself is the equivalent of drawing a tangent line on the point and finding where it intersects the curve again, then reflecting that point on the x-axis.
+
+<<ecc_illustrated>> shows the process for deriving _G_, _2G_, _4G_, as a geometric operation on the curve.
+
+[TIP]
+====
+((("secp256k1 optimized C library")))Bitcoin uses the https://github.com/bitcoin-core/secp256k1[secp256k1 optimized C library] to do the elliptic curve math.((("", startref="KAover04")))
+====
+
+[[ecc_illustrated]]
+.Elliptic curve cryptography: visualizing the multiplication of a point G by an integer k on an elliptic curve
+image::images/mbc2_0404.png["ecc_illustrated"]
+
+=== Indirizzi Bitcoin
+
+((("keys and addresses", "bitcoin addresses", id="KAaddress04")))A bitcoin address is a string of digits and characters that can be shared with anyone who wants to send you money. Addresses produced from public keys consist of a string of numbers and letters, beginning with the digit "1." Here's an example of a bitcoin address:
+
+----
+1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+----
+
+
+The bitcoin address is what appears most commonly in a transaction as the "recipient" of the funds. If we compare a bitcoin transaction to a paper check, the bitcoin address is the beneficiary, which is what we write on the line after "Pay to the order of." On a paper check, that beneficiary can sometimes be the name of a bank account holder, but can also include corporations, institutions, or even cash. Because paper checks do not need to specify an account, but rather use an abstract name as the recipient of funds, they are very flexible payment instruments. Bitcoin transactions use a similar abstraction, the bitcoin address, to make them very flexible. A bitcoin address can represent the owner of a private/public key pair, or it can represent something else, such as a payment script, as we will see in <<p2sh>>. For now, let's examine the simple case, a bitcoin address that represents, and is derived from, a public key.
+
+((("addresses", "algorithms used to create")))The bitcoin address is derived from the public key through the use of one-way cryptographic hashing. A "hashing algorithm" or simply "hash algorithm" is a one-way function that produces a fingerprint or "hash" of an arbitrary-sized input. Cryptographic hash functions are used extensively in bitcoin: in bitcoin addresses, in script addresses, and in the mining Proof-of-Work algorithm. The algorithms used to make a bitcoin address from a public key are the Secure Hash Algorithm (SHA) and the RACE Integrity Primitives Evaluation Message Digest (RIPEMD), specifically SHA256 and RIPEMD160.
+
+Starting with the public key _K_, we compute the SHA256 hash and then compute the RIPEMD160 hash of the result, producing a 160-bit (20-byte) number:
+
+[latexmath]
+++++
+\begin{equation}
+{A = RIPEMD160(SHA256(K))}
+\end{equation}
+++++
+
+where _K_ is the public key and _A_ is the resulting bitcoin address.
+
+
+[TIP]
+====
+A bitcoin address is _not_ the same as a public key. Bitcoin addresses are derived from a public key using a one-way function.
+====
+
+Bitcoin addresses are almost always encoded as "Base58Check" (see <<base58>>), which uses 58 characters (a Base58 number system) and a checksum to help human readability, avoid ambiguity, and protect against errors in address transcription and entry. Base58Check is also used in many other ways in bitcoin, whenever there is a need for a user to read and correctly transcribe a number, such as a bitcoin address, a private key, an encrypted key, or a script hash. In the next section we will examine the mechanics of Base58Check encoding and decoding and the resulting representations. <<pubkey_to_address>> illustrates the conversion of a public key into a bitcoin address.
+
+[[pubkey_to_address]]
+.Da chiave pubblica a indirizzo bitcoin: conversione di una chiave pubblica in un indirizzo bitcoin 
+image::images/mbc2_0405.png["pubkey_to_address"]
+
+[[base58]]
+==== Encoding Base58 e Base58Check
+
+((("keys and addresses", "bitcoin addresses", "Base58 and Base58check encoding")))((("Base58 and Base58check encoding", id="base5804")))((("addresses", "Base58 and Base58check encoding", id="Abase5804")))In order to represent long numbers in a compact way, using fewer symbols, many computer systems use mixed-alphanumeric representations with a base (or radix) higher than 10. For example, whereas the traditional decimal system uses the 10 numerals 0 through 9, the hexadecimal system uses 16, with the letters A through F as the six additional symbols. A number represented in hexadecimal format is shorter than the equivalent decimal representation. Even more compact, Base64 representation uses 26 lowercase letters, 26 capital letters, 10 numerals, and 2 more characters such as &#x201c;`+`&#x201d; and "/" to transmit binary data over text-based media such as email. Base64 is most commonly used to add binary attachments to email. Base58 is a text-based binary-encoding format developed for use in bitcoin and used in many other cryptocurrencies. It offers a balance between compact representation, readability, and error detection and prevention. Base58 is a subset of Base64, using upper- and lowercase letters and numbers, but omitting some characters that are frequently mistaken for one another and can appear identical when displayed in certain fonts. Specifically, Base58 is Base64 without the 0 (number zero), O (capital o), l (lower L), I (capital i), and the symbols &#x201c;`+`&#x201d; and "/". Or, more simply, it is a set of lowercase and capital letters and numbers without the four (0, O, l, I) just mentioned. <<base58alphabet>> shows the full Base58 alphabet.
+
+[[base58alphabet]]
+.Bitcoin's Base58 alphabet
+====
+----
+123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
+----
+====
+
+
+To add extra security against typos or transcription errors, Base58Check is a Base58 encoding format, frequently used in bitcoin, which has a built-in error-checking code. The checksum is an additional four bytes added to the end of the data that is being encoded. The checksum is derived from the hash of the encoded data and can therefore be used to detect and prevent transcription and typing errors. When presented with Base58Check code, the decoding software will calculate the checksum of the data and compare it to the checksum included in the code. If the two do not match, an error has been introduced and the Base58Check data is invalid. This prevents a mistyped bitcoin address from being accepted by the wallet software as a valid destination, an error that would otherwise result in loss of funds.
+
+To convert data (a number) into a Base58Check format, we first add a prefix to the data, called the "version byte," which serves to easily identify the type of data that is encoded. For example, in the case of a bitcoin address the prefix is zero (0x00 in hex), whereas the prefix used when encoding a private key is 128 (0x80 in hex). A list of common version prefixes is shown in <<base58check_versions>>.
+
+Successivamente, calcoliamo il checksum a "doppio-SHA", cioè applichiamo l'algoritmo di hashing SHA256 due volte sul risultato precedente (prefisso e dati).
+
+----
+checksum = SHA256(SHA256(prefix+data))
+----
+
+From the resulting 32-byte hash (hash-of-a-hash), we take only the first four bytes. These four bytes serve as the error-checking code, or checksum. The checksum is concatenated (appended) to the end.
+
+Il risultato è composto da tre elementi: un prefisso, i dati e un checksum. Questo risultato è codificato usando l'alfabeto Base58 descritto in precedenza. <<base58check_encoding>> illustra il processo di codifica Base58Check.
+
+[[base58check_encoding]]
+.encoding Base58Check: un formato Base58, versionato, con checksum per codificare dati bitcoin senza generare ambiguità
+image::images/mbc2_0406.png["Base58CheckEncoding"]
+
+In bitcoin, most of the data presented to the user is Base58Check-encoded to make it compact, easy to read, and easy to detect errors. The version prefix in Base58Check encoding is used to create easily distinguishable formats, which when encoded in Base58 contain specific characters at the beginning of the Base58Check-encoded payload. These characters make it easy for humans to identify the type of data that is encoded and how to use it. This is what differentiates, for example, a Base58Check-encoded bitcoin address that starts with a 1 from a Base58Check-encoded private key WIF that starts with a 5. Some example version prefixes and the resulting Base58 characters are shown in <<base58check_versions>>.
+
+[[base58check_versions]]
+.Prefisso di versione Base58Check e esempi del risultato 
+[options="header"]
+|=======
+|Tipo| Prefisso di versione (esadecimale)| Prefisso del risultato Base58
+| Indirizzo Bitcoin | 0x00 | 1
+| Indirizzo Pay-to-Script-Hash | 0x05 | 3
+| Indirizzo Bitcoin Testnet | 0x6F | m oppure n
+| Private Key WIF |  0x80 | 5, K, or L
+| BIP-38 Encrypted Private Key | 0x0142 | 6P
+| BIP-32 Extended Public Key | 0x0488B21E | xpub
+|=======
+
+==== Formati di Chiavi
+
+((("keys and addresses", "bitcoin addresses", "key formats")))Both private and public keys can be represented in a number of different formats. These representations all encode the same number, even though they look different. These formats are primarily used to make it easy for people to read and transcribe keys without introducing errors.
+
+[[priv_formats]]
+===== Formati delle Chiavi Private
+
+((("public and private keys", "private key formats")))The private key can be represented in a number of different formats, all of which correspond to the same 256-bit number. <<table_4-2>> shows three common formats used to represent private keys. Different formats are used in different circumstances. Hexadecimal and raw binary formats are used internally in software and rarely shown to users. The WIF is used for import/export of keys between wallets and often used in QR code (barcode) representations of private keys.
+
+[[table_4-2]]
+.Rappresentazioni di chiavi private (formati di codifica)
+[options="header"]
+|=======
+|Tipo|Prefisso|Descrizione
+| Raw | None | 32 bytes
+| Hex | Nessuno | 64 cifre esadecimali
+| WIF |  5 | Base58Check encoding: Base58 with version prefix of 128- and 32-bit checksum
+| WIF-compressed | K or L | Come sopra, con l'aggiunta di un suffisso 0x01 precedente all'encoding
+|=======
+
+<<table_4-3>> mostra la chiave provata generata nei seguenti tre formati.
+
+[[table_4-3]]
+.Esempio: Stessa chiave, formati differenti
+[options="header"]
+|=======
+|Format | Private key
+| Hex | 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+| WIF | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| WIF-compressed | KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+|=======
+
+All of these representations are different ways of showing the same number, the same private key. They look different, but any one format can easily be converted to any other format. Note that the "raw binary" is not shown in <<table_4-3>> as any encoding for display here would, by definition, not be raw binary data.
+
+We use the +wif-to-ec+ command from Bitcoin Explorer (see <<appdx_bx>>) to show that both WIF keys represent the same private key:
+
+----
+$ bx wif-to-ec 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+
+$ bx wif-to-ec KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+----
+
+===== Decodifica da Base58Check
+
+The Bitcoin Explorer commands (see <<appdx_bx>>) make it easy to write shell scripts and command-line "pipes" that manipulate bitcoin keys, addresses, and transactions. You can use Bitcoin Explorer to decode the Base58Check format on the command line.
+
+We use the +base58check-decode+ command to decode the uncompressed key:
+
+----
+$ bx base58check-decode 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+wrapper
+{
+    checksum 4286807748
+    payload 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd
+    version 128
+}
+----
+
+The result contains the key as payload, the WIF version prefix 128, and a checksum.
+
+Notice that the "payload" of the compressed key is appended with the suffix +01+, signalling that the derived public key is to be compressed:
+
+----
+$ bx base58check-decode KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+wrapper
+{
+    checksum 2339607926
+    payload 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd01
+    version 128
+}
+----
+
+===== Codifica da esadecimale a Base58Check
+
+To encode into Base58Check (the opposite of the previous command), we use the +base58check-encode+ command from Bitcoin Explorer (see <<appdx_bx>>) and provide the hex private key, followed by the WIF version prefix 128:
+
+----
+bx base58check-encode 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd --version 128
+5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+----
+
+===== Codifica da hex (chiave compressa) a Base58Check
+
+To encode into Base58Check as a "compressed" private key (see <<comp_priv>>), we append the suffix +01+ to the hex key and then encode as in the preceding section:
+
+----
+$ bx base58check-encode 1e99423a4ed27608a15a2616a2b0e9e52ced330ac530edcc32c8ffc6a526aedd01 --version 128
+KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+----
+
+The resulting WIF-compressed format starts with a "K." This denotes that the private key within has a suffix of "01" and will be used to produce compressed public keys only (see <<comp_pub>>).
+
+===== Formati di Chiavi Pubbliche
+
+((("public and private keys", "public key formats")))Public keys are also presented in different ways, usually as either _compressed_ or _uncompressed_ public keys.
+
+As we saw previously, the public key is a point on the elliptic curve consisting of a pair of coordinates +(x,y)+. It is usually presented with the prefix +04+ followed by two 256-bit numbers: one for the _x_ coordinate of the point, the other for the _y_ coordinate. The prefix +04+ is used to distinguish uncompressed public keys from compressed public keys that begin with a +02+ or a +03+.
+
+Ecco la chiave pubblica generata dalla chiave privata che abbiamo creato in precedenza, mostrata con le coordinate + x + e + y +:
+
+----
+x = F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+y = 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+----
+
+Qui si può notare la stessa chiave pubblica mostrata come un numero da 520-bit (130 cifre esadecimali) con il prefisso +04+ seguito dalle coordinate +x+ e +y+, come +04 x y+: 
+
+++++
+<pre data-type="programlisting">
+K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A↵
+07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
+</pre>
+++++
+
+[[comp_pub]]
+===== Chiavi pubbliche compresse
+
+((("public and private keys", "compressed public keys")))Compressed public keys were introduced to bitcoin to reduce the size of transactions and conserve disk space on nodes that store the bitcoin blockchain database. Most transactions include the public key, which is required to validate the owner's credentials and spend the bitcoin. Each public key requires 520 bits (prefix + x + y), which when multiplied by several hundred transactions per block, or tens of thousands of transactions per day, adds a significant amount of data to the blockchain.
+
+Come abbiamo visto nella sezione <<pubkey>>, una chiave pubblica è un punto (x, y) su una curva ellittica. Poiché la curva esprime una funzione matematica, un punto sulla curva rappresenta una soluzione all'equazione e, quindi, se conosciamo la coordinata _x_, possiamo calcolare la coordinata _y_ risolvendo l'equazione y^2^ mod p = (x ^ 3 ^ + 7) mod p. Ciò ci consente di memorizzare solo la coordinata _x_ del punto chiave pubblico, omettendo la coordinata _y_ e riducendo la dimensione della chiave e lo spazio richiesto per memorizzarla di 256 bit. Una riduzione di quasi il 50% delle dimensioni in ogni transazione consente di risparmiare molto spazi dati nel tempo!
+
+Whereas uncompressed public keys have a prefix of +04+, compressed public keys start with either a +02+ or a +03+ prefix. Let's look at why there are two possible prefixes: because the left side of the equation is __y__^2^, the solution for _y_ is a square root, which can have a positive or negative value. Visually, this means that the resulting _y_ coordinate can be above or below the x-axis. As you can see from the graph of the elliptic curve in <<ecc-curve>>, the curve is symmetric, meaning it is reflected like a mirror by the x-axis. So, while we can omit the _y_ coordinate we have to store the _sign_ of _y_ (positive or negative); or in other words, we have to remember if it was above or below the x-axis because each of those options represents a different point and a different public key. When calculating the elliptic curve in binary arithmetic on the finite field of prime order p, the _y_ coordinate is either even or odd, which corresponds to the positive/negative sign as explained earlier. Therefore, to distinguish between the two possible values of _y_, we store a compressed public key with the prefix +02+ if the _y_ is even, and +03+ if it is odd, allowing the software to correctly deduce the _y_ coordinate from the _x_ coordinate and uncompress the public key to the full coordinates of the point. Public key compression is illustrated in <<pubkey_compression>>.
+
+Here's the same public key generated previously, shown as a compressed public key stored in 264 bits (66 hex digits) with the prefix +03+ indicating the _y_ coordinate is odd:
+
+----
+K = 03F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A
+----
+
+This compressed public key corresponds to the same private key, meaning it is generated from the same private key. However, it looks different from the uncompressed public key. More importantly, if we convert this compressed public key to a bitcoin address using the double-hash function (+RIPEMD160(SHA256(K))+) it will produce a _different_ bitcoin address. This can be confusing, because it means that a single private key can produce a public key expressed in two different formats (compressed and uncompressed) that produce two different bitcoin addresses. However, the private key is identical for both bitcoin addresses.
+
+[[pubkey_compression]]
+[role="smallerseventy"]
+.Compressione di una chiave pubblicaPublic key compression
+image::images/mbc2_0407.png["pubkey_compression"]
+
+Compressed public keys are gradually becoming the default across bitcoin clients, which is having a significant impact on reducing the size of transactions and therefore the blockchain. However, not all clients support compressed public keys yet. Newer clients that support compressed public keys have to account for transactions from older clients that do not support compressed public keys. This is especially important when a wallet application is importing private keys from another bitcoin wallet application, because the new wallet needs to scan the blockchain to find transactions corresponding to these imported keys. Which bitcoin addresses should the bitcoin wallet scan for? The bitcoin addresses produced by uncompressed public keys, or the bitcoin addresses produced by compressed public keys? Both are valid bitcoin addresses, and can be signed for by the private key, but they are different addresses!
+
+To resolve this issue, when private keys are exported from a wallet, the WIF that is used to represent them is implemented differently in newer bitcoin wallets, to indicate that these private keys have been used to produce _compressed_ public keys and therefore _compressed_ bitcoin addresses. This allows the importing wallet to distinguish between private keys originating from older or newer wallets and search the blockchain for transactions with bitcoin addresses corresponding to the uncompressed, or the compressed, public keys, respectively. Let's look at how this works in more detail, in the next section.
+
+[[comp_priv]]
+===== Chiavi private compresse
+
+((("public and private keys", "compressed private keys")))Ironically, the term "compressed private key" is a misnomer, because when a private key is exported as WIF-compressed it is actually one byte _longer_ than an "uncompressed" private key. That is because the private key has an added one-byte suffix (shown as 01 in hex in <<table_4-4>>), which signifies that the private key is from a newer wallet and should only be used to produce compressed public keys. Private keys are not themselves compressed and cannot be compressed. The term "compressed private key" really means "private key from which only compressed public keys should be derived," whereas "uncompressed private key" really means "private key from which only uncompressed public keys should be derived." You should only refer to the export format as "WIF-compressed" or "WIF" and not refer to the private key itself as "compressed" to avoid further confusion
+
+<<table_4-4>> mostra la stessa chiave, codificata nei formati WIF e WIF-compressed.
+
+[[table_4-4]]
+.Esempio: Stessa chiave, formati differenti
+[options="header"]
+|=======
+|Format | Private key
+| Esadecimale | 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD
+| WIF | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| Hex-compressed | 1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD01
+| WIF-compressed | KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ
+|=======
+
+Notice that the hex-compressed private key format has one extra byte at the end (01 in hex). While the Base58 encoding version prefix is the same (0x80) for both WIF and WIF-compressed formats, the addition of one byte on the end of the number causes the first character of the Base58 encoding to change from a 5 to either a _K_ or _L_. Think of this as the Base58 equivalent of the decimal encoding difference between the number 100 and the number 99. While 100 is one digit longer than 99, it also has a prefix of 1 instead of a prefix of 9. As the length changes, it affects the prefix. In Base58, the prefix 5 changes to a _K_ or _L_ as the length of the number increases by one byte.
+
+Remember, these formats are _not_ used interchangeably. In a newer wallet that implements compressed public keys, the private keys will only ever be exported as WIF-compressed (with a _K_ or _L_ prefix). If the wallet is an older implementation and does not use compressed public keys, the private keys will only ever be exported as WIF (with a 5 prefix). The goal here is to signal to the wallet importing these private keys whether it must search the blockchain for compressed or uncompressed public keys and addresses.
+
+If a bitcoin wallet is able to implement compressed public keys, it will use those in all transactions. The private keys in the wallet will be used to derive the public key points on the curve, which will be compressed. The compressed public keys will be used to produce bitcoin addresses and those will be used in transactions. When exporting private keys from a new wallet that implements compressed public keys, the WIF is modified, with the addition of a one-byte suffix +01+ to the private key. The resulting Base58Check-encoded private key is called a "compressed WIF" and starts with the letter _K_ or _L_, instead of starting with "5" as is the case with WIF-encoded (noncompressed) keys from older wallets.
+
+
+[TIP]
+====
+"Compressed private keys" is a misnomer! They are not compressed; rather, WIF-compressed signifies that the keys should only be used to derive compressed public keys and their corresponding bitcoin addresses. Ironically, a "WIF-compressed" encoded private key is one byte longer because it has the added +01+ suffix to distinguish it from an "uncompressed" one.((("", startref="KAaddress04")))
+====
+
+=== Implementing Keys and Addresses in Cpass:[++]
+
+Let's look at the complete process of creating a bitcoin address, from a private key, to a public key (a point on the elliptic curve), to a double-hashed address, and finally, the Base58Check encoding. The C++ code in <<addr_example>> shows the complete step-by-step process, from private key to Base58Check-encoded bitcoin address. The code example uses the libbitcoin library introduced in <<alt_libraries>> for some helper functions.
+
+[[addr_example]]
+.Creazione di un indirizzo bitcoin Base58Check-encoded da una chiave privata
+====
+[role="c_less_space"]
+[source, cpp]
+----
+include::code/addr.cpp[]
+----
+====
+
+The code uses a predefined private key to produce the same bitcoin address every time it is run, as shown in <<addr_example_run>>.((("", startref="base5804")))((("", startref="Abase5804")))
+
+[[addr_example_run]]
+.Compilando ed eseguendo il codice addr
+====
+[source,bash]
+----
+# Compila il codice addr.cpp
+$ g++ -o addr addr.cpp -std=c++11 $(pkg-config --cflags --libs libbitcoin)
+# Esegui l'eseguibile addr Run the addr executable
+$ ./addr
+Public key: 0202a406624211f2abbdc68da3df929f938c3399dd79fac1b51b0e4ad1d26a47aa
+Address: 1PRTTaJesdNovgne6Ehcdu1fpEdX7913CK
+----
+====
+
+[TIP]
+====
+The code in <<addr_example_run>> produces a bitcoin address (+1PRTT...+) from a _compressed_ public key (see <<comp_pub>>). If you used the uncompressed public key instead, it would produce a different bitcoin address (+14K1y...+).
+====
+
+=== Implementando le Chiavi e gli Indirizzi in Python
+
+((("keys and addresses", "implementing in Python", id="KApython04")))((("pybitcointools")))The most comprehensive bitcoin library in Python is https://github.com/vbuterin/pybitcointools[pybitcointools] by Vitalik Buterin. In <<key-to-address_script>>, we use the pybitcointools library (imported as "bitcoin") to generate and display keys and addresses in various formats.
+
+[[key-to-address_script]]
+.Generazione di chiavi e indirizzi e formattazione tramite la libreria pybitcointools
+====
+[source,python]
+----
+include::code/key-to-address-ecc-example.py[]
+----
+====
+
+<<key-to-address_script_run>> mostra l'output ottenuto eseguendo questo codice.
+
+[[key-to-address_script_run]]
+.Eseguendo key-to-address-ecc-example.py
+====
+++++
+<pre data-type="programlisting">
+$ python key-to-address-ecc-example.py
+Private Key (hex) is:
+ 3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa6
+Private Key (decimal) is:
+ 26563230048437957592232553826663696440606756685920117476832299673293013768870
+Private Key (WIF) is:
+ 5JG9hT3beGTJuUAmCQEmNaxAuMacCTfXuw1R3FCXig23RQHMr4K
+Private Key Compressed (hex) is:
+ 3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa601
+Private Key (WIF-Compressed) is:
+ KyBsPXxTuVD82av65KZkrGrWi5qLMah5SdNq6uftawDbgKa2wv6S
+Public Key (x,y) coordinates is:
+ (41637322786646325214887832269588396900663353932545912953362782457239403430124L,
+ 16388935128781238405526710466724741593761085120864331449066658622400339362166L)
+Public Key (hex) is:
+ 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec↵
+243bcefdd4347074d44bd7356d6a53c495737dd96295e2a9374bf5f02ebfc176
+Compressed Public Key (hex) is:
+ 025c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec
+Bitcoin Address (b58check) is:
+ 1thMirt546nngXqyPEz532S8fLwbozud8
+Compressed Bitcoin Address (b58check) is:
+ 14cxpo3MBCYYWCgF74SWTdcmxipnGUsPw3
+</pre>
+++++
+====
+
+
+<<ec_math>> is another example, using the Python ECDSA library for the elliptic curve math and without using any specialized bitcoin libraries.
+
+[[ec_math]]
+.Uno script che dimostra la matematica a curve ellittiche usata per le chiavi bitcoin
+====
+[source, python]
+----
+include::code/ec-math.py[]
+----
+====
+
+<<ec_math_run>> shows the output produced by running this script.
+
+[WARNING]
+====
+<<ec_math>> ((("random numbers", "os.urandom", see="entropy")))((("entropy", "os.urandom", see="random numbers")))((("random numbers", "random number generation")))((("entropy", "random number generation")))uses +os.urandom+, which reflects a cryptographically secure random number generator (CSRNG) provided by the underlying operating system. Caution: Depending on the OS, +os.urandom+ may _not_ be implemented with sufficient security or seeded properly and may _not_ be appropriate for generating production-quality bitcoin keys.((("", startref="KApython04")))
+====
+
+[[ec_math_run]]
+.Installando la libreria Python ECDSA ed eseguendo lo script ec_math.py
+====
+----
+$ # Installa PIP, il package manager di Python 
+$ sudo apt-get install python-pip
+$ # Installa la libreria Python ECDSA
+$ sudo pip install ecdsa
+$ # Esegui lo script
+$ python ec-math.py
+Secret:  38090835015954358862481132628887443905906204995912378278060168703580660294000
+EC point: (70048853531867179489857750497606966272382583471322935454624595540007269312627, 105262206478686743191060800263479589329920209527285803935736021686045542353380)
+BTC public key: 029ade3effb0a67d5c8609850d797366af428f4a0d5194cb221d807770a1522873
+----
+====
+
+=== Chiavi avanzate e Indirizzi
+
+((("keys and addresses", "advanced forms", id="KAadvanced04")))In the following sections we will look at advanced forms of keys and addresses, such as encrypted private keys, script and multisignature addresses, vanity addresses, and paper wallets.
+
+==== Encrypted Private Keys (BIP-38)
+
+((("bitcoin improvement proposals", "Encrypted Private Keys (BIP-38)")))((("keys and addresses", "advanced forms", "encrypted private keys")))((("public and private keys", "encrypted private keys")))((("passwords", "encrypted private keys")))((("security", "passwords")))Private keys must remain secret. The need for _confidentiality_ of the private keys is a truism that is quite difficult to achieve in practice, because it conflicts with the equally important security objective of _availability_. Keeping the private key private is much harder when you need to store backups of the private key to avoid losing it. A private key stored in a wallet that is encrypted by a password might be secure, but that wallet needs to be backed up. At times, users need to move keys from one wallet to another—to upgrade or replace the wallet software, for example. Private key backups might also be stored on paper (see <<paper_wallets>>) or on external storage media, such as a USB flash drive. But what if the backup itself is stolen or lost? These conflicting security goals led to the introduction of a portable and convenient standard for encrypting private keys in a way that can be understood by many different wallets and bitcoin clients, standardized by BIP-38 (see <<appdxbitcoinimpproposals>>).
+
+BIP-38 proposes a common standard for encrypting private keys with a passphrase and encoding them with Base58Check so that they can be stored securely on backup media, transported securely between wallets, or kept in any other conditions where the key might be exposed. The standard for encryption uses the Advanced Encryption Standard (AES), a standard established by the NIST and used broadly in data encryption implementations for commercial and military applications.
+
+A BIP-38 encryption scheme takes as input a bitcoin private key, usually encoded in the WIF, as a Base58Check string with the prefix of "5."  Additionally, the BIP-38 encryption scheme takes a passphrase—a long password—usually composed of several words or a complex string of alphanumeric characters. The result of the BIP-38 encryption scheme is a Base58Check-encoded encrypted private key that begins with the prefix +6P+. If you see a key that starts with +6P+, it is encrypted and requires a passphrase in order to convert (decrypt) it back into a WIF-formatted private key (prefix +5+) that can be used in any wallet. Many wallet applications now recognize BIP-38-encrypted private keys and will prompt the user for a passphrase to decrypt and import the key. Third-party applications, such as the incredibly useful browser-based http://bitaddress.org[Bit Address] (Wallet Details tab), can be used to decrypt BIP-38 keys.
+
+The most common use case for BIP-38 encrypted keys is for paper wallets that can be used to back up private keys on a piece of paper. As long as the user selects a strong passphrase, a paper wallet with BIP-38 encrypted private keys is incredibly secure and a great way to create offline bitcoin storage (also known as "cold storage").
+
+Test the encrypted keys in <<table_4-10>> using bitaddress.org to see how you can get the decrypted key by entering the passphrase.
+
+[[table_4-10]]
+.Example of BIP-38 encrypted private key
+|=======
+| *Private Key (WIF)* | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+| *Passphrase* | MyTestPassphrase
+| *Encrypted Key (BIP-38)* | 6PRTHL6mWa48xSopbU1cKrVjpKbBZxcLRRCdctLJ3z5yxE87MobKoXdTsJ
+|=======
+
+
+[[p2sh_addresses]]
+==== Pay-to-Script Hash (P2SH) and Multisig Addresses
+
+((("keys and addresses", "advanced forms", "pay-to-script hash and multisig addresses")))((("Pay-to-Script-Hash (P2SH)", "multisig addresses and")))((("multisig addresses")))((("addresses", "multisig addresses")))As we know, traditional bitcoin addresses begin with the number “1” and are derived from the public key, which is derived from the private key.  Although anyone can send bitcoin to a “1” address, that bitcoin can only be spent by presenting the corresponding private key signature and public key hash.
+
+((("bitcoin improvement proposals", "Pay to Script Hash (BIP-16)")))Bitcoin addresses that begin with the number “3” are pay-to-script hash (P2SH) addresses, sometimes erroneously called multisignature or multisig addresses. They designate the beneficiary of a bitcoin transaction as the hash of a script, instead of the owner of a public key. The feature was introduced in January 2012 with BIP-16 (see <<appdxbitcoinimpproposals>>), and is being widely adopted because it provides the opportunity to add functionality to the address itself. Unlike transactions that "send" funds to traditional “1” bitcoin addresses, also known as a pay-to-public-key-hash (P2PKH), funds sent to “3” addresses require something more than the presentation of one public key hash and one private key signature as proof of ownership. The requirements are designated at the time the address is created, within the script, and all inputs to this address will be encumbered with the same requirements.
+
+A P2SH address is created from a transaction script, which defines who can spend a transaction output (for more details, see <<p2sh>>). Encoding a P2SH address involves using the same double-hash function as used during creation of a bitcoin address, only applied on the script instead of the public key:
+
+----
+script hash = RIPEMD160(SHA256(script))
+----
+
+The resulting "script hash" is encoded with Base58Check with a version prefix of 5, which results in an encoded address starting with a +3+. An example of a P2SH address is +3F6i6kwkevjR7AsAd4te2YB2zZyASEm1HM+, which can be derived using the Bitcoin Explorer commands +script-encode+, +sha256+, +ripemd160+, and +base58check-encode+ (see <<appdx_bx>>) as follows:
+
+----
+$ echo \
+'DUP HASH160 [89abcdefabbaabbaabbaabbaabbaabbaabbaabba] EQUALVERIFY CHECKSIG' > script
+$ bx script-encode < script | bx sha256 | bx ripemd160 \
+| bx base58check-encode --version 5
+3F6i6kwkevjR7AsAd4te2YB2zZyASEm1HM
+----
+
+[TIP]
+====
+P2SH is not necessarily the same as a multisignature standard transaction. A P2SH address _most often_ represents a multi-signature script, but it might also represent a script encoding other types of transactions.
+====
+
+===== Multisignature addresses and P2SH
+
+Currently, the most common implementation of the P2SH function is the multi-signature address script. As the name implies, the underlying script requires more than one signature to prove ownership and therefore spend funds. The bitcoin multi-signature feature is designed to require M signatures (also known as the “threshold”) from a total of N keys, known as an M-of-N multisig, where M is equal to or less than N. For example, Bob the coffee shop owner from <<ch01_intro_what_is_bitcoin>> could use a multisignature address requiring 1-of-2 signatures from a key belonging to him and a key belonging to his spouse, ensuring either of them could sign to spend a transaction output locked to this address. This would be similar to a “joint account” as implemented in traditional banking where either spouse can spend with a single signature. Or Gopesh,((("use cases", "offshore contract services"))) the web designer paid by Bob to create a website, might have a 2-of-3 multisignature address for his business that ensures that no funds can be spent unless at least two of the business partners sign a transaction.
+
+Esploreremo come creare transazioni che spendono fondi da indirizzi P2SH (e multi-signature) in <<transactions>>.
+
+==== Vanity Address
+
+((("keys and addresses", "advanced forms", "vanity addresses")))((("vanity addresses", id="vanity04")))((("addresses", "vanity addresses", id="Avanity04")))Vanity addresses are valid bitcoin addresses that contain human-readable messages. For example, +1LoveBPzzD72PUXLzCkYAtGFYmK5vYNR33+ is a valid address that contains the letters forming the word "Love" as the first four Base-58 letters. Vanity addresses require generating and testing billions of candidate private keys, until a bitcoin address with the desired pattern is found. Although there are some optimizations in the vanity generation algorithm, the process essentially involves picking a private key at random, deriving the public key, deriving the bitcoin address, and checking to see if it matches the desired vanity pattern, repeating billions of times until a match is found.
+
+Once a vanity address matching the desired pattern is found, the private key from which it was derived can be used by the owner to spend bitcoin in exactly the same way as any other address. Vanity addresses are no less or more secure than any other address. They depend on the same Elliptic Curve Cryptography (ECC) and SHA as any other address. You can no more easily find the private key of an address starting with a vanity pattern than you can any other address.
+
+In <<ch01_intro_what_is_bitcoin>>, we introduced Eugenia, a children's charity director operating in the Philippines. Let's say that Eugenia is organizing a bitcoin fundraising drive and wants to use a vanity bitcoin address to publicize the fundraising. Eugenia will create a vanity address that starts with "1Kids" to promote the children's charity fundraiser. Let's see how this vanity address will be created and what it means for the security of Eugenia's charity.((("use cases", "charitable donations", startref="eugeniafour")))
+
+===== Generare vanity address
+
+It's important to realize that a bitcoin address is simply a number represented by symbols in the Base58 alphabet. The search for a pattern like "1Kids" can be seen as searching for an address in the range from +1Kids11111111111111111111111111111+ to +1Kidszzzzzzzzzzzzzzzzzzzzzzzzzzzzz+. There are approximately 58^29^ (approximately 1.4 * 10^51^) addresses in that range, all starting with "1Kids." <<table_4-11>> shows the range of addresses that have the prefix 1Kids.
+
+[[table_4-11]]
+.La gamma di vanity address che iniziano con "1Kids"
+|=======
+| *Da* | +1Kids11111111111111111111111111111+
+| | +1Kids11111111111111111111111111112+
+| | +1Kids11111111111111111111111111113+
+| | +...+
+| *A* | +1Kidszzzzzzzzzzzzzzzzzzzzzzzzzzzzz+
+|=======
+
+Diamo un'occhiata al pattern "1Kids" come numero e vediamo con quale frequenza possiamo trovare questo pattern in un indirizzo bitcoin (vedi <<table_4-12>>). Un PC desktop medio, senza hardware specializzato, può cercare circa 100.000 chiavi al secondo.
+
+[[table_4-12]]
+.The frequency of a vanity pattern (1KidsCharity) and average search time on a desktop PC
+[options="header"]
+|=======
+| Lunghezza | Pattern | Frequenza | Tempo medio di ricerca
+| 1 | 1K | 1 su 58 chiavi | < 1 millisecondi
+| 2 | 1Ki| 1 su 3,364 | 50 millisecondi
+| 3 | 1Kid | 1 su 195,000 | < 2 secondi
+| 4 | 1Kids | 1 su 11 million | 1 minuto
+| 5 | 1KidsC | 1 su 656 milioni | 1 ora
+| 6 | 1KidsCh | 1 su 38 miliardi | 2 giorni
+| 7 | 1KidsCha | 1 su 2.2 mila miliardi | 3–4 mesi
+| 8 | 1KidsChar | 1 su 128 mila miliardi | 13–18 anni
+| 9 | 1KidsChari | 1 su 7 milioni di miliardi | 800 anni
+| 10 | 1KidsCharit | 1 su 400 milioni di miliardi | 46,000 anni
+| 11 | 1KidsCharity | 1 su 23 mila milioni di miliardi | 2.5 milioni di anni
+|=======
+
+
+As you can see, Eugenia won't be creating the vanity address "1KidsCharity" anytime soon, even if she had access to several thousand computers. Each additional character increases the difficulty by a factor of 58. Patterns with more than seven characters are usually found by specialized hardware, such as custom-built desktops with multiple GPUs. These are often repurposed bitcoin mining "rigs" that are no longer profitable for bitcoin mining but can be used to find vanity addresses. Vanity searches on GPU systems are many orders of magnitude faster than on a general-purpose CPU.
+
+Another way to find a vanity address is to outsource the work to a pool of vanity miners, such as the pool at http://vanitypool.appspot.com[Vanity Pool]. A pool is a service that allows those with GPU hardware to earn bitcoin searching for vanity addresses for others. For a small payment (0.01 bitcoin or approximately $5 at the time of this writing), Eugenia can outsource the search for a seven-character pattern vanity address and get results in a few hours instead of having to run a CPU search for months.
+
+Generating a vanity address is a brute-force exercise: try a random key, check the resulting address to see if it matches the desired pattern, repeat until successful. <<vanity_miner_code>> shows an example of a "vanity miner," a program designed to find vanity addresses, written in C++. The example uses the libbitcoin library, which we introduced in <<alt_libraries>>.
+
+[[vanity_miner_code]]
+.Miner di vanity address
+====
+[source,cpp]
+----
+include::code/vanity-miner.cpp[]
+----
+====
+
+[NOTE]
+====
+<<vanity_miner_run>> uses +std::random_device+. Depending on the implementation it may reflect a CSRNG provided by the underlying operating system. In the case of a Unix-like operating system such as Linux, it draws from +/dev/urandom+. The random number generator used here is for demonstration purposes, and it is _not_ appropriate for generating production-quality bitcoin keys as it is not implemented with sufficient security.
+====
+
+The example code must be compiled using a pass:[C++] compiler and linked against the libbitcoin library (which must be first installed on that system). To run the example, run the ++vanity-miner++ executable with no parameters (see <<vanity_miner_run>>) and it will attempt to find a vanity address starting with "1kid."
+
+[[vanity_miner_run]]
+.Compilare e eseguire l'esempio di vanity-miner
+====
+[source,bash]
+----
+$ # Compila il codice con g++
+$ g++ -o vanity-miner vanity-miner.cpp $(pkg-config --cflags --libs libbitcoin)
+$ # Esegui l'esempio
+$ ./vanity-miner
+Found vanity address! 1KiDzkG4MxmovZryZRj8tK81oQRhbZ46YT
+Secret: 57cc268a05f83a23ac9d930bc8565bac4e277055f4794cbd1a39e5e71c038f3f
+$ # Eseguilo nuovamente per ottenere un risultato differente
+$ ./vanity-miner
+Found vanity address! 1Kidxr3wsmMzzouwXibKfwTYs5Pau8TUFn
+Secret: 7f65bbbbe6d8caae74a0c6a0d2d7b5c6663d71b60337299a1a2cf34c04b2a623
+# Utilizza "time" per conoscere il tempo necessario per trovare un risultato
+$ time ./vanity-miner
+Found vanity address! 1KidPWhKgGRQWD5PP5TAnGfDyfWp5yceXM
+Secret: 2a802e7a53d8aa237cd059377b616d2bfcfa4b0140bc85fa008f2d3d4b225349
+
+real	0m8.868s
+user	0m8.828s
+sys	0m0.035s
+----
+====
+
+The example code will take a few seconds to find a match for the three-character pattern "kid," as we can see when we use the +time+ Unix command to measure the execution time. Change the +search+ pattern in the source code and see how much longer it takes for four- or five-character patterns!
+
+===== Sicurezza dei vanity address
+
+((("security", "vanity addresses")))Vanity addresses can be used to enhance _and_ to defeat security measures; they are truly a double-edged sword. Used to improve security, a distinctive address makes it harder for adversaries to substitute their own address and fool your customers into paying them instead of you. Unfortunately, vanity addresses also make it possible for anyone to create an address that _resembles_ any random address, or even another vanity address, thereby fooling your customers.
+
+Eugenia potrebbe pubblicare un indirizzo generato casualmente (e.g., +1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy+) a cui altri utenti possono inviare le loro donazioni. Oppure, potrebbe generare un vanity address che inizi con 1Kids, per renderlo più riconoscibile.
+
+In entrambi i casi, uno dei rischi dell'utilizzo di un singolo indirizzo fisso (piuttosto che un indirizzo dinamico separato per donatore) è che un ladro potrebbe essere in grado di infiltrarsi nel tuo sito Web e sostituirlo con il proprio indirizzo, deviando così le donazioni a se stesso. Se hai pubblicizzato il tuo indirizzo di donazione in un certo numero di luoghi diversi, i tuoi utenti possono ispezionare visivamente l'indirizzo prima di effettuare un pagamento per assicurarsi che sia lo stesso che hanno visto sul tuo sito web, sulla tua email e sul tuo volantino. Nel caso di un indirizzo casuale come +1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy+, l'utente medio controllerà forse i primi caratteri "1J7mdg" e si accontenterà che l'indirizzo corrisponda. Usando un generatore di indirizzi di vanità, qualcuno con l'intento di rubare sostituendo un indirizzo dall'aspetto simile può generare rapidamente indirizzi che corrispondono ai primi caratteri, come mostrato in <<table_4-13>>.
+
+[[table_4-13]]
+.Generando un vanity address che sia simile a un'indirizzo casuale
+|=======
+| *Indirizzo Casuale Originario* | 1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy
+| *Vanity (4-character match)* | 1J7md1QqU4LpctBetHS2ZoyLV5d6dShhEy
+| *Vanity (5-character match)* | 1J7mdgYqyNd4ya3UEcq31Q7sqRMXw2XZ6n
+| *Vanity (6-character match)* | 1J7mdg5WxGENmwyJP9xuGhG5KRzu99BBCX
+|=======
+
+So does a vanity address increase security? If Eugenia generates the vanity address +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, users are likely to look at the vanity pattern word _and a few characters beyond_, for example noticing the "1Kids33" part of the address. That would force an attacker to generate a vanity address matching at least six characters (two more), expending an effort that is 3,364 times (58 × 58) higher than the effort Eugenia expended for her 4-character vanity. Essentially, the effort Eugenia expends (or pays a vanity pool for) "pushes" the attacker into having to produce a longer pattern vanity. If Eugenia pays a pool to generate an 8-character vanity address, the attacker would be pushed into the realm of 10 characters, which is infeasible on a personal computer and expensive even with a custom vanity-mining rig or vanity pool. What is affordable for Eugenia becomes unaffordable for the attacker, especially if the potential reward of fraud is not high enough to cover the cost of the vanity address generation.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
+
+[[paper_wallets]]
+==== I Paper Wallet
+
+((("keys and addresses", "advanced forms", "paper wallets")))((("paper wallets", id="paperw04")))((("wallets", "types of", "paper wallets", id="Wpaper04")))Paper wallets are bitcoin private keys printed on paper. Often the paper wallet also includes the corresponding bitcoin address for convenience, but this is not necessary because it can be derived from the private key. Paper wallets are a very effective way to create backups or offline bitcoin storage, also known as "cold storage." As a backup mechanism, a paper wallet can provide security against the loss of key due to a computer mishap such as a hard-drive failure, theft, or accidental deletion. As a "cold storage" mechanism, if the paper wallet keys are generated offline and never stored on a computer system, they are much more secure against hackers, keyloggers, and other online computer threats.
+
+I paper wallet sono disponibili in molte forme, dimensioni e design, ma essenzialmente sono solo una chiave e un indirizzo stampati su carta. <<table_4-14>> mostra la forma più semplice di un paper wallet.
+
+[[table_4-14]]
+.Simplest form of a paper wallet—a printout of the bitcoin address and private key
+[options="header"]
+|=======================
+|Public address|Private key (WIF)
+|1424C2F4bC9JidNjjTUZCbUxv6Sa1Mt62x|5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
+|=======================
+
+
+Paper wallets can be generated easily using a tool such as the client-side JavaScript generator at _bitaddress.org_. This page contains all the code necessary to generate keys and paper wallets, even while completely disconnected from the internet. To use it, save the HTML page on your local drive or on an external USB flash drive. Disconnect from the internet and open the file in a browser. Even better, boot your computer using a pristine operating system, such as a CD-ROM bootable Linux OS. Any keys generated with this tool while offline can be printed on a local printer over a USB cable (not wirelessly), thereby creating paper wallets whose keys exist only on the paper and have never been stored on any online system. Put these paper wallets in a fireproof safe and "send" bitcoin to their bitcoin address, to implement a simple yet highly effective "cold storage" solution. <<paper_wallet_simple>> shows a paper wallet generated from the bitaddress.org site.
+
+[[paper_wallet_simple]]
+.Un esempio di un paper wallet semplice da bitaddress.org
+image::images/mbc2_0408.png[]
+
+((("bitcoin improvement proposals", "Encrypted Private Keys (BIP-38)")))The disadvantage of a simple paper wallet system is that the printed keys are vulnerable to theft. A thief who is able to gain access to the paper can either steal it or photograph the keys and take control of the bitcoin locked with those keys. A more sophisticated paper wallet storage system uses BIP-38 encrypted private keys. The keys printed on the paper wallet are protected by a passphrase that the owner has memorized. Without the passphrase, the encrypted keys are useless. Yet, they still are superior to a passphrase-protected wallet because the keys have never been online and must be physically retrieved from a safe or other physically secured storage. <<paper_wallet_encrypted>> shows a paper wallet with an encrypted private key (BIP-38) created on the bitaddress.org site.
+
+[[paper_wallet_encrypted]]
+.Un esempio di un paper wallet protetto da password dal sito  bitaddress.org . La passphrase è "test."
+mage::images/mbc2_0409.png[]
+
+[WARNING]
+====
+Although you can deposit funds into a paper wallet several times, you should withdraw all funds only once, spending everything. This is because in the process of unlocking and spending funds some wallets might generate a change address if you spend less than the whole amount. If the computer you use to sign the transaction is then compromised, you risk exposing the private key, giving access to the funds in the change address. By spending the entire balance of a paper wallet only once, you reduce the risk of key compromise. If you need only a small amount, send any remaining funds to a new paper wallet in the same transaction.
+====
+
+Paper wallets come in many designs and sizes, with many different features. Some are intended to be given as gifts and have seasonal themes, such as Christmas and New Year's themes. Others are designed for storage in a bank vault or safe with the private key hidden in some way, either with opaque scratch-off stickers, or folded and sealed with tamper-proof adhesive foil. Figures <<paper_wallet_bpw>> through <<paper_wallet_spw>> show various examples of paper wallets with security and backup features.
+
+[[paper_wallet_bpw]]
+.An example of a paper wallet from bitcoinpaperwallet.com with the private key on a folding flap
+image::images/mbc2_0410.png[]
+
+[[paper_wallet_bpw_folded]]
+.The bitcoinpaperwallet.com paper wallet with the private key concealed
+image::images/mbc2_0411.png[]
+
+Other designs feature additional copies of the key and address, in the form of detachable stubs similar to ticket stubs, allowing you to store multiple copies to protect against fire, flood, or other natural disasters.((("", startref="KAadvanced04")))((("", startref="Wpaper04")))((("", startref="paperw04")))
+
+[[paper_wallet_spw]]
+.An example of a paper wallet with additional copies of the keys on a backup "stub"
+image::images/mbc2_0412.png[]

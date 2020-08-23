@@ -1,0 +1,117 @@
+[[appdx_bitcore]]
+[appendix]
+
+== Bitcore
+
+
+((("Bitcore", id = "bitcore16"))) Bitcore è una suite di strumenti forniti da BitPay. Il suo obiettivo è fornire strumenti facili da usare per gli sviluppatori di Bitcoin. Quasi tutto il codice di Bitcore è scritto in JavaScript. Ci sono alcuni moduli scritti appositamente per NodeJS. Infine, il modulo "nodo" di Bitcore include il codice C ++ di Bitcoin Core. Si prega di consultare https://bitcore.io per ulteriori informazioni.
+
+=== Bitcore's Feature List
+
+* Bitcoin full node (bitcore-node)
+* Block explorer (insight)
+* Block, transaction, and wallet utilities (bitcore-lib)
+* Comunicazione diretta con la rete P2P di Bitcoin (bitcore-p2p)
+* Generazione mnemonica di entropia del seme (bitcore-mnemonico)
+* Protocollo di pagamento (bitcore-payment-protocol)
+* Verifica e firma dei messaggi (bitcore-message)
+* Schema di crittografia integrata a curva ellittica (bitcore-ecies)
+* Wallet service (bitcore-wallet-service)
+* Wallet client (bitcore-wallet-client)
+* Playground (bitcore-playground)
+* Integrazione di servizi direttamente con Bitcoin Core (bitcore-node)
+
+=== Esempi di libreria Bitcore
+
+====Prerequisiti
+
+* NodeJS >= 4.x or use our https://bitcore.io/playground[hosted online playground]
+
+Se si utilizza NodeJS e node REPL :
+
+[source,bash]
+----
+$ npm install -g bitcore-lib bitcore-p2p
+----
+
+==== Esempi di wallet che utilizzano bitcore-lib
+
+Creazione di un nuovo indirizzo bitcoin con chiave privata associata:
+
+----
+> bitcore = require('bitcore-lib')
+> privateKey = new bitcore.PrivateKey()
+> address = privateKey.toAddress().toString()
+----
+
+Creare una private key ed indirizzo gerarchico deterministico:
+
+----
+> hdPrivateKey = bitcore.HDPrivateKey()
+> hdPublicKey = bitcore.HDPublicKey(hdPrivateKey)
+> hdAddress = new bitcore.Address(hdPublicKey.publicKey).toString()
+----
+
+Creazione e firma di una transazione da un UTXO:
+
+----
+> utxo = {
+txId: id della transazione contenente un output non speso,
+outputIndex: output index e.g. 0,
+indirizzo: addressOfUtxo,
+  script: bitcore.Script.buildPublicKeyHashOut(addressOfUtxo).toString(),
+satoshis: importo inviato all'indirizzo
+}
+> fee = 3000 // impostato in modo appropriato per le condizioni sulla rete
+> tx = new bitcore.Transaction()
+.from(utxo)
+.to(address, 35000)
+.fee(fee)
+.enableRBF()
+.sign(privateKeyOfUtxo)
+----
+
+Sostituisci l'ultima transazione nel mempool (replace-by-fee):
+
+----
+> rbfTx = new Transaction()
+.from(utxo)
+.to(address, 35000)
+.fee(fee*2)
+.enableRBF()
+.sign(privateKeyOfUtxo);
+> tx.serialize();
+> rbfTx.serialize();
+----
+
+Trasmissione di una transazione alla rete Bitcoin
+(nota: trasmetti solo transazioni valide, fai riferimento a https://bitnodes.21.co/nodes [] per host peer):
+
+1. Copia il codice seguente in un file chiamato _broadcast.js_.
+2. Le variabili + tx + e + rbfTx + sono l'output di + tx.serialize () + e + rbfTx.serialize () +, rispettivamente.
+3. Al fine di sostituire a pagamento, il peer deve supportare l'opzione bitcoind + mempoolreplace + e impostarlo su +1+.
+4. Eseguire il nodo file _broadcast.js _ ((("", startref = "bitcore16"))):
+
+----
+var p2p = require('bitcore-p2p');
+var bitcore = require('bitcore-lib');
+var tx = new bitcore.Transaction('output from serialize function');
+var rbfTx = new bitcore.Transaction('output from serialize function');
+var host = 'ip address'; //use valid peer listening on tcp 8333
+var peer = new p2p.Peer({host: host});
+var messages = new p2p.Messages();
+peer.on('ready', function() {
+  var txs = [messages.Transaction(tx), messages.Transaction(rbfTx)];
+var index = 0;
+var interval = setInterval(function() {
+peer.sendMessage(txs[index++]);
+console.log('tx: ' + index + ' sent');
+if (index === txs.length) {
+clearInterval(interval);
+console.log('disconnecting from peer: ' + host);
+peer.disconnect();
+    }
+}, 2000);
+});
+peer.connect();
+----

@@ -1,0 +1,210 @@
+[role="pagenumrestart"]
+[[ch01_intro_what_is_bitcoin]]
+== Bevezetés
+
+=== Mi a bitcoin?
+
+((("bitcoin", "definíciója", id="GSdefine01")))A bitcoin olyan alapelvek és technológiák összessége, melyek egy digitális pénzrendszer alapját képezik. A bitcoinnak nevezett pénzegység érték tárolásra és továbbításra szolgál a bitcoin hálózat résztvevői között. A bitcoin felhasználók a bitcoin protokoll segítségével kommunikálnak egymással, főleg az interneten, de egyéb átviteli hálózatok is használhatók. A bitcoin protokoll, amely nyílt forráskódú szoftverként érhető el, széles eszközválasztékon futtatható, többek között notebookokon és okostelefonokon, ami könnyen elérhetővé teszi ezt a technológiát.
+
+A hálózaton át továbbított bitcoinokkal nagyjából ugyanaz megtehető, mint a hagyományos pénzzel, pl. áruvásárlás vagy eladás, pénz küldése magánembereknek vagy szervezeteknek, vagy hitelnyújtás. Bitcoinok az erre specializált pénzváltókban vehetők, adhatók el, vagy válthatók át egyéb pénznemekre. A bitcoin bizonyos értelemben az internetes pénz tökéletes formája, mivel gyors, biztonságos és határokat átívelő fizetést tesz lehetővé.
+
+A hagyományos pénzekkel ellentétben a bitcoin teljesen virtuális. Nincsenek fizikai érmék, de még digitális érmék sem. Az érméket implicit módon azok a tranzakciók tartalmazzák, melyek a feladótól a címzetthez továbbítják az értéket. A bitcoin felhasználóknak csupán kulcsaik vannak, amelyekkel a bitcoin hálózaton belül bizonyítani tudják a bitcoin tulajdonjogát. Ezekkel a kulcsokkal aláírhatnak tranzakciókat, amellyel fel tudják szabadítani az elköltendő összeget, és továbbítani tudják azt egy új tulajdonosnak. A kulcsok gyakran az egyes felhasználók számítógépén vagy okostelefonján, egy digitális pénztárcában vannak tárolva. A bitcoinok elköltésének az egyetlen előfeltétele az, hogy a felhasználó rendelkezzen a tranzakciók aláírásához szükséges kulccsal. Ez azt jelenti, hogy minden egyes felhasználó teljes mértékben maga rendelkezik a pénzével.
+
+A bitcoin egy egyenrangú csomópontokból álló peer-to-peer rendszer. Nincs benne semmilyen „központi” szerver vagy irányítás. A bitcoinok az ún. „bányászat” során jönnek létre. A bányászat egy olyan verseny, melyben a bitcoin tranzakciók feldolgozása során egy matematikai feladat megoldásának a keresése folyik. A bitcoin hálózat bármelyik tagja (vagyis bárki, aki a teljes bitcoin protokollt futtató eszközt használ) bányászként is képes működni, vagyis a számítógépe segítségével képes a tranzakciók ellenőrzésére és tárolására. Átlagosan tízpercenként sikerül egy bányásznak az utolsó tíz percben született tranzakciók érvényesítése, és ezért vadonatúj bitcoinokat kap jutalmul. A bitcoin bányászat lényegében decentralizálja egy központi bank pénzkibocsátási és elszámolási feladatait, és kiváltja a központi bankok iránti igényt.
+
+A bitcoin protokoll olyan beépített algoritmusokat tartalmaz, melyek a hálózat egészében szabályozzák a bányászatot. A bányászok által elvégzendő feladat nehézségét a hálózat dinamikusan úgy állítja be, hogy átlagosan minden 10 percben sikerrel járjon valaki, függetlenül attól, hogy egy adott pillanatban hány bányász (és mekkora kapacitás) verseng a feladat megoldásáért. A protokoll egyúttal minden 4 évben a felére csökkenti a tízpercenként kibocsájtott új bitcoinok számát, és ezáltal az összes létrejövő bitcoinok számát 21 millióra korlátozza. Emiatt a forgalomba kerülő bitcoinok száma egy könnyen megjósolható görbe, amely 2140-re megközelíti a 21 milliót. Az egyre csökkenő mértékű kibocsájtás miatt a bitcoin hosszabb távon deflációs pénz. A bitcoint nem lehet a tervezett kibocsájtási ütemet meghaladó mértékű új pénz „kinyomtatásával” elinflálni.
+
+A színfalak mögött a protokollt, a peer-to-peer hálózatot és az osztott feldolgozás együttesét is bitcoinnak hívják. A bitcoin mint pénz ennek az innovációnak csupán az első alkalmazása. A bitcoin a kriptográfia és az elosztott rendszerek évtizedes kutatásának a végeredménye. Négy alapvető újítást tartalmaz, melyek együttese egyedi és hatékony kombinációt alkot. A bitcoin alkotóelemei:
+
+* egy decentralizált peer-to-peer hálózat (a bitcoin protokoll),
+* egy nyilvános tranzakciós főkönyv (a blokklánc),
+* ((("bányászat és konszenzus", "konszenzus szabályok", "megfelelés")))Független tranzakció érvényesítési és pénzkibocsátási szabályok összessége (konszenzus szabályok)
+* Globális decentralizált konszenzus elérése az érvényes blokkláncon (munkabizonyíték algoritmus)
+
+Fejlesztőként számomra a bitcoin a pénzvilág internete: egy hálózat, mellyel érték továbbítható, és ami elosztott feldolgozás révén biztosítja a digitális vagyontárgyak tulajdonjogát. A bitcoin sokkal több annál, mint első ránézésre hinnénk.
+
+Ebben a fejezetben először a legfontosabb fogalmakat és kifejezéseket ismertetjük, letöltjük a szükséges szoftvert és egyszerű tranzakciókra használjuk a bitcoint. A további fejezetekben hozzálátunk azoknak a technológiai rétegeknek a feltárásához, melyek lehetővé teszik a bitcoin működését, és megvizsgáljuk a bitcoin hálózat és protokoll belső működését.((("", startref="GSdefine01")))
+
+[role="pagebreak-before less_space"]
+.A bitcoin előtti digitális pénzek
+****
+
+((("digitális pénz","a bitcoin előtt")))Az életképes digitális pénz megjelenése szorosan kötődik a kriptográfia fejlődéséhez. Ez nem meglepő, ha szemügyre vesszük azokat az alapvető feladatokat, melyek akkor lépnek föl, ha árukra és szolgáltatásokra elcserélhető értéket szeretnénk bitekkel ábrázolni. Bárki, aki digitális pénzt fogad el, az alábbi három alapvető kérdést teszi fel magának:
+
+1. Bízhatok-e abban, hogy a pénz valódi és nem hamisítvány?
+2. Bízhatok--e abban, hogy a pénz csak egyszer költhető el (ez az ún. „kettős költés” problémája)?
+3. Biztos lehetek-e abban, ez a pénz csak az enyém, és senki másé?
+
+A papírpénz kibocsájtás során egyre kifinomultabb papírokkal és nyomtatási módszerekkel veszik fel a harcot a hamisítás ellen. A fizikai pénz esetében a kettős költés kérdésének kezelése egyszerű, hiszen ugyanaz a bankjegy nem lehet egyszerre két helyen. Természetesen a hagyományos pénz tárolása és továbbítása is gyakran digitálisan történik. Ebben az esetben a hamisítás és kettős költés problémájának kezelése úgy történik, hogy az összes elektronikus tranzakciót központi szervezeteken keresztül bonyolítják le. A központi szervezeteknek globális rálátásuk van a forgalomban levő pénzre. A digitális pénznél, amely nem támaszkodhat különleges tintákra vagy holografikus csíkokra, a kriptográfia biztosítja a felhasználók értékekre vonatkozó állításainak a valódiságát. Nevezetesen, a digitális aláírások teszik lehetővé egy digitális eszköz vagy tranzakció aláírását, a felhasználó pedig ennek révén képes bizonyítani egy adott eszköz tulajdonjogát. A megfelelő architektúra segítségével a digitális aláírások a kettős költés problémájának a kezelésére is alkalmasak.
+
+Amikor a kriptográfia az 1980-as évek végén kezdett sokkal szélesebb körben elterjedni, sok kutató próbált a kriptográfia segítségével digitális pénzeket létrehozni. Ezek a korai projektek olyan digitális pénzeket hoztak létre, amelyeket egy nemzeti valutára vagy valamilyen nemesfémre, pl. az aranyra épültek.
+
+((("decentralizált rendszerek", "kontra centralizált", secondary-sortas="centralizált")))Ezek a korai digitális pénzek működtek ugyan, de centralizáltak voltak, emiatt pedig a kormányok vagy a hackerek támadásainak könnyű célpontjai voltak. A korai digitális pénzek a hagyományos bankrendszerhez hasonlóan egy központi elszámolóházat használtak, amely a tranzakciókat rendszeres időközönként elszámolta. Sajnos a legtöbb esetben ezek a születőfélben lévő digitális pénzek az aggódó kormányok céltáblái lettek, és végül jogi úton felszámolták őket. Voltak közülük olyanok, melyek látványosan összeomlottak, mikor az anyacég hirtelen felszámolásra került. Ahhoz, hogy egy digitális pénz robusztusan ellen tudjon állni az ellenfelek támadásainak, legyenek ezek törvényes kormányok vagy bűnöző elemek, olyan új _decentralizált_ digitális pénzre volt szükség, amelyben nem volt egy pontos támadási felület. A bitcoin egy ilyen rendszer: decentralizált, és nincs benne semmilyen központi szervezet vagy irányítás, amely megtámadható vagy korrumpálható.
+
+****
+
+=== A bitcoin története
+
+((("Nakamoto, Satoshi")))((("elosztott számítási rendszer")))((("bitcoin","kifejlődése")))A bitcoint 2008-ban találta fel fedőnevén Satoshi Nakamoto, amikor megjelentette a „Bitcoin: egy peer-to-peer elektronikus pénzrendszer”footnote:["Bitcoin: egy peer-to-peer elektronikus pénzrendszer," Satoshi Nakamoto (https://bitcoin.org/bitcoin.pdf).] című dolgozatát (ld. <satoshi_whitepaper>). Satoshi Nakamoto számos előző felfedezés, pl. a b-pénz és a HashCash kombinálásával egy teljesen decentralizált elektronikus pénzrendszert hozott létre, amelyben a pénzkibocsájtás, valamint a tranzakciók elszámolása és ellenőrzése nem egy központi szervezetre támaszkodik. ((("munkabizonyíték (proof-of-work) algoritmus")))((("decentralizált rendszerek", "konszenzusa")))((("bányászat és konszenzus", "munkabizonyíték (proof-of-work) algoritmus")))A legfontosabb újítása a munkabizonyíték algoritmuson alapuló elosztott számítási rendszer, amelyben 10 percenkénti globális „szavazás” révén a tranzakciók állapotáról _konszenzus_ alakulhat ki a decentralizált hálózatban. ((("kettős költés kérdése")))((("bitcoin elköltése", "kettős költés kérdése")))Ez elegáns megoldást jelent a kettős költés kérdésére – vagyis arra, hogy egy pénzegység ne legyen kétszer is elkölthető. Korábban a digitális pénz egyik gyengeségét éppen a kettős költés jelentette, melyet úgy kezeltek, hogy az összes tranzakciót egy központ elszámolóházon keresztül rendezték.
+
+A bitcoin hálózat a Nakamoto által publikált referencia implementáció alapján, 2009-ben kezdte meg a működését. A referencia implementációt azóta számos programozó felülvizsgálta. A bitcoin biztonságát és ellenálló képességét biztosító munkabizonyíték (Proof-of-Work) algoritmust megvalósító hálózat kapacitása exponenciálisan nőtt, és manapság meghaladja a világ leggyorsabb szuperszámítógépeinek feldolgozási összkapacitását. A bitcoin teljes piaci értéke a bitcoin-dollár árfolyamtól függően az elmúlt időszakban a 135 milliárd USA dollárt is meghaladta. A hálózat által feldolgozott eddigi legnagyobb tranzakció 400 millió USA dollár volt. A tranzakció azonnal továbbításra került, és feldolgozási költsége 1 dollár volt.
+
+Satoshi Nakamoto 2011 áprilisában visszavonult a nyilvánosságtól. A programkódot és a hálózat fejlesztését az egyre gyarapodó önkéntesek csoportjára hagyta. Még ma sem tudjuk, hogy ki vagy kik állhatnak a bitcoin mögött. ((("nyílt forráskódú licencek")))De a bitcoint se Satoshi Nakamoto, se mások nem tudják befolyásolni, mert a rendszer teljesen átlátható matematikai alapelvek, nyílt forráskódú szoftver, és résztvevői konszenzus szerint működik. Maga a felfedezés korszakalkotó, és máris egy új tudományágat hozott létre az osztott feldolgozás, a közgazdaságtan és az ökonometria területén.
+
+
+.Megoldás egy elosztott feldolgozási problémára
+****
+((("bizánci tábornokok problémája")))Satoshi Nakamoto felfedezése egyúttal az elosztott feldolgozás problémájának, az ún. "bizánci tábornokok problémájának" gyakorlati és újszerű megoldását jelenti. Röviden, a probléma abból áll, hogy hogyan lehet megegyezni a tennivalókról, vagy a rendszer állapotáról egy megbízhatatlan és potenciálisan kompromittált hálózatban végzett információcsere révén. ((("megbízható központi szervezet")))Satoshi Nakamoto megoldása, amely a munkabizonyíték fogalmának használatával, _megbízható központi szervezet nélkül_ éri el a konszenzust, áttörést jelent az elosztott feldolgozás terén, és a pénzügyeken kívül egyéb területeken is széles körben alkalmazható. Bizonyíthatóan igazságos választások, lottójáték, tulajdoni nyilvántartások, digitális közjegyzői szolgáltatások és sok minden más esetén is konszenzust lehet vele elérni a decentralizált hálózatokban.
+****
+
+
+[[user-stories]]
+=== A bitcoin használata a felhasználók szemszögéből
+
+((("bitcoin", "felhasználási esetek", id="GSuses01")))A bitcoin egy innováció az ősi technológiát használó pénz világában. Lényegét tekintve, a pénz emberek közötti értékcserét tesz lehetővé. Következésképp, hogy teljesen megértsük a bitcoin működését és felhasználását, felhasználók szemszögéből fogjuk megvizsgálni azt. Mindegyik felsorolt ember és történet, egy vagy több felhasználási esetet mutat be. A könyv során ővelük fogunk találkozni:
+
+Észak-Amerikai kiskereskedelem::
+((("felhasználási esetek", "kiskereskedelem")))Alice Észak-Kaliforniában, a Bay Areá-n él. A bitcoinról műszaki érdeklődésű barátaitól hallott, és szeretné elkezdeni a használatát. Őt követjük majd, amint megismeri a bitcoint, vesz egy keveset belőle, majd elkölt belőle valamennyit, hogy vegyen egy csésze kávét Bob Palo Altó-i kávézójában. Ennek a történetnek a révén fogunk megismerkedni meg egy vevő szemszögéből a szoftverrel, a pénzváltókkal és a legegyszerűbb tranzakciókkal.
+
+Észak-Amerikai nagykereskedelem::
+Carol egy galéria tulajdonosa San Franciscóban. Drága képeket árul bitcoinért. Az ő történetével fogjuk bemutatni a konszenzus elleni 51%-os támadás által jelentett veszélyt, mely a nagy értékű tételek eladásánál jelentkezik.
+
+Offshore szerződéses szolgáltatások::
+((("offshore szerződéses szolgáltatások")))((("felhasználási esetek", "offshore szerződéses szolgáltatások")))Bob, a Palo Altó-i kávéház tulajdonosa egy új webhelyet szeretne. Egy indiai webfejlesztővel, Gopesh-sel kötött szerződést, aki Banglore-ban él. Gopesh beleegyezett abba, hogy bitcoinban kapja a fizetését. Ebben a történetben azt fogjuk megvizsgálni, hogyan használható a bitcoin kiszervezésre, szerződéses szolgáltatásokra és nemzetközi banki átutalásra.
+
+Webáruház::
+((("felhasználási esetek", "webáruház")))Gábriel egy Rio de Janeiró-i vállalkozó tinédzser, aki egy kisebb webáruházat üzemeltet, amely bitcoin logós pólókat, kávébögréket és matricákat ad el. Gábriel még túl fiatal ahhoz, hogy saját bankszámlája legyen, de szülei igyekeznek kibontakoztatni vállalkozói szellemét.
+
+Jótékonysági adományok::
+((("adományok")))((("felhasználási esetek", "adományok")))Eugénia egy Fülöp-szigeti gyermek jótékonysági alap igazgatója. Nemrég bukkant rá a bitcoinra, és szeretné külföldi és hazai adományozók új csoportját elérni vele, hogy adományokat gyűjtsön. Eugénia a bitcoin használatával szeretne a szükséget szenvedő területekre pénzt küldeni. Az ő története fogja bemutatni, hogyan lehet a bitcoinnal határokon és pénznemeken átívelő módon globális adománygyűjtést szervezni, és hogyan használható a nyílt főkönyv a jótékonysági szervezetek átláthatósága érdekében.
+
+Import/export::
+((("felhasználási esetek", "import/export")))Mohammed elektronikai cikkeket importál Dubaiba. Arra akarja használni a bitcoint, hogy az USA-ból és Kínából elektronikai termékeket importáljon az Egyesült Arab Emirátusokba, és hogy felgyorsítsa az import termékek fizetési folyamatát. Ez a történet fogja bemutatni, hogyan használható a bitcoin a fizikai termékekkel kapcsolatos nemzetközi nagykereskedelmi tranzakciókban.
+
+Bitcoin bányászat::
+((("felhasználási esetek", "bitcoin bányászat")))Jing számítástechnikát tanul Shanghaiban. Jövedelemkiegészítés céljából épített egy bitcoin „bányász” platformot. Ez a történet a bitcoin „ipari” oldalát fogja bemutatni: milyen speciális berendezések biztosítják a bitcoin hálózatot és az új pénz létrejöttét.
+
+Mindegyik fenti történet valós szereplőkön és valós iparágakon alapul. Ezek a szereplők jelenleg arra használják a bitcoint, hogy új piacokat, új iparágakat teremtsenek, és a globális közgazdasági kérdésekre újító megoldásokat adjanak.((("", startref="GSuses01")))
+
+=== Elindulás
+
+((("elindulás", "pénztárca választás", id="GSwallet01")))((("pénztárcák", "választás", id="Wselect01")))((("bitcoin", "elindulás", id="BCbasic01"))A bitcoin egy protokoll, amely olyan kliens alkalmazáson keresztül érhető el, amelyik beszéli ezt a protokollt. A "bitcoin pénztárca" a bitcoin rendszer legelterjedtebb felhasználói felülete, ahhoz hasonlóan, ahogy a webböngésző a HTTP protokoll legelterjedtebb felhasználói felülete. A bitcoin pénztárcák számos implementációja, fajtája létezik, ugyanúgy, ahogy sokféle webböngésző létezik (pl. Chrome, Safari, Firefox és Internet Explorer). Mindannyiunknak van kedvenc (Mozilla Firefox, juhú!), és utált (Internet Explorer, fúj!) böngészője, úgy a bitcoin pénztárcák is eltérnek minőség, teljesítmény, biztonság, adatvédelem és megbízhatóság szempontjából. Továbbá létezik a bitcoin protokoll referencia implementációja, amely tartalmaz egy pénztárcát, amelyet "Satoshi Client"-nek vagy "Bitcoin Core"-nak nevezünk. Ez Satoshi Nakamoto eredeti implementációjából származik.
+
+==== Bitcoin pénztárca választása
+
+((("biztonság", "pénztárca választás")))A bitcoin pénztárcák a bitcoin ökoszisztéma legaktívabban fejlesztett alkalmazásai közé tartoznak. Heves versengés zajlik közöttük, és míg sok új pénztárca jelenleg is fejlesztés alatt áll, számos régebbi pénztárcát már nem tartanak karban. Sok pénztárca specifikus platformokra vagy használati esetekre fókuszál. Egyesek kezdők számára alkalmasabbak, míg mások sok funkció felvonultatásával haladó felhasználók igényeit elégítik ki. A pénztárca választás erősen szubjektív, a felhasználástól, és a felhasználó szakértelmétől függ. Ezért általánosságban lehetetlen egy konkrét pénztárca ajánlása. Azonban kategorizálhatjuk őket platform és funkciók szerint, ezáltal tisztább képet kapunk a különböző pénztárca típusokról. Mivel pénztárcák között viszonylag könnyű kulcsokat és magokat mozgatni, érdemes többfélét is kipróbálni, hogy megtaláljuk az igényeinknek leginkább megfelelőt.
+
+[role="pagebreak-before"]
+A bitcoin pénztárcák platform szerint a következő csoportokra oszthatók:
+
+Asztali pénztárca:: Az asztali pénztárca volt az első bitcoin pénztárca típus, melyet referencia implementációként hoztak létre. Sok felhasználó futtat asztali pénztárcát az általuk kínált funkciók, autonómia és kontroll miatt. Az általános célú operációs rendszereken (pl. Windows és macOS) való futás azonban biztonsági hátrányokkal jár, mivel ezek a platformok gyakran nem biztonságosak és rosszul konfiguráltak.
+
+Mobil pénztárca:: A mobil pénztárca a legelterjedtebb bitcoin pénztárca típus. Az okostelefon operációs rendszereken (pl. Apple iOS és Android) futó pénztárca kezdő felhasználók számára remek választás lehet. Ezek közül sok az egyszerűséget és a könnyű felhasználhatóságot helyezi előtérbe, de haladó felhasználók számára találhatunk teljes értékű mobil pénztárcákat is.
+
+Webes pénztárca:: A webes pénztárcák webböngészőn keresztül érhetők el, és a felhasználó pénztárcáját egy harmadik fél szerverén tárolják. Ez a webmailhez hasonlóan, teljes egészében egy harmadik fél szerverére támaszkodik. Ezen szolgáltatások közül néhány kliens oldali kódot futtat a felhasználó böngészőjében, ezáltal a bitcoin kulcsok kontrollját a felhasználó kezében tartja. A legtöbb azonban, némi kompromisszummal, a könnyű felhasználhatóság érdekében átveszi a felhasználóktól a kulcsok kontrollját. Nem ajánlatos nagy mennyiségű bitcoin harmadik fél rendszerén való tárolása.
+
+Hardver pénztárca:: A hardver pénztárcák olyan eszközök, amelyek biztonságos, önállóan működő pénztárcát valósítanak meg célhardveren. Asztali webböngészőn USB-n, mobil eszközön NFC-n (near-field-communication) keresztül használhatóak. Mivel minden bitcoinnal kapcsolatos műveletet a célhardver kezel, az ilyen pénztárcákat nagyon biztonságosnak, nagy mennyiségű bitcoin tárolására alkalmasnak tartják.
+
+Papír pénztárcák:: ((("hideg tárolás", seealso="tárolás")))((("tárolás", "hideg tárolás")))A bitcoint kontrolláló kulcsok hosszútávú tárolás céljából ki is nyomtathatók. Az ilyen megoldás papír pénztárca néven ismert, bár más anyagokra (fa, fém stb.) is nyomtathatók. A papírtárca alacsony technológiai szintű, de nagyon biztonságos megoldás bitcoin hosszútávú tárolására. Az offline tárolás _hideg tárolás_ néven is ismert.
+
+A bitcoin pénztárcák egy másik lehetséges besorolása autonómiájuk foka és a bitcoin hálózattal való együttműködésük módja szerint:
+
+Teljes kliens:: ((("teljes csomópont")))A teljes kliens vagy „teljes csomópont” egy olyan kliens, amely a bitcoin tranzakciók teljes történetét tárolja, kezeli a felhasználó pénztárcáját és a bitcoin hálózatban közvetlenül képes tranzakciók indítására. Kezeli a protokoll összes vonatkozását, és önállóan képes a teljes blokklánc és bármely tranzakció ellenőrzésére. A teljes kliens számottevő számítási kapacitást igényel (több, mint 125 GB tárhelyet és 2 GB RAM-ot), de teljes autonómiát és önálló tranzakció ellenőrzést biztosít.
+
+Pehelysúlyú kliens:: ((("pehelysúlyú kliensek")))((("egyszerűsített fizetési ellenőrzés (SPV)")))A pehelysúlyú, vagy más néven egyszerűsített fizetési ellenőrzéses (SPV) kliens más teljes bitcoin csomópontokhoz kapcsolódik a tranzakció információ lekérdezéséhez, de a felhasználói pénztárcát helyileg tárolja, és függetlenül hoz létre, ellenőriz és továbbít tranzakciókat. A pehelysúlyú kliensek közvetlenül, közvetítő nélkül lépnek kapcsolatba a bitcoin hálózattal.
+
+Harmadik féltől származó API kliensek:: ((("harmadik féltől származó API kliensek")))A harmadik féltől származó API kliensek harmadik féltől származó programozási interfészeken (API-kon) keresztül kezelik a bitcoint, nem közvetlenül kapcsolódnak a bitcoin hálózathoz. A pénztárcát a felhasználó, vagy harmadik féltől származó szerver tárolja, de minden tranzakció harmadik félen megy keresztül.
+
+Ezeket a kategóriákat kombinálva, sok bitcoin pénztárca egy néhány csoportba sorolható. A három leggyakoribb az asztali teljes kliens, a mobil pehelysúlyú kliens, és a webes harmadik féltől származó pénztárca. A kategóriák közötti határok sokszor elmosódnak, mivel sok pénztárca több platformon is fut, és többféle módon képes kapcsolatba lépni a hálózattal.
+
+Ebben a könyvben sokféle bitcoin kliens használatát fogjuk szemléltetni, a referencia implementációtól (Bitcoin Core) kezdve a mobil és webes pénztárcákig. Némelyik példához a Bitcoin Core-t kell majd használni, amely azon felül, hogy full kliens, API-kat nyújt a pénztárcához, a hálózathoz és a tranzakciós szolgáltatásokhoz. Ha önök a bitcoin rendszer programozható interfész felületeit szeretnék használni, akkor a Bitcoin Core-ra, vagy valamelyik alternatív kliensre lesz szükségük (lásd <<alt_libraries>>).((("", startref="GSwallet01")))((("", startref="Wselect01")))
+
+==== Gyors elindulás
+
+((("elindulás", "gyors elindulási példa", id="GSquick01")))((("pénztárcák", "gyors elindulási példa", id="Wquick01")))((("felhasználási esetek", "kávé vásárlás", id="aliceone")))Alice, akit <<user-stories>>-ben bemutattunk, nem egy műszaki beállítottságú felhasználó, és csak mostanában hallott a bitcoinról barátjától, Joe-tól. Egy buliban Joe ismét lelkesen magyarázza a bitcoint a környezetében lévőknek, és bemutatót kínál nekik. Alice kíváncsian megkérdezi, hogyan tud elindulni a bitcoinnal. Joe azt mondja, hogy új felhasználók számára a mobil pénztárca a legjobb választás, és ajánl néhányat a kedvenc pénztárcái közül. Alice letölti a "Mycelium"-ot Androidra, és telepíti azt a telefonjára.
+
+Amikor Alice először indítja a Myceliumot, sok más bitcoin pénztárcához hasonlóan az alkalmazás automatikusan egy új pénztárcát hoz létre számára. Alice látja a pénztárcát a képernyőjén, lásd <<mycelium-welcome>> (megjegyzés: _ne_ küldjön bitcoint erre a példacímre, mert az mindörökre elvész).
+
+[[mycelium-welcome]]
+.A Mycelium mobil pénztárca
+image::images/mbc2_0101.png["MyceliumWelcome"]
+
+((("címek", "bitcoin pénztárca gyors elindulási példa")))((("QR kódok", "bitcoin pénztárca gyors elindulási példa")))((("címek", see="also kulcsok és címek")))Ennek a képernyőnek a legfontosabb része Alice _bitcoin címe_. A képernyőn a bitcoin cím egy betűkből és számokból álló hosszú karakterláncként jelenik meg: +1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK+. A pénztárca bitcoin címe mellett van egy QR kód, amely egyfajta vonalkód, és ugyanezt az információt tartalmazza, de olyan formátumban, amely egy okostelefon fényképezőgépével könnyen bepásztázható. A QR kód az a négyzet alakú kép, amely fekete és fehér pontokból álló mintázatot tartalmaz. Alice a bitcoin címet vagy QR kódot úgy tudja a vágólapra másolni, hogy rákoppint a QR kódra, vagy megnyomja a Fogadás gombot. A legtöbb pénztárcában a QR kódra való koppintás ki is nagyítja azt, ezáltal okostelefonnal még könnyebben bepásztázható.
+
+[TIP]
+====
+((("címek", "biztonsága")))((("biztonság", "bitcoin címek")))A bitcoin címek az ’1’ vagy a ’3’ számjeggyel kezdődnek. Egy email címhez hasonlóan, bármelyik másik bitcoin felhasználónak megadhatók. A bitcoin cím ismeretében a többi felhasználó bitcoinokat tud küldeni erre címre. Biztonsági szempontból a bitcoin cím nem érzékeny adat. Bárhová feltehető anélkül, hogy biztonsági kockázatot jelentene. Az email címektől eltérően új címek olyan gyakran hozhatók létre, amilyen gyakran csak akarjuk, és mindegyik közvetlenül a pénztárcához fog tartozni. Sok modern pénztárca az adatvédelem érdekében automatikusan új címet generál minden tranzakcióhoz. A pénztárca egyszerűen címek és kulcsok gyűjteménye. A kulcsokkal lehet a pénztárcában lévő pénz zárolását megszüntetni.
+====
+
+Alice most már készen áll a pénz fogadására. A pénztárca alkalmazás generált neki egy véletlenszerű bitcoin címet és a hozzá tartozó kulcsot (ami egy elliptikus görbe privát kulcsa (részletesebben a <<private_keys>> rész ismerteti). Ebben a fázisban Alice bitcoin címét a bitcoin hálózat még nem ismeri, a cím a bitcoin rendszer semelyik részében sincs „regisztrálva”. Alice bitcoin címe egyszerűen csak egy szám, amely megfelel annak a kulcsnak, amellyel hozzá tud férni a pénzéhez. A pénztárca generálása nem igényelt semmilyen hivatkozást vagy regisztrációt külső szolgáltatóhoz, azoktól függetlenül jött létre. A legtöbb pénztárcánál nincs semmilyen kapcsolat a bitcoin cím és bármilyen külsőleg azonosítható információ (beleértve a felhasználó személyazonosságát) között. Mindaddig, amíg a bitcoin főkönyv a benne tárolt tranzakción keresztül nem hivatkozik erre a címre, és a címre még nem küldtek pénzt, addig a cím egyszerűen csak egy a hatalmas számú lehetséges érvényes bitcoin cím közül. Csak amikor már kapcsolatba került egy tranzakcióval, válik a hálózatban ismert címek egyikévé.
+
+Alice új bitcoin pénztárcája ezzel készen áll a használatra.((("", startref="GSquick01")))((("", startref="Wquick01")))
+
+[[getting_first_bitcoin]]
+==== Az első bitcoin beszerzése
+
+((("első lépések", "bitcoin beszerzése")))Az első és gyakran legnehezebb feladat új felhasználók számára a bitcoin beszerzése. Más devizákkal ellentétben, bankban vagy váltóban jelenleg nem kapható.
+
+A bitcoin tranzakciók visszafordíthatatlanok. A legtöbb elektronikus fizetési rendszer, mint a hitelkártyák, betéti kártyák, PayPal, és a banki átutalások visszafordíthatók. Egy bitcoint áruló személy számára ez nagyon magas kockázatot jelent, mivel a vevő visszafordíthatja az elektronikus fizetést, miután megkapta a bitcoint, így becsapva az eladót. A kockázat csökkentése érdekében a bitcoint hagyományos elektronikus fizetség ellenében eladó cégek általában megkövetelik a vevők személyazonosságának és hitelképességének ellenőrzését, ami néhány napot vagy hetet vehet igénybe. Egy új felhasználó számára ez azt jelenti, hogy nem vehet azonnal bitcoint hitelkártyával. Némi türelemmel és kreatív gondolkodásmóddal erre nem is lesz feltétlenül szükség.
+
+[role="pagebreak-before"]
+Egy új felhasználó a következő módszerekkel tud bitcoint szerezni:
+
+* Keressen fel egy barátot, aki rendelkezik bitcoinnal, és vegyen tőle közvetlenül. Sok bitcoin felhasználó így indul el. Ez a módszer a legkevésbé bonyolult. Egy lehetséges módja, hogy bitcoinnal rendelkező emberekkel találkozzon, egy helyi meetupon való részvétel. Ezek listája itt található: https://bitcoin.meetup.com/[Meetup.com].
+* A pass:[<a class="orm:hideurl" href="https://localbitcoins.com/">localbitcoins.com</a>]-hoz hasonló szolgáltatással keres egy területileg közeli eladót, akitől személyes tranzakció során, pénzért veszi meg a bitcoint.
+* Keressen bitcoint árú vagy szolgáltatás eladásáért. Ha ön programozó, programozzon bitcoinért. Ha ön fodrász, vágjon hajat bitcoin ellenében.
+* ((("Coin ATM Radar")))((("ATM-ek, megtalálása")))Használjon bitcoin ATM-et a városában. A bitcoin ATM egy olyan gép, ami pénz ellenében bitcoint küld az ön okostelefonján lévő bitcoin pénztárcába. Találjon egy közeli bitcoin ATM-et online térképen: https://coinatmradar.com/[Coin ATM Radar].
+* ((("árfolyamok", "listázási szolgáltatások")))Használjon egy bankszámlájához kötött bitcoin devizatőzsdét. Sok országban működnek devizatőzsdék, amik eladók és vevők számára piacot biztosítanak bitcoin helyi devizával történő cseréjére. Árfolyam-listázási szolgáltatások, mint pl. a https://bitcoinaverage.com/[BitcoinAverage], gyakran mutatnak különböző devizákhoz bitcoin tőzsdéket.
+
+[TIP]
+====
+((("adatvédelem, biztosítása")))((("biztonság", "adatvédelem biztosítása")))((("digitális fizetőeszközök", "devizatőzsdék")))((("devizatőzsdék")))((("digitális fizetőeszközök", "a bitcoin előnyei")))((("bitcoin", előnyei"))A bitcoin egyik előnye más fizetési rendszerekkel szemben, hogy amennyiben helyesen használják, magasabb szintű adatvédelmet nyújt a felhasználók számára. A bitcoin megszerzése, tartása és elköltése nem követeli meg érzékeny és személyhez köthető adatok harmadik féllel való megosztását. Azonban, ha a bitcoin érintkezésbe lép hagyományos fizetési rendszerekkel, mint pl. devizatőzsdékkel, nemzeti és nemzetközi rendeletek léphetnek érvénybe. Bitcoin nemzeti valuta ellenében való váltásához gyakran szükséges a személyazonosság igazolása, és a banki adatok megadása. A felhasználóknak tudniuk kell, hogy amennyiben egy bitcoin cím és a személyazonosság összekapcsolódik, minden érintett bitcoin tranzakció könnyen azonosíthatóvá és követhetővé válik. Ez az egyik oka annak, hogy sok felhasználó olyan elkülönített tőzsdei fiókot tart fenn, ami nem köthető a pénztárcájukhoz.
+====
+
+Alice-t a barátja ismertette meg a bitcoinnal, ezért Alice könnyen hozzá tud jutni az első bitcoinjához. A következőkben megnézzük, hogyan vásárol bitcoint barátjától, Joe-tól, és Joe hogyan küldi a bitcoint Alice pénztárcájába.
+
+[[bitcoin_price]]
+==== A bitcoin jelenlegi árfolyamának meghatározása
+
+((("elindulás", "árfolyamok")))((("árfolyamok", "meghatározása")))Mielőtt Alice bitcoint vehet Joe-tól, meg kell állapodniuk a bitcoin és USA dollár közötti _árfolyamban_. Ez egy újoncok körében gyakori kérdést vet fel: "Ki határozza meg a bitcoin árát?" A rövid válasz az, hogy a piac határozza meg az árat.
+
+((("árfolyamrendszerek", "lebegő")))((("lebegő árfolyamrendszer")))A bitcoinnak, mint a legtöbb devizának, _lebegő árfolyamrendszere_ van. Ez azt jelenti, hogy a bitcoin értéke más devizákhoz viszonyítva a kereslet és kínálat függvényében ingadozik azokon a piacokon, ahol kereskednek vele. Például a bitcoin USA dollárbeli "árát" a legutolsó bitcoin és USA dollár közötti kereskedés alapján számítják ki az egyes piacokon. Ily módon az ár másodpercenként többször minimálisan ingadozik. Egy árfolyam szolgáltató számos piaci árat összegez és egy forgalom szerint súlyozott átlagot számol, ami a devizapár (pl. BTC/USD) szélesebb piaci árfolyamát tükrözi.
+
+Alkalmazások és webhelyek százai foglalkoznak az aktuális piaci árral. Íme, a legnépszerűbbek:
+
+https://bitcoinaverage.com/[Bitcoin Average]:: ((("bitcoinaverage.com")))A bitcoinaverage.com, amely mindegyik pénznemre vonatkozóan tartalmaz egy forgalommal átlagolt árat.
+https://coincap.io/[CoinCap]:: Egy szolgáltatás amely sok száz kriptopénz tőkeértékét és árfolyamát listázza, beleértve bitcoint.
+https://bit.ly/cmebrr[A chicagói kereskedelmi tőzsde bitcoin referencia-árfolyama]:: Egy referencia-árfolyam, amely intézményi és szerződésbeli referenciaként használható, melyet befektetési adat feed keretében a CME bocsát rendelkezésre.
+
+Ezen webhelyek és alkalmazások mellett, a legtöbb bitcoin pénztárca automatikusan átkonvertálja az összegeket bitcoin és egyéb devizák között. Joe a pénztárcája segítségével átkonvertálja az összeget, mielőtt Alice-nek bitcoint küld.
+
+[[sending_receiving]]
+==== Bitcoin küldés és fogadás
+
+
+((("első lépések", "bitcoin küldése és fogadása", id="GSsend01")))((("bitcoin elköltése", "bitcoin pénztárca gyors elindulási példa")))((("bitcoin elköltése", see="also tranzakciók")))Alice úgy döntött, hogy 10 USA dollárt cserél bitcoinra, hogy ne kockáztasson túl sok pénzt erre az új technológiára. Joe-nak 10 dollár készpénzt ad, megnyitja a Mycelium pénztárca alkalmazását, és kiválasztja a Fogadást. Ez megjelenít egy QR kódot, ami Alice első bitcoin címét tartalmazza.
+
+Joe ezután okostelefonján kiválasztja a Küldést, majd egy újabb képernyőn két bemeneti adatot kell megadnia:
+
+* a címzett bitcoin címe
+* a küldeni kívánt összeg bitcoinban (BTC) vagy helyi devizában (USD) kifejezve
+
+A bitcoin cím beviteli mezőben van egy kis ikon, amely úgy néz ki, mint egy QR kód. Ezzel Joe az okostelefonja fényképezőgépén be tudja pásztázni Alice QR kódját, vagyis nem kell Alice bitcoin címét begépelnie, ami hosszú, és nehézkes folyamat. Joe megérinti a QR kód ikont, majd aktivizálja az okostelefon fényképezőgépét, és bepásztázza az Alice okostelefonján megjelenő QR kódot.
+
+Joe-nál most már Alice bitcoin címe van, mint címzett. Joe begépeli az összeget 10 USA dollárként, és a pénztárcája átkonvertálja egy online szolgáltató legfrissebb árfolyamát használva. Az akkori árfolyam 100 USA dollár per bitcoin, így 10 USA dollár 0,10 bitcoint (BTC), vagy 100 millibitcoint (mBTC) ér, amint az Joe pénztárcájának képernyőképéből látszik (lásd <<airbitz-mobile-send>>).
+
+[[airbitz-mobile-send]]
+[role="smallereighty"]
+.Airbitz mobil bitcoin pénztárca küldési képernyője
+image::images/mbc2_0102.png["airbitz mobil küldési képernyő"]
+
+Ezután Joe gondosan ellenőrzi az összeget, hogy helyes-e, mivel pénzről van szó, és a hibás tranzakciók visszavonhatatlanok. A cím és az összeg ismételt ellenőrzése után megnyomja a „Küldés” gombot, ekkor továbbításra kerül a tranzakció. Joe mobil bitcoin pénztárcája létrehoz egy tranzakciót, amely Joe pénzéből 0,10 BTC-t az Alice által megadott címhez rendel hozzá, majd Joe privát kulcsaival aláírja a tranzakciót. A bitcoin hálózat ebből tudja, hogy Joe az adott összeget Alice új címére szeretné továbbítani, és erre meghatalmazást adott. Amint a tranzakció továbbításra kerül a peer-to-peer protokollal, gyorsan szétterjed a bitcoin hálózatban. A hálózat legjobban kapcsolódó csomópontjai egy másodpercen belül megkapják a tranzakciót, és először találkoznak Alice címével.
+
+Eközben, Alice pénztárcája folyamatosan "figyeli" a publikált tranzakciókat a bitcoin hálózaton. Azokat keresi, amelyeknek a címe megegyezik a pénztárcájában lévő címmel. Egy néhány másodperccel azután, hogy Joe pénztárcája elküldi a tranzakciót, Alice pénztárcája jelezni fogja, hogy 0,10 BTC-t fogad.
+
+.Megerősítések
+****
+((("első lépések", "megerősítések")))((("megerősítések", ""bitcoin pénztárca gyors elindulási példa")))((("megerősítések", see="also bányászat és konszenzus tranzakciók")))((("klíring", seealso="megerősítések")))Alice címén a Joe-tól jövő tranzakció először „Megerősítetlen”-ként fog megjelenni. Ez azt jelenti, hogy a tranzakció már szétterjedt a hálózatban, de még nincs befoglalva a tranzakciós főkönyvbe, más néven a blokkláncba. Ahhoz, hogy a tranzakció megerősítésre kerülhessen, bele kell foglalni egy blokkba, és a blokklánchoz kell adni, ami átlagosan kb. 10 percenként történik. Ez hagyományos pénzügyi kifejezéssel _klíringként_ ismert. A bitcoin tranzakciók szétterjedésének, ellenőrzésének és klíringjének (megerősítésének) további részleteit lásd a <<mining>> részben.
+****
+
+Alice ezzel 0,10 BTC büszke tulajdonosa lett, melyet elkölthet. A következő fejezetben megnézzük, hogy mit fog venni Alice a bitcoinjáért, részletesebben megvizsgáljuk a vásárlás mögött álló tranzakciót és a szétterjedés mögött álló technológiákat.((("", startref="BCbasic01")))((("felhasználási esetek", "kávé vásárlás", startref="aliceone")))

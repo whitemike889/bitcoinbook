@@ -1,0 +1,117 @@
+[[appdx_bitcore]]
+[appendix]
+
+== Bitcore
+
+
+((("Bitcore", id="bitcore16")))Bitcore adalah seperangkat piranti lunak yang disediakan oleh BitPay. Tujuannya adalah untuk menyediakan alat yang mudah digunakan untuk para pengembang Bitcoin. Hampir semua code di dalam Bitcore ditulis dalam JavaScript. Ada beberapa modul yang ditulis khusus untuk NodeJS. Akhirnya, modul "node" Bitcore termasuk code C ++ Bitcoin Core. Silakan lihat di https://bitcore.io untuk informasi lebih lanjut.
+
+=== List Fitur Bitcore
+
+* Bitcoin full node (bitcore-node)
+* Block explorer (insight)
+* Block, transaksi, dan utilitas wallet (bitcore-lib)
+* Komunikasi langsung dengan network P2P Bitcoin (bitcore-p2p)
+* Generate seed entropy mnemonic (bitcore-mnemonic)
+* Protokol pembayaran (bitcore-payment-protocol)
+* Verifikasi dan penandatanganan pesan (bitcore-message)
+* Skema Elliptic curve Integrated Encryption (bitcore-ecies)
+* Layanan wallet (bitcore-wallet-service)
+* Klien wallet (bitcore-wallet-client)
+* Playground (bitcore-playground)
+* Layanan integerasi langsung dengan Bitcoin Core (bitcore-node)
+
+=== Contoh Library Bitcore
+
+==== Prasyarat
+
+* NodeJS >= 4.x atau gunakan https://bitcore.io/playground[hosted online playground] kami
+
+Jika menggunakan NodeJS dan node REPL:
+
+[source,bash]
+----
+$ npm install -g bitcore-lib bitcore-p2p
+----
+
+==== Contoh wallet menggunakan bitcore-lib
+
+Membuat address bitcoin baru yang berelasi dengan private key:
+
+----
+> bitcore = require('bitcore-lib')
+> privateKey = new bitcore.PrivateKey()
+> address = privateKey.toAddress().toString()
+----
+
+Membuat sebuah private key dan address hierarchical deterministic:
+
+----
+> hdPrivateKey = bitcore.HDPrivateKey()
+> hdPublicKey = bitcore.HDPublicKey(hdPrivateKey)
+> hdAddress = new bitcore.Address(hdPublicKey.publicKey).toString()
+----
+
+Membuat dan menandatangani transaksi dari sebuah UTXO:
+
+----
+> utxo = {
+  txId: id transaksi yang mengandung unspent output,
+  outputIndex: output index misal 0,
+  address: addressOfUtxo,
+  script: bitcore.Script.buildPublicKeyHashOut(addressOfUtxo).toString(),
+  satoshis: jumlah yang dikirim pada address
+}
+> fee = 3000 //set sesuai dengan kondisi jaringan
+> tx = new bitcore.Transaction()
+        .from(utxo)
+        .to(address, 35000)
+        .fee(fee)
+        .enableRBF()
+        .sign(privateKeyOfUtxo)
+----
+
+Ganti transaksi terakhir yang ada di dalam mempool (replace-by-fee):
+
+----
+> rbfTx = new Transaction()
+           .from(utxo)
+           .to(address, 35000)
+           .fee(fee*2)
+           .enableRBF()
+           .sign(privateKeyOfUtxo);
+> tx.serialize();
+> rbfTx.serialize();
+----
+
+Broadcast sebuah transaksi ke jaringan Bitcoin
+(catatan: hanya broadcast transaksi valid; mengacu pada https://bitnodes.21.co/nodes[] for peer hosts):
+
+1. Copy code dibawah ini menjadi sebuah file bernama _broadcast.js_.
+2. Masing-masing variabel +tx+ dan +rbfTx+ merupakan output dari +tx.serialize()+ dan +rbfTx.serialize()+.
+3. Agar dapat menggunakan replace-by-fee, peer harus support opsi bitcoind +mempoolreplace+ dan sudah di set menjadi +1+.
+4. Jalankan file node _broadcast.js_((("", startref="bitcore16"))):
+
+----
+var p2p = require('bitcore-p2p');
+var bitcore = require('bitcore-lib');
+var tx = new bitcore.Transaction('output from serialize function');
+var rbfTx = new bitcore.Transaction('output from serialize function');
+var host = 'ip address'; //use valid peer listening on tcp 8333
+var peer = new p2p.Peer({host: host});
+var messages = new p2p.Messages();
+peer.on('ready', function() {
+  var txs = [messages.Transaction(tx), messages.Transaction(rbfTx)];
+  var index = 0;
+  var interval = setInterval(function() {
+    peer.sendMessage(txs[index++]);
+    console.log('tx: ' + index + ' sent');
+    if (index === txs.length) {
+      clearInterval(interval);
+      console.log('disconnecting from peer: ' + host);
+      peer.disconnect();
+    }
+  }, 2000);
+});
+peer.connect();
+----

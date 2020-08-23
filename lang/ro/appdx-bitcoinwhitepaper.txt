@@ -1,0 +1,247 @@
+[[satoshi_whitepaper]]
+[appendix]
+== Referatul Bitcoin de Satoshi Nakamoto
+
+[NOTE]
+====
+((("referat", id="whitethirteen")))((("referatul bitcoin", id="BCwhitethirteen")))((("Nakamoto, Satoshi", id="nakamatothirteen")))Acesta este referatul original, reprodus în întregime exact cum a fost publicat de Satoshi Nakamoto în octombrie 2008.
+====
+
+=== Bitcoin - Un Sistem Electronic de Numerar De-la-Egal-la-Egal
+
+Satoshi Nakamoto
+
+_satoshin@gmx.com_
+
+pass:[<a href="https://bitcoin.org/en/" class="orm:hideurl"><em>www.bitcoin.org</em></a>]
+
+*Abstract.* O versiune exclusiv de-la-egal-la-egal de numerar electronic ar permite trimiterea plăților direct de la o entitate la alta fără a trece printr-o instituție financiară. Semnăturile digitale oferă o parte din soluție, dar principalele beneficii sunt pierdute dacă o a treia entitate considerată de încredere este încă necesară pentru a preveni cheltuirea dublă. Propunem o soluție la problema dublei-cheltuiri folosind o rețea de-la-egal-la-egal. Rețeaua pune tranzacțiilor o marcă de timp (timestamp) adaugând rezumatul (hash-ul) lor într-un lanț continuu de rezumate (hash-uri) bazate pe dovada-de-lucru, formând un registru ce nu poate fi schimbat fără a reface dovada-de-lucru. Cel mai lung lanț servește nu doar ca dovadă a secvenței de evenimente observate, dar și ca dovadă că a fost creat folosind cea mai mare cantitate de putere de calcul (CPU power). Cât timp majoritatea puterii de calcul este controlată de către noduri care nu cooperează pentru a ataca rețeaua, aceste noduri vor genera cel mai lung lanț și vor surclasa atacatorii. Rețeaua necesită o structură minimă. Fiecare nod difuzează (broadcasts) mesajele cât poate de bine, iar nodurile pot părăsi sau se pot (re)alătura rețelei după cum doresc, acceptând cel mai lung lanț bazat pe dovadă-de-lucru ca mărturie la ce s-a întâmplat cât timp au fost absente.
+
+==== Introducere
+Comerțul pe Internet a ajuns să se bazeze aproape exclusiv pe instituții financiare care joacă rolul de entități terțe de încredere pentru a procesa plățile electronice. Chiar dacă sistemul funcționează destul de bine pentru majoritatea tranzacțiilor, acesta încă suferă de slăbiciunile intrinseci ale modelului bazat pe încredere. Tranzacții complet ireversibile nu sunt cu adevărat posibile, deoarece instituțiile financiare nu pot evita medierea disputelor. Costul de mediere crește costurile tranzacției, limitând dimensiunea minimă a tranzacției și reducând posibilitatea pentru tranzacții ocazionale mici, existând un cost mai extins în pierderea capacității de a efectua plăți ireversibile pentru servicii ireversibile. Având posibilitatea de anulare, nevoia de încredere se extinde. Comercianții trebuie să fie precauți cu clienții lor, cerându-le mai multe informații decât ar avea nevoie în mod normal. Un anumit procent de fraudă este acceptat ca inevitabil. Aceste costuri și incercitudini legate de plată pot fi evitate efectuând plăți în persoană cu bani fizici, dar nu există un mecanism pentru a face plăți folosind un canal de comunicare fără implicarea unei entități de încredere.
+
+Ceea ce este necesar, este un sistem electronic de plată care să fie bazat pe dovadă critptografică în loc să fie bazat pe încredere (într-un terț), care să permită oricăror două entități să tranzacționeze direct între ele fără a fi nevoie de o a treia entitate (considerată) de încredere. Tranzacții care sunt nepractic computațional să fie inversate (anulate) ar proteja vânzătorii în fața fraudelor, iar mecanismele obișnuite de conturi de garanție ar putea fi ușor implementate pentru a proteja cumpărătorii. În această lucrare, propunem o soluție la problema dublei-cheltuiri folosind un server distribuit de-la-egal-la-egal pentru a genera dovada computațională a ordinii cronologice a tranzacțiilor. Sistemul este securizat atât timp cât nodurile oneste controlează împreună mai multă putere de calcul (CPU power) decât orice grup cooperant de noduri atacatoare.
+
+==== Tranzacții
+Definim o monedă electronică ca fiind un lanț de semnături digitale. Fiecare proprietar transferă moneda următorului proprietar aplicând o semnătură digitală la rezumatul (hash-ul) tranzacției precedente și cheii publice a următorului proprietar și adăugându-le pe acestea la sfârșitul monedei. Un beneficiar poate verifica semnăturile pentru a verifica lanțul de proprietate.
+
+image::images/mbc2_abin01.png["Tranzacții"]
+
+Problema este desigur că beneficiarul nu poate verifica dacă unul dintre proprietari a cheltuit de două ori moneda. O soluție obișnuită este folosirea unei autorități centrale, sau emitent, care inspecteză fiecare tranzacție pentru cheltuiri duble. După fiecare tranzacție, moneda trebuie returnată la emitent pentru a emite o nouă monedă, și doar monedele emise direct de către emitent sunt considerate sigure și că nu au fost cheltuite de două ori. Problema cu această soluție este că soarta întregului sistem monetar depinde de compania care rulează emitentul, fiecare tranzacție trebuind să treacă prin el, exact ca o bancă.
+
+Avem nevoie de o modalitate prin care beneficiarul să știe că proprietarii precendeți nu au semnat vreo tranzacție anterioară. Pentru scopurile noastre, cea mai recentă tranzacție este cea care contează, deci nu ne pasă de încercările ulterioare de a cheltui a doua oară. Singurul mod de a confirma absența unei tranzacții este de a fi la curent cu toate tranzacțiile. În modelul bazat pe emitent, emitentul a fost la curent cu toate tranzacțiile și a decis care a ajuns prima. Pentru a realiza acest lucru fără o entitate de încredere, tranzacțiile trebuie să fie anunțate public [1], și avem nevoie de un sistem pentru ca participanții să cadă de acord asupra unui singur istoric al ordinii în care tranzacțiile au ajuns. Beneficiarul are nevoie de dovada că la momentul fiecărei tranzacții, majoritatea nodurilor au fost de acord că a fost prima primită.
+
+==== Server de Marcare a Timpului (timestamp)
+Soluția pe care o propunem începe cu un server de marcare a timpului (timestamp). Un server de marcare a timpului funcționează luând rezumatul (hash-ul) unui bloc de elemente ce urmează a fi marcate și publicând pe scară largă rezumatul, la fel cum procedează un ziar sau un post Usenet [2-5]. Marca-de-timp dovedește că datele trebuie să fi existat la momentul respectiv, evident, pentru a putea fi incluse în rezumat (hash). Fiecare marcă-de-timp include marca precedentă în rezumatul ei, formând un lanț, fiecare marcă-de-timp adițională consolidându-le pe cele dinaintea ei.
+
+image::images/mbc2_abin02.png["server marcă-de-timp"]
+
+==== Dovadă-de-Lucru
+Pentru a implementa un server de marcare a timpului într-o rețea de-la-egal-la-egal, va trebui să folosim mai de grabă un sistem de dovadă-de-lucru similar cu soluția Hashcash [5] propusă de Adam Back, decât publicarea într-un ziar sau posturi Usenet. Soluția dovadă-de-lucru implică căutarea unei valori care atunci când este rezumată (hashed), cum ar fi cu o funcție SHA-256, rezumatul începe cu un anumit număr de biți de zero. Cantitatea de lucru medie necesară crește exponențial cu numărul de biți de zero necesari și poate fi verificată calculând un singur rezumat. Pentru rețeaua noastră de marcare a timpului, implementăm dovada-de-lucru incrementând un câmp (nonce) în bloc până când o valoare este găsită (pentru nonce) care face ca rezumatul blocului să înceapă cu numărul necesar de biți de zero. Odată ce efortul CPU a fost investit pentru a face blocul să satisfacă dovada-de-lucru, acest bloc nu poate fi schimbat făra a reface calculele. Pentru că blocurile ulterioare sunt înlănțuite după el, efortul necesar pentru a schimba blocul implică refacerea tututor blocurilor de după el.
+
+image::images/mbc2_abin03.png["pow"]
+
+Dovada-de-lucru rezolvă de asemenea problema reprezentării majorității în luarea deciziilor. Dacă majoritatea ar fi fost bazată pe principiul o-adresă-IP-un-vot, atunci ar fi fost răsturnată de oricine ar fi fost în stare să aloce mai multe adrese IP. Dovada-de-lucru este în esență un-CPU-un-vot. Decizia majorității este reprezentată de lanțul cel mai lung, care are cea mai mare dovadă-de-lucru acumulată. Dacă majoritatea puterii de calcul este controlată de către noduri oneste, lanțul onest va crește cel mai rapid și va depăși orice lanț concurent. Pentru a modifica un bloc precendent, un atacator ar trebui să refacă dovada-de-lucru a blocului respectiv, dar și a tuturor blocurilor de după el, iar apoi să ajungă din urmă și să depășească nodurile oneste. Vom arăta mai târziu că probabilitatea ca un atacator mai lent să ajungă din urmă (nodurile oneste) scade exponențial pe măsură ce noi blocuri sunt adăugate (la lanțul onest).
+
+Pentru a compensa pentru creșterea performanței hardware-ului și a diverselelor motive pentru a rula noduri de-a lungul timpului, dificultatea dovezii-de-lucru este determinată de o medie dinamică raportată la un număr mediu de blocuri pe oră. Dacă sunt generate prea repede, dificultatea crește.
+
+==== Rețea
+
+Pașii pentru a rula o rețea sunt următorii:
+
+1. Tranzacțiile noi sunt difuzate (broadcast) către toate nodurile.
+2. Fiecare nod colectează tranzacții noi într-un bloc
+3. Fiecare nod lucrează pentru a găsi o dovadă-de-lucru suficient de dificilă pentru blocul lui.
+4. Când un nod găsește o dovadă-de-lucru, difuzează (broadcasts) blocul către toate nodurile
+5. Nodurile acceptă blocul doar dacă toate tranzacțiile conținute în el sunt valide și nu sunt deja cheltuite.
+6. Nodurile îsi exprimă acordul asupra blocului începând lucrul la creeare următorului bloc din lanț, folosind rezumatul (hash-ul) blocului acceptat ca rezumat anterior.
+
+Nodurile întotdeauna consideră lanțul cel mai lung ca fiind cel corect și vor continua să lucreze la extinderea acestuia. Dacă două noduri difuzează (broadcast) simultan două versiuni (valide) diferite ale următorului bloc, unele noduri vor primi una dintre versiuni întâi. În acest caz, vor lucra cu prima pe care au primit-o, dar vor salva și cealaltă ramură în caz că devine mai lungă. Egalitatea va fi întreruptă când următoarea dovadă-de-lucru este găsită și una din ramuri devine mai lungă; nodurile care lucrau la cealaltă ramură vor schimba către cea mai lungă.
+
+Nu este nevoie ca tranzacțiile nou difuzate să ajungă la toate nodurile. Cât timp reușesc să ajungă la multe noduri, tranzacțiile vor reuși să fie incluse într-un bloc în scurtă vreme. Difuzarea de blocuri este de asemenea tolerantă cu mesajele pierdute. Daca un nod nu primește un bloc, îl va cere atunci când primește următorul bloc și își dă seama că îi lipsește unul.
+
+==== Stimulente
+Prin convenție, prima tranzacție dintr-un bloc este o tranzacție specială care creează monedă nouă deținută de către creatorul blocului. Această tranzacție adaugă un stimulent nodurilor pentru a susține rețeaua și oferă o modalitate de distribuire inițială a monedelor în circulație, din moment ce nu există o autoritate centrală care să le emită. Adăugarea stabilă a unei cantități constantă de noi monede este similară minerilor care cheltuiesc resurse pentru a pune aur în circulație. În cazul nostru este vorba de puterea de calcul și electricitatea care sunt cheltuite.
+
+Stimulentul poate fi de asemenea finanțat și din comisioanele de tranzacție. Dacă valoarea de ieșire a unei tranzacții este mai mică decât valoarea de intrare, atunci diferența este un comision de tranzacție care este adăugat la valoarea stimulentului oferit pentru blocul care conține tranzacția. Odată ce un număr predeterminat de monede a intrat în circulație, stimulentul poate trece în întregime la comisioane din tranzacții și poate fi complet lipsit de inflație.
+
+Stimulentul poate încuraja nodurile să rămână oneste. Dacă un atacator lacom reușește să reunească mai multă putere de calcul decât toate nodurile oneste, el ar trebui să decidă între a delapida oamenii furând înapoi plățile sale, și a folosi puterea de calcul pentru a genera noi monede. S-ar putea să fie mai profitabil să joace după reguli, aceste reguli care îi aduc mai multe monede noi decât restului de participanți la un loc, decât să submineze sistemul și validitatea propriei averi.
+
+==== Recuperarea Spațiului pe Disc
+
+ 
+Odată ce ultima tranzacție dintr-o monedă este acoperită de destule blocuri, tranzacțiile cheltuite înaintea ei pot fi înlăturate pentru a economisi spațiu pe disc. Pentru a facilita acest lucru fără a afecta rezumatul blocului, tranzacțiile sunt rezumate (hashed) intr-un arbore Merkle [7] [2] [5], doar rădăcina arborelui fiind inclusă în rezumatul blocului. Blocurile vechi pot fi apoi compactate prin scurtarea ramurilor arborelui. Rezumatele interne nu trebuie să fie stocate.
+ 
+
+image::images/mbc2_abin04.png["disk"]
+
+Antetul unui bloc fără nici o tranzacție are aproximativ 80 de octeți. Dacă presupunem că blocurile sunt generate la aproximativ 10 minute, `80 de octeți * 6 * 24 * 365 = 4.2MB` pe an. Având calculatoare care se vând de obicei cu 2GB de RAM în 2008, iar Legea lui Moore care prevede o creștere de 1.2BG pe an, stocarea nu ar trebui să fie o problemă chiar dacă antetele blocurilor trebuie ținute în memorie. 
+
+==== Verificarea Simplificată a Plății
+Este posibilă verificarea plăților fără a rula un nod de rețea complet. Un utilizator are nevoie să păstreze doar o copie a antetelor celui mai lung lanț bazat pe dovada-de-lucru, pe care o poate obține (copia antetelor) interogând nodurile rețelei până când este convins că are cel mai lung lanț, și apoi să obțină ramura Merkle legând tranzacția de blocul în care a fost inclusă. Utilizatorul nu poate verifica tranzacția de unul singur, dar legând-o într-un anumit loc în lanț, poate vedea că un nod din rețea a acceptat-o, iar blocurile adăugate după ea, confirmă și mai mult că rețeaua a acceptat-o. 
+
+image::images/mbc2_abin05.png["spv"]
+
+Ca atare, verificarea este de încredere cât timp nodurile oneste controlează rețeaua, dar este mai vulnerabilă dacă rețeaua este copleșită de un atacator. În timp ce nodurile pot verifica tranzacția direct, metoda simplificată poate fi păcălită de tranzacțiile inventate ale unui atacator atâta timp cât atacatorul poate continua să depășească rețeaua. O strategie de protecție împotriva acestui lucru ar fi să accepte alerte de la nodurile rețelei când acestea detectează un bloc invalid, determinând software-ul utilizatorului să downloadeze blocul complet împreună cu tranzacțiile suspecte pentru a confirma inconsistența. Companiile care primesc plăți frecvent vor dori probabil să ruleze propriile lor noduri pentru a avea o securitate mai independentă și o verificare mai rapidă.
+
+==== Combinarea și Divizarea Valorii
+Deși ar fi posibil să gestioneze monede în mod individual, ar fi greoi să se execute o tranzacție separată pentru fiecare cent dintr-un transfer. Pentru a permite ca valoarea să fie divizată și combinată, tranzacțiile conțin intrări și ieșiri multiple. În mod normal va exista fie o singură intrare de la o tranzacție precedentă mai mare fie mai multe intrări care combină sume mai mici, și cel mult două ieșiri: una pentru plată, și una pentru returnarea restului, dacă este cazul, înapoi la expeditor.
+
+image::images/mbc2_abin06.png["combining-splitting"]
+
+Ar trebuie menționat că ”mufarea”, când o tranzacție depinde de câteva alte tranzacții, iar acele tranzacții depind de multe altele, nu este o problemă aici. Nu este niciodată necesară extragerea unei copii complete independente din istoricul unei tranzacții.
+
+==== Confidențialitatea
+Modelul bancar tradițional atinge un anumit nivel de confidențialitate prin limitarea accesului la informații celor implicați și a entității terțe considerate de încredere. Necesitatea de a anunța toate tranzacțiile public înlătură acest model, dar confidențialitatea încă poate fi păstrată întrerupând fluxul de informații într-un alt loc: prin păstrarea cheilor publice anonime. Publicul poate vedea că cineva trimite o suma la altcineva, dar fără informații care să lege tranzacția de cineva anume. Acest lucru este similar cu nivelul de informații deblocat de bursele de valori, unde timpul și mărimea tranzacțiilor individuale, ”banda”, sunt făcute publice, dar fără a spune cine sunt participanții.
+
+image::images/mbc2_abin07.png["privacy"]
+
+Ca protecție suplimentară, o nouă pereche de chei ar trebui folosită pentru fiecare tranzacție pentru a le împiedica să fie corelate la un proprietar comun. Un anumit nivel de corelare nu poate fi evitat pentru tranzacții cu intrări multiple, care în mod necesar dezvăluie că intrările lor au fost deținute de același proprietar. Riscul este că, in cazul în care deținătorul unei chei este dezvăluit, corelarea ar putea trăda alte tranzacții care aparțin aceluiași proprietar.
+
+==== Calcule
+Considerăm scenariul în care un atacator încearcă să genereze un lanț alternativ mai rapid decât lanțul onest. Chiar dacă acest lucru este realizat, nu înseamnă că sistemul este acum deschis unor schimbări arbitrare, cum ar fi creare de valoare din nimic sau furtul banilor care nu au aparținut niciodata atacatorului. Nodurile nu vor accepta ca plată o tranzacție invalidă, iar nodurile oneste nu vor accepta vreodată un bloc care le conține. Un atacator poate doar să încerce să schimbe una din tranzacțiile lui pentru a recupera banii pe care i-a cheltuit recent.
+
+Cursa între lanțul onest și lanțul atacatorului poate fi caracterizată ca o Plimbare Aleatorie în Tandem. Un eveniment de succes este atunci când lanțul onest este extins cu un bloc, mărindu-și avantajul cu +1, iar un eveniment de eșec este atunci când lanțul atacatorului este extins cu un bloc, reducând diferența cu -1.
+
+ 
+Probabiliatea ca un atacator să ajungă din urmă de la o anumită diferență este similară cu problema referitoare la Ruina Pariorului. Presupunem că un parior cu fonduri nelimitate începe la un anume deficit și joacă un număr potențial infinit de încercări pentru a ajunge pe zero. Putem calcula probabiliatea ca el să ajungă vreodată pe zero, sau că un atacator ajunge din urmă lanțul onest, după cum urmează  [8]:
+ 
+
+p = probabilitatea ca un nod onest să găsescă blocul următor
+
+q = probabilitatea ca atacatorul să găsească blocul următor
+
+q~z~ = probabilitatea ca atacatorul să ajungă din urmă de la z blocuri în spate
+
+image::images/mbc2_abin08.png["eq1"]
+
+Având în vedere presupunerea noastră că p > q, probabilitatea scade exponențial pe măsură ce crește numărul de blocuri pe care atacatorul trebuie să le ajungă din urmă. Având sorții de izbândă impotriva lui, dacă nu reușește un salt norocos de la început, șansele lui devin extrem de mici pe măsură ce ramâne din ce în ce mai în urmă.
+
+Acum vom lua în considerare cât timp trebuie să aștepte beneficiarul unei noi tranzacții până când să fie suficient de sigur că expeditorul nu poate schimba tranzacția. Presupunem că expeditorul este un atacator care vrea să îl facă pe beneficiar să creadă pentru o vreme că a fost plătit, apoi să se plătească înapoi pe el după ce un anumit interval de timp a trecut. Beneficiarul va fi alertat când acest lucru se întâmplă, dar expeditorul speră că va fi prea târziu. 
+
+Destinatarul generează o nouă pereche de chei și trimite cheia publică expeditorului cu puțin timp înainte ca acesta să semneze tranzacția. Acest lucru împiedică expeditorul să pregătească un lanț-de-blocuri în avans lucrând la el în mod continuu până când e destul de norocos pentru a ajunge destul de în față, apoi să execute tranzacția la acel moment. Odată ce tranzacția este trimisă, expeditorul necinstit începe lucrul în secret la un lanț paralel ce conține o versiune alternativă a tranzacției originale.
+
+Destinatarul așteaptă până când tranzacția a fost adaugată la un bloc, iar după acel bloc încă z blocuri au fost adăugate. El nu știe exact progresul pe care atacatorul l-a făcut, dar presupunând că blocurile oneste au fost create în intervalul mediu preconizat de timp per bloc, progresul potențial al atacatorului va fi o distribuție Poisson cu valoarea:
+
+image::images/mbc2_abin09.png["eq2"]
+
+Pentru a obține probabilitatea ca atactorul să poată încă să ajungă din urmă, vom înmulți densitatea Poisson pentru fiecare masură de progres pe care ar fi putut-o face cu probabilitatea ca să poată ajunge din urmă din acel punct:
+
+image::images/mbc2_abin10.png["eq3"]
+
+Rearanjare pentru a evita însumarea cozii infinite a distribuției...
+
+image::images/mbc2_abin11.png["eq4"]
+
+implementarea în cod C...
+
+[source,c]
+----
+#include <math.h>
+double AttackerSuccessProbability(double q, int z)
+{
+    double p = 1.0 - q;
+    double lambda = z * (q / p);
+    double sum = 1.0;
+    int i, k;
+    for (k = 0; k <= z; k++)
+    {
+        double poisson = exp(-lambda);
+        for (i = 1; i <= k; i++)
+            poisson *= lambda / i;
+        sum -= poisson * (1 - pow(q / p, z - k));
+    }
+    return sum;
+}
+----
+
+După câteva rulări, putem vedea că probabiliatea scade exponențial cu z.
+----
+q=0.1
+z=0 P=1.0000000
+z=1 P=0.2045873
+z=2 P=0.0509779
+z=3 P=0.0131722
+z=4 P=0.0034552
+z=5 P=0.0009137
+z=6 P=0.0002428
+z=7 P=0.0000647
+z=8 P=0.0000173
+z=9 P=0.0000046
+z=10 P=0.0000012
+----
+----
+q=0.3
+z=0 P=1.0000000
+z=5 P=0.1773523
+z=10 P=0.0416605
+z=15 P=0.0101008
+z=20 P=0.0024804
+z=25 P=0.0006132
+z=30 P=0.0001522
+z=35 P=0.0000379
+z=40 P=0.0000095
+z=45 P=0.0000024
+z=50 P=0.0000006
+----
+Reazolvarea pentru P mai mic decât 0,1%...
+----
+P < 0.001
+q=0.10 z=5
+q=0.15 z=8
+q=0.20 z=11
+q=0.25 z=15
+q=0.30 z=24
+q=0.35 z=41
+q=0.40 z=89
+q=0.45 z=340
+----
+
+==== Concluzie
+Am propus un sistem pentru tranzacții electronice fără a ne baza pe încredere. Am început cu cadrul obișnuit al monedelor realizate din semnături digitale, care asigură control întărit de deținere, dar este incomplet fără o modalitate de a preveni cheltuirea-dublă. Pentru a rezolva această problemă, am propus o rețea de-la-egal-la-egal folosind dovada-de-lucru pentru a înregistra un istoric public al tranzacțiilor și care devine rapid nepractic computațional pentru un atacator să-l schimbe cât timp nodurile oneste controleaza majoritatea puterii de calcul. Rețeaua este robustă în simplitatea ei nestructurată. Nodurile lucreaza toate simultan cu coordonare minimă. Ele nu trebuie să fie identificate, deoarece mesajele nu sunt direcționate către un anumit loc ci trebuie doar să fie transmise cât se poate de bine mai departe. Nodurile pot părăsi și se pot realătura rețelei după cum doresc, acceptând lanțul de dovadă-de-lucru ca dovadă la ce s-a întâmplat cât timp au fost plecate. Nodurile votează cu puterea lor de calcul, exprimându-și acceptul asupra blocurilor valide și lucrând pentru a le extinde și respingând blocurile invalide prin refuzul de a lucra cu ele. Orice reguli și stimulente pot fi impuse cu acest mecanism de consens.
+
+==== Referințe
+ 
+ 
+[1] W. Dai, "b-money", http://www.weidai.com/bmoney.txt, 1998.
+ 
+ 
+[2] H. Massias, X.S. Avila, and J.-J. Quisquater, "Design of a secure timestamping service with minimal trust requirements," In 20th Symposium on Information Theory in the Benelux, May 1999.
+ 
+ 
+[3] S. Haber, W.S. Stornetta, "How to time-stamp a digital document," In Journal of Cryptology, vol 3, no 2, paginile 99-111, 1991.
+ 
+
+ 
+[4] D. Bayer, S. Haber, W.S. Stornetta, "Improving the efficiency and reliability of digital time-stamping," In Sequences II: Methods in Communication, Security and Computer Science, paginile 329-334, 1993.
+ 
+
+ 
+[5] S. Haber, W.S. Stornetta, "Secure names for bit-strings," In Proceedings of the 4th ACM Conference on Computer and Communications Security, paginile 28-35, April 1997.
+ 
+
+ 
+[6] A. Back, "Hashcash - a denial of service counter-measure", http://www.hashcash.org/papers/hashcash.pdf, 2002.
+ 
+
+ 
+[7] R.C. Merkle, "Protocols for public key cryptosystems," In Proc. 1980 Symposium on Security and Privacy, IEEE Computer Society, paginile 122-133, April 1980.
+ 
+
+ 
+[8] W. Feller, "An introduction to probability theory and its applications," 1957.
+ 
+ 
+
+=== Licență
+
+((("open source licenses")))Acest referat a fost publicat în octombrie 2009 de către Satoshi Nakamoto. A fost mai târziu (2009) adăugat ca documentație la software-ul bitcoin și are aceiași licență MIT. A fost reprodus în această carte doar cu modificări legate de formatare, sub termenii licenței MIT:
+
+Licența MIT (MIT) - Engleză
+Copyright (c) 2008 Satoshi Nakamoto
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.((("", startref="whitethirteen")))((("", startref="nakamatothirteen")))((("", startref="BCwhitethirteen")))

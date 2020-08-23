@@ -1,0 +1,800 @@
+[[ch03_bitcoin_client]]
+== Bitcoin Core – a referencia implementáció
+
+((("nyílt forráskódú licencek")))((("Nakamoto, Satoshi"))A bitcoin egy _nyílt forráskódú_ projekt, és a forráskód egy nyílt (MIT) licencen keresztül elérhető. Szabadon letölthető, és bármely célra felhasználható. A nyílt forráskód többet jelent a szabad felhasználhatóságnál. Azt is jelenti, hogy a bitcoint egy nyitott, önkéntes közösség fejleszti. Az elején mindössze Satoshi Nakamoto alkotta a közösséget. 2016-ra több, mint 400-an járultak hozzá a kódhoz, ebből egy tucatnyi fejlesztő majdnem teljes munkaidőben, és több tucatnyian részmunkaidőben dolgoztak rajta. Bárki, akár ön is hozzájárulhat a kódhoz.
+
+
+((("bitcoin dolgozat")))((("Satoshi kliens")))((("referencia implementáció", see="Bitcoin Core")))((("Bitcoin Core", "referencia implementáció"))Amikor Satoshi Nakamoto megalkotta a bitcoint, a szoftver előbb készült el, mint a dolgozat (melynek reprodukciója itt olvasható: <<satoshi_whitepaper>>). Satoshi meg akart győződni a helyes működésről, mielőtt dolgozatot írt volna róla. Az az első implementáció, amit akkor egyszerűen "Bitcoin"-nak vagy "Satoshi kliens"-nek hívtak számos módosításon és javításon ment keresztül. Ma _Bitcoin Core_-ként ismert, hogy megkülönböztethető legyen más vele kompatibilis implementációktól. A Bitcoin Core a bitcoin rendszer _referencia implementációja_, ami azt jelenti, hogy hiteles referenciaként szolgál arra, hogy a technológia egyes részeit hogyan kell implementálni. A Bitcoin Core a bitcoin minden elemét implementálja, beleértve a pénztárcákat, a tranzakció és blokkellenőrző motort, és egy teljes csomópontot a peer-to-peer bitcoin hálózatban.
+
+[WARNING]
+====
+((("pénztárcák", "bevált gyakorlatok")))((("bitcoin továbbfejlesztési javaslatok", "mnemonik (BIP-39)")))((("bitcoin továbbfejlesztési javaslatok", "hierarchikus determinisztikus pénztárcák (BIP-32/BIP-44)")))Ugyan a Bitcoin Core tartalmaz egy referencia pénztárca implementációt, de nem azzal a szándékkal, hogy azt felhasználók vagy alkalmazások élesben használják. Alkalmazásfejlesztők számára javasolt modern szabványokon, mint a BIP-39 és a BIP-32 (lásd <<mnemonic_code_words>> és <<hd_wallets>>), alapuló pénztárca építése. A BIP a _Bitcoin Improvement Proposal_ (bitcoin továbbfejlesztési javaslat) rövidítése.
+====
+
+<<bitcoin_core_architecture>> a Bitcoin Core felépítését mutatja.((("Bitcoin Core", "felépítés")))
+
+[[bitcoin_core_architecture]]
+.Bitcoin Core felépítés (Forrás: Eric Lombrozo)
+image::images/mbc2_0301.png["a Bitcoin Core felépítése"]
+
+
+=== Bitcoin fejlesztőkörnyezet
+
+((("fejlesztőkörnyezet", "felállítás", see="Bitcoin Core")))Ha ön fejlesztő, fejlesztőkörnyezetet kell felállítania az összes eszközzel, könyvtárral és bitcoin alkalmazások írására szolgáló támogató szoftverrel. Ebben az erősen technikai fejezetben lépésről lépésre áttekintjük ezt a folyamatot. Ha az anyag túl nehezen követhető (és ön valójában nem állít fel fejlesztőkörnyezetet), nyugodtan ugorjon a következő fejezetre, amely kevésbé technikai.
+
+[[compiling_core]]
+=== A Bitcoin Core kliens lefordítása a forráskódból
+
+((("Bitcoin Core", "forráskódból történő lefordítás", id="BCsource03")))((("Bitcoin Core", "forráskódból történő lefordítás", "letöltés")))((("kódpéldák, beszerzése és használata")))A Bitcoin Core forráskódja letölthető archívumként vagy a hiteles forrásgyűjtemény klónozásával a GitHubról. ((("Bitcoin Core letöltések")))A https://bitcoincore.org/bin/[Bitcoin Core letöltési oldalon] válassza ki a legfrissebb verziót, és töltse le a forráskód tömörített archívumát, pl. a +bitcoin-0.15.0.2.tar.gz+-t. ((("GitHub bitcoin oldal")))Alternatív megoldásként használja a git parancssort a forráskód helyi példányának létrehozására a https://github.com/bitcoin/bitcoin[GitHub bitcoin oldalról].
+
+[TIP]
+====
+((("$ szimbólum")))((("shell parancsok")))((("terminál alkalmazások")))A fejezet számos példájában az operációs rendszer parancssori felületét fogjuk használni (amely "shell" néven is ismert), "terminál" alkalmazáson keresztül érhető el. A shell megjelenít egy parancssort; beír egy parancsot; és a shell szövegesen válaszol, és új parancssort ad a következő parancs számára. A parancssor másképp nézhet ki az ön rendszerén, de a következő példákban egy +$+ szimbólum jelöli. A példákban, amikor szöveget lát egy +$+ szimbólum után, ne írja be a +$+ szimbólumot, hanem írja be a közvetlenül azt követő parancsot, majd nyomja meg az Enter billentyűt a parancs végrehajtásához. A példákban az egyes parancsok alatt lévő sorok az operációs rendszer válaszai a parancsra. Amikor megjelenik a következő +$+ előtag, tudni fogja, hogy ez egy új parancs, és meg kell ismételnie a folyamatot.
+====
+
+((("forráskód klónozása")))((("forráskód, klónozása", seealso="Bitcoin Core"))Ebben a példában a forráskód egy helyi példányát ("klónját") hozzuk létre a +git+ parancs segítségével:
+
+----
+$ git clone https://github.com/bitcoin/bitcoin.git
+Cloning into 'bitcoin'...
+remote: Counting objects: 102071, done.
+remote: Compressing objects: 100% (10/10), done.
+Receiving objects: 100% (102071/102071), 86.38 MiB | 730.00 KiB/s, done.
+remote: Total 102071 (delta 4), reused 5 (delta 1), pack-reused 102060
+Resolving deltas: 100% (76168/76168), done.
+Checking connectivity... done.
+$
+----
+
+[TIP]
+====
+((("elosztott verziókezelő rendszerek")))A Git a legszélesebb körben elterjedt elosztott verziókezelő rendszer, amely minden szoftverfejlesztő eszközkészletének nélkülözhetetlen része. Lehet, hogy telepítenie kell a +git+ parancsot vagy a git grafikus felhasználói felületét az operációs rendszerre, ha még nem rendelkezik ezzel.
+====
+
+A klónozási művelet befejeződése után a forráskódról egy teljes másolat lesz a helyi _bitcoin_ könyvtárban. Menjen ebbe a könyvtárba. Gépelje be a ++**cd bitcoin**++ parancsot:
+
+----
+$ cd bitcoin
+----
+
+====  Bitcoin Core release választása
+((("Bitcoin Core", "lefordítás forráskódból", "verzió választás")))Ha a git clone parancsban semmi sem volt megadva, akkor a helyi példány a legfrissebb kóddal lesz szinkronban, ami akár a bitcoin kliens egy nem stabil vagy „béta” verziója is lehet. A kód lefordítása előtt egy release _tag_ (_címke_) megadásával egy adott verzió választható ki. A tag (címke) kulcsszó a helyi másolatot a kódtár egy adott pillanatképével szinkronizálja. A fejlesztők a címkék használatával tudják egy verziószámmal megjelölni a kód egy adott verzióját. Azt, hogy milyen címkék vannak, a +git tag+ paranccsal írathatjuk ki:
+
+----
+$ git tag
+v0.1.5
+v0.1.6test1
+v0.10.0
+...
+v0.11.2
+v0.11.2rc1
+v0.12.0rc1
+v0.12.0rc2
+...
+----
+
+A címkék listája a bitcoin összes kibocsájtott változatát tartalmazza. Megállapodás szerint azoknak a jelölteknek, melyek tesztelésre szolgálnak, „rc” az utótagja (ami a _release candidate_ kezdőbetűinek felel meg). A stabil változatoknak, melyek éles rendszereken futtathatók, nincs utótagjuk. A fenti listából a legmagasabb verziójú változatot választjuk, ami írásunk időpontjában a v0.15.0. Ahhoz, hogy a helyi kód ezzel a változattal legyen szinkronban, a +git checkout+ parancsot használjuk:
+
+----
+$ git checkout v0.15.0
+HEAD is now at 3751912... Merge #11295: doc: Old fee_estimates.dat are discarded by 0.15.0
+----
+
+Megbizonyosodhat róla, hogy a kívánt verziót töltötte le a +git status+ parancs kiadásával:
+
+----
+$ git status
+HEAD detached at v0.15.0
+nothing to commit, working directory clean
+----
+
+==== A Bitcoin Core build konfigurálása
+
+((("Bitcoin Core", "lefordítás forráskódból", "build konfiguráció")))((("dokumentáció")))((("build dokumentáció", seealso="Bitcoin Core")))A forráskód tartalmaz némi dokumentációt is, melyek különféle állományokban találhatók. Nézze át a _bitcoin_ könyvtár _README.md_ állományában található dokumentációt. Ehhez gépelje be a prompton: ++**more README.md**++, és lapozásra használja a szóköz billentyűt. Ebben a fejezetben egy parancssori bitcoin klienst fogunk újraépíteni, melyet a Linuxon +bitcoind+-nek hívnak. Nézze át, hogy hogyan kell az ön platformján a bitcoind parancssori klienst lefordítani, ehhez gépelje be: ++**more doc/build-unix.md**++. A macOS és a Windows esetében az utasítások a _doc_ könyvtárban, a _build-osx.md_ vagy a _build-windows.md_ állományokban vannak.
+
+Gondosan nézze át az újraépítés előfeltételeit, melyek a dokumentáció első részében találhatók. Az itt felsorolt könyvtáraknak a rendszerben léteznie kell, mielőtt megkezdené a fordítást. Ha az előfeltételek nem teljesülnek, akkor az újraépítési folyamat hibával ér véget. Ha azért képződött hiba, mert valamelyik előfeltétel nem teljesült, akkor a megfelelő könyvtár installálása után a build folyamat onnan folytatható, ahol abbamaradt. Ha az előfeltételek teljesülnek, akkor az újraépítési folyamat úgy kezdhető el, hogy az _autogen.sh_ scripttel létrehozza az újraépítésre szolgáló scripteket.
+
+----
+$ ./autogen.sh
+...
+glibtoolize: copying file 'build-aux/m4/libtool.m4'
+glibtoolize: copying file 'build-aux/m4/ltoptions.m4'
+glibtoolize: copying file 'build-aux/m4/ltsugar.m4'
+glibtoolize: copying file 'build-aux/m4/ltversion.m4'
+...
+configure.ac:10: installing 'build-aux/compile'
+configure.ac:5: installing 'build-aux/config.guess'
+configure.ac:5: installing 'build-aux/config.sub'
+configure.ac:9: installing 'build-aux/install-sh'
+configure.ac:9: installing 'build-aux/missing'
+Makefile.am: installing 'build-aux/depcomp'
+...
+----
+
+Az _autogen.sh_ script automatikus konfiguráló scripteket hoz létre, melyek a rendszerből lekérdezik a helyes beállításokat, és biztosítják, hogy a fordításhoz szükséges összes könyvtár rendelkezésre álljon. Ezek közül a legfontosabb a +configure+ script, amely számos különféle lehetőséget ajánl a build folyamat egyedivé tételére. A különféle lehetőségek megjelenítésére gépelje be: ++**./configure --help**++
+
+----
+$ ./configure --help
+`configure' configures Bitcoin Core 0.15.0 to adapt to many kinds of systems.
+
+Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+...
+Optional Features:
+  --disable-option-checking ignore unrecognized --enable/--with options
+  --disable-FEATURE do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG] include FEATURE [ARG=yes]
+
+  --enable-wallet         enable wallet (default is yes)
+
+  --with-gui[=no|qt4|qt5|auto]
+...
+----
+
+A +configure+ scripttel bizonyos jellemzők engedélyezése vagy tiltása lehetséges, az +--enable-FEATURE+ és +--disable-FEATURE+ használatával, ahol a pass:[<span class="keep-together"><code>FEATURE</code></span>] a fenti listában szereplő jellemző neve. Ebben a fejezetben egy olyan +bitcoind+ klienst építünk, amelynek alapértelmezett jellemzői lesznek. Nem használunk egyetlen egy konfigurálási lehetőséget sem, de érdemes átnézni, hogy a kliensnek milyen egyéb opcionális részei lehetnek. Egyetemi hálózaton, a számítógéplabor jogosultsági beállításai megkövetelhetik az alkalmazások home könyvtárba való telepítését (pl. a +--prefix=$HOME+ használatával).
+
+Íme néhány hasznos opció, amelyek felülbírálják a konfigurációs script alapértelmezett viselkedését:
+
+++++
+<dl>
+<dt><code>--prefix=$HOME</code></dt>
+<dd><p>Ez felülbírálja a kapott futtatható fájl alapértelmezett telepítési helyét (amely a <em>/usr/local/</em>). A <code>$HOME</code> használatával a home könyvtárba tehet mindent, vagy választhat más útvonalat.</p></dd>
+
+<dt><code>--disable-wallet</code></dt>
+<dd><p>Ez a referencia pénztárca implementáció letiltására szolgál.</p></dd>
+
+<dt><code>--with-incompatible-bdb</code></dt>
+<dd><p>Ha pénztárcát épít, engedélyezze a Berkeley DB könyvtár nem kompatibilis verziójának használatát.</p></dd>
+
+<dt><code>--with-gui=no</code></dt>
+<dd><p>Ne építse fel a grafikus felhasználói felületet, amely megköveteli a Qt könyvtárat. Ez csak szerver és parancssori bitcoint épít fel.</p></dd>
+</dl>
+++++
+
+Ezután futtassa a +configure+ parancsfájlt, hogy automatikusan megtalálja az összes szükséges könyvtárat, és létrehozzon egy testreszabott build scriptet a rendszer számára:
+
+----
+$ ./configure
+checking build system type... x86_64-unknown-linux-gnu
+checking host system type... x86_64-unknown-linux-gnu
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+checking for gawk... gawk
+checking whether make sets $(MAKE)... yes
+...
+[sok oldal konfiguráció teszt]
+...
+$
+----
+
+
+Ha minden jól ment, akkor a +configure+ parancs úgy ér véget, hogy egy testre szabott build scriptet hoz létre, amellyel lefordítható a +bitcoind+. Ha hiányzó könyvtárak vagy hibák vannak, akkor a +configure+ parancs hibával fog véget érni, és nem hozza létre a fenti példában látható build scripteket. Ha hiba történik, annak a legvalószínűbb oka egy hiányzó vagy nem kompatibilis könyvtár. Nézze át ismét az újraépítésre vonatkozó dokumentációt, és telepítse a hiányzó előfeltételeket. Azután futtassa le ismét a +configure+ –t, és nézze meg, hogy elmúlt-e a hiba.
+
+==== A Bitcoin Core futtatható fájlok felépítése
+
+((("Bitcoin Core", "fordítás a forráskódból", "legfontosabb futtatható fájlok")))((("legfontosabb futtatható fájlok", seealso="Bitcoin Core")))Ezután lefordítjuk a forráskódot. Ez a folyamat a processzor sebességétől, és a rendelkezésre álló memóriától függően akár egy órát is igénybe vehet. A fordítási folyamat során néhány másodpercenként vagy néhány percenként látnia kell valamilyen kimenetet, vagy hibaüzenetet, ha valami hiba történik. Ha hiba lép fel, vagy a fordítási folyamat megszakad, bármikor folytathatja a +make+ újbóli beírásával. A futtatható alkalmazás fordításának megkezdéséhez írja be a ++**make**++ parancsot:
+
+----
+$ make
+Making all in src
+  CXX      crypto/libbitcoinconsensus_la-hmac_sha512.lo
+  CXX      crypto/libbitcoinconsensus_la-ripemd160.lo
+  CXX      crypto/libbitcoinconsensus_la-sha1.lo
+  CXX      crypto/libbitcoinconsensus_la-sha256.lo
+  CXX      crypto/libbitcoinconsensus_la-sha512.lo
+  CXX      libbitcoinconsensus_la-hash.lo
+  CXX      primitives/libbitcoinconsensus_la-transaction.lo
+  CXX      libbitcoinconsensus_la-pubkey.lo
+  CXX      script/libbitcoinconsensus_la-bitcoinconsensus.lo
+  CXX      script/libbitcoinconsensus_la-interpreter.lo
+
+[... sok egyéb fordítási üzenet ...]
+
+$
+----
+
+Egy gyors, több CPU-val rendelkező rendszeren érdemes beállítani a párhuzamos fordítási feladatok számát. Például a +make -j 2+ két magot fog használni, ha azok rendelkezésre állnak. Ha minden jól ment, a Bitcoin Core le van fordítva. Érdemes egységtesztet futtatni a +make check+ segítségével, hogy megbizonyosodjon arról, hogy a kapcsolódó könyvtárak nincsenek egyértelműen eltörve. Az utolsó lépés a különféle végrehajtható fájlok telepítése a rendszerre a +make install+ paranccsal. A rendszer kérheti a felhasználói jelszó megadását, mivel ez a lépés rendszergazdai jogokat igényel:
+
+----
+$ make check && sudo make install
+Jelszó:
+Making install in src
+ ../build-aux/install-sh -c -d '/usr/local/lib'
+libtool: install: /usr/bin/install -c bitcoind /usr/local/bin/bitcoind
+libtool: install: /usr/bin/install -c bitcoin-cli /usr/local/bin/bitcoin-cli
+libtool: install: /usr/bin/install -c bitcoin-tx /usr/local/bin/bitcoin-tx
+...
+$
+----
+
+((("", startref="BCsource03")))Az alapértelmezés szerinti telepítéskor a +bitcoind+ a _/usr/local/bin_ könyvtárba kerül. A következőképpen bizonyosodhatunk meg arról, hogy a bitcoind helyesen van telepítve:
+
+----
+$ which bitcoind
+/usr/local/bin/bitcoind
+
+$ which bitcoin-cli
+/usr/local/bin/bitcoin-cli
+----
+
+=== Bitcoin Core csomópont futtatása
+
+((("Bitcoin Core", "csomópontok futtatása", id = "BCnode03")))((("bitcoin csomópontok", "csomópontok futtatása", id="BNcore03")))A bitcoin peer-to-peer hálózata "csomópontokból" áll, amelyeket főként önkéntesek és bitcoin alkalmazásokat építő vállalkozások működtetnek. Azok, akik bitcoin csomópontot futtatnak, közvetlen és hiteles képet kapnak a bitcoin blokkláncról. Az összes tranzakció helyi példányával rendelkeznek, amelyeket saját rendszerük másoktól függetlenül ellenőriz. Egy csomópont futtatásával nem kell harmadik félre támaszkodnia egy tranzakció ellenőrzéséhez. Sőt, egy bitcoin csomópont futtatásával hozzá is járul a bitcoin hálózathoz, robusztusabbá téve azt.
+
+Egy csomópont futtatásához azonban folyamatos csatlakozással rendelkező rendszerre van szükség, amely elegendő erőforrással rendelkezik az összes bitcoin tranzakció feldolgozásához. Attól függően, hogy indexeli-e az összes tranzakciót, és megőrzi-e a teljes blokklánc másolatát, sok lemezterületre és RAM-ra is lehet szükség. 2018 elején egy teljes indexű csomópontnak 2 GB RAM-ra és legalább 160 GB lemezterületre van szüksége (lásd: https://blockchain.info/charts/blocks-size[]). A bitcoin csomópontok továbbítják és fogadják a bitcoin tranzakciókat és blokkokat, internetes sávszélességet felhasználva. Ha korlátozott az internetkapcsolata, alacsony adatforgalmi korlátja van, vagy olyan kapcsolata van, amely gigabit alapon számláz, akkor valószínűleg nem célszerű rajta bitcoin csomópontot futtatnia, vagy ha futtatja, érdemesebb sávszélesség-korlátozással futtatnia (lásd <<constrained_resources>>).
+
+[TIP]
+====
+((("figyelmeztetések és óvatosság", "központi csomópont erőforrás-követelmények")))((("erőforrás-követelmények")))A Bitcoin Core alapértelmezés szerint megőrzi a blokklánc teljes másolatát, minden olyan tranzakcióval, amely a bitcoinon 2009-es megszületése óta történt. Ez az adatkészlet több tucat gigabájt méretű, és néhány nap vagy hét alatt fokozatosan tölthető le, a CPU és az internetkapcsolat sebességétől függően. A Bitcoin Core addig nem képes feldolgozni a tranzakciókat vagy frissíteni a számlaegyenlegeket, amíg a teljes blokklánc-adatkészletet le nem tölti. Ellenőrizze, hogy van-e elegendő lemezterület, sávszélesség és idő a kezdeti szinkronizálás befejezéséhez. A Bitcoin Core konfigurálható úgy, hogy a régi blokkok eldobásával csökkentse a blokklánc méretét (lásd <<constrained_resources>>), de az adatok eldobása előtt akkor is letölti a teljes adatkészletet.
+====
+
+Ezen erőforrásigény ellenére önkéntesek ezrei futtatnak bitcoin csomópontokat. Néhány olyan egyszerű rendszeren fut, mint a Raspberry Pi (egy 35 dolláros, kártyapakli méretű számítógép). Sok önkéntes bitcoin csomópontokat is futtat bérelt szerveren, általában a Linux valamelyik változatán. Egy _Virtual Private Server_ (VPS) vagy _Cloud Computing Server_ példány használható a bitcoin csomópont futtatásához. Ilyen szervereket havi 25–50 dolláros áron lehet bérelni különféle szolgáltatóktól.
+
+Miért akarna futtatni egy csomópontot? Íme néhány a leggyakoribb okokból:
+
+* Ha bitcoin szoftvert fejlesztett, és a bitcoin csomópontra kell támaszkodnia a hálózathoz és a blokklánchoz való programozható (API) hozzáféréshez.
+
+* Ha olyan alkalmazásokat épít, amelyeknek a bitcoin konszenzusszabályainak megfelelően kell ellenőrizniük a tranzakciókat. A bitcoin szoftvercégek általában több csomópontot üzemeltetnek.
+
+* Ha támogatni szeretné a bitcoint. Egy csomópont futtatása révén a hálózat robusztusabb, és több pénztárcát, több felhasználót és több tranzakciót képes kiszolgálni.
+
+* Ha nem akar harmadik félre támaszkodni a tranzakciók feldolgozása vagy ellenőrzése során.
+
+Ha ezt a könyvet olvassa, és érdekli a bitcoin szoftver fejlesztése, akkor futtasson saját csomópontot.
+
+=== a Bitcoin Core csomópont beállítása
+
+((("Bitcoin Core", "core csomópontok futtatása", "konfigurálása")))((("figyelmeztetések és óvatosság", "jelszó létrehozása")))((("jelszavak", "létrehozása")))((("biztonság", "jelszavak")))A Bitcoin Core minden indításkor egy konfigurációs fájlt keres az adatkönyvtárában. Ebben a részben megvizsgáljuk a különféle konfigurációs lehetőségeket és beállítunk egy konfigurációs fájlt. A konfigurációs fájl megkereséséhez futtassa a terminálon a +bitcoind -printtoconsole+ parancsot, és keresse meg az első pár sort.
+
+----
+$ bitcoind -printtoconsole
+Bitcoin version v0.15.0
+Using the 'standard' SHA256 implementation
+Using data directory /home/ubuntu/.bitcoin/
+Using config file /home/ubuntu/.bitcoin/bitcoin.conf
+...
+[még sok hibakeresési üzenet]
+...
+----
+
+A Ctrl-C billentyűkombinációval leállíthatja a csomópontot, miután meghatározta a konfigurációs fájl helyét. A konfigurációs fájl általában a felhasználó home könyvtárában található _bitcoin_ adatkönyvtárban található. Nem automatikusan jön létre, de létrehozhat egy indító konfigurációs fájlt az alábbi <<#full_index_node>> példa másolásával és beillesztésével. A konfigurációs fájlt az ön által preferált szerkesztőben hozhatja létre vagy módosíthatja.
+
+A Bitcoin Core több mint 100 konfigurációs beállítást kínál, amelyek módosítják a hálózati csomópont viselkedését, a blokklánc tárolását és működésének sok más aspektusát. Ezen lehetőségek felsorolásának megtekintéséhez futtassa a +bitcoind --help+ parancsot:
+
+----
+$ bitcoind --help
+Bitcoin Core Daemon version v0.15.0
+
+Használat:
+  bitcoind [opciók]                     Start Bitcoin Core Daemon
+
+Opciók:
+
+  -?
+       Segítség kiírása és kilépés
+
+  -version
+       Verzió kiírása és kilépés
+
+  -alertnotify=<cmd>
+       Futtasson parancsot, ha releváns riasztás érkezik, vagy ha látunk egy
+       hosszú elágazást (%s-t cmd egy üzenettel helyettesíti)
+...
+[sok egyéb opció]
+...
+
+  -rpcthreads=<n>
+       Állítsa be a szálak számát, amelyek az RPC hívásokat szolgálják ki (alapértelmezésben 4)
+----
+
+((("konfigurációs beállítások", seealso="Bitcoin Core")))Íme néhány a legfontosabb opciók közül, amelyeket beállíthat a konfigurációs fájlban, vagy +bitcoind+ parancssori paraméterként:
+
+alertnotify:: Futtasson egy megadott parancsot vagy szkriptet, hogy vészjelzéseket küldjön a csomópont tulajdonosának, általában e-mailben.
+
+conf:: A konfigurációs fájl alternatív helye. Ennek csak +bitcoind+ parancssori paramétereként van értelme, mivel nem lehet az általa hivatkozott konfigurációs fájlban.
+
+datadir:: Kiválasztja azt a könyvtárat és fájlrendszert, amelyben az összes blokklánc adatot elhelyezi. Alapértelmezés szerint ez a home könyvtár _.bitcoin_ alkönyvtára. Ellenőrizze, hogy ezen a fájlrendszeren rendelkezésre áll-e több gigabájt szabad hely.
+
+prune:: A lemezterület-igényt ennyi megabájtra csökkenti, a régi blokkok törlésével. Használja ezt olyan erőforrás-korlátozott csomóponton, amelyen nem fér el a teljes blokklánc.
+
+txindex:: Az összes tranzakció indexének nyilvántartása. Ez a blokklánc teljes másolatát jelenti, amely lehetővé teszi bármilyen tranzakció azonosító szerinti lekérdezését.
+
+dbcache:: Az UTXO gyorsítótár mérete. Az alapértelmezett érték 300 MiB. Növelje ezt csúcskategóriás hardvereknél, és csökkentse az alacsonyabb kategóriájú hardvereknél, hogy a memóriát takarítson meg. Ennek az az ára, hogy lassabb hozzáférésű lemezterületet kell használni.
+
+maxconnections:: Beállítja a csomópontok maximális számát, ahonnan kapcsolódások elfogadhatók. Az alapértelmezett érték csökkentésével csökken a sávszélességigény. Használja, ha adatforgalmi korlátozással rendelkezik, vagy ha gigabájtonként fizet.
+
+maxmempool:: ennyi megabájtra korlátozza a tranzakciós memóriakészletet. Használja ezt a memóriahasználat csökkentésére memóriakorlátozott csomópontokon.
+
+maxreceptbuffer/maxsendbuffer:: ennyiszer 1000 bájtra korlátozza az összeköttetésenkénti memóriapuffert. Használja memóriakorlátozott csomópontokon.
+
+minrelaytxfee:: A továbbított tranzakciók minimális díját határozza meg. Ezen érték alatt a tranzakciót nemszabványos módon kezeli, elutasítja a tranzakciós készletből, és nem továbbítja.
+
+
+[[txindex]]
+.A Tranzakciós Adatbázis Index és a txindex opció
+****
+((("Bitcoin Core", "core csomópontok futtatása", "adatbázis-beállítások"))))((("tranzakciók", "adatbázis-konfigurációs beállítások")))((("txindex opció")))((("teljes indexelési opció")))Alapértelmezés szerint a Bitcoin Core egy adatbázist épít fel, amely _csak_ a felhasználó pénztárcájához kapcsolódó tranzakciókat tartalmazza. Ha azt szeretné, hogy _bármelyik_ tranzakció elérhető legyen olyan parancsokkal, mint a +getrawtransaction+ (lásd <<exploring_and_decoding_transanctions>>), be kell állítania a Bitcoin Core-t teljes tranzakciós index felépítésére, amelyet a +txindex+ opcióval lehet elérni. Állítsa be a+txindex=1+ értéket a Bitcoin Core konfigurációs fájlban. Ha az elején nem állítja ezt be, és később állítja teljes indexelésre, akkor újra kell indítania a +bitcoind+-et a +-reindex+ opcióval, és meg kell várnia az index újraépítését.
+****
+
+<<full_index_node>> mutatja, hogy miként kombinálhatja az előző opciókat egy teljesen indexelt csomópontnál, amely API backendként fut egy bitcoin alkalmazás számára.
+
+[[full_index_node]]
+.Mintakonfiguráció egy teljes indexű csomóponthoz
+====
+----
+alertnotify=myemailscript.sh "Alert: %s"
+datadir=/lotsofspace/bitcoin
+txindex=1
+----
+====
+
+<<constrained_resources>> egy erőforrás-korlátozott csomópontot mutat egy kisebb kiszolgálón.
+
+[[constrained_resources]]
+.Egy erőforrás-korlátozott rendszer mintakonfigurációja
+====
+----
+alertnotify=myemailscript.sh "Alert: %s"
+maxconnections=15
+prune=5000
+dbcache=150
+maxmempool=150
+maxreceivebuffer=2500
+maxsendbuffer=500
+----
+====
+
+Miután megszerkesztette a konfigurációs fájlt és beállította az igényeinek leginkább megfelelő beállításokat, kipróbálhatja a +bitcoind+ alkalmazást ezzel a konfigurációval. Futtassa a Bitcoin Core-t a +printtoconsole+ opcióval az előtérben történő futtatáshoz a konzolra történő kimenettel:
+
+----
+$ bitcoind -printtoconsole
+
+Bitcoin version v0.15.0
+InitParameterInteraction: parameter interaction: -whitelistforcerelay=1 -> setting -whitelistrelay=1
+Assuming ancestors of block 0000000000000000003b9ce759c2a087d52abc4266f8f4ebd6d768b89defa50a have valid signatures.
+Using the 'standard' SHA256 implementation
+Default data directory /home/ubuntu/.bitcoin
+Using data directory /lotsofspace/.bitcoin
+Using config file /home/ubuntu/.bitcoin/bitcoin.conf
+Using at most 125 automatic connections (1048576 file descriptors available)
+Using 16 MiB out of 32/2 requested for signature cache, able to store 524288 elements
+Using 16 MiB out of 32/2 requested for script execution cache, able to store 524288 elements
+Using 2 threads for script verification
+HTTP: creating work queue of depth 16
+No rpcpassword set - using random cookie authentication
+Generated RPC authentication cookie /lotsofspace/.bitcoin/.cookie
+HTTP: starting 4 worker threads
+init message: Verifying wallet(s)...
+Using BerkeleyDB version Berkeley DB 4.8.30: (April  9, 2010)
+Using wallet wallet.dat
+CDBEnv::Open: LogDir=/lotsofspace/.bitcoin/database ErrorFile=/lotsofspace/.bitcoin/db.log
+scheduler thread start
+Cache configuration:
+* Using 250.0MiB for block index database
+* Using 8.0MiB for chain state database
+* Using 1742.0MiB for in-memory UTXO set (plus up to 286.1MiB of unused mempool space)
+init message: Loading block index...
+Opening LevelDB in /lotsofspace/.bitcoin/blocks/index
+Opened LevelDB successfully
+
+[... további indulási üzenetek ...]
+----
+
+A Ctrl-C billentyűkombinációval megszakíthatja a folyamatot, ha meggyőződött arról, hogy az a megfelelő beállításokat töltötte be, és a várakozásnak megfelelően fut.
+
+A Bitcoin Core folyamatnak a háttérben történő futtatásához indítsa el a +daemon+ opcióval: +bitcoind -daemon+.
+
+A bitcoin csomópont előrehaladásának és futási idejének figyeléséhez használja a +bitcoin-cli getblockchaininfo+ parancsot:
+
+----
+$ bitcoin-cli getblockchaininfo
+----
+
+[source,json]
+----
+{
+  "chain": "main",
+  "blocks": 0,
+  "headers": 83999,
+  "bestblockhash": "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+  "difficulty": 1,
+  "mediantime": 1231006505,
+  "verificationprogress": 3.783041623201835e-09,
+  "chainwork": "0000000000000000000000000000000000000000000000000000000100010001",
+  "pruned": false,
+  [...]
+}
+----
+
+Ez egy olyan csomópontot mutat, amelynek blokklánc magassága 0 blokk és 83999 fejlécet tartalmaz. A csomópont jelenleg lehívja a legjobb lánc blokkfejléceit, és utána folytatja a teljes blokkok letöltését.
+
+Miután elégedett a választott konfigurációs opciókkal, hozzá kell adnia a bitcoint az operációs rendszer indító parancsfájljaihoz, hogy folyamatosan fusson és újrainduljon, amikor az operációs rendszer újraindul. A bitcoin forráskönyvtárában számos indítási példaszkriptet talál különböző operációs rendszerekhez a _contrib/init_ alatt, valamint egy _README.md_ fájlt, amely leírja, hogy melyik szkriptet melyik rendszer használja.((("", startref="BCnode03")))((("", startref="BNcore03")))
+
+=== Bitcoin Core alkalmazásprogramozási felület (API)
+
+((("Bitcoin Core", "Bitcoin Core API", id="BCapi03")))The Bitcoin Core kliensben van egy parancssorból elérhető JSON-RPC interfész, amely a +bitcoin-cli+ segédprogrammal érhető el. A parancssor lehetővé teszi, hogy interaktívan kísérletezzünk azokkal a lehetőségekkel, melyek az API-n keresztül programokból is elérhetők. ((("Bitcoin Core", "Bitcoin Core API", "RPC parancsok")))Indulásként, a +help+ parancs kiadásával jelenítsük meg a használható bitcoin RPC parancsok listáját:
+
+[[bitcoind_commands]]
+
+----
+$ bitcoin-cli help
+addmultisigaddress nrequired ["key",...] ( "account" )
+addnode "node" "add|remove|onetry"
+backupwallet "destination"
+createmultisig nrequired ["key",...]
+createrawtransaction [{"txid":"id","vout":n},...] {"address":amount,...}
+decoderawtransaction "hexstring"
+...
+...
+verifymessage "bitcoinaddress" "signature" "message"
+walletlock
+walletpassphrase "passphrase" timeout
+walletpassphrasechange "oldpassphrase" "newpassphrase"
+----
+
+Ezen parancsok mindegyike számos paramétert igényelhet. További segítség, részletes leírás és a paraméterekkel kapcsolatos információkért írja be a parancs nevét a +help+ után. Például, ha segítségre van szüksége a +getblockhash+ RPC parancshoz:
+
+----
+$ bitcoin-cli help getblockhash
+getblockhash magasság
+
+Visszaadja a blokk hashét a legjobb blokkláncban a megadott magasságban.
+
+Argumentumok:
+1. magasság         (numerikus, kötelező) A magasság index
+
+Eredmény:
+"hash"         (string) A blokk hash
+
+Példák:
+> bitcoin-cli getblockhash 1000
+> curl --user felhasználónév --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockhash", "params": [1000] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+----
+
+A súgóinformációk végén az RPC parancs két példáját láthatja, a +bitcoin-cli+ helper vagy a +curl+ HTTP kliens használatával. Ezek a példák bemutatják, hogyan hívhatja meg a parancsot. Másolja az első példát, és nézze meg az eredményt:
+
+----
+$ bitcoin-cli getblockhash 1000
+00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09
+----
+
+Az eredmény egy blokk hash, amelyet a következő fejezetekben részletesebben ismertetünk. Egyelőre ennek a parancsnak ugyanazt az eredményt kell visszaadnia a rendszerén, megmutatva, hogy a Bitcoin Core csomópont fut, fogadja a parancsokat, és rendelkezik az 1000. blokkra vonatkozó információval, amit visszaadhat.
+
+A következő részekben bemutatunk néhány nagyon hasznos RPC parancsot és azok várható kimenetét.
+
+==== A Bitcoin Core kliens státuszának lekérdezése
+
+((("Bitcoin Core", "Bitcoin Core API", "állapotinformációk")))A Bitcoin Core a JSON-RPC felületen keresztül különféle modulokról készít állapotjelentéseket. A legfontosabb parancsok a +getblockchaininfo+, a +getmempoolinfo+, a +getnetworkinfo+ és a +getwalletinfo+.
+
+A bitcoin +getblockchaininfo+ RPC parancsát korábban bemutattuk. A +getnetworkinfo+ parancs alapvető információkat jelenít meg a bitcoin hálózati csomópont állapotáról. Futtatáshoz használja a +bitcoin-cli+ parancsot:
+
+----
+$ bitcoin-cli getnetworkinfo
+----
+[source,json]
+----
+  "version": 150000,
+  "subversion": "/Satoshi:0.15.0/",
+  "protocolversion": 70015,
+  "localservices": "000000000000000d",
+  "localrelay": true,
+  "timeoffset": 0,
+  "networkactive": true,
+  "connections": 8,
+  "networks": [
+    ...
+    részletes információ az összes hálózatról (ipv4, ipv6 vagy onion)
+    ...
+  ],
+  "relayfee": 0.00001000,
+  "incrementalfee": 0.00001000,
+  "localaddresses": [
+  ],
+  "warnings": ""
+}
+
+----
+
+Az adatokat JavaScript Object Notation (JSON) formátumban kapjuk vissza. Ezt a formátumot az összes programozási nyelv könnyen „megérti”, ugyanakkor emberek számra is egész olvasható. Az adatok között látjuk a bitcoin kliens szoftver verzióját (150000), és a protokoll verzióját (70015). Láthatjuk a kapcsolatok számát (8), és a bitcoin hálózatra, ill. a kliens beállítására vonatkozó különféle információkat.
+
+[TIP]
+====
+Eltarthat némi ideig, akár több napig is, amíg a +bitcoind+ kliens „beéri” az aktuális blokklánc magasságot, miközben blokkokat tölt le a többi bitcoin klienstől. A folyamat menete úgy ellenőrizhető, hogy a +getblockchaininfo+-val kiíratjuk az ismert blokkok számát.
+====
+
+[[exploring_and_decoding_transanctions]]
+==== Tranzakciók vizsgálata és dekódolása
+
+((("Bitcoin Core", "Bitcoin Core API", "tranzakciók vizsgálata és dekódolása")))((("tranzakciók", "vizsgálata Bitcoin Core API-val")))Parancsok: +getrawtransaction+, +decoderawtransaction+
+
+
+
+<<cup_of_coffee>> részben ((("felhasználási esetek", "kávé vásárlás", id="alicethree")))Alice egy csésze kávét vásárolt a Bob kávézójától. Tranzakciója a +0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2+ tranzakciós azonosítóval (+txid+) került rögzítésre a blokkláncon. Használjuk az API-t a tranzakció lekéréséhez és vizsgálatához a tranzakció azonosítójának paraméterként történő átadásával:
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getrawtransaction 0627052b6f28912f2703066a912ea577f2ce4da4caa5a↵
+5fbd8a57286c345c2f2
+
+0100000001186f9f998a5aa6f048e51dd8419a14d8a0f1a8a2836dd734d2804fe65fa35779000↵
+000008b483045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4↵
+ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813014↵
+10484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc54123363767↵
+89d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adfffffffff0260e3160000000↵
+0001976a914ab68025513c3dbd2f7b92a94e0581f5d50f654e788acd0ef8000000000001976a9↵
+147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac00000000
+</pre>
+++++
+
+
+[TIP]
+====
+((("tranzakció azonosítók (txd)")))((("képlékenység")))A tranzakció azonosítók mindaddig nem hitelesek, amíg a tranzakció megerősítésre nem került. Ha a blokkláncban hiányzik a tranzakció azonosító, az nem jelenti azt, hogy a tranzakció nem lett feldolgozva. Ez az ú.n. „tranzakció képlékenység” („transaction malleability”), amelynek az az oka, hogy egy tranzakció hashe az előtt, mielőtt megerősítésre kerül a blokkban, még módosítható. A megerősítés után a +txid+ megváltoztathatatlan és hiteles.
+====
+
+A +getrawtransaction+ parancs egy sorosított tranzakciót jelenít meg hexadecimális jelöléssel. Ennek dekódolására a +decoderawtransaction+ parancsot használjuk, átadva paraméterként a hexadecimális adatokat. Másolhatja a +getrawtransaction+ által visszaadott hexát és beillesztheti paraméterként a +decoderawtransaction+-be:
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli decoderawtransaction 0100000001186f9f998a5aa6f048e51dd8419a14d8↵
+a0f1a8a2836dd734d2804fe65fa35779000000008b483045022100884d142d86652a3f47ba474↵
+6ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298↵
+cad530a863ea8f53982c09db8f6e381301410484ecc0d46f1918b30928fa0e4ed99f16a0fb4fd↵
+e0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa↵
+336a8d752adfffffffff0260e31600000000001976a914ab68025513c3dbd2f7b92a94e0581f5↵
+d50f654e788acd0ef8000000000001976a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8↵
+88ac00000000
+
+</pre>
+++++
+
+++++
+<pre data-type="programlisting" data-code-language="json">
+{
+  "txid": "0627052b6f28912f2703066a912ea577f2ce4da4caa5a5fbd8a57286c345c2f2",
+  "size": 258,
+  "version": 1,
+  "locktime": 0,
+  "vin": [
+    {
+      "txid": "7957a35fe64f80d234d76d83a2...8149a41d81de548f0a65a8a999f6f18",
+      "vout": 0,
+      "scriptSig": {
+        "asm":"3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1decc...",
+        "hex":"483045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1de..."
+      },
+      "sequence": 4294967295
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.01500000,
+      "n": 0,
+      "scriptPubKey": {
+        "asm": "OP_DUP OP_HASH160 ab68...5f654e7 OP_EQUALVERIFY OP_CHECKSIG",
+        "hex": "76a914ab68025513c3dbd2f7b92a94e0581f5d50f654e788ac",
+        "reqSigs": 1,
+        "type": "pubkeyhash",
+        "addresses": [
+          "1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA"
+        ]
+      }
+    },
+    {
+      "value": 0.08450000,
+      "n": 1,
+      "scriptPubKey": {
+        "asm": "OP_DUP OP_HASH160 7f9b1a...025a8 OP_EQUALVERIFY OP_CHECKSIG",
+        "hex": "76a9147f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a888ac",
+        "reqSigs": 1,
+        "type": "pubkeyhash",
+        "addresses": [
+          "1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK"
+        ]
+      }
+    }
+  ]
+}
+
+</pre>
+++++
+
+A tranzakció dekódolás a tranzakció összes részét, többek között a tranzakció bemeneteket és kimeneteket is megjeleníti. Ebben az esetben azt látjuk, hogy a tranzakció, amely 15 milliBitet írt jóvá az új címünkre, egy bemenetet és két kimenetet használt. A tranzakció bemenete egy előzőleg megerősített tranzakció kimenete volt (amely fent a +7957a35fe+ kezdetű vin +txid+-ként szerepel). A két kimenet megfelel a 15 milliBit jóváírásnak és a visszajáró pénznek.
+
+A blokkláncot tovább tudjuk vizsgálni, ha ugyanezzel a paranccsal (vagyis a +getrawtransaction+ paranccsal) a tranzakcióban szereplő előző tranzakciókat listázzuk ki. Tranzakcióról tranzakcióra lépve nyomon követhetjük a tranzakcióláncban, hogy az egyes tulajdonosok között  hogyan mozogtak az érmék.
+
+
+
+==== Blokkok vizsgálata
+
+((("Bitcoin Core", "Bitcoin Core API", "blokkok vizsgálata")))((("blokkok", "vizsgálata Bitcoin Core API-val")))Parancsok: +getblock+, +getblockhash+
+
+((("blokkok", "blokkmagasság")))((("blokkok", "blokk hash")))A blokkok felfedezése hasonló a tranzakciók felfedezéséhez. A blokkokra azonban vagy a blokk _magasság_, vagy a blokk _hash_ segítségével hivatkozhatunk. Először keressük meg a blokkot a magassága alapján. <<cup_of_coffee>> részben láttuk, hogy Alice tranzakciója a 277316. blokkban szerepel.
+
+A blokkhoz tartozó blokk hasht (zanzát) a +getblockhash+ parancs adja vissza, ahol a parancs paramétere a blokk magasság:
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getblockhash 277316
+0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4
+</pre>
+++++
+
+Most, hogy tudjuk, mely blokkban szerepel Alice tranzakciója, lekérdezhetjük azt. A +getblock+ parancsot használjuk a blokk hash-sel mint paraméterrel:
+
+++++
+<pre data-type="programlisting">
+$ bitcoin-cli getblock 0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b3↵
+1b2cc7bdc4
+</pre>
+++++
+
+++++
+<pre data-type="programlisting" data-code-language="json">
+{
+  "hash": "0000000000000001b6b9a13b095e96db41c4a928b97ef2d944a9b31b2cc7bdc4",
+  "confirmations": 37371,
+  "size": 218629,
+  "height": 277316,
+  "version": 2,
+  "merkleroot": "c91c008c26e50763e9f548bb8b2fc323735f73577effbc55502c51eb4cc7cf2e",
+  "tx": [
+    "d5ada064c6417ca25c4308bd158c34b77e1c0eca2a73cda16c737e7424afba2f",
+    "b268b45c59b39d759614757718b9918caf0ba9d97c56f3b91956ff877c503fbe",
+    "04905ff987ddd4cfe603b03cfb7ca50ee81d89d1f8f5f265c38f763eea4a21fd",
+    "32467aab5d04f51940075055c2f20bbd1195727c961431bf0aff8443f9710f81",
+    "561c5216944e21fa29dd12aaa1a45e3397f9c0d888359cb05e1f79fe73da37bd",
+[... sok száz tranzakció ...]
+    "78b300b2a1d2d9449b58db7bc71c3884d6e0579617e0da4991b9734cef7ab23a",
+    "6c87130ec283ab4c2c493b190c20de4b28ff3caf72d16ffa1ce3e96f2069aca9",
+    "6f423dbc3636ef193fd8898dfdf7621dcade1bbe509e963ffbff91f696d81a62",
+    "802ba8b2adabc5796a9471f25b02ae6aeee2439c679a5c33c4bbcee97e081196",
+    "eaaf6a048588d9ad4d1c092539bd571dd8af30635c152a3b0e8b611e67d1a1af",
+    "e67abc6bd5e2cac169821afc51b207127f42b92a841e976f9b752157879ba8bd",
+    "d38985a6a1bfd35037cb7776b2dc86797abbb7a06630f5d03df2785d50d5a2ac",
+    "45ea0a3f6016d2bb90ab92c34a7aac9767671a8a84b9bcce6c019e60197c134b",
+    "c098445d748ced5f178ef2ff96f2758cbec9eb32cb0fc65db313bcac1d3bc98f"
+  ],
+  "time": 1388185914,
+  "mediantime": 1388183675,
+  "nonce": 924591752,
+  "bits": "1903a30c",
+  "difficulty": 1180923195.258026,
+  "chainwork": "000000000000000000000000000000000000000000000934695e92aaf53afa1a",
+  "previousblockhash": "0000000000000002a7bbd25a417c0374cc55261021e8a9ca74442b01284f0569",
+  "nextblockhash": "000000000000000010236c269dd6ed714dd5db39d36b33959079d78dfd431ba7"
+}
+</pre>
+++++
+
+A blokk 419 tranzakciót tartalmaz, és a 64. kilistázott tranzakció (+0627052b ...+) Alice kávé fizetése. A +height+ sor szerint ez a 277316. blokk a blokkláncban.
+
+==== A Bitcoin Core programozási felületének használata
+
+((("Bitcoin Core", "Bitcoin Core API", "programozási felületet használata")))((("programozási felület", id="progint03")))A +bitcoin-cli+ helper nagyon hasznos a Bitcoin Core API felfedezésére, és függvények tesztelésére. De az alkalmazásprogramozási felületnek lényege a függvények programból való meghívása. Ebben a részben bemutatjuk a Bitcoin Core elérését egy másik programból.
+
+A Bitcoin Core API egy JSON-RPC felület. A JSON a JavaScript Object Notation kifejezést jelenti, és egy nagyon kényelmes módot kínál adatok bemutatására, amely mind emberek, mind programok számára könnyen olvasható. Az RPC a Remote Procedure Call kifejezést jelenti, ami azt jelenti, hogy távoli eljárásokat (függvényeket) hívunk meg (a Bitcoin Core csomóponton) egy hálózati protokollon keresztül. Ebben az esetben a hálózati protokoll HTTP vagy HTTPS (titkosított kapcsolatokhoz).
+
+Amikor a +bitcoin-cli+ paranccsal súgót kértünk egy parancshoz, akkor a +curl+, egy sokoldalú parancssori HTTP kliens, használatáról mutatott példát egy JSON-RPC hívás felépítésére:
+
+----
+$ curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockchaininfo", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+----
+
+Ez a parancs azt mutatja, hogy a +curl+ HTTP kérést küld a helyi gazdagépnek (127.0.0.1), csatlakozva az alapértelmezett bitcoin porthoz (8332), és +jsonrpc+ kérést küld a +getblockchaininfo+ metódushoz +text/plain+ kódolással.
+
+Előfordulhat, hogy a curl a bejelentkezési adatok küldését kéri a hívással együtt. A Bitcoin Core véletlenszerű jelszót hoz létre minden egyes indításkor, és elhelyezi az adatkönyvtárban +.cookie+ néven. A +bitcoin-cli+ helper el tudja olvasni ezt a jelszó fájlt, az adatkönyvtár ismeretében. Hasonlóképpen másolhatja a jelszót, és átadhatja azt a curl-nek (vagy bármilyen magasabb szintű Bitcoin Core RPC csomagolónak). Alternatív megoldásként statikus jelszót hozhat létre a segítő szkripttel, amely a Bitcoin Core forráskönyvtárában lévő _./share/rpcauth/rpcauth.py_ fájlban található.
+
+Ha JSON-RPC hívást implementál a saját programjában, akkor egy általános HTTP könyvtárat is felhasználhat a hívás felépítéséhez, hasonlóan az előző +curl+ példához.
+
+Ugyanakkor a legtöbb programozási nyelvben vannak olyan könyvtárak, amelyek "becsomagolják" a Bitcoin Core API-t oly módon, hogy ez sokkal egyszerűbbé váljon. Az API hozzáférés egyszerűsítésére a +python-bitcoinlib+ könyvtárat fogjuk használni. Ne feledje, ehhez szükség van egy futó Bitcoin Core példányra, amelyet JSON-RPC hívásokhoz fogunk használni.
+
+A Python szkript az <<rpc_example>>-ban egy egyszerű +getblockchaininfo+ hívást kezdeményez, és kiírja a + blocks+ paramétert a Bitcoin Core által visszaadott adatokból.
+
+[[rpc_example]]
+.A getblockchaininfo futtatása a Bitcoin Core JSON-RPC API-jával
+====
+[source,python]
+----
+include::code/rpc_example.py[]
+----
+====
+
+Futtatásával a következő eredményt kapjuk:
+
+----
+$ python rpc_example.py
+394075
+----
+
+Azt mondja, hogy a helyi Bitcoin Core csomópontunk blokkláncában 394075 blokk van. Ez nem látványos eredmény, de bemutatja a könyvtár alapvető használatát a Bitcoin Core JSON-RPC API egyszerűsített felületeként.
+
+Ezután a +getrawtransaction+ és a+ decodetransaction+ hívásokat használjuk Alice kávé fizetésének részleteinek lekérésére. <<rpc_transaction>>-ban lekérjük Alice tranzakcióját és felsoroljuk a tranzakció kimeneteit. Minden kimenetnél megmutatjuk a címzett címét és az összeget. Emlékeztetőül, Alice tranzakciójának egy kimenete volt Bob kávézójának kifizetéséhez, és egy kimenet volt a visszajáróhoz.
+
+[[rpc_transaction]]
+.A tranzakció lekérdezése és a kimenetek iterálása
+====
+[source,python]
+----
+include::code/rpc_transaction.py[]
+----
+====
+
+A kód futtatásával ezt kapjuk:
+
+----
+$ python rpc_transaction.py
+([u'1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA'], Decimal('0.01500000'))
+([u'1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK'], Decimal('0.08450000'))
+----
+
+Mindkét előző példa meglehetősen egyszerű. Nem igazán szükséges egy program a futtatásukhoz; ugyanolyan könnyen használhattuk volna a +bitcoin-cli+ segítőt. A következő példa azonban több száz RPC hívást igényel, és egyértelműbben mutatja be a programozási felület használatát.
+
+<<rpc_block>>-ban először lekérjük a 277316. blokkot, majd a 419 tranzakció mindegyikét lekérjük az egyes tranzakció-azonosítók alapján. Ezután a tranzakció minden kimenetét iteráljuk, és összeadjuk az értéküket.((("", startref="alicethree")))
+
+[[rpc_block]]
+.Blokk lekérdezése és az összes tranzakció kimenet összeadása
+====
+[source,python]
+----
+include::code/rpc_block.py[]
+----
+====
+
+A kód futtatásával ezt kapjuk:
+
+----
+$ python rpc_block.py
+
+('Total value in block: ', Decimal('10322.07722534'))
+----
+
+Példakódunk kiszámította, hogy ebben a blokkban a teljes tranzakció értéke 10 322,0722534 BTC (beleértve a 25 BTC jutalmat és a 0,0909 BTC díjat). Hasonlítsa össze ezt a blokkfelfedező webhely által kiírt összeggel a blokk hash vagy a magasság keresésével. Néhány blokkfelfedező a jutalom és a díjak nélkül írja ki az összértéket. Nézze meg, hogy észreveszi-e a különbséget.((("", startref="BCapi03")))((("", startref="progint03")))
+
+[[alt_libraries]]
+=== Alternatív kliensek, könyvtárak és eszközkészletek
+
+((("Bitcoin Core", "alternatívák", id="BCalt03")))((("kliensek, könyvtárak és eszközkészletek", id="clients03")))((("könyvtárak, kliensek és eszközkészletek", id="librar03")))((("eszközkészletek, könyvtárak és kliensek", id="toolkit03")))((("harmadik féltől származó API kliensek", id="thirdpart03")))Sok alternatív kliens, könyvtár, eszközkészlet és még teljes csomópont implementáció is létezik a bitcoin ökoszisztémában. Ezek különféle programozási nyelveken lettek megvalósítva, így a programozóknak az általuk preferált programozási nyelven kínálnak natív interfészeket.
+
+A következő részben a legjobb könyvtárakból, kliensekből és eszközkészletekből sorolunk fel néhányat, programozási nyelv szerint rendezve.
+
+==== C/C++
+https://github.com/bitcoin/bitcoin[Bitcoin Core] :: A bitcoin referencia implementációja
+https://github.com/libbitcoin/libbitcoin[libbitcoin]:: Keresztplatform C++ fejlesztő eszközkészlet, csomópont  és konszenzus könyvtár
+https://github.com/libbitcoin/libbitcoin-explorer[bitcoin explorer]:: A libbitcoin parancssori eszköze
+https://github.com/jgarzik/picocoin[picocoin]:: C nyelven írt pehelysúlyú bitcoin kliens könyvtár Jeff Garziktól
+
+==== JavaScript
+http://bcoin.io/[bcoin]:: Egy moduláris és skálázható teljes csomópont API-val
+https://bitcore.io/[Bitcore] :: Teljes csomópont, API és könyvtár a Bitpaytől
+https://github.com/bitcoinjs/bitcoinjs-lib[BitcoinJS] :: Tisztán JavaScript Bitcoin könyvtár node.js-hez és böngészőkhöz
+
+==== Java
+https://bitcoinj.github.io[bitcoinj]:: Teljes csomópontot megvalósító Java kliens könyvtár
+https://bitsofproof.com[Bits of Proof (BOP)]:: Egy Java-ban írt  nagyvállalati bitcoin implementáció
+
+==== PHP
+https://github.com/bit-wasp/bitcoin-php[bitwasp/bitcoin]:: Egy PHP bitcoin könyvtár és kapcsolódó projektek
+
+==== Python
+https://github.com/petertodd/python-bitcoinlib[python-bitcoinlib]:: Egy Python bitcoin könyvtár, konszenzus könyvtár és csomópont Peter Toddtól
+https://github.com/richardkiss/pycoin[pycoin]:: Egy Python bitcoin könyvtár Richard Kisstől
+https://github.com/vbuterin/pybitcointools[pybitcointools]:: Egy Python bitcoin könyvtár Vitalik Buterintől
+
+==== Ruby
+https://github.com/sinisterchipmunk/bitcoin-client[bitcoin-client]:: Egy Ruby könyvtár, ami JSON-RPC API csomagolóként szolgál
+
+==== Go
+https://github.com/btcsuite/btcd[btcd]:: Go nyelvű, teljes csomópontot megvalósító bitcoin kliens
+
+==== Rust
+https://github.com/apoelstra/rust-bitcoin[rust-bitcoin]:: Rust bitcoin könyvtár sorosításhoz, értelmezéshez és API hívásokhoz
+
+==== C#
+https://github.com/MetacoSA/NBitcoin[NBitcoin]:: Átfogó bitcoin könyvtár a .NET keretrendszerhez
+
+==== Objective-C
+https://github.com/oleganza/CoreBitcoin[CoreBitcoin]:: Bitcoin eszközkészlet ObjC-hez és Swifthez
+
+Még sok könyvtár létezik számos más programozási nyelven, és folyamatosan készülnek újabbak.((("", startref="BCalt03")))((("", startref="clients03")))((("", startref="thirdpart03")))((("", startref="toolkit03")))((("", startref="librar03")))

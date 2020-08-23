@@ -1,0 +1,199 @@
+[[tx_script_ops]]
+[appendix]
+== İşlem Betik Dili Operatörleri, Sabitler ve Semboller
+
+[NOT]
+====
+Tables and descriptions sourced from https://en.bitcoin.it/wiki/Script[].
+====
+
+<<tx_script_ops_table_pushdata>> shows operators for pushing values onto the stack.((("transactions", "scripts and Script language", id="TRlang14")))((("scripting", "Script language operators, constants, and symbols", id="SCRlang14")))
+
+[[tx_script_ops_table_pushdata]]
+.Değeri yığına it
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| OP_0 veya OP_FALSE | 0x00 | Yığına itilen boş bir dizi
+| 1 to 75 | 0x01 to 0x4b | Push the next N bytes onto the stack, where N is 1 to 75 bytes
+| OP_PUSHDATA1 | 0x4c | Sonraki betik baytı N içerir, takip eden N baytı yığına it
+| OP_PUSHDATA2 | 0x4d | Sonraki iki betik baytı N içerir, takip eden N baytı yığına it
+| OP_PUSHDATA4 | 0x4e | Sonraki dört betik baytı N içerir, takip eden N baytı yığına it
+| OP_1NEGATE | 0x4f |  "–1" değerini yığına it
+| OP_RESERVED | 0x50 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_1 or OP_TRUE| 0x51 | "1" değerini yığına it
+| OP_2 to OP_16 | 0x52 to 0x60 |  For OP_N, push the value "N" onto the stack, e.g., OP_2 pushes "2"
+| =======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_control>> shows conditional flow control operators.
+
+[[tx_script_ops_table_control]]
+Koşullu akış kontrolü
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| OP_NOP | 0x61 | Hiçbir şey yapma
+| OP_VER | 0x62 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_IF | 0x63 | Eğer yığının tepesi 0 değilse devamındaki işlemleri çalıştır
+| OP_NOTIF | 0x64 | Eğer yığının tepesi 0'sa devamındaki işlemleri çalıştır
+| OP_VERIF | 0x65 | Halt&#x2014;Invalid transaction
+| OP_VERNOTIF | 0x66 | Halt&#x2014;Invalid transaction
+| OP_ELSE | 0x67 | Önceki işlemler çalıştırılmamışsa bunu çalıştır
+| OP_ENDIF | 0x68 |  OP_IF, OP_NOTIF, OP_ELSE bloğunu bitir
+| OP_VERIFY | 0x69 | Yığının tepesini kontrol et, eğer TRUE değilse dur ve işlemi geçersiz kıl.
+| OP_RETURN | 0x6a | Dur ve işlemi geçersiz kıl
+| =======
+
+<<tx_script_ops_table_timelock>> shows operators used for timelocks.
+
+[[tx_script_ops_table_timelock]]
+.Timelock operations
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| OP_CHECKLOCKTIMEVERIFY (previously OP_NOP2) | 0xb1 | Marks transaction as invalid if the top stack item is greater than the transaction's nLockTime field, otherwise script evaluation continues as though an OP_NOP was executed. Transaction is also invalid if 1. the stack is empty; or 2. the top stack item is negative; or 3. the top stack item is greater than or equal to 500000000 while the transaction's nLockTime field is less than 500000000, or vice versa; or 4. the input's nSequence field is equal to 0xffffffff. The precise semantics are described in BIP-65 
+| OP_CHECKSEQUENCEVERIFY (previously OP_NOP3) | 0xb2 | Marks transaction as invalid if the relative lock time of the input (enforced by BIP 0068 with nSequence) is not equal to or longer than the value of the top stack item. The precise semantics are described in BIP-112|
+| =======
+
+<<tx_script_ops_table_stack>> shows operators used to manipulate the stack.
+
+[[tx_script_ops_table_stack]]
+Yığın işlemleri
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| OP_TOALTSTACK | 0x6b | Yığının tepesindekini çek ve alternatif yığına it
+| OP_FROMALTSTACK | 0x6c | Alternatif yığındaki işlemi çek ve yığına it
+| OP_2DROP | 0x6d | Yığının tepesindeki 2 öğeyi çek
+| OP_2DUP | 0x6e | Yığının tepesindeki iki öğenin kopyasını çıkart
+| OP_3DUP | 0x6f | Yığının tepesindeki üç öğenin kopyasını çıkart
+| OP_2OVER | 0x70 | Yığının tepesine kadar üçüncü ve dördüncü öğeyi kopyala
+| OP_2ROT | 0x71 | Yığındaki beşinci ve altıncı öğeleri yığının tepesine taşı
+| OP_2SWAP | 0x72 | Yığının tepesindeki iki çifti yer değiştir
+| OP_IFDUP | 0x73 | Yığının tepesindeki öğe 0 değilse kopyasını çıkart
+| OP_DEPTH | 0x74 | Yığındaki öğeleri say ve sayıyı yığına it
+| OP_DROP | 0x75 | Yığının tepesindeki öğeyi çek
+| OP_DUP | 0x76 | Yığının tepesindeki öğeyi çek
+| OP_NIP | 0x77 | Yığındaki ikinci öğeyi çek
+| OP_OVER | 0x78 | Yığındaki ikinci öğeyi çek ve yığının tepesine it
+| OP_PICK | 0x79 | Yığının tepesindeki N değerini çek ve N'inci değeri yığının tepesine kopyala
+| OP_ROLL | 0x7a | N değerini yığındak çek ve N'inci öğeyi yığının başına taşı
+| OP_ROT | 0x7b | Yığının tepesindeki üç öğeyi döndür
+| OP_SWAP | 0x7c | Swap the top two items on the stack
+| OP_TUCK | 0x7d | Copy the top item and insert it between the top and second item
+| =======
+
+<<tx_script_ops_table_splice>> shows string operators.
+
+[[tx_script_ops_table_splice]]
+Dize ekleme işlemleri
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| _OP_CAT_ | 0x7e | Devre dışı (tepedeki iki öğeyi birleştirir)
+| _OP_SUBSTR_ | 0x7f | Devre dışı (alt dizgeyi döndürür)
+| _OP_LEFT_ | 0x80 | Devre dışı (soldaki alt dizgeyi döndürür)
+| _OP_RIGHT_ | 0x81 | Devre dışı (sağ alt dizgeyi döndürür)
+| OP_SIZE | 0x82 | tepedeki öğenin dizge uzunluğunu hesapla ve sonucu yığına it 
+| =======
+
+<<tx_script_ops_table_binmath>> shows binary arithmetic and boolean logic operators.
+
+[[tx_script_ops_table_binmath]]
+İkili aritmetik ve koşullar
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| _OP_INVERT_ | 0x83 | Devre dışı (tepedeki öğenin bitlerini tersine çevirir)
+| _OP_AND_ | 0x84 | Devre dışı (tepedeki iki öğenin bool aritmetiğinde VE (AND) işlemi)
+| _OP_OR_ | 0x85 | Devre dışı (Tepedeki iki öğenin Bool OR işlemi)
+| _OP_XOR_ | 0x86 | Devre dışı (tepedeki iki öğenin bool XOR işlemi)
+| OP_EQUAL | 0x87 | Eğer tepedeki iki öğe birebir aynıysa yığına TRUE (1) it, değilse FALSE (0) it
+| OP_EQUALVERIFY | 0x88 |  OP_EQUALile aynıdır, ama eğer doğru değilse durdurmak için OP_VERIFY'ı koşar
+| OP_RESERVED1 | 0x89 | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| OP_RESERVED2 | 0x8a | Halt&#x2014;Invalid transaction unless found in an unexecuted OP_IF clause
+| =======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_numbers>> shows numeric (arithmetic) operators.
+
+[[tx_script_ops_table_numbers]]
+Sayısal işlemler
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| OP_1ADD | 0x8b | Tepedeki öğeye 1 ekle   
+| OP_1SUB | 0x8c | Tepedeki öğeden 1 çıkart
+| _OP_2MUL_ | 0x8d | Devre dışı (tepedeki öğeyi 2 ile çarp)
+| _OP_2DIV_ | 0x8e | Devre dışı (tepedeki öğeyi 2'ye böl)
+| OP_NEGATE | 0x8f | Tepedeki öğenin işaretini ters çevir
+| OP_ABS | 0x90 | Tepedeki öğenin işaretini pozitif yap
+| OP_NOT | 0x91 | Eğer tepedeki öğe 0 veya 1 ise bool cebirinde tersine çevir, aksi halde 0 döndür
+| OP_0NOTEQUAL | 0x92 | Eğer tepedeki öğe 0'sa 0 döndür, aksi halde 1 döndür
+| OP_ADD | 0x93 | Tepedeki iki öğeyi çek, topla ve sonucu yığına it
+| OP_SUB | 0x94 | Tepedeki iki öğeyi çek, birinciyi ikinciden çıkart ve sonucu yığına it
+| _OP_MUL_ | 0x95 | Disabled (multiply top two items)
+| _OP_DIV_ | 0x96 | Disabled (divide second item by first item)
+| _OP_MOD_ | 0x97 | Disabled (remainder divide second item by first item)
+| _OP_LSHIFT_ | 0x98 | Disabled (shift second item left by first item number of bits)
+| _OP_RSHIFT_ | 0x99 | Disabled (shift second item right by first item number of bits)
+| OP_BOOLAND | 0x9a | Tepedeki iki öğenin bool AND işlemini al
+| OP_BOOLOR | 0x9b | Tepedeki iki öğenin bool OR işlemini al
+| OP_NUMEQUAL | 0x9c | Eğer tepedeki iki öğe eşit sayılarsa TRUE döndür
+| OP_NUMEQUALVERIFY | 0x9d | NUMEQUAL ile aynı, eğer TRUE değilse durmak için OP_VERIFY çalıştır
+| OP_NUMNOTEQUAL | 0x9e | Eğer tepedeki iki öğe aynı değilse TRUE döndür
+| OP_LESSTHAN | 0x9f | Eğer ikinci öğe tepedeki öğeden azsa TRUE döndür
+| OP_GREATERTHAN | 0xa0 | Eğer ikinci öğe tepedekinden büyükse TRUE döndür
+| OP_LESSTHANOREQUAL | 0xa1 | Eğer ikinci öğe tepedeki öğeden küçük veya eşitse TRUE döndür
+| OP_GREATERTHANOREQUAL | 0xa2 | Eğer ikinci öğe tepedekinden büyük veya eşitse TRUE döndür
+| OP_MIN | 0xa3 | En üstteki iki öğenin küçüğünü döndür 
+| OP_MAX | 0xa4 | Tepedeki iki öğenin uzununu döndür
+| OP_WITHIN | 0xa5 | Eğer üçüncü öğe ilk iki öğenin arasında veya onlara eşitse TRUE döndür
+| =======
+
+[role="pagebreak-before"]
+<<tx_script_ops_table_crypto>> shows cryptographic function operators.
+
+[[tx_script_ops_table_crypto]]
+Kriptografi ve karma işlemleri
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| OP_RIPEMD160 | 0xa6 | Tepedeki öğenin RIPEMD160 özetini döndür
+| OP_SHA1 | 0xa7 | Tepedeki öğenin SHA1 özetini döndür
+| OP_SHA256 | 0xa8 | Tepedeki öğenin SHA256 özetini döndür
+| OP_HASH160 | 0xa9 | Tepedeki öğenin RIPEMD160(SHA256(x)) özetini döndür
+| OP_HASH256 | 0xaa | Tepedeki öğenin SHA256(SHA256(x)) özetini döndür
+| OP_CODESEPARATOR | 0xab | İmzası kontrol edilmiş verinin başını işaretle
+| OP_CHECKSIG | 0xac | Yığından açık anahtar ve imza çekbu işlemin özet verisinin imzasını doğrula, eğer eşleşiyorsa TRUE döndür
+| OP_CHECKSIGVERIFY | 0xad | CHECKSIG ile aynı, TRUE değilse durdurmak için OP_VERIFY çalıştır
+| OP_CHECKMULTISIG | 0xae | Verilen her bir imza ve açık anahtar çifti için CHECKSIG'i çalıştır. Tamamı eşleşmeli. İmplementasyonundaki hata fazladan değer çıkartabilir, OP_NOP ön eki ile geçici çözüm üretilebilir
+| OP_CHECKMULTISIGVERIFY | 0xaf | CHECKMULTISIG ile aynı, eğer TRUE değilse OP_VERIFY çalıştır
+| =======
+
+<<tx_script_ops_table_nop>> shows nonoperator symbols.
+
+[[tx_script_ops_table_nop]]
+.Nonoperators
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| OP_NOP1 to OP_NOP10 | 0xb0 to 0xb9 | Does nothing, ignored
+| =======
+
+
+<<tx_script_ops_table_internal>> shows operator codes reserved for use by the internal script parser.((("", startref="TRlang14")))((("", startref="SCRlang14")))
+
+[[tx_script_ops_table_internal]]
+.ayrıştırıcının iç kullanımı için rezerve edilmiş OP kodları
+[Seçenekler = "başlığı"]
+| =======
+| Sembol| Değer (hex) | Tanım
+| OP_SMALLDATA | 0xf9 | Küçük veri alanını temsil eder 
+| OP_SMALLINTEGER | 0xfa | Küçük tam sayı alanını temsil eder
+| OP_PUBKEYS | 0xfb | Açık anahtar alanını temsil eder
+| OP_PUBKEYHASH | 0xfd | Açık anahtarın özet alanını temsil eder
+| OP_PUBKEY | 0xfe | Açık anahtar alanını temsil eder
+| OP_INVALIDOPCODE | 0xff | Henüz atanmamış OP kodu temsil eder
+| =======

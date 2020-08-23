@@ -1,0 +1,117 @@
+[[appdxbitcoinimpproposals]]
+[appendix]
+== Bitcoin továbbfejlesztési javaslatok (Bitcoin Improvement Proposals)
+
+((("bitcoin továbbfejlesztési javaslatok", "típusai")))A bitcoin továbbfejlesztési javaslatok olyan tervezési dokumentumok, melyek a bitcoin közösség számára adnak információkat, vagy egy új bitcoin jellemzőt, folyamatot vagy környezetet írnak le.
+
+A BIP-01 _BIP Purpose and Guidelines_ (_A BIP-ek célja) szerint a BIP-eknek három fajtája van:
+
+_Szabvány_ BIP:: Azokat a változtatásokat írja le, melyek a bitcoin implementációk nagy részét vagy egészét érintik. Ilyen pl. a hálózati protokoll megváltoztatása, a blokk vagy tranzakció ellenőrzési szabályok megváltoztatása, vagy bármilyen egyéb változás vagy bővítés, amely érinti a bitcoint használó alkalmazások együttműködését.
+_Tájékoztatásra szolgáló_ BIP:: Valamilyen tervezési kérdés leírása, vagy általános útmutató, ill. tájékoztatás a bitcoin közösség számára. Nem tartalmaz új jellemzőt. A tájékoztatásra szolgáló BIP-ek nem feltétlenül képviselik a közösségi közmegegyezést vagy nem feltétlenül jelentenek ajánlást, amiatt a felhasználók és fejlesztők szabadon eldönthetik, hogy figyelmen kívül hagyják a BIP-et, vagy követik a tanácsát.
+_Folyamatot leíró_ BIP:: Egy bitcoin folyamatot ír le, vagy valamilyen változtatást javasol egy folyamatban vagy egy esemény beillesztését javasolja egy folyamatba. A folyamatot leíró BIP-ek olyanok, mint a szabvány BIP-ek, de a bitcoin protokollon túlmenően más területekre is vonatkozhatnak. Javasolhatnak megvalósításokat, de ez a bitcoin kódbázisát nem érintheti. Gyakran közösségi konszenzust igényelnek. A tájékoztatásra szolgáló BIP-ektől eltérően a folyamat leíró BIP-ek nem csupán ajánlások, a felhasználók pedig általában nem hagyhatják őket figyelmen kívül.  Például ilyenek az eljárásokra, útmutatókra és a döntési folyamat megváltoztatására vonatkozó BIP-ek, valamint a bitcoin fejlesztési folyamatban használt eszközök vagy fejlesztési környezet megváltoztatása. A meta-BIP-eket szintén folyamat leíró BIP-eknek tekintik.
+
+((("bitcoin továbbfejlesztési javaslatok", "gyűjteménye")))A bitcoin továbbfejlesztési javaslatokat egy verziózott GitHub:https://github.com/bitcoin/bips[https://github.com/bitcoin/bips] gyűjteményben tárolják. A <<table_d-1>> a BIP-ek 2017 áprilisi pillanatfelvételét mutatja. A létező BIP-ekről és azok aktuális tartalmáról a mérvadó gyűjteményből tájékozódhat.((("bitcoin továbbfejlesztési javaslatok", "pillanatfelvétele", id="BIPsnap15")))
+
+[[table_d-1]]
+.Pillanatfelvétel a BIP-ekről
+[options="header"]
+|=======================================================================
+|BIP# | Cím | Tulajdonos |Típus | Státusz
+|[[bip-1]]https://github.com/bitcoin/bips/blob/master/bip-0001.mediawiki[BIP-1] |A BIP-ek célja. Útmutató |Amir Taaki |Folyamat |Mással lett felváltva
+|[[bip-2]]https://github.com/bitcoin/bips/blob/master/bip-0002.mediawiki[BIP-2] |BIP folyamat, felülvizsgálva |Luke Dashjr |Folymat |Aktív
+|[[bip-8]]https://github.com/bitcoin/bips/blob/master/bip-0008.mediawiki[BIP-8] |Verzió bitek garantált időzárral |Shaolin Fry |Információs |Tervezet
+|[[bip-9]]https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki[BIP-9] |Version bits with timeout and delay |Pieter Wuille, Peter Todd, Greg Maxwell, Rusty Russell |Informational |Final
+|[[bip-10]]https://github.com/bitcoin/bips/blob/master/bip-0010.mediawiki[BIP-10] |Multi-Sig Transaction Distribution |Alan Reiner |Informational |Withdrawn
+|[[bip-11]]https://github.com/bitcoin/bips/blob/master/bip-0011.mediawiki[BIP-11] |M-of-N szabványos tranzakciók |Gavin Andresen |Szabvány |Végleges
+|[[bip-12]]https://github.com/bitcoin/bips/blob/master/bip-0012.mediawiki[BIP-12] |OP_EVAL |Gavin Andresen |Szabvány |Visszavonva
+|[[bip-13]]https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki[BIP-13] |A pay-to-script-hash címformátuma |Gavin Andresen |Szabvány |Végleges
+|[[bip-14]]https://github.com/bitcoin/bips/blob/master/bip-0014.mediawiki[BIP-14] |Protokoll verzió és felhasználói ágens |Amir Taaki, Patrick Strateman |Szabvány |Végleges
+|[[bip-15]]https://github.com/bitcoin/bips/blob/master/bip-0015.mediawiki[BIP-15] |Aliasok |Amir Taaki |Szabvány |Felfüggesztve
+|[[bip-16]]https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki[BIP-16] |Pay to Script Hash |Gavin Andresen |Standard |Final
+|[[bip-17]]https://github.com/bitcoin/bips/blob/master/bip-0017.mediawiki[BIP-17] |OP_CHECKHASHVERIFY (CHV) |Luke Dashjr |Standard |Visszavonva
+|[[bip-18]]https://github.com/bitcoin/bips/blob/master/bip-0018.mediawiki[BIP-18] |hashScriptCheck |Luke Dashjr |Szabvány |Javaslat
+|[[bip-19]]https://github.com/bitcoin/bips/blob/master/bip-0019.mediawiki[BIP-19] |M-of-N szabványos tranzakciók (Low SigOp) | Luke Dashjr |Szabvány |Tervezet
+|[[bip-20]]https://github.com/bitcoin/bips/blob/master/bip-0020.mediawiki[BIP-20] |URI séma |Luke Dashjr |Szabvány |Mással lett felváltva 
+|[[bip-21]]https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki[BIP-21] |URI séma |Nils Schneider, Matt Corallo |Szabvány |Végleges
+|[[bip-22]]https://github.com/bitcoin/bips/blob/master/bip-0022.mediawiki[BIP-22] |getblocktemplate - alapok |Luke Dashjr |Szabvány |Végleges
+|[[bip-23]]https://github.com/bitcoin/bips/blob/master/bip-0023.mediawiki[BIP-23] |getblocktemplate - - társult bányászat |Luke Dashjr |Szabvány |Végleges
+|[[bip-30]]https://github.com/bitcoin/bips/blob/master/bip-0030.mediawiki[BIP-30] |Dupla tranzakciók |Pieter Wuille |Szabvány |Végleges
+|[[bip-31]]https://github.com/bitcoin/bips/blob/master/bip-0031.mediawiki[BIP-31] |Pong üzenet |Mike Hearn |Szabvány |Végleges
+|[[bip-32]]https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki[BIP-32] |Hierarchikus determinisztikus pénztárcák|Pieter Wuille |Tájékoztató |Végleges
+|[[bip-33]]https://github.com/bitcoin/bips/blob/master/bip-0033.mediawiki[BIP-33] |Stratized Nodes |Amir Taaki |Standard |Draft
+|[[bip-34]]https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki[BIP-34] |Block v2, magasság a coinbase-ben |Gavin Andresen |Szabvány |Végleges
+|[[bip-35]]https://github.com/bitcoin/bips/blob/master/bip-0035.mediawiki[BIP-35] |mempool üzenet |Jeff Garzik |Szabvány |Végleges
+|[[bip-36]]https://github.com/bitcoin/bips/blob/master/bip-0036.mediawiki[BIP-36] |Egyedi szolgáltatások |Stefan Thomas |Szabvány |Tervezet
+|[[bip-37]]https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki[BIP-37] Bloom szűrők |Mike Hearn, Matt Corallo |Szabvány |Végleges
+|[[bip-38]]https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki[BIP-38] |Jelmondattal védett titkos kulcs |Mike Caldwell,  Aaron Voisine |Szabvány |Tervezet
+|[[bip-39]]https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki[BIP-39] |Mnemonikok a determinisztikus kulcsok előállításához |Marek Palatinus, Pavol Rusnak, Aaron Voisine, Sean Bowe |Szabvány |Javaslat
+|[[bip-40]]https://github.com/bitcoin/bips/blob/master/bip-0040.mediawiki[BIP-40] |Stratum wire protocol |Marek Palatinus |Standard |BIP number allocated
+|[[bip-41]]https://github.com/bitcoin/bips/blob/master/bip-0041.mediawiki[BIP-41] |Stratum bányászprotokoll |Marek Palatinus |Szabvány |BIP szám hozzárendelve
+|[[bip-42]]https://github.com/bitcoin/bips/blob/master/bip-0042.mediawiki[BIP-42] |A bitcoin véges pénzkészlete |Pieter Wuille |Szabvány |Tervezet
+|[[bip-43]]https://github.com/bitcoin/bips/blob/master/bip-0043.mediawiki[BIP-43] |Cél mező determinisztikus pénztárcákhoz |Marek Palatinus, Pavol Rusnak |Tájékoztató |Tervezet
+|[[bip-44]]https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki[BIP-44] |Számlák hierarchiája determinisztikus pénztárcákban |Marek Palatinus, Pavol Rusnak |Szabvány |Javaslat
+|[[bip-45]]https://github.com/bitcoin/bips/blob/master/bip-0045.mediawiki[BIP-45] |Determinisztikus P2SH multisignature pénztárcák strukturája |Manuel Araoz, Ryan X. Charles, Matias Alejo Garcia |Szabvány |Javaslat
+|[[bip-47]]https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki[BIP-47] Újrahasználható fizetési kódok hierarchikus determinisztikus pénztárcákhoz |Justus Ranvier |Tájékoztató |Tervezet
+|[[bip-49]]https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki[BIP-49] |Derivation scheme for P2WPKH-nested-in-P2SH based accounts |Daniel Weigl |Informational |Draft
+|[[bip-50]]https://github.com/bitcoin/bips/blob/master/bip-0050.mediawiki[BIP-50] |A 2013. márciusi fork utólagos vizsgálata |Gavin Andresen |Tájékoztató |Végleges
+|[[bip-60]]https://github.com/bitcoin/bips/blob/master/bip-0060.mediawiki[BIP-60] |Fix hosszúságú "version" üzenet (Relay-Transactions mező) |Amir Taaki |Szabvány |Tervezet
+|[[bip-61]]https://github.com/bitcoin/bips/blob/master/bip-0061.mediawiki[BIP-61] |"Reject" P2P üzenet |Gavin Andresen |Szabvány |Végleges
+|[[bip-62]]https://github.com/bitcoin/bips/blob/master/bip-0062.mediawiki[BIP-62] |A tranzakciók változékonyságának kezelése |Pieter Wuille |Szabvány |Visszavonva
+|[[bip-63]]https://github.com/bitcoin/bips/blob/master/bip-0063.mediawiki[BIP-63] |Stealth Addresses |Peter Todd |Standard |BIP number allocated
+|[[bip-64]]https://github.com/bitcoin/bips/blob/master/bip-0064.mediawiki[BIP-64] |getutxo üzenet |Mike Hearn |Szabvány |Tervezet
+|[[bip-65]]https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki[BIP-65] |OP_CHECKLOCKTIMEVERIFY |Peter Todd |Szabvány |Végleges
+|[[bip-66]]https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki[BIP-66] |Szigorú DER aláírások |Pieter Wuille |Szabvány |Végleges
+|[[bip-67]]https://github.com/bitcoin/bips/blob/master/bip-0067.mediawiki[BIP-67] |Deterministic Pay-to-script-hash multi-signature addresses through public key sorting |Thomas Kerin, Jean-Pierre Rupp, Ruben de Vries |Standard |Proposed
+|[[bip-68]]https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki[BIP-68] |Relative lock-time using consensus-enforced sequence numbers |Mark Friedenbach, BtcDrak, Nicolas Dorier, kinoshitajona |Standard |Final
+|[[bip-69]]https://github.com/bitcoin/bips/blob/master/bip-0069.mediawiki[BIP-69] |Tranzakció bemenetek és kimenetek lexikografikus  indexelése |Kristov Atlas |Tájékoztató |Javaslat
+|[[bip-70]]https://github.com/bitcoin/bips/blob/master/bip-0070.mediawiki[BIP-70] |Payment protokoll |Gavin Andresen, Mike Hearn |Szabvány |Végleges
+|[[bip-71]]https://github.com/bitcoin/bips/blob/master/bip-0071.mediawiki[BIP-71] |Payment protokoll MIME típusok |Gavin Andresen |Szabvány |Végleges
+|[[bip-72]]https://github.com/bitcoin/bips/blob/master/bip-0072.mediawiki[BIP-72] |bitcoin: payment protokoll URI-k |Gavin Andresen |Szabvány |Végleges
+|[[bip-73]]https://github.com/bitcoin/bips/blob/master/bip-0073.mediawiki[BIP-73] |Használjunk "Accept" fejet a Payment kérések URL-jeiben |Stephen Pair |Szabvány |Végleges
+|[[bip-74]]https://github.com/bitcoin/bips/blob/master/bip-0074.mediawiki[BIP-74] |Allow zero value OP_RETURN in Payment Protocol |Toby Padilla |Standard |Draft
+|[[bip-75]]https://github.com/bitcoin/bips/blob/master/bip-0075.mediawiki[BIP-75] |Out of Band Address Exchange using Payment Protocol Encryption |Justin Newton, Matt David, Aaron Voisine, James MacWhyte |Standard |Draft
+|[[bip-80]]https://github.com/bitcoin/bips/blob/master/bip-0080.mediawiki[BIP-80] |Hierarchy for Non-Colored Voting Pool Deterministic Multisig Wallets |Justus Ranvier, Jimmy Song |Informational |Deferred
+|[[bip-81]]https://github.com/bitcoin/bips/blob/master/bip-0081.mediawiki[BIP-81] |Hierarchy for Colored Voting Pool Deterministic Multisig Wallets |Justus Ranvier, Jimmy Song |Informational |Deferred
+|[[bip-83]]https://github.com/bitcoin/bips/blob/master/bip-0083.mediawiki[BIP-83] |Dynamic Hierarchical Deterministic Key Trees |Eric Lombrozo |Standard |Draft
+|[[bip-90]]https://github.com/bitcoin/bips/blob/master/bip-0090.mediawiki[BIP-90] |Buried Deployments |Suhas Daftuar |Informational |Draft
+|[[bip-99]]https://github.com/bitcoin/bips/blob/master/bip-0099.mediawiki[BIP-99] |Motivation and deployment of consensus rule changes ([soft/hard]forks) |Jorge Timón |Informational |Draft
+|[[bip-101]]https://github.com/bitcoin/bips/blob/master/bip-0101.mediawiki[BIP-101] |Maximum blokkméret növelése |Gavin Andresen |Szabvány |Visszavonva
+|[[bip-102]]https://github.com/bitcoin/bips/blob/master/bip-0102.mediawiki[BIP-102] |A blokk méret 2 MB-ra növelése |Jeff Garzik |Szabvány |Tervezet
+|[[bip-103]]https://github.com/bitcoin/bips/blob/master/bip-0103.mediawiki[BIP-103] |Technológiai növekedést követő blokkméret |Pieter Wuille |Szabvány |Tervezet
+|[[bip-104]]https://github.com/bitcoin/bips/blob/master/bip-0104.mediawiki[BIP-104] |'Block75' - Max block size like difficulty |t.khan |Standard |Draft
+|[[bip-105]]https://github.com/bitcoin/bips/blob/master/bip-0105.mediawiki[BIP-105] |Consensus based block size retargeting algorithm |BtcDrak |Standard |Draft
+|[[bip-106]]https://github.com/bitcoin/bips/blob/master/bip-0106.mediawiki[BIP-106] |Dynamically Controlled Bitcoin Block Size Max Cap |Upal Chakraborty |Standard |Draft
+|[[bip-107]]https://github.com/bitcoin/bips/blob/master/bip-0107.mediawiki[BIP-107] |Dynamic limit on the block size |Washington Y. Sanchez |Standard |Draft
+|[[bip-109]]https://github.com/bitcoin/bips/blob/master/bip-0109.mediawiki[BIP-109] |Two million byte size limit with sigop and sighash limits |Gavin Andresen |Standard |Rejected
+|[[bip-111]]https://github.com/bitcoin/bips/blob/master/bip-0111.mediawiki[BIP-111] |NODE_BLOOM service bit |Matt Corallo, Peter Todd |Standard |Proposed
+|[[bip-112]]https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki[BIP-112] |CHECKSEQUENCEVERIFY |BtcDrak, Mark Friedenbach, Eric Lombrozo |Szabvány |Végleges
+|[[bip-113]]https://github.com/bitcoin/bips/blob/master/bip-0113.mediawiki[BIP-113] |Median time-past as endpoint for lock-time calculations |Thomas Kerin, Mark Friedenbach |Standard |Final
+|[[bip-114]]https://github.com/bitcoin/bips/blob/master/bip-0114.mediawiki[BIP-114] |Merkelized Abstract Syntax Tree |Johnson Lau |Standard |Draft
+|[[bip-120]]https://github.com/bitcoin/bips/blob/master/bip-0120.mediawiki[BIP-120] |Proof of Payment (bizonyíték fizetésről) |Kalle Rosenbaum |Szabvány |Tervezet
+|[[bip-121]]https://github.com/bitcoin/bips/blob/master/bip-0121.mediawiki[BIP-121] |Proof of Payment URI scheme |Kalle Rosenbaum |Standard |Draft
+|[[bip-122]]https://github.com/bitcoin/bips/blob/master/bip-0122.mediawiki[BIP-122] |URI scheme for Blockchain references / exploration |Marco Pontello |Standard |Draft
+|[[bip-123]]https://github.com/bitcoin/bips/blob/master/bip-0123.mediawiki[BIP-123] |BIP Classification |Eric Lombrozo |Process |Active
+|[[bip-124]]https://github.com/bitcoin/bips/blob/master/bip-0124.mediawiki[BIP-124] |Hierarchical Deterministic Script Templates |Eric Lombrozo, William Swanson |Informational |Draft
+|[[bip-125]]https://github.com/bitcoin/bips/blob/master/bip-0125.mediawiki[BIP-125] |Opt-in Full Replace-by-Fee Signaling |David A. Harding, Peter Todd |Standard |Proposed
+|[[bip-126]]https://github.com/bitcoin/bips/blob/master/bip-0126.mediawiki[BIP-126] |Best Practices for Heterogeneous Input Script Transactions |Kristov Atlas |Informational |Draft
+|[[bip-130]]https://github.com/bitcoin/bips/blob/master/bip-0130.mediawiki[BIP-130] |sendheaders message |Suhas Daftuar |Standard |Proposed
+|[[bip-131]]https://github.com/bitcoin/bips/blob/master/bip-0131.mediawiki[BIP-131] |"Coalescing Transaction" Specification (wildcard inputs) |Chris Priest |Standard |Draft
+|[[bip-132]]https://github.com/bitcoin/bips/blob/master/bip-0132.mediawiki[BIP-132] |Committee-based BIP Acceptance Process |Andy Chase |Process |Withdrawn
+|[[bip-133]]https://github.com/bitcoin/bips/blob/master/bip-0133.mediawiki[BIP-133] |feefilter message |Alex Morcos |Standard |Draft
+|[[bip-134]]https://github.com/bitcoin/bips/blob/master/bip-0134.mediawiki[BIP-134] |Flexible Transactions |Tom Zander |Standard |Draft
+|[[bip-140]]https://github.com/bitcoin/bips/blob/master/bip-0140.mediawiki[BIP-140] |Normalized TXID |Christian Decker |Standard |Draft
+|[[bip-141]]https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki[BIP-141] |Segregated Witness (Consensus layer) |Eric Lombrozo, Johnson Lau, Pieter Wuille |Standard |Draft
+|[[bip-142]]https://github.com/bitcoin/bips/blob/master/bip-0142.mediawiki[BIP-142] |Address Format for Segregated Witness |Johnson Lau |Standard |Deferred
+|[[bip-143]]https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki[BIP-143] |Transaction Signature Verification for Version 0 Witness Program |Johnson Lau, Pieter Wuille |Standard |Draft
+|[[bip-144]]https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki[BIP-144] |Segregated Witness (Peer Services) |Eric Lombrozo, Pieter Wuille |Standard |Draft
+|[[bip-145]]https://github.com/bitcoin/bips/blob/master/bip-0145.mediawiki[BIP-145] |getblocktemplate Updates for Segregated Witness |Luke Dashjr |Standard |Draft
+|[[bip-146]]https://github.com/bitcoin/bips/blob/master/bip-0146.mediawiki[BIP-146] |Dealing with signature encoding malleability |Johnson Lau, Pieter Wuille |Standard |Draft
+|[[bip-147]]https://github.com/bitcoin/bips/blob/master/bip-0147.mediawiki[BIP-147] |Dealing with dummy stack element malleability |Johnson Lau |Standard |Draft
+|[[bip-148]]https://github.com/bitcoin/bips/blob/master/bip-0148.mediawiki[BIP-148] |Mandatory activation of segwit deployment |Shaolin Fry |Standard |Draft
+|[[bip-150]]https://github.com/bitcoin/bips/blob/master/bip-0150.mediawiki[BIP-150] |Peer Authentication |Jonas Schnelli |Standard |Draft
+|[[bip-151]]https://github.com/bitcoin/bips/blob/master/bip-0151.mediawiki[BIP-151] |Peer-to-Peer Communication Encryption |Jonas Schnelli |Standard |Draft
+|[[bip-152]]https://github.com/bitcoin/bips/blob/master/bip-0152.mediawiki[BIP-152] |Compact Block Relay |Matt Corallo |Standard |Draft
+|[[bip-171]]https://github.com/bitcoin/bips/blob/master/bip-0171.mediawiki[BIP-171] |Currency/exchange rate information API |Luke Dashjr |Standard |Draft
+|[[bip-180]]https://github.com/bitcoin/bips/blob/master/bip-0180.mediawiki[BIP-180] |Block size/weight fraud proof |Luke Dashjr |Standard |Draft
+|[[bip-199]]https://github.com/bitcoin/bips/blob/master/bip-0199.mediawiki[BIP-199] |Hashed Time-Locked Contract transactions |Sean Bowe, Daira Hopwood |Standard |Draft((("", startref="BIPsnap15"))) 
+|=======================================================================
