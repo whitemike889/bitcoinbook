@@ -1,0 +1,148 @@
+[main]
+host = https://www.transifex.com
+
+[mastering-bitcoin.appendix-bips]
+file_filter = lang/<lang>/appdx-bips.txt
+source_file = lang/en/appdx-bips.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.appdx-bitcoinwhitepapertxt]
+file_filter = lang/<lang>/appdx-bitcoinwhitepaper.txt
+source_file = lang/en/appdx-bitcoinwhitepaper.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.appdx-bitcoretxt]
+file_filter = lang/<lang>/appdx-bitcore.txt
+source_file = lang/en/appdx-bitcore.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.appendix-bx]
+file_filter = lang/<lang>/appdx-bx.txt
+source_file = lang/en/appdx-bx.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.appendix-pycoin]
+file_filter = lang/<lang>/appdx-pycoin.txt
+source_file = lang/en/appdx-pycoin.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.appendix-script-ops]
+file_filter = lang/<lang>/appdx-scriptops.txt
+source_file = lang/en/appdx-scriptops.txt
+source_lang = en
+type = TXT
+
+
+[mastering-bitcoin.chapter-1]
+file_filter = lang/<lang>/ch01.txt
+source_file = lang/en/ch01.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-2]
+file_filter = lang/<lang>/ch02.txt
+source_file = lang/en/ch02.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-3]
+file_filter = lang/<lang>/ch03.txt
+source_file = lang/en/ch03.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-4]
+file_filter = lang/<lang>/ch04.txt
+source_file = lang/en/ch04.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-5]
+file_filter = lang/<lang>/ch05.txt
+source_file = lang/en/ch05.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-6]
+file_filter = lang/<lang>/ch06.txt
+source_file = lang/en/ch06.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-7]
+file_filter = lang/<lang>/ch07.txt
+source_file = lang/en/ch07.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-8]
+file_filter = lang/<lang>/ch08.txt
+source_file = lang/en/ch08.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-9]
+file_filter = lang/<lang>/ch09.txt
+source_file = lang/en/ch09.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.chapter-10]
+file_filter = lang/<lang>/ch10.txt
+source_file = lang/en/ch10.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.ch11]
+file_filter = lang/<lang>/ch11.txt
+source_file = lang/en/ch11.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.ch12]
+file_filter = lang/<lang>/ch12.txt
+source_file = lang/en/ch12.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.glossary-1]
+file_filter = lang/<lang>/glossary.txt
+source_file = lang/en/glossary.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.preface]
+file_filter = lang/<lang>/preface.txt
+source_file = lang/en/preface.txt
+source_lang = en
+type = TXT
+
+
+[mastering-bitcoin.praise]
+file_filter = lang/<lang>/praise.txt
+source_file = lang/en/praise.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.preface-open]
+file_filter = lang/<lang>/preface_open_edition.txt
+source_file = lang/en/preface_open_edition.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.book]
+file_filter = lang/<lang>/book.txt
+source_file = lang/en/book.txt
+source_lang = en
+type = TXT
+
+[mastering-bitcoin.githubcontrib]
+file_filter = lang/<lang>/github_contrib.txt
+source_file = lang/en/github_contrib.txt
+source_lang = en
+type = TXT
