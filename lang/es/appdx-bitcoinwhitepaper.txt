@@ -1,5 +1,5 @@
 [[satoshi_whitepaper]]
-[apéndice]
+[appendix]
 == El Whitepaper (Libro Blanco) de Bitcoin por Satoshi Nakamoto
 
 [NOTE]

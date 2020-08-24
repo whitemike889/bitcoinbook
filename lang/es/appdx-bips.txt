@@ -1,5 +1,5 @@
 [[appdxbitcoinimpproposals]]
-[apéndice]
+[appendix]
 == Propuestas de Mejora para Bitcoin
 
 ((("propuestas de mejora de bitcoin", "tipos de propuestas")))Las propuestas de mejora de bitcoin (o del inglés, las "BIP") son documentos de diseño para proporcionar información a la comunidad de bitcoin, o para proponer una nueva característica para bitcoin o sus procesos o entorno.

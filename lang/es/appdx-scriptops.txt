@@ -1,5 +1,5 @@
 [[tx_script_ops]]
-[apéndice]
+[appendix]
 == Operadores, Constantes y Símbolos del Lenguaje de Script de Transacción
 
 [NOTE]

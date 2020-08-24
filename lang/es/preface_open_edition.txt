@@ -60,19 +60,19 @@ Sin embargo, tenga en cuenta que las llaves privadas utilizadas para construir d
 NO ENVÍE DINERO A NINGUNA DE LAS DIRECCIONES DE ESTE LIBRO. Otro lector podría tomar su dinero o bien, se perderá para siempre. ((("", startref="codeuse00")))
 ====
 
-=== Publication by O'Reilly Media
+=== Publicación de O'Reilly Media
 
-This book is derived under license from the book "Mastering Bitcoin 2nd Edition", by O'Reilly Media.
+Este libro se deriva bajo licencia a partir del libro "Mastering Bitcoin 2nd Edition", de O'Reilly Media.
 
-=== Copyright and Book License
+=== Derechos de Autor y Licencia del Libro
 
 Copyright (c) 2014 Andreas M. Antonopoulos LLC
 
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit
+Este trabajo está sujeto a la licencia internacional de "Creative Commons Attribution-ShareAlike, versión 4.0". Para ver una copia de esta licencia, puede visitarse el enlace:
 
 http://creativecommons.org/licenses/by-sa/4.0/.
 
-To provide attribution please link to the book's repository:
+Para proporcionar atribución, enlace al repositorio del libro:
 
 https://github.com/bitcoinbook/bitcoinbook
 

@@ -257,7 +257,7 @@ Zatim, Đingov čvor izračunava tačnu nagradu za novi blok. Nagrada se izraču
 Računica se može videti u funkciji +GetBlockSubsidy+ u Bitcoin Core klijentu, kao što je prikazano u <<getblocksubsidy_source>>.
 
 [[getblocksubsidy_source]]
-.Računanje nagrade bloka&#x2014;Funkcija GetBlockSubsidi, GetBlockSubsidy, Bitcoin Core Client, main.cpp
+.Računanje nagrade bloka—Funkcija GetBlockSubsidi, GetBlockSubsidy, Bitcoin Core Client, main.cpp
 ====
 [role="c_less_space"]
 [source, cpp]
@@ -305,7 +305,7 @@ Kao što vidite u<<generation_tx_example>>, transakcija coinbase-a ima poseban f
 | Veličina | Polje | Opis
 | 32 bajta | Heš transakcije | Referenca na transakciju koja sadrži UTXO za potrošnju
 | 4 bajta | Izlazni indeks | Broj indeksa UTXO-a za potrošnju, prvi je 0
-| 1&#x2013;9 bajta (VarInt) | Veličina skripte za otključavanje | Dužina skripte u bajtovima
+| 1-9 bajta (VarInt) | Veličina skripte za otključavanje | Dužina skripte u bajtovima
 | Promenljiva | Skripta za otključavanje | Skripta koja ispunjava uslove UTXO skripte za zaključavanje
 | 4 bajta | Redni broj | Obično postavljeno na 0xFFFFFFFF da bi se isključili BIP 125 i BIP 68
 |=======
@@ -317,7 +317,7 @@ Kao što vidite u<<generation_tx_example>>, transakcija coinbase-a ima poseban f
 | Veličina | Polje | Opis
 | 32 bajta | Heš transakcije | Svi bitovi su nula: nije referenca na heš transakcije
 | 4 bajta | Izlazni indeks | Svi bitovi su: 0xFFFFFFFF
-| 1&#x2013;9 bajta (VarInt) | Veličina coinbase podataka | Dužina coinbase podataka, od 2 do 100 bajtova
+| 1-9 bajta (VarInt) | Veličina coinbase podataka | Dužina coinbase podataka, od 2 do 100 bajtova
 | Promenljiva | Coinbase podaci | Proizvoljni podaci koji se koriste za dodatni nonce i rudarske oznake. U v2 blokova; mora da počne visinom bloka
 | 4 bajta | Redni broj | Stavite ga na 0xFFFFFFFF
 |=======
@@ -658,7 +658,7 @@ Novi cilj = Stari cilj * (Stvarno vreme poslednjih 2016 blokova / 20160 minuta)
 <<retarget_code>> prikazuje kod koji se koristi u Bitcoin Core klijentu.
 
 [[retarget_code]]
-.Iznova postavljanje cilja za Proof-of-Work&#x2014;CalculateNextWorkRequired() u pow.cpp
+.Iznova postavljanje cilja za Proof-of-Work—CalculateNextWorkRequired() u pow.cpp
 ====
 [source,cpp]
 ----
@@ -778,7 +778,7 @@ U prvom dijagramu (<<fork1>>), mreža ima objedinjenu perspektivu blokčejna, sa
 
 [[fork1]]
 [role="smallereighty"]
-.Pre fork-a&#x2014;svi čvorovi imaju istu perspektivu
+.Pre fork-a—svi čvorovi imaju istu perspektivu
 image::images/mbc2_1002.png["Pre fork-a - svi čvorovi imaju istu perspektivu"]
 
 "Fork" se javlja kad god se dva kandidatska bloka takmiče da formiraju najduži blokčejn. To se događa u normalnim uslovima kada dva rudara reše algoritam Proof-of-Work u kratkom vremenskom periodu jedan od drugog. Kako oba rudara otkriju rešenje za svoj kandidatski blok, oni odmah emituju sopstveni "pobednički" blok neposrednim komšijama koji započinju širenje bloka širom mreže. Svaki čvor koji primi važeći blok ugradiće ga u svoj blokčejn, proširujući blokčejn za jedan blok. Ako taj čvor kasnije vidi drugi kandidatski blok koji proširuje istog roditelja, on povezuje drugog kandidata u sekundarnom lancu. Kao rezultat toga, neki čvorovi će prvo "videti" jedan kandidatski blok, dok će drugi čvorovi videti drugi kandidatski blok i pojaviće se dve konkurentske verzije blokčejna.
@@ -834,14 +834,14 @@ Bitkoinov interval blokova od 10 minuta predstavlja kompromis u dizajnu između 
 
 Sledeća lista prikazuje ukupnu snagu hešovanja bitkoin mreže tokom prvih osam godina rada:
 
-2009:: 0.5 MH/sec–8 MH/sec (16× growth)
-2010:: 8 MH/sec–116 GH/sec (14,500× growth)
-2011:: 116 GH/sec–9 TH/sec (78× growth)
-2012:: 9 TH/sec–23 TH/sec (2.5× growth)
-2013:: 23 TH/sec–10 PH/sec (450× growth)
-2014:: 10 PH/sec–300 PH/sec (30× growth)
-2015:: 300 PH/sec-800 PH/sec (2.66× growth)
-2016:: 800 PH/sec-2.5 EH/sec (3.12× growth)
+2009:: 0.5 MH/sec–8 MH/sec (rast 16×)
+2010:: 8 MH/sec–116 GH/sec (rast  14,500×)
+2011:: 116 GH/sec–9 TH/sec (rast 78×)
+2012:: 9 TH/sec–23 TH/sec (rast 2.5×)
+2013:: 23 TH/sec–10 PH/sec (rast 450×)
+2014:: 10 PH/sec–300 PH/sec (rast 30×)
+2015:: 300 PH/sec-800 PH/sec (rast 2.66×)
+2016:: 800 PH/sec-2.5 EH/sec (rast 3.12×)
 
 U tabeli u <<network_hashing_power>>, možemo videti da se snaga hešovanja bitkoin mreže povećala u poslednje dve godine. Kao što vidite, takmičenje između rudara i rast bitkoina doveli su do eksponencijalnog povećanja snage hešovanja (ukupnih hešova u sekundi širom mreže).
 
@@ -987,7 +987,7 @@ Jednom kada rudar pomoću novih pravila izrudari blok, rudarska snaga i lanac ta
 
 ((("forks", "changing consensus rules", "diverging miners and difficulty")))Dok se rudari razdvajaju u rudarenju na dva različita lanca, snaga hešovanja se deli između lanaca. Snaga rudarenja se može podeliti u bilo kojoj proporciji između dva lanca. Nova pravila može pratiti samo manjina, ili velika većina rudarske snage.
 
-Pretpostavimo, na primer, razdvajanje 80%&#x2013;20%, pri čemu većina rudarske snage koristi nova konsenzusna pravila. Pretpostavimo i da se fork pojavljuje odmah nakon perioda iznova postavljanja cilja.
+Pretpostavimo, na primer, razdvajanje 80%-20%, pri čemu većina rudarske snage koristi nova konsenzusna pravila. Pretpostavimo i da se fork pojavljuje odmah nakon perioda iznova postavljanja cilja.
 
 Oba lanca bi nasledila težinu iz perioda novog postavljanja cilja. Nova pravila konsenzusa imala bi 80% prethodno raspoložive rudarske snage koja im je posvećena. Iz perspektive ovog lanca, rudarska snaga je naglo opala za 20% u odnosu na prethodni period. Blokovi će biti nađeni u proseku na svakih 12,5 minuta, što predstavlja 20% pada rudarske snage na raspolaganju za proširenje ovog lanca. Ova brzina izdavanja bloka će se nastaviti (zabranjivanjem bilo kakvih promena snage hešovanja) sve dok se 2016 blokova ne izrudari, što će trajati otprilike 25.200 minuta (sa 12,5 minuta po bloku), ili 17,5 dana. Nakon 17,5 dana uslediće usporavanje i težina će se prilagoditi (smanjiti za 20%) kako bi se ponovo proizveli blokovi od 10 minuta, na osnovu smanjene količine snage hešovanja u ovom lancu.
 

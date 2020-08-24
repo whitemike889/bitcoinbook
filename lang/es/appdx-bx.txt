@@ -1,5 +1,5 @@
 [[appdx_bx]]
-[apéndice]
+[appendix]
 
 == Comandos del "Bitcoin Explorer" (bx)
 

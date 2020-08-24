@@ -21,7 +21,7 @@ Aplikacija block explorer-a prikazuje transakciju od Alisine "adrese" do Bobove 
 image::images/mbc2_0208.png["Alice Coffee Transaction"]
 
 [[transactions_behind_the_scenes]]
-==== Transakcije&#x2014;Iza kulisa
+==== Transakcije—Iza kulisa
 
 ((("transactions", "behind the scenes details of")))Iza kulisa, stvarna transakcija izgleda veoma različito od transakcije koju pruža tipični blok explorer. U stvari, većina konstrukcija na visokom nivou koje vidimo u različitim korisničkim interfejsima bitkoin aplikacije _zapravo ne postoje_ u bitkoin sistemu.
 
@@ -122,7 +122,7 @@ Kao što vidite transakcija sadrži dva izlaza. Svaki izlaz je definisan vredno�
 
 O temi zaključavanja i otključavanja UTXO-a diskutovaće se kasnije u <<tx_lock_unlock>>. Skripting jezik koji se koristi za skriptu u +scriptPubKey+ obradićemo u  <<tx_script>>. Ali pre nego što se pozabavimo tim temama, moramo da shvatimo celokupnu strukturu ulaza i izlaza transakcija.
 
-===== Serijalizacija transakcija&#x2014;izlazi
+===== Serijalizacija transakcija—izlazi
 
 ((("transactions", "outputs and inputs", "structure of")))((("outputs and inputs", "structure of")))((("serialization", "outputs")))Kad se transakcije prenose preko mreže ili razmenjuju između aplikacija, one su _serijalizovane_. Serijalizacija je proces pretvaranja unutrašnje reprezentacije strukture podataka u format koji se može preneti bajt po bajt, takođe poznat kao tok bajtova (byte stream). Serijalizacija se najčešće koristi za kodiranje struktura podataka za prenos preko mreže ili za skladištenje u fajlovima. Format serijalizacije izlaza transakcije prikazan je u <<tx_out_structure>>.
 
@@ -132,7 +132,7 @@ O temi zaključavanja i otključavanja UTXO-a diskutovaće se kasnije u <<tx_loc
 |=======
 | Veličina | Polje | Opis
 | 8 bajtova (little-endian) | Iznos | Vrednost bitkoina u satošijima (10^-8^ bitkoin)
-| 1&#x2013;9 bajta (VarInt) | Veličina skripte za zaključavanje | Dužina skripte za zaključavanje u bajtovima
+| 1–9 bajta (VarInt) | Veličina skripte za zaključavanje | Dužina skripte za zaključavanje u bajtovima
 | Promenljiva | Skripta za zaključavanje | Skripta koji definiše uslove potrebne za potrošnju izlaza
 |=======
 
@@ -231,7 +231,7 @@ Vidimo da ovaj UTXO ima vrednost 0,1 BTC i da ima skriptu za zaključavanje (+sc
 Da bismo u potpunosti razumeli Alisinu transakciju moramo prethodno pogledati jednu (ili više) transakcija koje se navode kao ulazi. Funkcija koja skida prethodne transakcije i neiskorišćene izlaze transakcija veoma je česta i postoji u skoro svim bitkoin bibliotekama i API-ima.
 ====
 
-===== Serijalizacija transakcija&#x2014;ulazi
+===== Serijalizacija transakcija—ulazi
 
 ((("serialization", "inputs")))((("transactions", "outputs and inputs", "input serialization")))((("outputs and inputs", "input serialization")))Transakcije su serijalizovane za prenos na mrežu, njihovi ulazi se kodiraju u tok bajtova (byte stream) kao što je prikazano u <<tx_in_structure>>.
 
@@ -242,7 +242,7 @@ Da bismo u potpunosti razumeli Alisinu transakciju moramo prethodno pogledati je
 | Veličina | Polje | Opis
 | 32 bajta | Heš transakcije | Referenca transakcije koja sadrži UTXO za potrošnju
 | 4 bajta | Izlazni indeks | Redni broj UTXO-a koji je za potrošnju; prvi je 0
-| 1&#x2013;9 bajta (VarInt) | Veličina skripte za otključavanje | Dužina skripte u bajtovima
+| 1–9 bajta (VarInt) | Veličina skripte za otključavanje | Dužina skripte u bajtovima
 | Promenljiva | Skripta za otključavanje | Skripta koja ispunjava uslove UTXO skripte za zaključavanje
 | 4 bajta | Redni broj | Koristi se za vreme zaključavanja ili nekorišćenje (0xFFFFFFFF)
 |=======
@@ -311,7 +311,7 @@ Algoritmi za procenu naknade izračunavaju odgovarajuću naknadu na osnovu kapac
 ((("static fees")))((("fees", "static fees")))Statičke naknade više nisu održive na bitkoin mreži. Novčanici koji postavljaju statičke naknade stvoriće loše korisničko iskustvo jer će se transakcije često "zaglaviti" i ostati nepotvrđene. Korisnici koji ne razumeju bitkoin transakcije i naknade negoduju zbog "zaglavljenih" transakcija jer misle da su izgubili novac.
 ====
 
-Dijagram u <<bitcoinfeesearncom>> prikazuje procenu naknada u realnom vremenu pri povećanju od 10 satošija po bajtu i očekivano vreme potvrde (u minutima i broju blokova) za transakcije sa naknadama u svakom rasponu. Za svaki raspon naknada (npr. 61&#x2013;70 satošija po bajtu), dve horizontalne trake prikazuju broj nepotvrđenih transakcija (1405) i ukupan broj transakcija u protekla 24 sata (102,975), sa naknadama u tom rasponu. Na osnovu dijagrama, preporučena naknada visokog prioriteta u tom trenutku je bila 80 satošija po bajtu, a naknada će verovatno rezultirati transakcijom  rudarenom u prvom sledećem bloku (nula blok kašnjenja). Sa te tačke gledišta, srednja veličina transakcije je 226 bajta, tako da bi preporučena naknada za veličinu transakcije bila 18.080 satošija (0,00018080 BTC).
+Dijagram u <<bitcoinfeesearncom>> prikazuje procenu naknada u realnom vremenu pri povećanju od 10 satošija po bajtu i očekivano vreme potvrde (u minutima i broju blokova) za transakcije sa naknadama u svakom rasponu. Za svaki raspon naknada (npr. 61–70 satošija po bajtu), dve horizontalne trake prikazuju broj nepotvrđenih transakcija (1405) i ukupan broj transakcija u protekla 24 sata (102,975), sa naknadama u tom rasponu. Na osnovu dijagrama, preporučena naknada visokog prioriteta u tom trenutku je bila 80 satošija po bajtu, a naknada će verovatno rezultirati transakcijom  rudarenom u prvom sledećem bloku (nula blok kašnjenja). Sa te tačke gledišta, srednja veličina transakcije je 226 bajta, tako da bi preporučena naknada za veličinu transakcije bila 18.080 satošija (0,00018080 BTC).
 
 Podaci o proceni naknade mogu se pronaći putem jednostavnog HTTP REST API-ja, na https://bitcoinfees.earn.com/api/v1/fees/recommended[https://bitcoinfees.earn.com/api/v1/fees/recommended]. Na primer, u komandnoj liniji koristeći +curl+ naredbu:
 
@@ -359,7 +359,7 @@ Eugenijina novčanik aplikacija izračunaće odgovarajuću naknadu mereći veli�
 [role="pagebreak-before less_space_h1"]
 === Skripte za transakcije i njihov jezik
 
-((("transactions", "scripts and Script language", id="Tsript06")))((("scripting", "transactions and", id="Stransact06")))Jezik skripte za bitkoin transakcije, nazvan _Script_ , je jezik sličan Forth-u koji izvršava komande sa obrnutom poljskom notacijom. Ako vam to zvuči nerazumljivo verovatno niste proučavali programske jezike iz 1960-ih, što je u redu&#x2014;sve će biti objašnjeno u ovom poglavlju. Skripta za zaključavanje postavljena na UTXO-u i skripta za otključavanje napisane su u ovom skripting jeziku. Kada je transakcija validirana, skripta za otključavanje na svakom ulazu izvršava se zajedno sa odgovarajućom skriptom za zaključavanje kako bi se videlo da li zadovoljava uslov potrošnje.
+((("transactions", "scripts and Script language", id="Tsript06")))((("scripting", "transactions and", id="Stransact06")))Jezik skripte za bitkoin transakcije, nazvan _Script_ , je jezik sličan Forth-u koji izvršava komande sa obrnutom poljskom notacijom. Ako vam to zvuči nerazumljivo verovatno niste proučavali programske jezike iz 1960-ih, što je u redu—sve će biti objašnjeno u ovom poglavlju. Skripta za zaključavanje postavljena na UTXO-u i skripta za otključavanje napisane su u ovom skripting jeziku. Kada je transakcija validirana, skripta za otključavanje na svakom ulazu izvršava se zajedno sa odgovarajućom skriptom za zaključavanje kako bi se videlo da li zadovoljava uslov potrošnje.
 
 Skripta je veoma jednostavan jezik koji je osmišljen da bude ograničenog obima i da se može izvršiti na čitavom nizu hardvera, možda podjednako jednostavan kao i ugrađeni sistemi. Zahteva minimalnu obradu, ali ne može da radi mnoge maštovite stvari koje čine moderni programski jezici. Ovo je namerna bezbednosna funkcija, zbog njegove upotrebe pri validaciji novca koji može da se programira.
 
@@ -563,14 +563,14 @@ Pogledajte transakciju koju je Alisa napravila još jednom ((("use cases", "buyi
 
 Taj potpis je serijalizovani tok bajtova sa vrednostima +R+ i +S+ koji je proizveo Alisin novčanik, kako bi dokazao da ona poseduje privatni ključ ovlašćen da troši taj izlaz. Format serijalizacije se sastoji od devet elemenata, i to sledećih:
 
-* +0x30+&#x2014;označava početak DER sekvence
-* +0x45+&#x2014;dužina sekvence (69 bajta)
-  * +0x02+&#x2014;sledi ceo broj
-  * +0x21+&#x2014;dužina celog broja (33 bajta)
-  * +R+&#x2014;++00884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb++
-  * +0x02+&#x2014;sledi drugi celi broj
-  * +0x20+&#x2014;dužina celog broja (32 bajta)
-  * +S+&#x2014;++4b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813++
+* +0x30+—označava početak DER sekvence
+* +0x45+—dužina sekvence (69 bajta)
+  * +0x02+—sledi ceo broj
+  * +0x21+—dužina celog broja (33 bajta)
+  * +R+—++00884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb++
+  * +0x02+—sledi drugi celi broj
+  * +0x20+—dužina celog broja (32 bajta)
+  * +S+—++4b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813++
 * Sufiks (+0x01+) koji označava vrstu korišćenog heša (+SIGHASH_ALL+)
 
 Pogledajte da li možete da dekodirate Alisin serijalizovani (DER-kodirani) potpis pomoću ove liste. Važni brojevi su +R+ i +S+; ostatak podataka je deo DER šeme kodiranja.
@@ -632,7 +632,7 @@ Na primeru Alisine transakcije (pogledajte spisak u <<seralization_of_signatures
 
 Pogledajte neke druge +SIGHASH+ vrste i kako mogu du se koriste u praksi:
 
-+ALL|ANYONECANPAY+ :: ((("charitable donations")))((("use cases", "charitable donations")))Ova konstrukcija može da se koristi za pravljenje transakcije "crowdfunding&#x201d;-a. Neko ko pokušava da prikupi fondove može da konstruiše transakciju sa jednim jedinim izlazom. Taj jedini izlaz uplaćuje "ciljni" iznos osobi koja prikuplja sredstva. Takva transakcija očigledno nije validna, jer nema ulaza. Međutim, drugi mogu da je izmene dodavajući svoj sopstveni ulaz kao donaciju. Oni potpisuju sopstveni ulaz sa +ALL|ANYONECANPAY+. Ako se ne skupi dovoljno ulaza da bi se dostigla vrednost izlaza, transakcija je nevažeća. Svaka donacija je "zalog", koji sakupljač sredstava ne može da podigne dok se celokupni ciljni iznos ne prikupi. 
++ALL|ANYONECANPAY+ :: ((("charitable donations")))((("use cases", "charitable donations")))Ova konstrukcija može da se koristi za pravljenje transakcije "crowdfunding"-a. Neko ko pokušava da prikupi fondove može da konstruiše transakciju sa jednim jedinim izlazom. Taj jedini izlaz uplaćuje "ciljni" iznos osobi koja prikuplja sredstva. Takva transakcija očigledno nije validna, jer nema ulaza. Međutim, drugi mogu da je izmene dodavajući svoj sopstveni ulaz kao donaciju. Oni potpisuju sopstveni ulaz sa +ALL|ANYONECANPAY+. Ako se ne skupi dovoljno ulaza da bi se dostigla vrednost izlaza, transakcija je nevažeća. Svaka donacija je "zalog", koji sakupljač sredstava ne može da podigne dok se celokupni ciljni iznos ne prikupi. 
 
 +NONE+ :: Ova konstrukcija se može koristiti za kreiranje "čeka na donosioca" ili "praznog čeka" na određeni iznos. Obavezuje ulaz, ali omogućava promenu skripte za zaključavanja izlaza. Svako može upisati svoju bitkoin adresu u skriptu za zaključavanje izlaza i otkupiti transakciju. Međutim, sama izlazna vrednost zaključava se potpisom.
 

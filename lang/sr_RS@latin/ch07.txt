@@ -312,19 +312,19 @@ gde je +<sada {plus} 3 meseca>+ visina bloka ili vrednost vremena procenjena za 
 
 Kada Bob pokuša da potroši ovaj UTXO, on konstruiše transakciju koja UTXO navodi kao ulaz. On koristi svoj potpis i javni ključ u skripti za otključavanje tog ulaza i postavlja na +nLocktime+ transakcije da bude jednaka ili veća od vremenske brave u +CHECKLOCKTIMEVERIFY+ koju je Alisa stavila. Nakon toga Bob emituje transakciju na bitkoin mreži.
 
-Bobova transakcija se procenjuje na sledeći način. Ako je parametar +CHECKLOCKTIMEVERIFY+ koji je Alisa postavila manji od ili jednak +nLocktime+ transakcije potrošnje, izvršavanje skripte se nastavlja (deluje kao da je izvršena &#x201d;prazna operacija&#x201d; ili NOP opkod). U suprotnom se izvršavanje skripte zaustavlja i transakcija se smatra nevažećom.
+Bobova transakcija se procenjuje na sledeći način. Ako je parametar +CHECKLOCKTIMEVERIFY+ koji je Alisa postavila manji od ili jednak +nLocktime+ transakcije potrošnje, izvršavanje skripte se nastavlja (deluje kao da je izvršena ”prazna operacija” ili NOP opkod). U suprotnom se izvršavanje skripte zaustavlja i transakcija se smatra nevažećom.
 
 Tačnije, +CHECKLOCKTIMEVERIFY+ ne uspeva i zaustavlja izvršavanje, označavajući transakciju nevažećom ako (izvor: BIP-65):
 
-1. je stek prazan; ili
-1. je gornja stavka na steku manja od 0; ili
-1. vrsta locktime-a (visina naspram vremenskog pečata) na vrhu steka i polje +nLocktime+ nisu isti; ili
-1. je stavka na vrhu steka veća od polja +nLocktime+; ili
-1. je polje +nSequence+ ulaza 0xffffffff.
+. je stek prazan; ili
+. je gornja stavka na steku manja od 0; ili
+. vrsta locktime-a (visina naspram vremenskog pečata) na vrhu steka i polje +nLocktime+ nisu isti; ili
+. je stavka na vrhu steka veća od polja +nLocktime+; ili
+. je polje +nSequence+ ulaza 0xffffffff.
 
 [NOTE]
 ====
-+CLTV+ i +nLocktime+ koriste isti format da bi opisali vremenske brave (timelocks), bilo visinu bloka ili proteklo vreme u sekundama od Unix epoch vremena. Kada se koriste zajedno, format +nLocktime+ mora da odgovara formatu +CLTV+ u izlazima&#x2014;oba se moraju pozivati ili na visinu bloka ili na vreme u sekundama.
++CLTV+ i +nLocktime+ koriste isti format da bi opisali vremenske brave (timelocks), bilo visinu bloka ili proteklo vreme u sekundama od Unix epoch vremena. Kada se koriste zajedno, format +nLocktime+ mora da odgovara formatu +CLTV+ u izlazima—oba se moraju pozivati ili na visinu bloka ili na vreme u sekundama.
 ====
 
 Nakon izvršenja, ako je +CLTV+ uslov zadovoljen, vremenski parametar koji mu je prethodio ostaje kao gornja stavka na steku i možda će morati da bude ispušten sa +DROP+ za ispravno izvršavanje narednih skript opkodova. Iz tog razloga često ćete videti +CHECKLOCKTIMEVERIFY+, a zatim +DROP+.
@@ -414,7 +414,7 @@ Na primer, recimo da je najviši postojeći blok #100,000. Ako umesto pokušaja 
 
 Danas ovaj napad nije posebno unosan, jer je nagrada za blok mnogo veća od ukupne naknade po bloku. Ali u jednom trenutku u budućnosti, naknade za transakcije će predstavljati najveći deo nagrade (ili čak čitavu nagradu). Tada će ovaj scenario postati neizbežan.
 
-Da bi se sprečilo "gađanje nadoknade", kada Bitcoin Core stvara transakcije, on koristi +nLocktime+ da bi ih po difoltu ograničio na "sledeći blok". U našem scenariju, Bitcoin Core bi postavljao +nLocktime+ na 100,001 na bilo kojoj transakciji koju je stvorio. U normalnim okolnostima ovaj +nLocktime+ nema efekta&#x2014;transakcije su ionako mogle da budu uključene samo u blok #100,001; koji je sledeći blok.
+Da bi se sprečilo "gađanje nadoknade", kada Bitcoin Core stvara transakcije, on koristi +nLocktime+ da bi ih po difoltu ograničio na "sledeći blok". U našem scenariju, Bitcoin Core bi postavljao +nLocktime+ na 100,001 na bilo kojoj transakciji koju je stvorio. U normalnim okolnostima ovaj +nLocktime+ nema efekta—transakcije su ionako mogle da budu uključene samo u blok #100,001; koji je sledeći blok.
 
 Pod blokčejn fork napadom rudari ne bi mogli da povuku transakcije sa visokom naknadom iz mempool-a, jer bi sve te transakcije bile sa vremenskom bravom na bloku #100,001. Oni mogu samo iznova da izrudare #100,000 sa bilo kojim transakcijama koje su bile validne u to vreme, u suštini ne dobijajući nove naknade.
 
@@ -654,7 +654,7 @@ https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki[BIP-141] :: Glavn
 
 https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki[BIP-143] :: Verifikacija potpisa transakcije za verziju 0 programa svedoka
 
-https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki[BIP-144] :: Peer Services&#x2014;Nove mrežne poruke i formati za serijalizaciju
+https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki[BIP-144] :: Peer Services—Nove mrežne poruke i formati za serijalizaciju
 
 https://github.com/bitcoin/bips/blob/master/bip-0145.mediawiki[BIP-145] :: Ažuriranje getblocktemplate-a za odvojene svedoke (za rudarenje)
 
@@ -669,50 +669,50 @@ Zloupotreba (malleability) transakcije: Premeštanjem svedoka van transakcije, h
 
 Verzija skripti :: Uvođenjem skripti odvojenih svedoka svakoj skripti za zaključavanje prethodi broj _verzije skripte_, slično kao što transakcije i blokovi imaju brojeve verzija. Dodavanje broja verzije skripte omogućava nadogradnju jezika skripte na unazad kompatibilan način (tj. korišćenjem soft fork nadogradnji) da bi se uveli novi operandi skripti, sintaksa ili semantika. Mogućnost nadogradnje skripting jezika na nedisruptivni (nondisruptive) način uveliko će ubrzati stopu inovacija u bitkoinu.
 
-Skaliranje mreže i skladišta :: Podaci svedoka često doprinose ukupnoj veličini transakcije. Složenije skripte poput onih koje se koriste za multisig ili kanale za plaćanje su veoma velike. U nekim slučajevima te skripte predstavljaju većinu (više od 75%) podataka u transakciji. Premeštanjem podataka svedoka izvan transakcije, odvojeni svedok poboljšava skalabilnost bitkoina. Čvorovi mogu ukloniti podatke svedoka nakon validacije potpisa ili ih zanemariti u potpunosti kada rade pojednostavljenu verifikaciju plaćanja. Podaci svedoka ne moraju se prenositi na sve čvorove i ne moraju ih svi čvorovi sačuvati na disku.
+Skaliranje mreže i skladišta :: Podaci svedoka često doprinose ukupnoj veličini transakcije. Složenije skripte poput onih koje se koriste za multisig ili kanale za plaćanje su veoma velike. U nekim slučajevima te skripte predstavljaju većinu (više od 75%) podataka u transakciji. Premeštanjem podataka svedoka izvan transakcije, odvojeni svedok poboljšava skalabilnost bitkoina. Čvorovi mogu ukloniti podatke svedoka nakon validacije potpisa ili ih zanemariti u potpunosti kada rade pojednostavljenu verifikaciju plaćanja. Podaci svedoka ne moraju da se prenose na sve čvorove i ne moraju ih svi čvorovi sačuvati na disku.
 
-Optimizacija verifikacije potpisa :: Odvojeni svedok nadograđuje funkcije potpisa (+CHECKSIG+, +CHECKMULTISIG+ itd.) da bi smanjio algoritamsku složenost računanja. Pre segwita algoritam koji se koristio za potpisivanje zahtevao je određeni broj heš operacija koji je bio proporcionalan veličini transakcije. Računanja hešovanja podataka povećala su se sa O(n^2^) u odnosu na broj operacija potpisa, uvodeći značajno računarsko opterećenje na sve čvorove koji potvrđuju potpis. Sa segwitom, algoritam se menja da bi se složenost smanjila na O(n).
+Optimizacija verifikacije potpisa :: Odvojeni svedok nadograđuje funkcije potpisa (+CHECKSIG+, +CHECKMULTISIG+ itd.) da bi smanjio algoritamsku složenost računanja. Pre segwita algoritam koji se koristio za potpisivanje zahtevao je određeni broj heš operacija koji je bio proporcionalan veličini transakcije. Računanja hešovanja podataka povećala su se sa O(n^2^) u odnosu na broj operacija potpisa, uvodeći značajno računarsko opterećenje na sve čvorove koji potvrđuju potpis. Sa segwitom se algoritam menja da bi se smanjila složenost na O(n).
 
 Poboljšanje oflajn potpisivanja :: Potpisi odvojenih svedoka sadrže vrednost (iznos) na koju upućuje svaki ulaz u hešu koji je potpisan. Ranije je uređaj za oflajn potpisivanje, kao što je hardverski novčanik, morao da proveri količinu svakog ulaza pre potpisivanja transakcije. To se obično postizalo strimovanjem velike količine podataka o prethodnim transakcijama koje se navode kao ulazi. Pošto je izlaz sada deo heša za preuzete obaveze koji je potpisan, vanmrežnom uređaju nisu potrebne prethodne transakcije. Ako se iznosi ne preklapaju (pogrešno su predstavljeni kompromitovanim onlajn sistemom), potpis će biti nevažeći.
 
 ==== Kako funkcioniše odvojeni svedok
 
-Na prvi pogled, čini se da je odvojeni svedok promena načina na koji se grade transakcije i samim tim funkcija na nivou transakcije, ali nije. Zapravo, odvojeni svedok je promena u načinu na koji se troše pojedinačni UTXO-i i zato je karakteristika na bazi izlaza.
+Na prvi pogled se čini da je odvojeni svedok promena načina na koji se grade transakcije i samim tim funkcija na nivou transakcije, ali nije. Zapravo, odvojeni svedok je promena u načinu na koji se troše pojedinačni UTXO-i i zato je karakteristika na bazi izlaza.
 
-Transakcija može da potroši izlaze odvojenog svedoka ili tradicionalne (inline-witness) izlaze ili oboje. Zato nema puno smisla da se transakcija naziva "transakcijom odvojenog svedoka". Pre bi trebalo da označimo specifične izlazne transakcije kao "izlaze odvojenog svedoka“.
+Transakcija može da potroši izlaze odvojenog svedoka ili tradicionalne (inline-witness) izlaze ili oboje. Zato nema mnogo smisla da se transakcija naziva "transakcijom odvojenog svedoka". Pre bi trebalo da označimo specifične izlazne transakcije kao "izlaze odvojenog svedoka“.
 
-Kada transakcija potroši UTXO, ona mora da obezbedi svedoka. U tradicionalnom UTXO-u, skripta za zaključavanje zahteva da se podaci svedoka dodaju _unutra_ u ulaznom delu transakcije koja troši UTXO. Međutim, odvojeni svedok UTXO posebno navodi skriptu za zaključavanje koja može biti zadovoljena podacima svedoka izvan ulaza (odvojeno).
+Kada transakcija potroši UTXO,ona mora da obezbedi svedoka. U tradicionalnom UTXO-u skripta za zaključavanje zahteva da se podaci svedoka dodaju _unutra_ u ulaznom delu transakcije koja troši UTXO. Međutim, odvojeni svedok UTXO posebno navodi skriptu za zaključavanje koja može biti zadovoljena podacima svedoka izvan ulaza (odvojeno).
 
 ==== Soft fork (kompatibilnost unazad)
 
-Odvojeni svedok je značajna promena u arhitekturi izlaza i transakcija. Takva bi promena obično zahtevala istovremeno menjanje svakog bitkoin čvora i novčanika da bi se promenila pravila konsenzusa&#x2014;što je poznato i kao hard fork (tvrda račva). Umesto toga, odvojeni svedok se uvodi uz promenu koja remeti mnogo manje, a koja je kompatibilna unazad, poznata i kao soft fork (meka račva). Ova vrsta nadogradnje omogućava neažuriranom softveru da ignoriše promene i nastavi da radi bez ikakvih poremećaja.
+Odvojeni svedok je značajna promena u arhitekturi izlaza i transakcija. Takva promena bi obično zahtevala istovremeno menjanje svakog bitkoin čvora i novčanika da bi se promenila pravila konsenzusa&#x2014;što je poznato i kao hard fork (tvrda račva). Umesto toga, odvojeni svedok se uvodi uz promenu koja mnogo manje remeti, a koja je kompatibilna unazad, poznata i kao soft fork (meka račva). Ova vrsta nadogradnje omogućava neažuriranom softveru da ignoriše promene i nastavi da radi bez ikakvih poremećaja.
 
-Izlazi odvojenog svedoka konstruisani su tako da ih stariji sistemi, koji nisu svesni promene, mogu i dalje potvrditi. Starom novčaniku ili čvoru, odvojeni svedok izgleda kao izlaz koji _svako može da potroši_. Takvi se rezultati mogu potrošiti sa praznim potpisom, zato činjenica da nema transakcije unutar transakcije (odvojena je) ne poništava transakciju. Noviji novčanici i rudarski čvorovi, međutim, vide izlaz odvojenog svedoka i očekuju da će u podacima o svedocima transakcije pronaći validnog svedoka za njega.
+Izlazi odvojenog svedoka konstruisani su tako da stariji sistemi, koji nisu svesni segwit promene, mogu da ih potvrde. Starom novčaniku ili čvoru odvojeni svedok izgleda kao izlaz koji _svako može da potroši_. Takvi se rezultati mogu potrošiti sa praznim potpisom, zato činjenica da nema transakcije unutar transakcije (odvojena je) ne poništava transakciju. Međutim, noviji novčanici i rudarski čvorovi vide izlaz odvojenog svedoka i očekuju da će u podacima o svedocima transakcije pronaći validnog svedoka za njega.
 
 ==== Primeri izlaza odvojenih svedoka i transakcija
 
-Pogledajmo neke od naših primera transakcija da bismo videli kako bi se promenile sa odvojenim svedokom. Prvo ćemo pogledati kako se plaćanje putem Pay-to-Public-Key-Hash (P2PKH) menja programom odvojenih svedoka. Zatim ćemo pogledati ekvivalent odvojenog svedoka za skriptu „Pay-to-Script-Hash“ (P2SH). Na kraju, pogledaćemo kako se oba prethodna programa odvojenih svedoka mogu ugraditi u P2SH skriptu.
+Pogledajte neke od primera transakcija da biste videli kako bi se promenile sa odvojenim svedokom. Prvo pogledajte kako se plaćanje putem Pay-to-Public-Key-Hash (P2PKH) menja programom odvojenih svedoka. Zatim pogledajte ekvivalent odvojenog svedoka za skriptu „Pay-to-Script-Hash“ (P2SH). Na kraju, pogledajte kako se oba prethodna programa odvojenih svedoka mogu ugraditi u P2SH skriptu.
 
 [[p2wpkh]]
 ===== Pay-to-Witness-Public-Key-Hash (Plati hešu javnog ključa svedoka) (P2WPKH)
 
-U <<cup_of_coffee>>, ((("use cases", "buying coffee", id="aliced")))Alisa je kreirala transakciju kako bi Bobu platila šolju kafe. Ta transakcija je stvorila izlaz P2PKH sa vrednošću od 0,015 BTC-a koju Bob može potrošiti. Skripta izlaza izgleda ovako:
+U <<cup_of_coffee>>, ((("use cases", "buying coffee", id="aliced")))Alisa je kreirala transakciju kako bi Bobu platila šolju kafe. Ta transakcija je stvorila izlaz P2PKH sa vrednošću od 0,015 BTC-a koju Bob može da potroši. Skripta izlaza izgleda ovako:
 
 .Primer izlazne skripte P2PKH
 ----
 DUP HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 EQUALVERIFY CHECKSIG
 ----
 
-Pomoću odvojenog svedoka, Alisa bi kreirala skriptu Pay-to-Witness-Public-Key-Hash (P2WPKH, plati hešu javnog ključa svedoka), koja izgleda ovako:
+Pomoću odvojenog svedoka Alisa bi kreirala skriptu Pay-to-Witness-Public-Key-Hash (P2WPKH, plati hešu javnog ključa svedoka), koja izgleda ovako:
 
 .Primer izlazne skripte P2WPKH
 ----
 0 ab68025513c3dbd2f7b92a94e0581f5d50f654e7
 ----
 
-Kao što vidite, skripta za zaključavanje odvojenog svedoka je mnogo jednostavnija od tradicionalnog izlaza. Sastoji se od dve vrednosti koje su gurnute na stek evaluacije skripte. Za starog (onog koji nije svestan segwit-a) bitkoin klijenta, dva elementa na steku bi izgledala kao rezultat koji svako može da potroši i ne zahteva potpis (ili bolje rečeno, može se potrošiti sa praznim potpisom). Novijem klijentu koji nije svestan segwit-a, prvi broj (0) se tumači kao broj verzije (_verzija svedoka_), a drugi deo (20 bajtova) ekvivalent je skripte za zaključavanje koji je poznat kao _program svedoka_. Program za svedoke od 20 bajtova prosto je heš javnog ključa, kao u P2PKH skripti.
+Kao što vidite, skripta za zaključavanje odvojenog svedoka je mnogo jednostavnija od tradicionalnog izlaza. Sastoji se od dve vrednosti koje su gurnute na stek evaluacije skripte. Za starog (onog koji nije svestan segwit-a) bitkoin klijenta, dva elementa na steku bi izgledala kao rezultat koji svako može da potroši i ne zahteva potpis (ili bolje rečeno, može da se potroši sa praznim potpisom). Novijem klijentu koji nije svestan segwit-a, prvi broj (0) se tumači kao broj verzije (_verzija svedoka_), a drugi deo (20 bajtova) ekvivalent je skripte za zaključavanje koji je poznat kao _program svedoka_. Program za svedoke od 20 bajtova je jednostavno heš javnog ključa, kao u P2PKH skripti.
 
-Sada, pogledajmo odgovarajuću transakciju koju Bob koristi da bi potrošio ovaj izlaz. Za originalnu skriptu (bez segwit-a), Bobova transakcija bi morala da uključi potpis unutar ulaza transakcije:
+Pogledajte sada odgovarajuću transakciju koju Bob koristi da bi potrošio ovaj izlaz. Za originalnu skriptu (bez segwit-a), Bobova transakcija bi morala da uključi potpis unutar ulaza transakcije:
 
 .Dekodirana transakcija koja prikazuje izlaz P2PKH koji se troši sa potpisom
 ----
@@ -725,7 +725,7 @@ Sada, pogledajmo odgovarajuću transakciju koju Bob koristi da bi potrošio ovaj
 [...]
 ----
 
-Međutim, da bi potrošio izlaz odvojenog svedoka, transakcija nema potpis na tom ulazu. Umesto toga, Bobova transakcija ima prazan +scriptSig+ i uključuje odvojenog svedoka, van same transakcije:
+Međutim, da bi potrošila izlaz odvojenog svedoka transakcija nema potpis na tom ulazu. Umesto toga, Bobova transakcija ima prazan +scriptSig+ i uključuje odvojenog svedoka van same transakcije:
 
 .Dekodiranje transakcije koja prikazuje izlaz P2WPKH koji se troši sa odvojenim podacima svedoka
 ----
@@ -754,7 +754,7 @@ P2WPKH treba da konstruiše primalac plaćanja pretvaranjem kompresovanog javnog
 [[p2wsh]]
 ===== Pay-to-Witness-Script-Hash (Plati hešu skripte svedoka) (P2WSH)
 
-((("use cases", "import/export", id="mohamappd")))Drugi tip programa svedočenja odgovara skripti Pay-to-Script-Hash (P2SH) (plati hešu skripte). Videli smo ovu vrstu skripti u <<p2sh>>. U tom primeru, Mohamedova kompanija je koristila P2SH za izražavanje multisig skripte. Uplate Mohamedovoj kompaniji kodirane su skriptom za zaključavanje poput ove:
+((("use cases", "import/export", id="mohamappd")))Drugi tip programa svedočenja odgovara skripti Pay-to-Script-Hash (P2SH) (plati hešu skripte). Videli smo ovu vrstu skripti u <<p2sh>>. U tom primeru Mohamedova kompanija je koristila P2SH za izražavanje multisig skripte. Uplate Mohamedovoj kompaniji kodirane su skriptom za zaključavanje poput ove:
 
 .Primer izlazne skripte P2SH
 ----
@@ -773,14 +773,14 @@ Ova skripta P2SH odnosi se na heš _skripte za otkup_ koja definiše 2-od-3 mult
 ]
 ----
 
-Pogledajmo kako bi ceo ovaj primer bio nadograđen na segwit. Ako bi Mohamedovi kupci koristili novčanik kompatibilan sa segwit-om, izvršili bi plaćanje kreirajući izlaz Pay-to-Witness-Script-Hash (P2VSH) koji bi izgledao ovako:
+Pogledajte kako bi ceo ovaj primer bio nadograđen na segwit. Ako bi Mohamedovi kupci koristili novčanik kompatibilan sa segwit-om, izvršili bi plaćanje kreirajući izlaz Pay-to-Witness-Script-Hash (P2VSH), koji bi izgledao ovako:
 
 .Primer izlazne skripte P2WSH
 ----
 0 a9b7b38d972cabc7961dbfbcb841ad4508d133c47ba87457b4a0e8aae86dbb89
 ----
 
-Opet, kao i na primeru P2WPKH, možete videti da je ekvivalentna skripta za odvojenog svedoka mnogo jednostavnija i izostavlja različite operatore skripte koje vidite u P2SH skriptama. Umesto toga, program odvojenog svedoka sastoji se od dve vrednosti stavljene na stek: verzije svedoka (0) i 32-bajtnog SHA256 heša skripte za otkup.
+Na primeru P2WPKH možete videti da je ekvivalentna skripta za odvojenog svedoka mnogo jednostavnija i izostavlja različite operatore skripte koje vidite u P2SH skriptama. Umesto toga, program odvojenog svedoka sastoji se od dve vrednosti stavljene na stek: verzije svedoka (0) i 32-bajtnog SHA256 heša skripte za otkup.
 
 [TIP]
 ====
@@ -788,7 +788,7 @@ Dok P2SH koristi 20-bajtni +RIPEMD160(SHA256 (skripta))+ heš, program svedoka P
 
 ====
 
-Mohamedova kompanija može potrošiti izlaz P2WSH prezentujući ispravnu skriptu za otkup i dovoljno potpisa da je zadovolji. I skripta za otkup i potpisi biće odvojeni _izvan_ potrošne transakcije kao deo podataka svedoka. Unutar transakcije, novčanik Mohameda ((("", startref="mohamappd"))) stavio bi prazan +scriptSig+:
+Mohamedova kompanija može potrošiti izlaz P2WSH prezentujući ispravnu skriptu za otkup i dovoljno potpisa da je zadovolji. I skripta za otkup i potpisi biće odvojeni _izvan_ potrošne transakcije kao deo podataka svedoka. Unutar transakcije novčanik Mohameda ((("", startref="mohamappd"))) stavio bi prazan +scriptSig+:
 
 .Dekodirana transakcija koja prikazuje izlaz P2WSH koji se troši sa posebnim podacima svedoka
 ----
@@ -810,18 +810,18 @@ U prethodna dva odeljka demonstrirali smo dve vrste programa svedoka: <<p2wpkh>>
 * Heš javnog ključa u P2WPKH iznosi 20 bajtova
 * Heš skripte u P2WSH je 32 bajta
 
-Ovo je jedina razlika koja novčaniku omogućava da razlikuje ove dve vrste programa svedočenja. Posmatrajući dužinu heša, novčanik može utvrditi koja vrsta programa svedoka je u pitanju, P2WPKH ili P2WSH.
+Ovo je jedina razlika koja novčaniku omogućava da razlikuje ove dve vrste programa svedočenja. Posmatrajući dužinu heša novčanik može da utvrdi koja vrsta programa svedoka je u pitanju, P2WPKH ili P2WSH.
 
 ==== Nadogradnja na odvojenog svedoka
 
-Kao što vidimo iz prethodnih primera, prelazak na odvojene svedoke je proces iz dva koraka. Prvo, novčanici moraju da stvore posebne izlaze tipa segwit. Zatim ove izlaze mogu potrošiti novčanici koji znaju kako da konstruišu odvojene transakcije svedoka. U primerima, Alisin novčanik je bio svestan da postoji segwit i bio je u mogućnosti da stvori posebne izlaze sa skriptom odvojenih svedoka. Bobov novčanik takođe je svestan segwita i u stanju je da potroši te izlaze. Ono što na primeru ne može biti očigledno je da u praksi Alisin novčanik mora da _zna_ da Bob koristi novčanik koji je svestan segwit-a i koji može da troši ove izlaze. U suprotnom, ako Bobov novčanik nije nadograđen i Alisa pokušava da izvrši segwit uplate Bobu, Bobov novčanik neće moći da otkrije ove uplate.
+Kao što vidite iz prethodnih primera prelazak na odvojene svedoke je proces iz dva koraka. Prvo, novčanici moraju da stvore posebne izlaze tipa segwit. Zatim, ove izlaze mogu da potroše novčanici koji znaju kako da konstruišu odvojene transakcije svedoka. U primerima, Alisin novčanik je bio svestan da postoji segwit i bio je u mogućnosti da stvori posebne izlaze sa skriptom odvojenih svedoka. Bobov novčanik takođe je svestan segwita i u stanju je da potroši te izlaze. Ono što na primeru ne može biti očigledno je da u praksi Alisin novčanik mora da _zna_ da Bob koristi novčanik koji je svestan segwit-a i koji može da troši ove izlaze. U suprotnom, ako Bobov novčanik nije nadograđen i Alisa pokušava da izvrši segwit uplate Bobu, Bobov novčanik neće moći da otkrije ove uplate.
 
 [TIP]
 ====
-Za P2WPKH i P2WSH vrste plaćanja potrebno je nadograditi novčanike pošiljaoca i primaoca da bi mogli koristiti segwit. Pored toga, novčanik pošiljaoca mora znati da je novčanik primaoca svestan segwita.
+Na P2WPKH i P2WSH vrste plaćanja potrebno je nadograditi novčanike pošiljaoca i primaoca da bi mogli koristiti segwit. Pored toga, novčanik pošiljaoca mora znati da je novčanik primaoca svestan segwita.
 ====
 
-Odvojeni svedok neće se istovremeno implementirati na celoj mreži. Umesto toga, odvojeni svedok je implementiran kao nadogradnja kompatibilna unazad, gde _stari i novi klijenti mogu da koegzistiraju_. Programeri novčanika će nezavisno nadograđiti softver za novčanike kako bi dodali segwit mogućnosti. Vrste plaćanja P2WPKH i P2WSH koriste se kada su pošiljalac i primalac svesni segwita. Tradicionalni P2PKH i P2SH nastaviće da rade za nenadograđene novčanike. To dozvoljava dva važna scenarija, o kojima je reč u sledećem odeljku:
+Odvojeni svedok se neće istovremeno implementirati na celoj mreži. Umesto toga, odvojeni svedok je implementiran kao nadogradnja kompatibilna unazad, gde _stari i novi klijenti mogu da koegzistiraju_. Programeri novčanika će nezavisno nadograđiti softver za novčanike kako bi dodali segwit mogućnosti. Vrste plaćanja P2WPKH i P2WSH koriste se kada su pošiljalac i primalac svesni segwita. Tradicionalni P2PKH i P2SH nastaviće da rade za nenadograđene novčanike. To dozvoljava dva važna scenarija, o kojima će biti reči u sledećem odeljku:
 
 * Sposobnost novčanika pošiljaoca koji nije svestan segwita da izvrši uplatu u novčanik primaoca koji može da obrađuje segwit transakcije
 
@@ -1023,7 +1023,7 @@ Podsticaji koje naknade stvaraju su važni, jer utiču na ponašanje novčanika.
 
 Transakcije konzumiraju UTXO u svojim ulazima i kreiraju novi UTXO sa svojim izlazima. Dakle, transakcija koja ima više ulaza nego izlaza, rezultiraće smanjenjem skupa UTXO-a, dok će transakcija koja ima više izlaza nego ulaza rezultirati povećavanjem UTXO skupa. Razmotrimo _razliku_ između ulaza i izlaza i nazovimo je "neto-novih-UTXO-a". To je važna metrika, jer nam govori kakav će uticaj imati transakcija na najskuplji mrežni resurs, UTXO skup u memoriji. Transakcija sa pozitivnim neto-novih-UTXO-a dodatno opterećuje taj resurs. Transakcija sa negativnim neto-novih-UTXO-a smanjuje teret. Zato želimo da ohrabrimo transakcije koje imaju negativni ili neutralni neto-novih-UTXO-a.
 
-Pogledajmo primer koji pokazuje koje podsticaje stvara računanje naknade za transakcije, sa i bez odvojenog svedoka. Razmotrićemo dve različite transakcije. Transakcija A je transakcija sa tri ulaza i dva izlaza, i ima neto-novih-UTXO metriku od &#x2013;1, što znači da troši jedan UTXO više nego što stvara, smanjujući skup UTXO-a za jedan. Transakcija B je transakcija sa 2 ulaza i 3 izlaza, i ima neto-novih-UTXO metriku od 1, što znači da dodaje jedan UTXO u UTXO skup, namećući dodatne troškove celoj bitkoin mreži. Obe transakcije koriste multisig skripte (2-od-3) da bi pokazale kako složene skripte povećavaju uticaj odvojenog svedoka na naknade. Pretpostavimo da je provizija 30 satošija po bajtu i popust 75% na podatke svedoka:
+Pogledajmo primer koji pokazuje koje podsticaje stvara računanje naknade za transakcije, sa i bez odvojenog svedoka. Razmotrićemo dve različite transakcije. Transakcija A je transakcija sa tri ulaza i dva izlaza, i ima neto-novih-UTXO metriku od - 1, što znači da troši jedan UTXO više nego što stvara, smanjujući skup UTXO-a za jedan. Transakcija B je transakcija sa 2 ulaza i 3 izlaza, i ima neto-novih-UTXO metriku od 1, što znači da dodaje jedan UTXO u UTXO skup, namećući dodatne troškove celoj bitkoin mreži. Obe transakcije koriste multisig skripte (2-od-3) da bi pokazale kako složene skripte povećavaju uticaj odvojenog svedoka na naknade. Pretpostavimo da je provizija 30 satošija po bajtu i popust 75% na podatke svedoka:
 
 ++++
 <dl>

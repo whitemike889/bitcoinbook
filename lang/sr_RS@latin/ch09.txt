@@ -25,7 +25,7 @@ Jedan od načina da se zamisli blokčejn je u obliku slojeva u geološkoj formac
 | Veličina | Polje | Opis
 | 4 bajta | Veličina bloka | Veličina bloka, u bajtovima, nakon ovog polja
 | 80 bajtova | Zaglavlje bloka | Nekoliko polja formiraju zaglavlje bloka
-| 1&#x2013;9 bajta (VarInt) | Brojač transakcija | Koliko transakcija sledi
+| 1–9 bajta (VarInt) | Brojač transakcija | Koliko transakcija sledi
 | Promenljiva | Transakcije | Transakcije zabeležene u ovom bloku
 |=======
 
@@ -268,7 +268,7 @@ Razmotrimo, na primer, SPV čvor koji je zainteresovan za dolazne uplate na adre
 ((("blockchain (the)", "test blockchains", id="BCTtest09")))((("mainnet", seealso="blockchain (the)")))Možda ćete biti iznenađeni kada saznate da postoji više od jednog bitkoin blokčejna. "Glavni" bitkoin blokčejn, onaj koji je stvorio Satoši Nakamoto 3. januara 2009, onaj sa geneznim (početnim) blokom koji smo proučavali u ovom poglavlju, zove se _mainnet_. Postoje i drugi bitkoin blokčejnovi koji se koriste za testiranja: u ovom trenutku _testnet_, _segnet_ i _regtest_. Pogledajmo ih sve, jedan za drugim.((("testnet", id="testnet09")))
 
 
-==== Testnet&#x2014;Bitkoin igralište za testiranje
+==== Testnet—Bitkoin igralište za testiranje
 
 Testnet je naziv test blokčejna, mreže i valute koji se koriste za testiranja. Testnet je potpuno opremljena P2P mreža sa novčanikom, test bitkoinima (testnet kovanicama), rudarenjem i svim ostalim karakteristikama mainneta. Zaista postoje samo dve razlike: testnet kovanice su predviđene da budu beskorisne, a težina rudarenja treba da bude dovoljno niska da svako može relativno lako rudariti testnet kovanice (što ih održava bezvrednim).
 
@@ -319,7 +319,7 @@ Takođe možete pokrenuti na testnet3 sa drugim implementacijama punog čvora, k
 
 Početkom 2017. testnet3 podržava sve funkcije mainneta, uključujući odvojenog svedoka (vidi <<segwit>>). Zbog toga se testnet3 takođe može koristiti za testiranje funkcije odvojenog svedoka. ((("", startref="testnet09")))
 
-==== Segnet&#x2014;Testnet odvojenih svedoka
+==== Segnet—Testnet odvojenih svedoka
 
 
 ((("segnet")))2016. godine je pokrenut specijalni testnet za pomoć razvoju i ispitivanju odvojenog svedoka (aka segwit; vidi <<segwit>>). Ovaj test blokčejn se zove +segnet+ i može mu se pridružiti pokretanjem posebne verzije (branch) Bitcoin Core-a.
@@ -328,7 +328,7 @@ Početkom 2017. testnet3 podržava sve funkcije mainneta, uključujući odvojeno
 
 U budućnosti ćemo verovatno videti druge testnet blokčejnove koji su posebno dizajnirani za testiranje jedne karakteristike ili velike arhitektonske promene, poput segneta.
 
-==== Regtest&#x2014;Lokalni blokčejn
+==== Regtest—Lokalni blokčejn
 
 ((("regtest (Regression Testing)")))Regtest, što znači "regresiono testiranje", je karakteristika Bitcoin Core-a koja vam omogućava da kreirate lokalni blokčejn u svrhu testiranja. Za razliku od testnet3, koji je javni i zajednički test blokčejn, regtest blokčejn je namenjen za pokretanje u zatvorenom sistemu za lokalno testiranje. Pokrećete regtest blokčejn od nule, kreirajući lokalni genezni blok. Možete dodati druge čvorove u mrežu ili ih pokrenuti jednim čvorom samo za testiranje Bitcoin Core softvera.
 
