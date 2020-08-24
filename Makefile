@@ -16,28 +16,15 @@ ADOCFONTSDIR = /usr/lib/ruby/gems/*/gems/*/data/fonts/
 TTFFONTSDIR = /usr/share/fonts/ttf-*/
 ASCIIDOC_IMAGES = /etc/asciidoc/images
 
-PDFOPTS = -a pdfbuild --format=pdf --conf-file=a2x.conf --fop --xsl-file=custom-docbook-styles.xsl -k --verbose
-EPUBOPTS = -v -v -a ebookbuild -f epub --stylesheet=epub3-css3-only.css
-HTMLOPTS = -v -v -a max-width=55em -a ebookbuild -f xhtml --stylesheet=epub3-css3-only.css
-
 KINDLEGEN_PATH = /usr/bin/
 KINDLEGEN_OPTS = -c2
 
 #  ---------------------------------
 #  Public targets
 
-docker-build:
-	export PWD=`pwd`
-	docker image build ${PWD} -t bookbuilder
-
-docker-run:
-	export PWD=`pwd`
-	docker run -it -v ${PWD}:/documents/ bookbuilder
-
 all: pdf epub kindle
 	# Usage
 	# make [LANG=xx] {pdf, epub, kindle}
-
 
 pdf: clean create_pdf dist_pdf
 
@@ -47,6 +34,16 @@ kindle: epub create_kindle dist_kindle
 
 html: clean compress_images create_html
 
+docker-build:
+	export PWD=`pwd`
+	docker image build ${PWD} -t bookbuilder
+
+docker-run:
+	export PWD=`pwd`
+	docker run -it -v ${PWD}:/documents/ bookbuilder
+
+tx-pull:
+	tx pull -l ${LANG}
 
 #  ---------------------------------
 #  Private targets
@@ -66,8 +63,15 @@ create_folder:
 	cp -v -u -R -L ${ASCIIDOC_IMAGES} ${DIR}; \
 	cp -v -R -u images/ ${DIR}; \
 	cp -v -R -u code/ ${DIR}; \
-	cp -v -u *.asciidoc ${DIR}; \
 	cp -v -u conf/* ${DIR};
+	if [ -d "lang/${LANG}" ]; then \
+		for f in lang/${LANG}/*.txt; do \
+			name=$$(basename $f .txt); \
+			cp -v lang/${LANG}/${name}.txt ${DIR}/${name}.asciidoc; \
+		done; \
+	fi; \
+
+
 
 
 copy_fonts:

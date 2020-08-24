@@ -1,0 +1,6 @@
+////
+Do not translate the :variable names:
+////
+:index_heading: Index
+:toc-title: Table of Contents
+:table-caption: Table

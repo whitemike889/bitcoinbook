@@ -1,0 +1,7 @@
+////
+Do not translate the :variable names:
+////
+:author: Andreas M. Antonopoulos
+:book_title: Mastering Bitcoin Open Second Edition
+:subtitle: Programming the Open Blockchain
+:publisher: aantonop Books LLC
