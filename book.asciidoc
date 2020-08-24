@@ -1,7 +1,7 @@
-= {book_title}
 include::title.asciidoc[]
 include::headings.asciidoc[]
 include::settings.asciidoc[]
+= {book_title}
 include::preface_open_edition.asciidoc[]
 include::glossary.asciidoc[]
 include::ch01.asciidoc[]
