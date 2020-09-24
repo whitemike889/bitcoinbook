@@ -17,7 +17,7 @@ Minerii validează tranzacțiile noi și le înregistrează în registrul global
 
 ((("comisioane", "recompense de minerit")))((("minerit și consens", "recompense minere și comisioane")))((("algoritm Dovadă-de-Lucru")))((("minerit și consens", "algoritm Dovadă-de-Lucru")))Minerii primesc două tipuri de recompense în schimbul securității pe care o oferă prin minerit: monede noi create cu fiecare bloc nou și comisioane de tranzacție din toate tranzacțiile incluse în bloc. Pentru a câștiga această recompensă, minerii concurează pentru a rezolva o problemă matematică dificilă bazată pe un algoritm criptografic de rezumare. Soluția problemei, numită Dovadă-de-Lucru, este inclusă în noul bloc și acționează ca dovadă că minerul a investit eforturi de calcul semnificative. Competiția de rezolvare a algoritmului Dovadă-de-Lucru pentru a câștiga recompensa și dreptul de a înregistra tranzacții pe lanțul-de-blocuri este baza modelului de securitate bitcoin.
 
-Procesul se numește minerit, deoarece recompensa (generarea de monede noi) este concepută pentru a simula diminuarea randamentului, la fel ca minarea pentru metale prețioase. Oferta de monede bitcoin este creată prin minerit, similar cu modul în care o bancă centrală emite bani noi prin tipărirea bancnotelor. Cantitatea maximă de bitcoin nou-creat pe care un miner o poate adăuga la un bloc scade aproximativ la fiecare patru ani (sau mai exact la fiecare 210.000 de blocuri). A început la 50 de bitcoin pe bloc în ianuarie 2009 și s-a redus la jumătate (la 25 de bitcoin pe bloc) în noiembrie 2012. S-a redus la jumătate la 12,5 bitcoin în iulie 2016. Pe baza acestei formule, recompensele miniere bitcoin scad exponențial până aproximativ în anul 2140, când toată cantitatea de bitcoin (20.99999998 milioane) va fi emisă. După 2140, nu va fi emis niciun bitcoin nou.
+Procesul se numește minerit, deoarece recompensa (generarea de monede noi) este concepută pentru a simula diminuarea randamentului, la fel ca minarea pentru metale prețioase. Oferta de monede bitcoin este creată prin minerit, similar cu modul în care o bancă centrală emite bani noi prin tipărirea bancnotelor. Cantitatea maximă de bitcoin nou-creat pe care un miner o poate adăuga la un bloc scade aproximativ la fiecare patru ani (sau mai exact la fiecare 210.000 de blocuri). A început la 50 de bitcoin pe bloc în ianuarie 2009 și s-a redus la jumătate (la 25 de bitcoin pe bloc) în noiembrie 2012. S-a redus la jumătate la 12,5 bitcoin în iulie 2016 și din nou la 6,25 în mai 2020. Pe baza acestei formule, recompensele miniere bitcoin scad exponențial până aproximativ în anul 2140, când toată cantitatea de bitcoin (20.99999998 milioane) va fi emisă. După 2140, nu va fi emis niciun bitcoin nou.
 
 Minerii bitcoin câștigă, de asemenea, comisioane din tranzacții. Fiecare tranzacție poate include un comision de tranzacție sub forma unui excedent de bitcoin între intrările și ieșirile tranzacției. Minerul câștigător ajunge să ”păstreze restul” de la tranzacțiile incluse în blocul câștigător. Astăzi, comisioanele reprezintă 0,5% sau mai puțin din venitul unui miner, marea majoritate provenind din bitcoin-ul recent creat. Cu toate acestea, pe măsură ce recompensa scade în timp și numărul tranzacțiilor pe bloc crește, o proporție mai mare din veniturile miniere vor proveni din comisioane. Treptat, recompensa minieră va fi dominată de comisioanele de tranzacție, care vor constitui stimulentul principal pentru mineri. După 2140, cantitatea de bitcoin nouă în fiecare bloc scade la zero, iar minarea va fi stimulată doar prin comisioane de tranzacție.
 
@@ -194,7 +194,7 @@ $ bitcoin-cli getblock 0000000000000001b6b9a13b095e96db41c4a928b97ef2d9\
 
 [NOTE]
 ====
-Când blocul 277.316 a fost minat, recompensa a fost de 25 de bitcoin per bloc. De atunci, s-a scurs o perioadă ”de înjumătățire”. Recompensa blocului s-a schimbat la 12,5 bitcoin în iulie 2016. Aceasta a fost din nou redusă la jumătate peste 210.000 de blocuri, în anul 2020.
+Când blocul 277.316 a fost minat, recompensa a fost de 25 de bitcoin per bloc. De atunci, s-au scurs două perioade ”de înjumătățire”. Recompensa blocului s-a schimbat la 12,5 bitcoin în iulie 2016. Aceasta a fost din nou redusă la jumătate peste 210.000 de blocuri, în anul 2020.
 ====
 
 Nodul lui Jing creează tranzacția coinbase ca plată către propriul portofel: ”Plătește adresa lui Jing 25.09094928 bitcoin”. Suma totală de recompensă pe care Jing o încasează pentru minarea unui bloc este suma recompensei coinbase (25 de bitcoin noi) și comisioanele de tranzacție (0.09094928) din toate tranzacțiile incluse în bloc, așa cum se arată în <<generation_tx_example>>.
@@ -283,7 +283,7 @@ Subvenția inițială este calculată în satoshi înmulțind 50 cu constanta `C
 
 Numărul maxim de jumătăți admis este de 64, deci codul impune o recompensă zero (returnează doar comisioanele) dacă se depășesc cele 64 de înjumătățiri.
 
-În continuare, funcția folosește operatorul de deplasare-binară-dreapta pentru a împărți recompensa (+nSubsidy+) în două pentru fiecare rundă de înjumătățire. În cazul blocului 277.316, acest lucru ar deplasa-binar-dreapta recompensa de 5 miliarde de satoshi o dată (la jumătate) și ar rezulta în 2,5 miliarde de satoshis, sau 25 bitcoin. Operatorul de deplasare-binar-dreapta este utilizat deoarece este mai eficient decât mai multe împărțiri repetate. Pentru a evita o potențială eroare, operația de deplasare este omisă după 63 de înjumătățiri, iar subvenția este setată la 0.
+În continuare, funcția folosește operatorul de deplasare-binară-dreapta pentru a împărți recompensa (`nSubsidy`) în două pentru fiecare rundă de înjumătățire. În cazul blocului 277.316, acest lucru ar deplasa-binar-dreapta recompensa de 5 miliarde de satoshi o dată (la jumătate) și ar rezulta în 2,5 miliarde de satoshi, sau 25 bitcoin. Operatorul de deplasare-binar-dreapta este utilizat deoarece este mai eficient decât mai multe împărțiri repetate. Pentru a evita o potențială eroare, operația de deplasare este omisă după 63 de înjumătățiri, iar subvenția este setată la 0.
 
 În cele din urmă, recompensa coinbase (`nSubsidy`) este adăugată la comisioanele de tranzacție (`nFees`), iar suma este returnată.
 
@@ -834,14 +834,14 @@ Intervalul de 10 minute per bloc al bitcoin este un compromis de proiectare înt
 
 Următoarea listă arată puterea totală de rezumare a rețelei bitcoin, în primii opt ani de funcționare:
 
-2009:: 0.5 MH/sec–8 MH/sec (16× growth)
-2010:: 8 MH/sec–116 GH/sec (14,500× growth)
-2011:: 116 GH/sec–9 TH/sec (78× growth)
-2012:: 9 TH/sec–23 TH/sec (2.5× growth)
-2013:: 23 TH/sec–10 PH/sec (450× growth)
-2014:: 10 PH/sec–300 PH/sec (30× growth)
-2015:: 300 PH/sec-800 PH/sec (2.66× growth)
-2016:: 800 PH/sec-2.5 EH/sec (3.12× growth)
+2009:: 0.5 MH/sec–8 MH/sec (16 × creștere)
+2010:: 8 MH/sec–116 GH/sec (14.500 × creștere)
+2011:: 116 GH/sec–9 TH/sec (78 × creștere)
+2012:: 9 TH/sec–23 TH/sec (2,56 × creștere)
+2013:: 23 TH/sec–10 PH/sec (450 × creștere)
+2014:: 10 PH/sec–300 PH/sec (30 × creștere)
+2015:: 300 PH/sec-800 PH/sec (2,66 × creștere)
+2016:: 800 PH/sec-2.5 EH/sec (3,12 × creștere)
 
 În graficul din <<network_hashing_power>>, putem observa că puterea de rezumare a rețelei bitcoin a crescut în ultimii doi ani. După cum puteți vedea, concurența dintre mineri și creșterea bitcoin a dus la o creștere exponențială a puterii de rezumare (rezumări totale pe secundă în întreaga rețea).
 
@@ -877,7 +877,7 @@ Să ne uităm la un exemplu specific. Presupunem că un miner a achiziționat ec
 
 Unde 210240 este numărul de blocuri în patru ani. Minerul are o probabilitate de 98% de a găsi un bloc pe parcursul a patru ani, pe baza ratei globale de rezumare la începutul perioadei.
 
-Dacă minerul găsește un singur bloc în acest interval de timp, răsplata de 12,5 bitcoin, la aproximativ 1.000 de dolari pe bitcoin, va duce la o singură recompensă de 12 500 de dolari, ceea ce va produce un profit net de aproximativ 7 000 de dolari. Cu toate acestea, șansa de a găsi un bloc într-o perioadă de 4 ani depinde de norocul minerului. S-ar putea să găsească două blocuri în 4 ani și să facă un profit foarte mare. Sau s-ar putea să nu găsească nici un bloc timp de 5 ani și să sufere o pierdere financiară mai mare. Și mai rău, dificultatea algoritmului Dovadă-de-Lucru este probabil să crească semnificativ în acea perioadă, la ritmul actual de creștere a puterii de rezumare, ceea ce înseamnă că minerul are cel mult un an pentru a ajunge pe zero chiar înainte ca hardware-ul să fie în mod efectiv învechit și să trebuiască înlocuit cu un hardware minier mai puternic. Dacă acest miner participă la un bazin de minerit, în loc să aștepte o șansă norocoasă de 12.500 de dolari o dată la patru ani, el va putea câștiga aproximativ 50 până la 60 $ pe săptămână. Plățile obișnuite de la un bazin de minerit îl vor ajuta să amortizeze de-a lungul timpului costul hardware-ului și al energiei electrice, fără a-și asuma un risc enorm. Hardware-ul va rămâne învechit într-un an sau doi ani, iar riscul este încă ridicat, dar veniturile sunt cel puțin regulate și fiabile în acea perioadă. Din punct de vedere financiar, acest lucru are sens doar la costuri reduse de energie electrică (mai puțin de 1 cent per kW-oră) și doar la o scară foarte mare.
+Dacă minerul găsește un singur bloc în acest interval de timp, răsplata de 6,25 bitcoin, la aproximativ 1.000 de dolari pe bitcoin, va duce la o singură recompensă de 6250 de dolari, ceea ce va produce un profit net de aproximativ 750 de dolari. Cu toate acestea, șansa de a găsi un bloc într-o perioadă de 4 ani depinde de norocul minerului. S-ar putea să găsească două blocuri în 4 ani și să facă un profit foarte mare. Sau s-ar putea să nu găsească nici un bloc timp de 5 ani și să sufere o pierdere financiară mai mare. Și mai rău, dificultatea algoritmului Dovadă-de-Lucru este probabil să crească semnificativ în acea perioadă, la ritmul actual de creștere a puterii de rezumare, ceea ce înseamnă că minerul are cel mult un an pentru a ajunge pe zero chiar înainte ca hardware-ul să fie în mod efectiv învechit și să trebuiască înlocuit cu un hardware miner mai puternic. Din punct de vedere financiar, acest lucru are sens doar la costuri reduse de energie electrică (mai puțin de 1 cent per kW-oră) și doar la o scară foarte mare.
 
 Bazinele de minerit coordonează sute sau mii de mineri, pe baza unor protocoale specializate pentru bazinele de minerit. Minerii individuali își configurează echipamentele miniere pentru a se conecta la un server de bazin, după crearea unui cont cu bazinul. Hardware-ul lor de exploatare rămâne conectat la serverul de bazin în timp ce minează, sincronizând eforturile lor cu ceilalți mineri. Astfel, minerii din bazin împărtășesc efortul de a mina un bloc și apoi împart recompensele.
 

@@ -168,7 +168,7 @@ Tabelle e descrizioni provenienti da https://en.bitcoin.it/wiki/Script[].
 | OP_CODESEPARATOR | 0xab | Segna l'inizio di un dato signature-checked (controllato da firma)
 | OP_CHECKSIG | 0xac | Pop a public key and signature and validate the signature for the transaction's hashed data, return TRUE if matching
 | OP_CHECKSIGVERIFY | 0xad | Uguale a CHECKSIG, inoltre fa si che OP_VERIFY si fermi (halt) se non TRUE
-| OP_CHECKMULTISIG | 0xae | Esegui CHECKSIG per ogni coppia di firma e public key fornita. Tutte devono corrispondere. Un bug nell'implementazione fa il pop di un valore extra, usa il prefisso NO_OP come workaround.
+| OP_CHECKMULTISIG | 0xae | Run CHECKSIG for each pair of signature and public key provided. All must match. Bug in implementation pops an extra value, prefix with OP_0 as workaround
 | OP_CHECKMULTISIGVERIFY | 0xaf | Uguale a CHECKMULTISIG, inoltre fa si che OP_VERIFY si interrompa (halt) se non TRUE
 |=======
 

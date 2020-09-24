@@ -168,7 +168,7 @@ Tables and descriptions sourced from https://en.bitcoin.it/wiki/Script[].
 | OP_CODESEPARATOR | 0xab | 署名チェック済みのデータの最初に印を置く
 | OP_CHECKSIG | 0xac | 公開鍵と署名をpopしたのち、トランザクションのハッシュ化データに対して署名が有効であるかを検証し、有効であれば真を返却
 | OP_CHECKSIGVERIFY | 0xad | CHECKSIGと同じだが、もし真でなければ停止のためにOP_VERIFYを実行
-| OP_CHECKMULTISIG | 0xae | 与えられたそれぞれの署名と公開鍵のペアに対してCHECKSIGを実行。結果は全て真でなければならない。この実装には余分な値をpopしてしまうというバグがあり、回避策としてOP_NOPをOP_CHECKMULTISIGの前に置く
+| OP_CHECKMULTISIG | 0xae | Run CHECKSIG for each pair of signature and public key provided. All must match. Bug in implementation pops an extra value, prefix with OP_0 as workaround
 | OP_CHECKMULTISIGVERIFY | 0xaf | CHECKMULTISIGと同じだが、もし真でなければ停止のためにOP_VERIFYを実行
 |=======
 

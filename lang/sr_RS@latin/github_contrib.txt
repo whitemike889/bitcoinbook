@@ -1,7 +1,7 @@
 [[github_contrib]]
 ==== Rane verzije izdanja (GitHub prilozi)
 
-Mnogi saradnici su ponudili komentare, ispravke i dopune ranih verzija na GitHub-u. Hvala svima na vašem doprinosu ovoj knjizi.
+Mnogi saradnici su ponudili komentare, ispravke i dopune ranijih verzija na GitHub-u. Hvala vam svima na vašem doprinosu u ovoj knjizi.
 
 Sledi lista značajnih saradnika GitHub-a:
 

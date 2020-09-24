@@ -18,14 +18,13 @@
 * Esquema Integrado de Cifrado por curva elíptica (bitcore-ecies)
 * Servicio de Cartera (bitcore-wallet-service)
 * Aplicación Cliente de Cartera (bitcore-wallet-client)
-* Servicio de Herramientas "Playground" (bitcore-playground)
 * Integración directa de servicios con la aplicación principal Bitcoin Core (bitcore-node)
 
 === Ejemplos de Bibliotecas Bitcore
 
 ==== Prerequisitos
 
-* Versión de NodeJS >= 4.x o úsese https://bitcore.io/playground[hosted online playground] 
+* NodeJS >= 4.x
 
 Si ha de usarse NodeJS y el nodo REPL:
 

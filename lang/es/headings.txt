@@ -1,6 +1,6 @@
 ////
-Do not translate the :variable names:
+No traduzca los :nombres de variables:
 ////
-:index_heading: Index
-:toc-title: Table of Contents
-:table-caption: Table
+:index_heading: Índice
+:toc-title: Tabla de contenido
+:table-caption: Tabla

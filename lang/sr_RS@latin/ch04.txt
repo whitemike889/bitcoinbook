@@ -23,7 +23,7 @@ Od pronalaska kriptografije javnog ključa, otkriveno je nekoliko odgovarajućih
 
 U bitkoinu koristimo kriptografiju javnog ključa kako bismo stvorili par ključeva koji kontrolišu pristup bitkoinu. Par ključeva sastoji se od privatnog ključa i - izvedenog iz njega - jedinstvenog javnog ključa. Javni ključ koristi se za primanje sredstava, a privatni ključ se koristi za potpisivanje transakcija za trošenje sredstava.
 
-Postoji matematički odnos između javnog i privatnog ključa koji omogućava da se privatni ključ koristi za generisanje potpisa na porukama. Ovaj potpis se može proveriti korišćenjem javnog ključa bez otkrivanja privatnog ključa.
+Postoji matematički odnos između javnog i privatnog ključa koji omogućava da se privatni ključ koristi za generisanje potpisa na porukama. Ovi potpisi mogu da se potvrde u odnosu na javne ključeve, bez otkrivanja privatnog ključa.
 
 Kada se bitkoin troši, trenutni vlasnik bitkoina predstavlja svoj javni ključ i potpis (svaki put različit, ali napravljen iz istog privatnog ključa) u transakciji za trošenje tih bitkoina. Kroz predstavljanje javnog ključa i potpisa, svi u bitkoin mreži mogu da provere i prihvate transakciju kao validnu, dajući potvrdu da ih je osoba koja ih je prebacila, posedovala u trenutku prenosa.
 
@@ -186,7 +186,7 @@ Postoji nekoliko posebnih slučajeva koji objašnjavaju potrebu za "tačkom u be
 
 Ako se tačke P~1~ i P~2~ podudaraju, razmatrana prava treba da bude tangenta na krivu u tački P~1~. Tada će ta tangenta preseći krivu tačno u jednoj novoj tački. Možete koristiti tehnike iz analize da odredite nagib tangentne linije. Interesantno je da ove tehnike funkcionišu, iako ograničavamo naš interes na tačke na krivoj sa dve celobrojne koordinate!
 
-U nekim slučajevima (tj. ako P~1~ and P~2~ imaju iste x vrednosti, ali različite y vrednosti), tangenta će biti tačno vertikalna, u tom slučaju P3 = "tačka u beskonačnosti".
+U nekim slučajevima (tj, ako P~1~ i P~2~ imaju iste x vrednosti, ali različite y vrednosti), tangentna linija će biti vertikalna, u tom slučaju je P~3~ = "tačka u beskonačnosti."
 
 Ako je P~1~ "tačka u beskonačnosti", tada je P~1~ + P~2~ = P~2~. Slično tome, ako je P~2~ tačka u beskonačnosti, onda je P~1~ + P~2~ = P~1~. Ovo pokazuje kako tačka u beskonačnosti igra ulogu nule.
 
@@ -437,7 +437,7 @@ Evo istog javnog ključa prikazanog kao 520-bitni broj (130 heksadecimalnih cifr
 
 ++++
 <pre data-type="programlisting">
-K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A↵
+K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A&#x21b5;
 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
 </pre>
 ++++
@@ -568,7 +568,7 @@ Koordinate javnog ključa (x,y) su:
  (41637322786646325214887832269588396900663353932545912953362782457239403430124L,
  16388935128781238405526710466724741593761085120864331449066658622400339362166L)
 Javni ključ (u heksadecimali) je:
- 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec↵
+ 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec&#x21b5;
 243bcefdd4347074d44bd7356d6a53c495737dd96295e2a9374bf5f02ebfc176
 Kompresovani javni ključ (u heksadecimali) je:
  025c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec
@@ -618,27 +618,6 @@ BTC public key: 029ade3effb0a67d5c8609850d797366af428f4a0d5194cb221d807770a15228
 === Napredni ključevi i adrese
 
 ((("keys and addresses", "advanced forms", id="KAadvanced04")))U narednim odeljcima razmotrićemo napredne forme ključeva i adresa, kao što su šifrovani privatni ključevi, skripte, adrese i multisignature adresa (adresa sa više potpisa), vanity adrese i papirne novčanike.
-
-==== Šifrovani privatni ključevi (BIP-38)
-
-((("bitcoin improvement proposals", "Encrypted Private Keys (BIP-38)")))((("keys and addresses", "advanced forms", "encrypted private keys")))((("public and private keys", "encrypted private keys")))((("passwords", "encrypted private keys")))((("security", "passwords")))Privatni ključevi moraju ostati tajni. Potreba za _poverljivošću_ privatnih ključa je truizam koji je u praksi prilično teško postići jer je u konfliktu sa jednako važnim sigurnosnim ciljem _dostupnosti_. Držati privatni ključ tajnim mnogo je teže kada je potrebno sačuvati sigurnosne kopije privatnog ključa kako se ne bi izgubio. Privatni ključ u novčaniku koji je šifrovan lozinkom možda je siguran, ali taj novčanik treba da bude bekapovan. Ponekad korisnici moraju premeštati ključeve iz jednog novčanika u drugi - na primer da apdejtuju ili zamene softver za novčanik. Rezervne kopije privatnog ključa mogu se takođe sačuvati na papiru (vidi <<paper_wallets>>) ili na eksternim medijumima za čuvanje podataka, kao što je USB memorija. Ali šta ako se rezervna kopija ukrade ili izgubi? Ovi konfliktni bezbednosni  ciljevi doveli su do uvođenja prenosivog i pogodnog standarda za šifrovanje privatnih ključeva na način koji mogu da razumeju mnogi različiti novčanici i bitkoin klijenti, a koji je standardizovan u BIP-38 (videti <<appdxbitcoinimpproposals>>).
-
-BIP-38 predlaže zajednički standard za šifrovanje privatnih ključeva sa lozinkom (passphrase) i za njihovo kodiranje sa Base58Check, tako da se mogu sigurno čuvati na bekap medijima, sigurno transportovati među novčanicima ili čuvati pod bilo kojim drugim uslovima kojima je ključ možda izložen. Standard za šifrovanje koristi Advanced Encryption Standard (AES), standard koji je uspostavio NIST i koji se široko koristi u implementacijama šifrovanja podataka za komercijalne i vojne aplikacije.
-
-Šema enkripcije BIP-38 uzima kao ulaz privatni ključ bitkoina, obično kodiran u WIF-u, kao niz Base58Check sa prefiksom "5." Pored toga, šema enkripcije BIP-38 sadrži passphrase—dugačku lozinku—obično sastavljenu od nekoliko reči ili složenog niza alfanumeričkih znakova. Rezultat BIP-38 šeme šifrovanja je šifrovani privatni ključ koji je kodiran sa Base58Check-om koji počinje sa prefiksom +6P+. Ako vidite ključ koji počinje sa +6P+, šifrovan je i zahteva lozinku da bi ga pretvorili (dešifrovali) nazad u privatni ključ u formatu WIF (prefiks +5+) koji se može koristiti u bilo kojem novčaniku. Mnoge aplikacije za novčanik sada prepoznaju privatne ključeve šifrovane prema BIP-38 standardu i od korisnika će zatražiti lozinku da se dešifruje i uveze ključ. Aplikacije trećih lica, kao što je neverovatno koristan http://bitaddress.org[Bit Address] (Wallet Details tab), mogu se koristiti za dešifrovanje ključeva BIP-38.
-
-Najčešći slučaj upotrebe BIP-38 šifrovanih ključeva je za novčanike od papira koji se mogu koristiti za pravljenje sigurnosnih kopija privatnih ključeva na komadu papira. Sve dok korisnik odabere snažnu lozinku, papirni novčanik sa šifrovanim BIP-38 privatnim ključevima je neverovatno siguran i odličan način za kreiranje oflajn skladišta bitkoina (poznat i kao "cold storage").
-
-Testirajte šifrovane ključeve u <<table_4-10>> pomoću bitaddress.org da vidite kako možete dobiti dešifrovani ključ unoseći lozinku.
-
-[[table_4-10]]
-.Primer privatnog ključa šifrovanog sa BIP-38
-|=======
-| *Private Key (WIF)* | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
-| *Passphrase* | MyTestPassphrase
-| *Encrypted Key (BIP-38)* | 6PRTHL6mWa48xSopbU1cKrVjpKbBZxcLRRCdctLJ3z5yxE87MobKoXdTsJ
-|=======
-
 
 [[p2sh_addresses]]
 ==== Pay-to-Script Hash (P2SH) i Multisig Adrese
@@ -784,7 +763,7 @@ U oba slučaja, jedan od rizika upotrebe jedne fiksne adrese (umesto posebne din
 | *Vanity (6-character match)* | 1J7mdg5WxGENmwyJP9xuGhG5KRzu99BBCX
 |=======
 
-So does a vanity address increase security? If Eugenia generates the vanity address +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, users are likely to look at the vanity pattern word _and a few characters beyond_, for example noticing the "1Kids33" part of the address. That would force an attacker to generate a vanity address matching at least six characters (two more), expending an effort that is 3,364 times (58 × 58) higher than the effort Eugenia expended for her 4-character vanity. Essentially, the effort Eugenia expends (or pays a vanity pool for) "pushes" the attacker into having to produce a longer pattern vanity. If Eugenia pays a pool to generate an 8-character vanity address, the attacker would be pushed into the realm of 10 characters, which is infeasible on a personal computer and expensive even with a custom vanity-mining rig or vanity pool. What is affordable for Eugenia becomes unaffordable for the attacker, especially if the potential reward of fraud is not high enough to cover the cost of the vanity address generation.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
+Da li vanity adresa povećava sigurnost? Ako Eugenija generiše vanity adresu +1Kids33k44erFfpeKsrmDSz7zEkG2FesZEN+, korisnici će verovatno videti vanity obrazac _ i nekoliko znakova više_, na primer kada primeti deo adrese „1Kids33“. To bi prisililo napadača da generiše vanity adresu koja se poklapa u najmanje šest znakova (još dva), trošeći napor koji je za 3,364 puta (58 &#x00D7; 58) veći od napora koji je Eugenija uložila u svoj tekst od 4 karaktera. U suštini, napor koji Eugenija ulaže (ili plaća) "prisiljava" napadača na stvaranje dužih tekstova. Ako Eugenija plati servis da generiše vanity adresu od 8 znakova, napadač bi bio prinuđen na količinu od 10 znakova, što je neizvodljivo na ličnom računaru i skupo čak i ako ima prilagođen sistem za rudarenje vanity adresa ili vanity pool. Ono što je povoljno za Eugeniju postaje nedostupno za napadača, posebno ako potencijalna nagrada za prevaru nije dovoljno visoka da pokrije troškove pravljanja vanity adresa.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
 
 [[paper_wallets]]
 ==== Papirni novčanici
@@ -819,7 +798,7 @@ image::images/mbc2_0409.png[]
 Iako možete uložiti sredstva u papirni novčanik nekoliko puta, trebalo bi da povučete sva sredstva samo jednom, trošeći sve bitkoine na njima. To je zato što bi tokom otključavanja i trošenja sredstava neki novčanici mogli da generišu promenjivu adresu ako potrošite manje od celog iznosa. Ako je računar koji koristite za potpisivanje transakcije ugrožen, rizikujete da iznesete privatni ključ i pristupite sredstvima na adresi za kusur. Trošeći celokupni ulog papirnog novčanika odjednom, smanjujete rizik od kompromisa. Ako vam je potreban samo mali iznos, preostala sredstva pošaljite u papirni novčanik u istoj transakciji.
 ====
 
-Papirni novčanici dolaze u mnogo dizajna i veličina, sa mnogo različitih karakteristika. Neki su predviđeni za poklon sa sezonskim motivima, kao što su božićni i novogodišnji. Drugi su dizajnirani za skladištenje u trezoru banke ili sefu sa privatnim ključem skrivenim na neki način, bilo sa neprozirnim nalepnicama za grebanje, ili presavijenom i zapečaćenom lepljivom folijom. Ilustracije <<paper_wallet_bpw>> do <<paper_wallet_spw>> prikazuju različite primere papirnih novčanika sa funkcijama zaštite i izrade sigurnosnih kopija. 
+Papirni novčanici dolaze u mnogo dizajna i veličina sa mnogo različitih karakteristika. Neki su predviđeni za poklon sa sezonskim motivima, kao što su božićni i novogodišnji. Drugi su dizajnirani za skladištenje u trezoru banke ili sefu sa privatnim ključem skrivenim na neki način, bilo sa neprozirnim nalepnicama za grebanje, ili presavijenom i zapečaćenom lepljivom folijom. Figure pass:[<a data-type="xref" href="#paper_wallet_bpw" data-xrefstyle="select: labelnumber">#paper_wallet_bpw</a>] through pass:[<a data-type="xref" href="#paper_wallet_spw" data-xrefstyle="select: labelnumber">#paper_wallet_spw</a>] prikazuju različite primere papirnih novčanika sa funkcijama zaštite i izrade sigurnosnih kopija.
 
 [[paper_wallet_bpw]]
 .Primer papirnog novčanika sa bitcoinpaperwallet.com sa privatnim ključem na preklopnom poklopcu

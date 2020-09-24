@@ -183,7 +183,7 @@ Prueba-de-Trabajo::
     Es un paquete de datos que requiere de una cantidad de cómputo significativo para poder calcularlo. En bitcoin, los mineros deben encontrar una solución numérica para el algoritmo SHA256 que cumpla con un objetivo universal de toda la red, el objetivo de dificultad.
 
 recompensa::
-    Es una cantidad de monedas incluida en cada nuevo bloque como recompensa de la red para el minero que encontró la solución de la Prueba-de-trabajo. Actualmente es de 12,5 BTC por bloque.
+    Una cantidad incluida en cada nuevo bloque como recompensa de la red para el minero que encontró la solución de la Prueba-de-Trabajo. Actualmente la recompensa es de 6.25 BTC por bloque.
 
 RIPEMD-160::
     RIPEMD-160 es una función hash criptográfica de 160 bits. RIPEMD-160 es una versión reforzada de RIPEMD con un resultado hash de 160 bits, y se espera que sea seguro durante los próximos diez años o más.

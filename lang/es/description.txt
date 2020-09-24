@@ -1,0 +1,12 @@
+Únase a la revolución tecnológica que está arrasando en el mundo financiero. Dominando el Bitcoin será su guía a través del aparentemente complejo mundo del Bitcoin y le proporcionará el conocimiento que necesita para participar en la Internet del dinero. Ya sea que esté creando la próxima aplicación arrasadora, invirtiendo en un emprendimiento o bien sea que simplemente siente curiosidad por esta tecnología, esta segunda edición revisada y ampliada le brindará detalles esenciales para comenzar.
+
+Bitcoin, aunque ha sido la primera moneda digital descentralizada exitosa, aún se encuentra en sus primeras etapas y, sin embargo, ya ha generado una economía global de miles de millones de dólares, abierta a cualquier persona con el conocimiento y la pasión por participar. Dominando el Bitcoin le proporcionará este conocimiento. Usted simplemente proporcionará la pasión.
+
+Esta segunda edición incluye:
+
+* Una amplia introducción sobre el bitcoin y su cadena de bloques subyacente, ideal para usuarios no técnicos, inversionistas y ejecutivos de negocios.
+* Una explicación de los fundamentos técnicos del bitcoin y demás monedas criptográficas para desarrolladores, ingenieros y arquitectos de software y sistemas.
+* Detalles de la red descentralizada de bitcoin, arquitectura "peer-to-peer" (o "entre pares iguales"), ciclo de vida de las transacciones y principios de seguridad.
+* Nuevos desarrollos como el del Testigo Segregado, los Canales de Pago y la plataforma Lightning Network.
+* Una inmersión profunda en las aplicaciones de la cadena de bloques, incluyendo cómo combinar los componentes básicos que ofrece esta plataforma en aplicaciones de nivel superior.
+* Historias de usuarios, analogías, ejemplos y fragmentos de código que ilustran conceptos técnicos fundamentales.

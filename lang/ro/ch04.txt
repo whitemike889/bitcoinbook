@@ -23,7 +23,7 @@ De la inventarea criptografiei cu cheie publică, au fost descoperite câteva fu
 
 În bitcoin, folosim criptografia cu cheie publică pentru a crea o pereche de chei ce controlează accesul la bitcoin. Perechea de chei constă dintr-o cheie privată și--derivată din ea--o cheie publică unică. Cheia publică este folosită pentru a primi fonduri, iar cheia privată este folosită pentru a semna tranzacții în scopul cheltuirii fondurilor.
 
-Există o relație matematică între cheia publică și cheia privată care permite cheii private să fie folosită pentru a genera semnături pentru mesaje. Semnătura poate fi validată cu cheia publică fără a dezvălui cheia privată.
+Există o relație matematică între cheia publică și cea privată care permite utilizarea cheii private pentru a genera semnături pe mesaje. Aceste semnături pot fi validate cu cheia publică fără a dezvălui cheia privată.
 
 Când cheltuiește bitcoin, actualul proprietar își prezintă cheia publică și o semnătură (diferită de fiecare dată, dar creeată folosind aceeași cheie privată) ca parte a unei tranzacții pentru a cheltui acei bitcoin. Prin prezentarea cheii publice și a semnăturii, toți cei din rețeaua bitcoin pot verifica și accepta tranzacția ca fiind validă, confirmând că persoana care a transferat bitcoin îi deținea la momentul transferului. 
 
@@ -186,7 +186,7 @@ Există câteva cazuri speciale care explică necesitatea existenței unui ”pu
 
 Dacă P~1~ și P~2~ coincid, dreapta ”dintre” P~1~ și P~2~ este tangenta la curbă în acest punct P~1~. Această tangentă va intersecta curba în exact un punct. Puteți folosi analiza matematică pentru a calcula panta tangentei. Aceste mecanisme funcționează în mod interesant, chiar dacă restrângem domeniul punctelor de pe curbă doar la punctele cu coordonate numere întregi!
 
-În unele cazuri (dacă P~1~ și P~2~ au aceeași valoare pe axa x, dar valori diferite pentru y), tangenta va fi verticală, caz în care P~3~ = ”punct la infinit”.
+În unele cazuri (dacă  P~1~ și P~2~ au aceleași valori x, dar valori y diferite), tangenta va fi verticală, caz în care P~3~ = ”punct la infinit”.
 
 Dacă P~1~ este ”punct la infinit,” atunci P~1~ + P~2~ = P~2~. Similar, dacă P~2~ este ”punct la infinit,” atunci P~1~ + P~2~ = P~1~. Acest lucru arată cum ”punctul la infinit” joacă rolul lui zero.
 
@@ -568,7 +568,7 @@ Public Key (x,y) coordinates is:
  (41637322786646325214887832269588396900663353932545912953362782457239403430124L,
  16388935128781238405526710466724741593761085120864331449066658622400339362166L)
 Public Key (hex) is:
- 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec↵
+ 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec&#x21b5;
 243bcefdd4347074d44bd7356d6a53c495737dd96295e2a9374bf5f02ebfc176
 Compressed Public Key (hex) is:
  025c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec
@@ -618,27 +618,6 @@ BTC public key: 029ade3effb0a67d5c8609850d797366af428f4a0d5194cb221d807770a15228
 === Chei și Adrese Avansate
 
 ((("chei și adrese", "forme avansate", id="KAadvanced04")))În secțiunea următoare vom analiza forme avansate de chei și adrese, cum ar fi chei private criptate, adrese script și semnătură multiplă, adrese de vanitate și portofele de hârtie.
-
-==== Cheile Private Criptate (BIP-38)
-
-((("propuneri de îmbunătățire bitcoin", "Chei Private Criptate (BIP-38)")))((("chei și adrese", "forme avansate", "chei private criptate")))((("chei publice și private", "chei private criptate")))((("parole", "chei private criptate")))((("securitate", "parole")))Cheile private trebuie să rămână secrete. Necesitatea _confidențialității_ cheilor private este un truism destul de dificil de realizat în practică, deoarece intră în conflict cu obiectivul de securitate la fel de important al _disponibilității_. Păstrarea cheii private private este mult mai greu când trebuie să stocați copii de rezervă pentru a nu o pierde. O cheie privată care este stocată într-un portofel criptat de o parolă s-ar putea să fie în siguranță, dar acel portofel trebuie să aibă o copie de rezervă. Uneori, utilizatorii trebuie să mute cheile dintr-un portofel în altul, pentru a actualiza sau înlocui software-ul portofelului, de exemplu. Copiile de rezervă a cheilor private pot fi stocate de asemenea pe hârtie (vezi <<paper_wallets>>) sau pe medii externe de stocare cum ar fi un stick USB. Dar ce facem dacă chiar rezerva este copiată sau pierdută? Aceste obiective contradictorii de securitate au dus la introducerea unui standard portabil și convenabil pentru criptarea cheilor private, într-un mod care poate fi înțeles de numeroase portofele și clienți bitcoin,  standardizat de BIP-38 (see <<appdxbitcoinimpproposals>>).
-
-BIP-38 propune un standard comun pentru criptarea cheilor private cu o frază-de-acces și codificarea acestora cu Base58Check, astfel încât acestea să poată fi stocate în siguranță pe suporturi de rezervă, transportate în siguranță între portofele sau păstrate în orice alte condiții în care cheia ar putea fi expusă. Standardul pentru criptare utilizează Advanced Encryption Standard (AES), un standard stabilit de NIST și utilizat pe scară largă în implementările de criptare a datelor pentru aplicații comerciale și militare.
-
-O schemă de criptare BIP-38 are ca intrare o cheie privată bitcoin, de obicei codificată în formatul WIF, ca un șir Base58Check cu prefixul ”5”. În plus, schema de criptare BIP-38 acceptă o frază-de-acces—o parolă lungă—compusă de obicei din mai multe cuvinte sau un șir complex de caractere alfanumerice. Rezultatul schemei de criptare BIP-38 este o cheie privată criptată codificată în Base58Check care începe cu prefixul _6P_. Dacă vedeți o cheie care începe cu _6P_, este criptată și necesită o frază-de-acces pentru a o coverti (decripta) înapoi într-o cheie privată în format WIF (prefix _5_) care poate fi folosită într-un portofel. Multe portofele recunosc acum cheile criptate BIP-38 și solicită utilizatorului o frază-de-acces pentru a decripta și importa cheia. Alte aplicații, cum ar fi http://bitaddress.org[Bit Address] (tab-ul Wallet Details), pot fi folosite pentru a decripta chei BIP-38.
-
-Cele mai des întâlnit caz pentru chei criptate BIP-38 este pentru portofelele de hârtie care pot fi folosite pentru a crea o copie de rezervă pe o bucată de hârtie. Cât timp utilizatorul alege o frază-de-access puternică, un portofel de hârtie cu chei criptate BIP-38 este incredibil de sigur și o modalitate excelentă de a stoca bitcoin offline (cunoscută și sub denumirea de "stocare la rece”).
-
-Testați cheile criptate la  <<table_4-10>> folosind bitaddress.org pentru a vedea cum puteți obține cheile decriptate introducând parola.
-
-[[table_4-10]]
-. Exemplu de cheie privată criptată BIP-38
-|=======
-| *Private Key (WIF)* | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
-| *Passphrase* | MyTestPassphrase
-| *Encrypted Key (BIP-38)* | 6PRTHL6mWa48xSopbU1cKrVjpKbBZxcLRRCdctLJ3z5yxE87MobKoXdTsJ
-|=======
-
 
 [[p2sh_addresses]]
 ==== Rezumat Plată-către-Script (Pay-to-Script Hash - P2SH) și Adrese Semnătură Multiplă
@@ -784,7 +763,7 @@ Eugenia ar putea publica o adresă generată aleatoriu (de exemplu, _1J7mdg5rbQy
 | Vanitate (potrivire de 6 caractere) | 1J7mdg5WxGENmwyJP9xuGhG5KRzu99BBCX
 |=======
 
-So does a vanity address increase security? If Eugenia generates the vanity address +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, users are likely to look at the vanity pattern word _and a few characters beyond_, for example noticing the "1Kids33" part of the address. That would force an attacker to generate a vanity address matching at least six characters (two more), expending an effort that is 3,364 times (58 × 58) higher than the effort Eugenia expended for her 4-character vanity. Essentially, the effort Eugenia expends (or pays a vanity pool for) "pushes" the attacker into having to produce a longer pattern vanity. If Eugenia pays a pool to generate an 8-character vanity address, the attacker would be pushed into the realm of 10 characters, which is infeasible on a personal computer and expensive even with a custom vanity-mining rig or vanity pool. What is affordable for Eugenia becomes unaffordable for the attacker, especially if the potential reward of fraud is not high enough to cover the cost of the vanity address generation.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
+Deci, o adresă de vanitate crește securitatea? Dacă Eugenia generează adresa de vanitate _1Kids33q44erFfpeXrmDSz7zEqG2FesZEN_, utilizatorii probabil vor acorda atenție modelului de vanitate _și câtorva caractere după_, de exemplu vor observa partea "1Kids33" din adresă. Acest lucru ar obliga un atacator să genereze o adresă de vanitate care să se potrivească cu cel puțin șase caractere (încă două), investind un efort care este de 3364 (58 x 58) mai mare decât efortul pe care Eugenia l-a investit pentru cele 4 caractere de vanitate. În esență, efortul pe care Eugenia îl depune (sau pentru care plătește un bazin de vanitate) ”împinge” atacatorul să producă o adresă de vanitate cu un model mai lung. Dacă Eugenia plătește un bazin pentru a genera o adresă de vanitate cu un model de 8 caractere, atacatorul va fi împins în zona de 10 caractere, care nu este fezibil pe un calculator personal și este scump chiar cu un echipament de minerit specializat sau folosind un bazin de mineri de vanitate. Ce este  accesibil pentru Eugenia, devine inaccesibil pentru atacator, mai ales dacă recompensa potențială în urma fraudei nu este destul de mare pentru a acoperi costurile generării adresei de vanitate.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
 
 [[paper_wallets]]
 ==== Portofele de Hârtie
@@ -819,7 +798,7 @@ image::images/mbc2_0409.png[]
 Chiar dacă puteți depozita fonduri într-un portofel de hârtie de mai multe ori, ar trebui să retrageți fondurile doar o data, cheltuind totul. Motivul este că în procesul de deblocare și cheltuire a fondurilor unele portofele s-ar putea să genereze o adresă de rest dacă cheltuiți mai puțin decât suma totală. Dacă calculatorul pe care l-ați folosit să semnați tranzacțiile este apoi compromis, riscați expunerea cheii private, oferind access la fondurile din adresa de rest. Cheltuind întreaga sumă a unui portofel de hârtie doar o dată, reduceți riscul de a compromite cheile. Dacă trebuie să cheltuiți doar o sumă mai mică, trimiteți fondurile rămase la un nou portofel de hârtie în aceeași tranzacție.
 ====
 
-Paper wallets come in many designs and sizes, with many different features. Some are intended to be given as gifts and have seasonal themes, such as Christmas and New Year's themes. Others are designed for storage in a bank vault or safe with the private key hidden in some way, either with opaque scratch-off stickers, or folded and sealed with tamper-proof adhesive foil. Figures <<paper_wallet_bpw>> through <<paper_wallet_spw>> show various examples of paper wallets with security and backup features.
+Portofelele de hârtie au mai multe modele și dimensiuni, cu multe funcționalități diferite. Unele sunt destinate a fi oferite ca și cadouri și au teme de sezon, cum ar fi teme de Crăciun și Anul Nou. Altele sunt  concepute pentru depozitare într-un seif al băncii având cheile private ascunse cumva, sau cu colante opace răzuibile, sau împăturite și sigilate cu o folie adezivă. Imaginile următoare prezintă diferite exemple de portofele de hârtie având funcții de securitate și rezervă.
 
 [[paper_wallet_bpw]]
 .Un exemplu de portofel de hârtie de la bitcoinpaperwallet.com cu cheia privată pe o clapeta pliabilă

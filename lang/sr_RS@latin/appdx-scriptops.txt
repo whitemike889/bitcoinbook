@@ -1,5 +1,5 @@
 [[tx_script_ops]]
-[dodatak]
+[appendix]
 == Operatori, konstante i simboli skript jezika za transakcije
 
 [NOTE]
@@ -20,7 +20,7 @@ Tabele i opisi preuzeti sa https://en.bitcoin.it/wiki/Script[].
 | OP_PUSHDATA2 | 0x4d | Sledeća dva bajta skripta sadrže N, a sledeće N bajtove stavite na stek
 | OP_PUSHDATA4 | 0x4e | Sledeća četiri bajta skripta sadrže N, a sledeće N bajtove stavite na stek
 | OP_1NEGATE | 0x4f | Stavite vrednost "-1" na stek
-| OP_RESERVED | 0k50 | Zastoj&#x2014;nevažeća transakcija ukoliko se ne nađe u neizvršenoj OP_IF klauzuli
+| OP_RESERVED | 0k50 | Zastoj—nevažeća transakcija ukoliko se ne nađe u neizvršenoj OP_IF klauzuli
 | OP_1 ili OP_TRUE | 0x51 | Stavite vrednost "1" na stek
 | OP_2 do OP_16 | 0x52 do 0x60 | Za OP_N, stavite vrednost "N" na stek, npr. OP_2 stavlja "2" na stek
 |=======
@@ -34,14 +34,14 @@ Tabele i opisi preuzeti sa https://en.bitcoin.it/wiki/Script[].
 |=======
 | Simbol | Vrednost (heksadecimalna) | Opis
 | OP_NOP | 0x61 | Ne radi ništa
-| OP_VER | 0x62 | Zastoj&#x2014;Invalidna transakcija ukoliko se ne nađe u neizvršenoj OP_IF klauzuli
+| OP_VER | 0x62 | Zastoj—Nevažeća transakcija ukoliko se ne nađe u neizvršenoj OP_IF klauzuli
 | OP_IF | 0x63 | Izvršite sledeće operacije ako vrh steka nije 0
 | OP_NOTIF | 0x64 | Izvršite sledeće operacije ako je vrh steka 0
-| OP_VERIF | 0x65 | Zastoj&#x2014;Nevažeća transakcija
-| OP_VERNOTIF | 0x66 | Zastoj&#x2014;nevažeća transakcija
+| OP_VERIF | 0x65 | Zastoj—Nevažeća transakcija
+| OP_VERNOTIF | 0x66 | Zastoj—Nevažeća transakcija
 | OP_ELSE | 0x67 | Izvršite samo ako prethodne operacije nisu izvršene
 | OP_ENDIF | 0x68 | Završite blok OP_IF, OP_NOTIF, OP_ELSE
-| OP_VERIFY | 0x69 | Proveri vrh steka, zaustavite i poništite transakciju ako nije TRUE
+| OP_VERIFY | 0x69 | Proverite vrh steka, zaustavite i poništite transakciju ako nije TRUE
 | OP_RETURN | 0x6a | Zaustavite i poništite transakciju
 |=======
 
@@ -111,8 +111,8 @@ Tabele i opisi preuzeti sa https://en.bitcoin.it/wiki/Script[].
 | _OP_XOR_ | 0x86 | Onemogućeno (Bulov eksplicitni ili (XOR) od dva predmeta na vrhu steka)
 | OP_EQUAL | 0x87 | Stavite TRUE (1) na vrh steka ako su gornja dva predmeta potpuno jednaka, u suprotnom stavite FALSE (0)
 | OP_EQUALVERIFY | 0x88 | Isto kao OP_EQUAL, ali pokrenite OP_VERIFY ako želite da zaustavite izvršenje ako rezultat nije TRUE
-| OP_RESERVED1 | 0x89 | Zastoj&#x2014;nevažeća transakcija osim ako se ne nađe u neizvršenoj OP_IF klauzuli
-| OP_RESERVED2 | 0x8a | Zastoj&#x2014;nevažeća transakcija osim ako se ne nađe u neizvršenoj OP_IF klauzuli
+| OP_RESERVED1 | 0x89 | Zastoj—Nevažeća transakcija osim ako se ne nađe u neizvršenoj OP_IF klauzuli
+| OP_RESERVED2 | 0x8a | Zastoj—Nevažeća transakcija osim ako se ne nađe u neizvršenoj OP_IF klauzuli
 |=======
 
 [role="pagebreak-before"]
@@ -168,7 +168,7 @@ Tabele i opisi preuzeti sa https://en.bitcoin.it/wiki/Script[].
 | OP_CODESEPARATOR | 0xab | Označite početak podatka sa proverenim potpisima
 | OP_CHECKSIG | 0xac | Skinite javni ključ i potpis i potvrdite potpis za heš transakcije, vratite TRUE ako su isti
 | OP_CHECKSIGVERIFY | 0xad | Isto kao CHECKSIG, pa OP_VERIFY da zaustavite ako nije TRUE
-| OP_CHECKMULTISIG | 0xae | Pokreni CHECKSIG za svaki par potpisa i javnog ključa. Svi se moraju da pašu. Greška u implementaciji skine dodatnu vrednost, prefiks sa OP_NOP-om kao rešenjem
+| OP_CHECKMULTISIG | 0xae | Pokrenite CHECKSIG za svaki par potpisa i obezbedite javni ključ. Svi moraju da se podudaraju. Greška u implementaciji pokazuje dodatnu vrednost sa prefiksom OP_0 kao rešenjem.
 | OP_CHECKMULTISIGVERIFY | 0xaf | Isto kao CHECKMULTISIG, pa OP_VERIFY da zaustavite ako nije TRUE
 |=======
 

@@ -829,11 +829,11 @@ Odvojeni svedok se neće istovremeno implementirati na celoj mreži. Umesto toga
 
 ===== Ugradnja odvojenog svedoka u P2SH
 
-Pretpostavimo, na primer, da Alisin novčanik nije nadograđen na segwit, ali Bobov novčanik jeste i može da rukuje segwit transakcijama. Alisa i Bob mogu da koriste "stare" ne-segwit transakcije. Ali Bob bi verovatno želeo da koristi segwit da smanji naknade za transakcije, koristeći popust koji se odnosi na podatke svedoka.
+Pretpostavimo da Alisin novčanik nije nadograđen na segwit, ali Bobov novčanik jeste i može da rukuje segwit transakcijama. Alisa i Bob mogu da koriste "stare" ne-segwit transakcije. Ali Bob bi verovatno želeo da koristi segwit da smanji naknade za transakcije, koristeći popust koji se odnosi na podatke svedoka.
 
 U ovom slučaju Bobov novčanik može konstruisati P2SH adresu koja u sebi sadrži segwit skriptu. Alisin novčanik ovo smatra "normalnom" P2SH adresom i može vršiti plaćanja na nju bez ikakvog znanja o segwitu. Bobov novčanik tada može da izvrši to plaćanje segwit transakcijom, koristeći svu prednost segwit-a i smanjujući troškove transakcije.
 
-Oba oblika skripte svedoka, P2WPKH i P2WSH, mogu biti ugrađene u P2SH adresu. Prva je označen kao P2SH (P2WPKH), a druga kao P2SH (P2WSH).
+Oba oblika skripte svedoka, P2WPKH i P2WSH, mogu da budu ugrađene u P2SH adresu. Prva je označena kao P2SH (P2WPKH), a druga kao P2SH (P2WSH).
 
 ===== Pay-to-Witness-Public-Key-Hash unutar Pay-to-Script-Hash-a
 
@@ -850,7 +850,7 @@ Bobov novčanik počinje programom svedoka P2WPKH kojeg smo videli ranije:
 
 Program svedoka P2WPKH sastoji se od verzije svedoka i Bobovog hešovanog javnog ključa od 20 bajtova.
 
-Bobov novčanik zatim štiti prethodni program svedoka, prvo sa SHA256, zatim sa RIPEMD160, stvarajući još jedan heš od 20 bajtova.
+Bobov novčanik tada štiti prethodni program svedoka, prvo sa SHA256, zatim sa RIPEMD160, stvarajući još jedan heš od 20 bajtova.
 
 Koristimo +bx+ iz komandne linije da se to uradi:
 
@@ -863,7 +863,7 @@ echo \
 ----
 
 
-Nakon toga, heš skripta za otkup se pretvara u bitkoin adresu. Koristimo ponovo +bx+ u komandnoj liniji:
+Nakon toga se heš skripta za otkup pretvara u bitkoin adresu. Koristite ponovo +bx+ u komandnoj liniji:
 
 .P2SH adresa
 ----
@@ -873,7 +873,7 @@ echo \
 37Lx99uaGn5avKBxiW26HjedQE3LrDCZru
 ----
 
-Sada, Bob može prikazati ovu adresu kupcima koji plaćaju kafu. Alisin novčanik može uplatiti na +37Lk99uaGn5avKBkiV26HjedKE3LrDCZru+, baš kao i na bilo koju drugu bitkoin adresu.
+Bob sada može da prikaže ovu adresu kupcima koji plaćaju kafu. Alisin novčanik može da napravi uplatu na +37Lk99uaGn5avKBkiV26HjedKE3LrDCZru+, kao i na bilo koju drugu bitkoin adresu.
 
 Da bi platio Bobu, Alisin novčanik će zaključati izlaz pomoću P2SH skripte:
 ----
@@ -884,9 +884,9 @@ Iako Alisin novčanik nema podršku za segwit, Bob koji kreira uplatu može da j
 
 ===== Pay-to-Witness-Script-Hash unutar Pay-to-Script-Hash-a
 
-Slično tome, program svedočenja P2WSH za skriptu sa multisig-om ili drugu komplikovanu skriptu može biti ugrađen unutar P2SH skripte i adrese, omogućavajući bilo kom novčaniku da izvrši plaćanja koja su segwit kompatibilna.
+Slično tome program svedočenja P2WSH za skriptu sa multisig-om ili drugom komplikovanom skriptom može biti ugrađen unutar P2SH skripte i adrese, omogućavajući bilo kom novčaniku da izvrši plaćanja koja su segwit kompatibilna.
 
-Kao što smo videli u <<p2wsh>>, Mohamedova kompanija ((("use cases", "import/export")))koristi plaćanje odvojenog svedoka sa multisig skriptama. Kako bi bilo koji klijent mogao da plati njegovoj kompaniji, bez obzira da li su novčanici nadograđeni za segwit, Mohamedov novčanik može da ugradi program svedoka P2WSH unutar P2SH skripte.
+Kao što ste videli u <<p2wsh>>, Mohamedova kompanija ((("use cases", "import/export")))koristi plaćanje odvojenog svedoka sa multisig skriptama. Kako bi bilo koji klijent mogao da plati njegovoj kompaniji, bez obzira da li su novčanici nadograđeni za segwit, Mohamedov novčanik može da ugradi program svedoka P2WSH unutar P2SH skripte.
 
 Prvo, Mohammedov novčanik izbacuje skriptu za otkup sa SHA256 (samo jednom). Iskoristimo +bx+ da to uradimo u komandnoj liniji:
 
@@ -909,7 +909,7 @@ Zatim se hešovana skripta za otkup pretvara u program svedoka P2WSH:
 0 9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73
 ----
 
-Zatim se program za svedoke hešuje sa SHA256 i RIPEMD160, stvarajući novi 20-bajtni heš, kakav se koristi u tradicionalnom P2SH. Koristimo +bx+ u komandnoj liniji da to učinimo:
+Onda se program za svedoke hešuje sa SHA256 i RIPEMD160, stvarajući novi 20-bajtni heš, kakav se koristi u tradicionalnom P2SH. Koristite +bx+ u komandnoj liniji da to učinite:
 
 .HASH160 programa svedoka P2WSH
 ----
@@ -919,7 +919,7 @@ Zatim se program za svedoke hešuje sa SHA256 i RIPEMD160, stvarajući novi 20-b
 86762607e8fe87c0c37740cddee880988b9455b2
 ----
 
-Zatim novčanik gradi P2SH bitkoin adresu iz ovog heša. Opet, koristimo +bx+ za proračun u komandnoj liniji:
+Potom novčanik gradi P2SH bitkoin adresu iz ovog heša. Ponovo koristite +bx+ za proračun u komandnoj liniji:
 
 .P2SH bitkoin adresa
 ----
@@ -929,7 +929,7 @@ echo \
 3Dwz1MXhM6EfFoJChHCxh1jWHb8GQqRenG
 ----
 
-Sada Mohamedovi klijenti mogu uplaćivati na ovu adresu bez ikakve potrebe da podrže segwit. Da bi poslao uplatu Mohamedu, novčanik će zaključati izlaz sledećom P2SH skriptom:
+Sada Mohamedovi klijenti mogu da uplaćuju na ovu adresu bez ikakve potrebe da podrže segwit. Da bi poslao uplatu Mohamedu, novčanik će zaključati izlaz sledećom P2SH skriptom:
 
 .P2SH skripta koja se koristi za zaključavanje plaćanja Mohamedovom multisig-u
 ----
@@ -940,9 +940,9 @@ Mohamedova kompanija tada može da konstruiše segwit transakcije kako bi potro�
 
 ===== Adrese odvojenih svedoka
 
-Čak i nakon aktiviranja segwit-a, biće potrebno neko vreme dok se većina novčanika ne nadogradi. U početku će segwit biti ugrađen u P2SH, kao što smo videli u prethodnom odeljku, kako bi se olakšala kompatibilnost između novčanika koji su svesni i onih koji nisu svesni segwit-a.
+Čak i nakon aktiviranja segwit-a biće potrebno neko vreme dok se većina novčanika ne nadogradi. U početku će segwit biti ugrađen u P2SH, kao što smo videli u prethodnom odeljku, kako bi se olakšala kompatibilnost između novčanika koji su svesni i onih koji nisu svesni segwit-a.
 
-Međutim, jednom kada novčanici budu široko podržavali segwit, imaće smisla kodirati skripte svedoka direktno u native formatu adrese dizajniranom za segwit, umesto da ga ugrađujete u P2SH.
+Međutim, kada novčanici budu široko podržavali segwit ima smisla da se kodiraju skripte svedoka direktno u matičnom formatu adrese (native addresss format) dizajniranom za segwit, umesto da se ugrađuje u P2SH.
 
 Native format segwit adrese je definisan u BIP-173:
 
@@ -950,7 +950,7 @@ https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki[BIP-173]:: Base32
 
 BIP-173 kodira samo skriptu svedoka (P2WPKH i P2WSH). Nije kompatibilan sa skriptama P2PKH ili P2SH bez segwit-a. BIP-173 je Base32 kodiran sa kontrolnim brojem, u poređenju sa Base58 kodiranom "tradicionalnom" bitkoin adresom. BIP-173 adrese se takođe nazivaju _bech32_ adresama, koje se izgovaraju "beh 32", aludirajući na upotrebu algoritma za otkrivanje grešaka "BCH" i Base32 skupa za kodiranje sa 32 znaka.
 
-BIP-173 adrese koriste alfanumerički niz od 32 znaka, koji su pažljivo odabrani da bi se smanjile greške u slučaju pogrešnog čitanja ili pogrešnog unošenja. Biranjem samo cifara i malih slova, bech32 se lakše čita, izgovora i 45% efikasnije se kodira u QR kodovima.
+BIP-173 adrese koriste alfanumerički niz od 32 znaka, koji su pažljivo odabrani da bi se smanjile greške u slučaju pogrešnog čitanja ili pogrešnog unošenja. Biranjem samo cifara i malih slova, bech32 se lakše čita, izgovora i 45% efikasnije kodira u QR kodovima.
 
 BCH algoritam za otkrivanje grešaka je veliko poboljšanje u odnosu na prethodni algoritam kontrolnog broja (od Base58Check-a), koji omogućava ne samo otkrivanje, već i ispravljanje grešaka. Kada otkriju grešku, Interfejsi polja za unos adresa (poput tekstualnih polja u obrascima) mogu otkriti i istaknuti koji je znak najverovatnije pogrešno unet.
 
@@ -961,13 +961,13 @@ Testnet P2WPKH:: tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx
 Mainnet P2WSH:: bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3
 Testnet P2WSH:: tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7
 
-Kao što vidite u ovim primerima, niz segwit bech32 znaka dugačak je do 90 znakova i sastoji se iz tri dela:
+Kao što vidite u ovim primerima niz segwit bech32 znaka dugačak je do 90 znakova i sastoji se iz tri dela:
 
 Deo čitljiv za ljude: Ovaj prefiks "bc" ili "tb" identifikuje mainnet ili testnet.
 
-Separator:: cifra "1" koja nije deo skupa za kodiranje od 32 znaka i može se pojaviti u ovom položaju samo kao separator
+Separator:: cifra "1" koja nije deo skupa za kodiranje od 32 znaka i može da se pojavi u ovom položaju samo kao separator
 
-Deo podatka:: Najmanje 6 alfanumeričkih znakova, kontrolnim brojem kodirana skripta svedoka
+Deo podatka:: Najmanje 6 alfanumeričkih znakova, kontrolni broj kodirane skripte svedoka
 
 U ovom trenutku samo nekoliko novčanika prihvata ili proizvodi native segwit adrese bech32, ali kako se usvajanje segwita povećava, viđaćete ih sve češće i češće.
 
@@ -976,17 +976,17 @@ U ovom trenutku samo nekoliko novčanika prihvata ili proizvodi native segwit ad
 
 ((("transaction IDs (txid)")))Jedna od najvećih prednosti odvojenog svedoka je ta što eliminiše zloupotrebu (malleability) transakcija trećih lica.
 
-Pre segwita, treća lica su mogla suptilno da izmene potpise transakcija, menjajući ID transakcije (heš), a ne menjajući im bilo koje osnovno svojstvo (ulaz, izlaz, iznos). To je stvorilo mogućnosti za DoS (denial-of-service) napade, kao i napade protiv loše napisanog softvera za novčanike, koji su pretpostavljali da se nepotvrđeni hešovi transakcije ne mogu menjati.
+Pre segwita treća lica su mogla suptilno da izmene potpise transakcija, menjajući ID transakcije (heš), a ne menjajući im bilo koje osnovno svojstvo (ulaz, izlaz, iznos). To je stvorilo prilike za DoS (denial-of-service) napade, kao i napade protiv loše napisanog softvera za novčanike, koji su pretpostavili da se nepotvrđeni hešovi transakcije ne mogu menjati.
 
-Uvođenjem odvojenog svedoka, transakcije imaju dva identifikatora, +txid+ i +wtxid +. Tradicionalni ID transakcije +txid+ je dvostruki SHA256 heš serijalizovane transakcije, bez podataka o svedoku. Transakcija +wtxid+ je dvostruki SHA256 heš sa novim formatom serijalizacije transakcije sa podacima svedoka.
+Uvođenjem odvojenog svedoka transakcije imaju dva identifikatora, +txid+ i +wtxid +. Tradicionalni ID transakcije +txid+ je dvostruki SHA256 heš serijalizovane transakcije, bez podataka o svedoku. Transakcija +wtxid+ je dvostruki SHA256 heš sa novim formatom serijalizacije transakcije sa podacima svedoka.
 
-Tradicionalni +txid+ se izračunava na potpuno isti način kao i kod transakcije bez segwit-a. Međutim, budući da segwit transakcije imaju prazne ++scriptSig++-ove u svakom ulazu, ne postoji deo transakcije koji treće lice može da modifikuje. Dakle, u segwit transakciji, treće lice ne može da promeni +txid+, čak i kada transakcija nije potvrđena.
+Tradicionalni +txid+ se izračunava na potpuno isti način kao i kod transakcije bez segwit-a. Međutim, budući da segwit transakcije imaju prazne ++scriptSig++-ove u svakom ulazu, ne postoji deo transakcije koji treće lice može da modifikuje. Dakle, u segwit transakciji treće lice ne može da promeni +txid+, čak ni kada transakcija nije potvrđena.
 
 +wtxid+ je kao "prošireni" ID, jer heš takođe sadrži podatke svedoka. Ako se transakcija prenese bez podataka o svedocima, tada su +wtxid+ i +txid+ identični. Imajte na umu da pošto +wtxid+ uključuje podatke svedoka (potpise) i podaci svedoka mogu biti zloupotrebljeni dok se transakcija ne potvrdi. Treća lica mogu smatrati nepromenjive samo +wtxid+ segwit transakcije i to samo ako su _svi_ ulazi u transakciju segwit ulazi.
 
 [TIP]
 ====
-Odvojene transakcije svedoka imaju dve identifikacije (ID): +txid+ i +wtxid+. +txid+ je heš transakcije bez podatka o svedoku, a +wtxid+ je heš koji uključuje podatke svedoka. +txid+ transakcije u kojoj su svi ulazi segwit ulazi nije podložan zloupotrebi transakcija trećeg lica.
+Odvojene transakcije svedoka imaju dve identifikacije (ID): +txid+ i +wtxid+. +txid+ je heš transakcije bez podatka o svedoku, a +wtxid+ je heš koji uključuje podatke svedoka. +txid+ transakcija u kojoj su svi ulazi segwit ulazi nije podložan zloupotrebi transakcija trećeg lica.
 ====
 
 ==== Novi algoritam za potpisivanje odvojenog svedoka
@@ -995,7 +995,7 @@ Odvojeni svedok menja semantiku četiri funkcije provere potpisa  (+CHECKSIG+, +
 
 Potpisi u bitkoin transakcijama primenjuju se na _hešu obavezivanja (commitment hash)_, koji se izračunava iz podataka o transakciji i zaključava određene delove podataka koji ukazuju na obavezivanje potpisnika tim vrednostima. Na primer, u jednostavnom potpisu tipa +SIGHASH_ALL+, heš obavezivanja uključuje sve ulaze i izlaze.
 
-Nažalost, način na koji se heš obavezivanja izračunava uveo je mogućnost da se čvor koji potvrđuje potpis može primorati na izvršavanje značajnog broja računanja heša. Konkretno, heš operacije se povećavaju u O(n^2^) u odnosu na broj operacija potpisa u transakciji. Napadač bi, prema tome, mogao da napravi transakciju sa veoma velikim brojem operacija za potpis, zbog čega cela bitkoin mreža mora da izvrši stotine ili hiljade heš operacija da bi verifikovala transakciju.
+Nažalost, način na koji se heš obavezivanja izračunava uveo je mogućnost da se čvor koji potvrđuje potpis primora na izvršavanje značajnog broja računanja heša. Konkretno, heš operacije se povećavaju u O(n^2^) u odnosu na broj operacija potpisa u transakciji. Prema tome, napadač bi mogao da napravi transakciju sa veoma velikim brojem operacija za potpis, zbog čega cela bitkoin mreža mora da izvrši stotine ili hiljade heš operacija da bi verifikovala transakciju.
 
 Segwit je predstavljao priliku da se reši ovaj problem promenom načina na koji se izračunava heš obavezivanja. Za programe segwit verzije 0 programi svedoka koriste proveru potpisa sa poboljšanim algoritmom hešovanja obavezivanja kako je specificirano u BIP-143.
 
@@ -1005,25 +1005,25 @@ Novi algoritam postiže dva važna cilja. Prvo, broj heš operacija povećava se
 
 Bitkoin rudarski čvorovi i puni čvorovi imaju troškove za resurse koji se koriste za podršku bitkoin mreže i blokčejna. Kako se količina bitkoin transakcija povećava, tako se povećavaju i troškovi resursa (CPU, mrežni kapacitet, prostor na disku, memorija). Rudarima se ti troškovi nadoknađuju naknadama koje su proporcionalne veličini svake transakcije (u bajtovima). Puni čvorovi koji ne rudare ne primaju nadoknadu, pa na njima nastaju troškovi, jer moraju da pokreću autoritativni, potpuno validirajući čvor sa punim indeksom, možda zato što se čvor koristi za upravljanje bitkoin biznisom.
 
-Bez naknada za transakcije, rast bitkoin podataka sigurno bi se drastično povećao. Naknade su namenjene usklađivanju potreba korisnika bitkoina sa teretom koji njihove transakcije nameću mreži, putem tržišnog mehanizma otkrivanja cena.
+Bez naknada za transakcije rast bitkoin podataka bi se sigurno drastično povećao. Naknade su namenjene usklađivanju potreba korisnika bitkoina sa teretom koji njihove transakcije nameću mreži, putem tržišnog mehanizma otkrivanja cena.
 
 Obračun naknada na osnovu veličine transakcije tretira sve podatke u transakciji kao jednake troškove. Ali iz perspektive punih čvorova i rudara, neki delovi transakcije nose mnogo veće troškove. Svaka transakcija dodata u bitkoin mrežu utiče na potrošnju četiri resursa na čvorovima:
 
-Prostor na disku :: Svaka transakcija se čuva u blokčejnu, dodajući ukupnoj veličini blockčejna. Blokčejn se čuva na disku, ali skladištenje se može optimizovati "obrezivanjem" starijih transakcija.
+Prostor na disku :: Svaka transakcija se čuva u blokčejnu, koja se dodaje ukupnoj veličini blokčejna. Blokčejn se čuva na disku, ali skladištenje se može optimizovati "obrezivanjem" starijih transakcija.
 
 CPU :: Svaka transakcija mora biti potvrđena, za šta je potrebno CPU vreme.
 
-Širina opsega :: Svaka transakcija se prenosi (putem flood propagation (širenja poplave)) preko mreže najmanje jednom. Bez ikakve optimizacije u protokolu širenja bloka, transakcije se ponovo prenose kao deo bloka, udvostručavajući uticaj na kapacitet mreže.
+Širina opsega :: Svaka transakcija se prenosi (putem flood propagation (širenjem poplave)) preko mreže najmanje jednom. Bez ikakve optimizacije u protokolu širenja bloka, transakcije se ponovo prenose kao deo bloka, udvostručavajući uticaj na kapacitet mreže.
 
 Memorija :: Čvorovi koji potvrđuju transakcije zadržavaju UTXO indeks ili čitav UTXO skup u memoriji kako bi ubrzali potvrđivanje. S obzirom da je memorija bar za jedan red veličine skuplja od diska, rast UTXO skupa disproporcionalno doprinosi troškovima pokretanja čvora.
 
-Kao što vidite sa liste, nema svaki deo transakcije isti uticaj na troškove pokretanja čvora ili na sposobnost bitkoina da  skalira kako bi podržavao više transakcija. Najskuplji deo transakcije su novokreirani izlazi jer se dodaju u UTXO skup u memoriji. Radi poređenja, potpisi (podaci svedoka) dodaju najmanje tereta mreži i troškovima za pokretanje čvora, jer se podaci svedoka samo jednom validiraju, a zatim se više ne upotrebljavaju. Dalje, odmah nakon primanja nove transakcije i potvrđivanja podataka svedoka, čvorovi mogu odbaciti te podatke svedoka. Ako se naknade izračunavaju na osnovu veličine transakcije, bez razlike između ove dve vrste podataka, tada tržišni podsticaji za naknade nisu usklađeni sa stvarnim troškovima nametnutim transakcijom. U stvari, trenutna struktura naknade zapravo podstiče suprotno ponašanje, jer su podaci o svedocima najveći deo transakcije.
+Kao što vidite na listi nema svaki deo transakcije isti uticaj na troškove pokretanja čvora ili na sposobnost bitkoina da skalira kako bi podržavao više transakcija. Najskuplji deo transakcije su novokreirani izlazi jer se dodaju u memoriju UTXO skups. Radi poređenja, potpisi (podaci svedoka) dodaju najmanje tereta mreži i troškovima za pokretanje čvora, jer se podaci svedoka samo jednom validiraju, a zatim se više ne upotrebljavaju. Osim toga, odmah nakon primanja nove transakcije i potvrđivanja podataka svedoka, čvorovi mogu  da odbace te podatke svedoka. Ako se naknade izračunavaju na osnovu veličine transakcije, bez razlike između ove dve vrste podataka, tada tržišni podsticaji za naknade nisu usklađeni sa stvarnim troškovima nametnutim transakcijom. U stvari, trenutna struktura naknade zapravo podstiče suprotno ponašanje, jer su podaci o svedocima najveći deo transakcije.
 
-Podsticaji koje naknade stvaraju su važni, jer utiču na ponašanje novčanika. Za sastavljanje transakcija, svi novčanici moraju primeniti određenu strategiju koja uzima u obzir brojne faktore, kao što su poverljivost (smanjivanje ponovne upotrebe adresa), fragmentacija (stvaranje mnogo sitnog kusura) i naknada. Ako naknade prevladavaju u motivisanju novčanika da koriste što manje moguće ulaza u transakcijama, to može dovesti do biranja UTXO-a i promene strategija adrese koje nenamerno povećavaju UTXO skup.
+Podsticaji koje stvaraju naknade su važni, jer utiču na ponašanje novčanika. Za sastavljanje transakcija, svi novčanici moraju primeniti određenu strategiju koja uzima u obzir brojne faktore, kao što su poverljivost (smanjivanje ponovne upotrebe adresa), fragmentacija (stvaranje mnogo sitnog kusura) i naknada. Ako naknade prevladavaju u motivisanju novčanika da koriste što manje moguće ulaza u transakcijama, to može dovesti do biranja UTXO-a i promene strategija adrese koje nenamerno povećavaju UTXO skup.
 
 Transakcije konzumiraju UTXO u svojim ulazima i kreiraju novi UTXO sa svojim izlazima. Dakle, transakcija koja ima više ulaza nego izlaza, rezultiraće smanjenjem skupa UTXO-a, dok će transakcija koja ima više izlaza nego ulaza rezultirati povećavanjem UTXO skupa. Razmotrimo _razliku_ između ulaza i izlaza i nazovimo je "neto-novih-UTXO-a". To je važna metrika, jer nam govori kakav će uticaj imati transakcija na najskuplji mrežni resurs, UTXO skup u memoriji. Transakcija sa pozitivnim neto-novih-UTXO-a dodatno opterećuje taj resurs. Transakcija sa negativnim neto-novih-UTXO-a smanjuje teret. Zato želimo da ohrabrimo transakcije koje imaju negativni ili neutralni neto-novih-UTXO-a.
 
-Pogledajmo primer koji pokazuje koje podsticaje stvara računanje naknade za transakcije, sa i bez odvojenog svedoka. Razmotrićemo dve različite transakcije. Transakcija A je transakcija sa tri ulaza i dva izlaza, i ima neto-novih-UTXO metriku od - 1, što znači da troši jedan UTXO više nego što stvara, smanjujući skup UTXO-a za jedan. Transakcija B je transakcija sa 2 ulaza i 3 izlaza, i ima neto-novih-UTXO metriku od 1, što znači da dodaje jedan UTXO u UTXO skup, namećući dodatne troškove celoj bitkoin mreži. Obe transakcije koriste multisig skripte (2-od-3) da bi pokazale kako složene skripte povećavaju uticaj odvojenog svedoka na naknade. Pretpostavimo da je provizija 30 satošija po bajtu i popust 75% na podatke svedoka:
+Pogledajte primer koji pokazuje koje podsticaje stvara računanje naknade za transakcije, sa i bez odvojenog svedoka. Razmotrićemo dve različite transakcije. Transakcija A ima tri ulaza i dva izlaza, koja ima neto-novih-UTXO metriku od - 1, što znači da troši jedan UTXO više nego što stvara, smanjujući skup UTXO-a za jedan. Transakcija B ima 2 ulaza i 3 izlaza, koja ima neto-novih-UTXO metriku od 1, što znači da dodaje jedan UTXO u UTXO skup, namećući dodatne troškove celoj bitkoin mreži. Obe transakcije koriste multisig skripte (2-od-3) da bi pokazale kako složene skripte povećavaju uticaj odvojenog svedoka na naknade. Pretpostavimo da je provizija 30 satošija po bajtu i popust 75% na podatke svedoka:
 
 ++++
 <dl>
@@ -1042,6 +1042,6 @@ Pogledajmo primer koji pokazuje koje podsticaje stvara računanje naknade za tra
 ++++
 
 
-Obe transakcije su jeftinije kada se implementira odvojeni svedok. Ali ako uporedimo troškove te dve transakcije, vidimo da je pre odvojenog svedoka naknada veća za transakciju koja ima negativan neto-novih-UTXO-a. Nakon odvojenog svedoka, naknade za transakcije usklađuju se sa podsticajem da se minimalizuje stvaranje novog UTXO-a tako da greškom ne kaznimo transakcije sa mnogo ulaza.
+Obe transakcije su jeftinije kada se implementira odvojeni svedok. Ako uporedite troškove te dve transakcije, videćete da je pre odvojenog svedoka naknada veća za transakciju koja ima negativan neto-novih-UTXO-a. Nakon odvojenog svedoka, naknade za transakcije usklađuju se sa podsticajem da se minimalizuje stvaranje novog UTXO-a tako da greškom ne kaznimo transakcije sa mnogo ulaza.
 
-Zato odvojeni svedok ima dve glavne posledice na naknade koje plaćaju korisnici bitkoina. Prvo, segwit smanjuje ukupne troškove transakcija popustom na podatake svedoka i povećanjem kapaciteta bitkoin blokčejna. Drugo, popust segwita na podatke svedoka ispravlja pogrešno izbalansirane podsticaje koji su nenamerno stvorile pretrpavanje UTXO skupa. ((("", startref="Tadv07")))((("", startref="Ssegwit07")))
+Zato odvojeni svedok ima dve glavne posledice na naknade koje plaćaju korisnici bitkoina. Prvo, segwit smanjuje ukupne troškove transakcija popustom na podatake svedoka i povećanjem kapaciteta bitkoin blokčejna. Drugo, popust segwita na podatke svedoka ispravlja pogrešno izbalansirane podsticaje, koji su nenamerno stvorili pretrpavanje UTXO skupa. ((("", startref="Tadv07")))((("", startref="Ssegwit07")))

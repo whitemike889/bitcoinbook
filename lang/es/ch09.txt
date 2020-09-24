@@ -270,7 +270,7 @@ Consideremos, por ejemplo, un nodo SPV que esté interesado en los pagos entrant
 
 ==== Testnet&#x2014;La Zona de Pruebas de Bitcoin
 
-Testnet es el nombre de la cadena de bloques de prueba, la red y la moneda que se utiliza para fines de prueba. Testnet es una red P2P viva con todas las funciones, con carteras, bitcoins de prueba (monedas de testnet), minería y todas las demás funciones de mainnet. En realidad, solo hay dos diferencias: las monedas de testnet no tienen valor y la dificultad de minería debe ser lo suficientemente baja para que cualquiera pueda extraer monedas de la testnet con relativa facilidad (manteniéndolas sin valor) .
+Testnet es el nombre de la cadena de bloques de prueba, la red y la moneda que se utiliza para fines de prueba. Testnet es una red P2P en vivo con todas las funciones, con billeteras, bitcoins de prueba (monedas testnet), minería y todas las demás características de la mainnet. En realidad, solo hay dos diferencias: las monedas de testnet no tienen valor y la dificultad para la minería debe ser lo suficientemente baja como para que cualquiera pueda extraer monedas de la testnet con relativa facilidad (manteniéndolas sin valor).
 
 Cualquier desarrollo de software que esté destinado al uso en producción en la red principal de bitcoin (en inglés, mainnet), debe probarse primero en la red de pruebas (en inglés, testnet) con monedas de prueba. Esto protege tanto a los desarrolladores de pérdidas monetarias debido a errores, como a la red del comportamiento no deseado debido a errores.
 

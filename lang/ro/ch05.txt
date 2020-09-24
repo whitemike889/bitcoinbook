@@ -126,7 +126,7 @@ Notând acestă mnemonică, Gabriel a creat o copie de rezervă (vezi <<mnemonic
 
 [[mnemonic_paper_backup]]
 .Copia de rezervă de hârtie a lui Gabriel
-[cols="<,^,<,^", width="80%"]
+[width="80%"]
 |===
 |*1.*| _army_ |*7.*| _garbage_
 |*2.*| _van_ |*8.*| _claim_
@@ -222,7 +222,7 @@ image::images/mbc2_0507.png["De la mnemonică la sămânță"]
 Funcția de întindere (stretching) a cheilor, cu rundele sale de 2048 de rezumări (hashing), este o protecție foarte eficientă împotriva atacurilor prin forță brută împotriva mnemonicei sau a frazei-de-acces. Este extrem de costisitor (ca efort de calcul) să încercați mai mult de câteva mii de fraze și combinații mnemonice, în timp ce numărul de semințe (seeds) derivate posibile este vast (2^512^).
 ====
 
-Tables <<mnemonic_128_no_pass>>, and <<mnemonic_256_no_pass>> show some examples of mnemonic codes and the seeds they produce (either with or without a passphrase).
+Tabelele următoare arată câteva exemple de coduri mnemonice și semințele pe care le produc (cu sau fără o frază-de-acces).
 
 [[mnemonic_128_no_pass]]
 .Cod mnemonic de entropie pe 128 biți, fără frază-de-acces, sămânța rezultată
@@ -473,18 +473,18 @@ BIP-44 specifică structura ca fiind formată din cinci niveluri predefinite ale
 m / scop' / tip_monedă'  / cont'  / rest  / adresă_indice
 -----
 
-The first-level "purpose" is always set to +44'+. The second-level "coin_type" specifies the type of cryptocurrency coin, allowing for multicurrency HD wallets where each currency has its own subtree under the second level. There are three currencies defined for now: Bitcoin is m/44'/0', Bitcoin Testnet is m/44'/1', and Litecoin is m/44'/2'.
+”Scopul” de pe primul nivel este întotdeauna setat la _44'_. Al doilea nivel ”tip_monedă” specifică tipul de cripto monedă, permițând portofele HD multimonedă în care fiecare monedă are propriul său sub-arbore sub al doilea nivel. Există trei valute definite deocamdată: Bitcoin este m/44'/0', Bitcoin Testnet este m/44'/1', iar Litecoin este m/44'/2'.
 
-The third level of the tree is "account," which allows users to subdivide their wallets into separate logical subaccounts, for accounting or organizational purposes. For example, an HD wallet might contain two bitcoin "accounts": m/44'/0'/0' and m/44'/0'/1'. Each account is the root of its own subtree.
+Al treilea nivel al arborelui este ”cont”, care permite utilizatorilor să își subdivizeze portofelele în subconturi logice separate, în scopuri contabile sau organizaționale. De exemplu, un portofel HD poate conține două ”conturi” bitcoin: m/44'/0'/0' și m/44'/0'/1'. Fiecare cont este rădăcina propriului său sub-arbore.
 
-((("keys and addresses", see="also public and private keys")))On the fourth level, "change," an HD wallet has two subtrees, one for creating receiving addresses and one for creating change addresses. Note that whereas the previous levels used hardened derivation, this level uses normal derivation. This is to allow this level of the tree to export extended public keys for use in a nonsecured environment. Usable addresses are derived by the HD wallet as children of the fourth level, making the fifth level of the tree the "address_index." For example, the third receiving address for bitcoin payments in the primary account would be M/44'/0'/0'/0/2. <<table_4-9>> shows a few more examples.
+((("chei și adrese", see="de asemenea chei private și publice")))La al patrulea nivel, ”rest”, un portofel HD are doi sub-arbori, unul pentru crearea adreselor de primire și unul pentru crearea adreselor de rest. Rețineți că, în timp ce nivelurile anterioare au utilizat o derivare întărită, acest nivel folosește derivarea normală. Acest lucru permite ca acest nivel al arborelui să exporte chei publice extinse pentru utilizare într-un mediu nesigur. Adresele utilizabile sunt derivate de portofelul HD ca fiind copii de nivelul al patrulea, ceea ce face ca al cincilea nivel al arborelui să fie "adresa_indice”. De exemplu, a treia adresă de primire pentru plăți bitcoin în contul principal ar M/44'/0'/0'/0/2.<<table_4-9>> arată alte câteva exemple.
 
 [[table_4-9]]
 .Exemple de structuri BIP-44 de portofel HD
 [options="header"]
 |=======
 | Calea HD | Descriere Cheie
-| M/44'/0'/0'/0/2 | The third receiving public key for the primary bitcoin account
-| M/44'/0'/3'/1/14 | The fifteenth change-address public key for the fourth bitcoin account
-| m/44'/2'/0'/0/1 | The second private key in the Litecoin main account, for signing transactions
+| M/44'/0'/0'/0/2 | Cea de-a treia cheie publică de primire pentru contul bitcoin primar
+| M/44'/0'/'/1/14 | Cea de-a cincisprezecea cheie publică pentru rest pentru al patrulea cont bitcoin
+| m/44'/2'/0'/0/1 | A doua cheie privată din contul principal Litecoin, pentru semnarea tranzacțiilor
 |=======

@@ -60,27 +60,27 @@ Cu toate acestea, rețineți că cheile private utilizate pentru construirea adr
 NU TRIMITI BANI LA NICIUNA DINTRE ADRESELE DIN ACEASTĂ CARTE. Banii dumneavoastră vor fi luați de un alt cititor sau îi veți pierde pentru totdeauna.((("", startref="codeuse00")))
 ====
 
-=== Publication by O'Reilly Media
+=== Publicată de către O'Reilly Media
 
-This book is derived under license from the book "Mastering Bitcoin 2nd Edition", by O'Reilly Media.
+Această carte este derivată sub licență din cartea "Mastering Bitcoin 2nd Edition", de O'Reilly Media.
 
-=== Copyright and Book License
+=== Dreptul de Autor și Licența Cărții
 
 Copyright (c) 2014 Andreas M. Antonopoulos LLC
 
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit
+Această lucrare este licențiată sub licența internațională Creative Commons Attribution-ShareAlike 4.0. Pentru a vizualiza o copie a acestei licențe, vizitați
 
 http://creativecommons.org/licenses/by-sa/4.0/.
 
-To provide attribution please link to the book's repository:
+Pentru a furniza atribuire, vă rugăm să folosiți linkul căre repo-ul cărții
 
 https://github.com/bitcoinbook/bitcoinbook
 
-and include this license or an equivalent open license, to satisfy the ShareAlike requirements.
+și includeți această licență sau o licență deschisă echivalentă, pentru a satisface cerințele ShareAlike.
 
-This "Free Culture" compliant license was approved by my publisher O'Reilly Media (http://oreilly.com), who understand the value of open source. O'Reilly Media is not just the world's best publisher of technical books but also a strong supporter of an open culture and the sharing of knowledge.
+Această licență conformă ”Free Culture” a fost aprobată de editorul meu O'Reilly Media (http://oreilly.com), care înțelege valoarea open source. O'Reilly Media nu este doar cel mai bun editor mondial de cărți tehnice, ci și un susținător puternic al unei culturi deschise și a schimbului de cunoștințe.
 
-Thank you O'Reilly!
+Mulțumesc O'Reilly!
 
 [role="pagebreak-before"]
 === Contactarea Autorului
@@ -94,7 +94,7 @@ link:$$https://bitcoinbook.info/$$[]
 Urmăriți-mă pe Twitter:
 link:$$https://twitter.com/aantonop$$[]
 
-Find more than 500 education videos on my YouTube channel:
+Găsiți peste 500 de videoclipuri educaționale pe canalul meu YouTube:
 link:$$https://youtube.com/aantonop$$[]
 
 Mulțumesc tuturor patronilor mei care îmi susțin munca prin donații lunare. Puteți să urmăriți pagina Patreon aici:

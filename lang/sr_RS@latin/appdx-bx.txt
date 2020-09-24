@@ -1,9 +1,9 @@
 [[appdx_bx]]
-[dodatak]
+[appendix]
 
 == Bitkoin Explorer (bx) komande
 
-((("Bitcoin Explorer (bx) Komande", id="BX18_1", range="startofrange")))Bitkoin Explorer (bx) je alat komandne linije koji pruža razne komande za upravljanje ključem i pravljenje transakcija. Deo je bitkoinove biblioteke libbitcoin.
+((("Bitcoin Explorer (bx) Komande", id="BX18_1", range="startofrange")))Bitkoin Explorer (bx) je alat komandne linije koji pruža razne komande za upravljanje ključem i pravljenje transakcija. Deo je bitkoin biblioteke libbitcoin.
 
 ----
 Upotreba: bx COMMAND [--help]
@@ -107,7 +107,7 @@ $ cat public_key
 02fca46a6006a62dfdd2dbb2149359d0d97a04f430f12a7626dd409256c12be500
 ----
 
-Možete preoblikovati +public_key+ kao adresu koristeći naredbu +ec-to-address+. Prosledujemo _public_key_ u standardni ulaz (standard input):
+Možete preoblikovati +public_key+ kao adresu koristeći naredbu +ec-to-address+. Prosleđujemo _public_key_ u standardni ulaz (standard input):
 
 ----
 $ bx ec-to-address < public_key

@@ -789,7 +789,7 @@ https://github.com/sinisterchipmunk/bitcoin-client[bitcoin-client]:: O bibliotec
 https://github.com/btcsuite/btcd[btcd]:: Un client bitcoin nod-complet scris în Go
 
 ==== Rust
-https://github.com/apoelstra/rust-bitcoin[rust-bitcoin]:: Bibliotecă bitcoin pentru serializare, parsare, și apeluri de API scrisă în Rust
+https://github.com/rust-bitcoin/rust-bitcoin[rust-bitcoin]:: Biblioteca bitcoin Rust pentru serializare, analizare și apeluri API
 
 ==== C#
 https://github.com/MetacoSA/NBitcoin[NBitcoin]:: Bibliotecă bitcoin cuprinzătoare pentru platforma .NET

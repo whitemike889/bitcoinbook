@@ -1,5 +1,5 @@
 [[appdx-pycoin]]
-[dodatak]
+[appendix]
 == pycoin, ku, i tx
 
 
@@ -51,7 +51,7 @@ Napravite ključ BIP-32 od lozinke:
 
 [WARNING]
 ====
-Lozinku u ovom primeru je mnogo lako pogoditi.
+U ovom primeru je lako pogoditi lozinku.
 ====
 
 ----
@@ -134,7 +134,7 @@ $ ku -w -s3/2 P:foo
 xprv9wTErTSkjVyJa1v4cUTFMFkWMe5eu8ErbQcs9xajnsUzCBT7ykHAwdrxvG3g3f6BFk7ms5hHBvmbdutNmyg6iogWKxx6mefEw4M8EroLgKj
 ----
 
-Ojačan potključ:
+Ojačan podključ:
 
 ----
 $ ku -w -s3/2H P:foo
@@ -330,7 +330,7 @@ Dogecoin address : DFpN6QqFfUm3gKNaxN6tNcab1FArL9cZLE
 ==== Transaction Utility (TX, uslužni program transakcija)
 
 ((("transaction utility (TX)", id="TX17")))
-Uslužni program komandne linije +tx+ prikazaće transakcije u obliku čitljivim za ljude, dohvatiti bazne transakcije iz pycoin-ove transakcijske keš memorije ili iz web servisa (blockchain.info, blockcypher.com, blockr.io i chain.so su trenutno podržani), objediniti transakcije, dodati ili obrisati ulaze ili izlaze i potpisati transakcije.
+Uslužni program komandne linije +tx+ prikazaće transakcije u obliku čitljivim za ljude, dohvatiće bazne transakcije iz pycoin-ove transakcijske keš memorije ili iz web servisa (blockchain.info, blockcypher.com, blockr.io i chain.so su trenutno podržani), objediniti transakcije, dodati ili obrisati ulaze ili izlaze i potpisati transakcije.
 
 Sledi nekoliko primera.
 
@@ -383,7 +383,7 @@ including unspents in hex dump since transaction not fully signed
 ** can't validate transaction as source transactions missing
 ----
 
-Poslednja linija se pojavljuje jer su vam, tehnički, za potvrdu transakcija potrebne izvorne transakcije. Zato dodajmo +-a+ da bismo popunili transakcije sa izvornim informacijama:
+Poslednja linija se pojavljuje jer su vam za potvrdu transakcija tehnički potrebne izvorne transakcije. Zato dodajmo +-a+ da bismo popunili transakcije sa izvornim informacijama:
 
 ----
 $ tx -a 49d2adb6e476fa46d8357babf78b1b501fd39e177ac7833124b3f67b17c40c2a

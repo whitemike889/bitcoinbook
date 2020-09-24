@@ -270,7 +270,7 @@ Luați în considerare, de exemplu, un nod SPV care este interesat de plățile 
 
 ==== Testnet - locul de joacă pentru testarea Bitcoin
 
-Testnet este numele lanțului-de-blocuri, rețelei și monedei utilizate în scopuri de testare. Testnet este o rețea P2P completă, cu portofele, bitcoin de test (monede testnet), minerit și toate celelalte caracteristici ale mainnet-ului. Există într-adevăr doar două diferențe: monedele testnet sunt inutile, iar dificultatea de minerit ar trebui să fie suficient de scazută astfel încât oricine să poată mina monede de testnet relativ ușor (ramânând fără valoare).
+Testnet este numele lanțului-de-blocuri, rețelei și monedei utilizate în scopuri de testare. Testnet este o rețea P2P completă, cu portofele, bitcoin de test (monede testnet), minerit și toate celelalte caracteristici ale mainnet-ului. Există într-adevăr doar două diferențe: monedele testnet sunt inutile, iar dificultatea de minerit ar trebui să fie suficient de scăzută astfel încât oricine să poată mina monede de testnet relativ ușor (ramânând fără valoare).
 
 Orice aplicație software destinată utilizării în producției în rețeaua bitcoin ar trebui testată mai întâi pe testnet cu monede de test. Acest lucru protejează atât dezvoltatorii împotriva pierderii banilor din cauza erorilor, cât și a rețelei împotriva funcționalităților nedorite cauzate de defecte.
 

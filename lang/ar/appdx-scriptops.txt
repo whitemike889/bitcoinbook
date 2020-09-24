@@ -168,7 +168,7 @@ Tables and descriptions sourced from https://en.bitcoin.it/wiki/Script[].
 | OP_CODESEPARATOR | 0xab | يقوم بوضع علامة على بداية البيانات التي تم التحقق من توقيعها
 | OP_CHECKSIG | 0xac | يقوم بحذف المفتاح العام والتوقيع من المكدسة ويتحقق من صحة التوقيع بالنسبة لبيانات التعامل الممزوجة، يعيد القيمة صواب TRUE إذا تطابقا
 | OP_CHECKSIGVERIFY | 0xad | مثل المعامل CHECKSIG، مُطبقاً من بعده المعامل  OP_VERIFY لإيقاف التعامل إذا لم يكن الناتج هو صواب TRUE
-| OP_CHECKMULTISIG | 0xae |  يقوم بتشغيل المعامل CHECKSIG على كل زوج توقيع-مفتاح عام معطى. يجب أن يحدث تطابق في كل الأزواج. توجد عله حدثت عندما تم القيام بعمل تنفيذ لشفرة تقوم بهذا المعامل فحواها أن المعامل أصبح يقوم بسحب قيمة إضافية من المكدسة، تستطيع التغلب على هذه العلة بوضع المعامل OP_NOP قبل المعامل OP_CHECKMULTISIG
+| OP_CHECKMULTISIG | 0xae | Run CHECKSIG for each pair of signature and public key provided. All must match. Bug in implementation pops an extra value, prefix with OP_0 as workaround
 | OP_CHECKMULTISIGVERIFY | 0xaf | مثل المعامل CHECKMULTISIG، متبوعاً بالمعامل OP_VERIFY للإيقاف إذا لم يكن الناتج صواب TRUE
 |=======
 

@@ -168,7 +168,7 @@ A <<tx_script_ops_table_crypto>> a kriptográfiai műveleteket mutatja.
 | OP_CODESEPARATOR | 0xab | Az aláírással ellenőrzött adat kezdetét jelöli
 | OP_CHECKSIG | 0xac | Eltávolítja a veremről a nyilvános kulcsot és az aláírást, és ellenőrzi, hogy az aláírás megfelel-e a tranzakció hashelt adatának, TRUE-t ad vissza, ha igen
 | OP_CHECKSIGVERIFY | 0xad | U.a. mint a CHECKSIG, de egy OP_VERIFY megállítja a végrehajtást, ha az eredmény nem TRUE
-| OP_CHECKMULTISIG | 0xae | A CHECKSIG futtatása minden egyes megadott nyilvános kulcs és aláírás párra. Az összesnek egyeznie kell. Egy implementációs hiba miatt eggyel több értéket távolít el a veremről. Az OP_NOP előtaggal megkerülhető a hiba.
+| OP_CHECKMULTISIG | 0xae | A CHECKSIG futtatása minden egyes megadott nyilvános kulcs és aláírás párra. Az összesnek egyeznie kell. Egy implementációs hiba miatt eggyel több értéket távolít el a veremről. Az OP_0 előtaggal megkerülhető a hiba.
 | OP_CHECKMULTISIGVERIFY | 0xaf | U.a. mint a CHECKMULTISIG, de egy OP_VERIFY megállítja a végrehajtást, ha az eredmény nem TRUE
 |=======
 

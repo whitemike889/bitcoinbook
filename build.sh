@@ -101,6 +101,21 @@ grayscale_images () {
 	done;
 }
 
+create_dist () {
+	if [ ! -d "${DIST}" ]; then
+		mkdir ${DIST};
+	fi;
+	if [ ! -d "${DIST}/${LANG}" ]; then
+		mkdir ${DIST}/${LANG};
+	fi;
+}
+
+dist_pdf () {
+	if [ -f "${DIR}/${BOOK}.pdf" ]; then
+		cp ${DIR}/${BOOK}.pdf ${DIST}/${LANG}/${TITLE}_${LANG}_${TAG}.pdf;
+	fi; 
+}
+
 case "$1" in
 	pdf)
 		echo "Building pdf"
@@ -110,14 +125,16 @@ case "$1" in
 		copy_chapters
 		cd ${DIR}
 		asciidoctor-pdf -a pdfbuild -r asciidoctor-mathematical ${BOOK}.asciidoc
+		create_dist
+		dist_pdf
 		shift
 		;;
 	epub)
-		echo "Building pdf"
+		echo "Building epub"
 		shift
 		;;
 	mobi)
-		echo "Building pdf"
+		echo "Building mobi"
 		shift
 		;;
 	*)

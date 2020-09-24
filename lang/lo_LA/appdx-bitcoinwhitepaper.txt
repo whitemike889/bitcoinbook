@@ -4,7 +4,7 @@
 
 [NOTE]
 ====
-((("whitepaper", id="whitethirteen")))((("bitcoin whitepaper", id="BCwhitethirteen")))((("Nakamoto, Satoshi", id="nakamatothirteen")))This is the original whitepaper, reproduced in its entirety exactly as it was published by Satoshi Nakamoto in October 2008.
+((("whitepaper", id="whitethirteen")))((("bitcoin whitepaper", id="BCwhitethirteen")))((("Nakamoto, Satoshi", id="nakamatothirteen"))) ນີ້ເປັນເອກະສານນຳສະເໜີ. ທີ່ໄດ້ນຳມາຮຽບຮຽງແລະເຜີຍແຜ ໂດຍ ທ່ານ Satoshi Nakamoto ໃນ ເດືອນຕຸລາ ປີ 2008 
 ====
 
 === Bitcoin - A Peer-to-Peer Electronic Cash System

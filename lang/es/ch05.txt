@@ -126,7 +126,7 @@ Al escribir este mnemónico, Gabriel creó una copia de seguridad (ver <<mnemoni
 
 [[mnemonic_paper_backup]]
 .Copia de seguridad en papel del mnemónico de Gabriel
-[cols="<,^,<,^", width="80%"]
+[cols="<1,^50,<1,^50", width="80%"]
 |===
 |*1.*| _army_ |*7.*| _garbage_
 |*2.*| _van_ |*8.*| _claim_
@@ -222,7 +222,7 @@ image::images/mbc2_0507.png["From mnemonic to seed"]
 La función de estiramiento de llaves, con sus 2048 rondas de hash, es una protección muy efectiva contra los ataques de fuerza bruta contra el mnemónico o la frase de contraseña. Es extremadamente costoso (en computación) probar más de unos pocos miles de combinaciones de frases de contraseña y de mnemónicos, mientras que el número de posibles semillas que se pueden derivar es enorme (2^512^).
 ====
 
-Tables <<mnemonic_128_no_pass>>, and <<mnemonic_256_no_pass>> show some examples of mnemonic codes and the seeds they produce (either with or without a passphrase).
+Las tablas pass:[<a data-type="xref" href="#mnemonic_128_no_pass" data-xrefstyle="select: labelnumber">#mnemonic_128_no_pass</a>], pass:[<a data-type="xref" href="#mnemonic_128_w_pass" data-xrefstyle="select: labelnumber">#mnemonic_128_w_pass</a>], y pass:[<a data-type="xref" href="#mnemonic_256_no_pass" data-xrefstyle="select: labelnumber">#mnemonic_256_no_pass</a>] muestran algunos ejemplos de códigos mnemónicos y las semillas que éstos producen (con o sin frase de contraseña).
 
 [[mnemonic_128_no_pass]]
 .Código mnemónico con 128 bits de entropía, sin frase de contraseña, semilla resultante
@@ -473,18 +473,18 @@ BIP-44 especifica que la estructura se basa en cinco niveles predefinidos del á
 m / propósito' / tipo_moneda' / cuenta' / cambio / índice_dirección
 -----
 
-The first-level "purpose" is always set to +44'+. The second-level "coin_type" specifies the type of cryptocurrency coin, allowing for multicurrency HD wallets where each currency has its own subtree under the second level. There are three currencies defined for now: Bitcoin is m/44'/0', Bitcoin Testnet is m/44'/1', and Litecoin is m/44'/2'.
+El primer nivel "propósito" está siempre ajustado a +44'+. El segundo nivel "tipo_moneda" especifica el tipo de criptomoneda, permitiendo carteras HD multidivisa donde cada moneda tiene su propio subárbol bajo el segundo nivel. Hay tres monedas definidas por ahora: Bitcoin es m/44'/0', Bitcoin Testnet es m/44++&#x27;++/1++&#x27;++ y Litecoin es m/44++&#x27;++/2++&#x27;++.
 
-The third level of the tree is "account," which allows users to subdivide their wallets into separate logical subaccounts, for accounting or organizational purposes. For example, an HD wallet might contain two bitcoin "accounts": m/44'/0'/0' and m/44'/0'/1'. Each account is the root of its own subtree.
+El tercer nivel del árbol es "cuenta", que permite a los usuarios que subdividan sus carteras en subcuentas lógicas separadas, para la contabilidad o para propósitos organizativos. Por ejemplo, una cartera HD puede contener dos "cuentas" bitcoin: m/44++&#x27;++/0++&#x27;++/0++&#x27;++ and m/44++&#x27;++/0++&#x27;++/1++&#x27;++. Cada cuenta es la raíz de su propio subárbol.
 
-((("keys and addresses", see="also public and private keys")))On the fourth level, "change," an HD wallet has two subtrees, one for creating receiving addresses and one for creating change addresses. Note that whereas the previous levels used hardened derivation, this level uses normal derivation. This is to allow this level of the tree to export extended public keys for use in a nonsecured environment. Usable addresses are derived by the HD wallet as children of the fourth level, making the fifth level of the tree the "address_index." For example, the third receiving address for bitcoin payments in the primary account would be M/44'/0'/0'/0/2. <<table_4-9>> shows a few more examples.
+((("llaves y direcciones", see="también llaves públicas y privadas")))En el cuarto nivel, "cambio", una cartera HD tiene dos subárboles, uno para la creación de direcciones que reciben y otro para la creación de direcciones de cambio. Ten en cuenta que mientras que los niveles anteriores utilizaron derivación reforzada, este nivel utiliza derivación normal. Esto se hace para permitir que este nivel del árbol pueda exportar las llaves públicas extendidas para el uso en un entorno no seguro. Las direcciones utilizables se derivan de la cartera HD como hijos del cuarto nivel, haciendo que el quinto nivel del árbol sea el "indice_dirección". Por ejemplo, la tercera dirección de recepción para los pagos bitcoin en la cuenta principal sería M/44++&#x27;++/0++&#x27;++/0++&#x27;++/0/2. <<table_4-9>> muestra algunos ejemplos más.
 
 [[table_4-9]]
 .Ejemplos de estructuras de carteras HD BIP-44
 [opciones="título"]
 |=======
 |Ruta HD | Llave descrita
-| M/44'/0'/0'/0/2 | La tercera clave pública receptora para la cuenta bitcoin primaria
-| M/44'/0'/3'/1/14 | La decimoquinta clave pública de la dirección de cambio para la cuarta cuenta bitcoin
-| m/44'/2'/0'/0/1 | La segunda clave privada en la cuenta principal litecoin, para las transacciones de firma
+| M/44++&#x27;++/0++&#x27;++/0++&#x27;++/0/2 | La tercera llave pública receptora para la cuenta bitcoin primaria
+| M/44++&#x27;++/0++&#x27;++/3++&#x27;++/1/14 | La decimoquinta llave pública de la dirección de cambio para la cuarta cuenta bitcoin
+| m/44++&#x27;++/2++&#x27;++/0++&#x27;++/0/1 | La segunda llave privada en la cuenta principal Litecoin, para las transacciones de firma
 |=======

@@ -23,7 +23,7 @@ Desde la invención de la criptografía de llave pública, se han descubierto va
 
 En bitcoin, utilizamos la criptografía de llave pública para crear un par de llaves que controla el acceso a bitcoin. El par de llaves consiste en una llave privada y, derivada de ella, una llave pública única. La llave pública se utiliza para recibir fondos, y la llave privada se usa para firmar transacciones para gastar los fondos.
 
-Existe una relación matemática entre las llaves pública y privada que permiten que la llave privada sea utilizada para generar firmas en mensajes. Estas firmas pueden ser validadas contra la llave pública sin necesidad de revelar la llave privada.
+Existe una relación matemática entre la llave pública y la privada que permite que la llave privada se use para generar firmas en los mensajes. Estas firmas se pueden validar con la llave pública sin revelar la llave privada.
 
 Cuando los bitcoin son gastados, el dueño actual de los bitcoin presenta su llave pública y firma (diferente cada vez, pero creada a partir de la misma llave privada) en una transacción para gastar esos bitcoin. A través de la presentación de la llave pública y la firma, todos los participantes de la red bitcoin pueden verificar y aceptar la transacción como válida, confirmando que la persona que transfirió el bitcoin era la propietaria en el momento de la transferencia.
 
@@ -186,7 +186,7 @@ Existen un par de casos especiales que explican la necesidad del "punto en el in
 
 Si P~1~ y P~2~ son el mismo punto, la línea "entre" P~1~ y P~2~ debe extenderse para ser la tangente sobre la curva en el punto P~1~. Esta tangente intersecará la curva en exactamente un nuevo punto. Puedes usar técnicas de cálculo para determinar la pendiente de la línea tangencial. Estas técnicas curiosamente funcionan a pesar de estar restringiendo nuestro interés a puntos sobre la curva con coordenadas de dos enteros.
 
-En algunos casos (esto es, si P~1~ y P~2~ tienen el mismo valor en x pero distinto valor en y) la línea tangente será exactamente vertical, en cuyo caso P3 = "punto en el infinito."
+En algunos casos (es decir, si P~1~ y P~2~ poseen los mismos valores x pero diferentes valores y), la línea tangente será exactamente vertical, en cuyo caso P~3~ = "punto al infinito".
 
 Si P~1~ es el "punto en el infinito", entonces P~1~ + P~2~ = P~2~. De manera similar, si P~2~ es el punto en el infinito, entonces P~1~ + P~2~ = P~1~. Esto muestra cómo el punto en el infinito desempeña el rol de cero.
 
@@ -437,7 +437,7 @@ Aquí está la misma llave pública mostrada como un número de 520 bits (130 d�
 
 ++++
 <pre data-type="programlisting">
-K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A↵
+K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A&#x21b5;
 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
 </pre>
 ++++
@@ -568,7 +568,7 @@ Public Key (x,y) coordinates is:
  (41637322786646325214887832269588396900663353932545912953362782457239403430124L,
  16388935128781238405526710466724741593761085120864331449066658622400339362166L)
 Public Key (hex) is:
- 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec↵
+ 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec&#x21b5;
 243bcefdd4347074d44bd7356d6a53c495737dd96295e2a9374bf5f02ebfc176
 Compressed Public Key (hex) is:
  025c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec
@@ -618,27 +618,6 @@ BTC public key: 029ade3effb0a67d5c8609850d797366af428f4a0d5194cb221d807770a15228
 === Llaves y Direcciones Avanzadas
 
 ((("direcciones y llaves", "formas avanzadas", id="KAadvanced04")))En las siguientes secciones veremos formas avanzadas de llaves y direcciones, tales como llaves privadas encriptadas, scripts y direcciones multifirma, direcciones de vanidad y carteras de papel.
-
-==== Llaves Privadas Encriptadas (BIP-38)
-
-((("propuestas de mejora de bitcoin", "Llaves Privadas Encriptadas (BIP-38)")))((("llaves y direcciones", "formas avanzadas", "llaves privadas encriptadas")))((("llaves públicas y privadas", "llaves privadas encriptadas")))((("contraseñas", "llaves privadas encriptadas")))((("seguridad", "contraseñas")))Las llaves privadas deben mantenerse en secreto. La necesidad de _confidencialidad_ de las llaves privadas es un tema evidente que es bastante difícil de lograr en la práctica, porque entra en conflicto con el objetivo igualmente importante de la _disponibilidad_. Mantener en privado la llave privada es mucho más difícil cuando se necesita almacenar copias de seguridad de la llave privada para evitar perderla. Una llave privada almacenada en una cartera que está encriptada por una contraseña puede ser segura, pero se debe hacer una copia de seguridad de esa cartera. A veces, los usuarios necesitan mover las llaves de una cartera a otra, por ejemplo, para actualizar o reemplazar el software de la cartera. Las copias de seguridad de las llaves privadas también se pueden almacenar en papel (consulta <<paper_wallets>>) o en un medio de almacenamiento externo, como una unidad flash USB. Pero, ¿qué pasa si la copia de seguridad es robada o se pierde? Estos conflictos en los objetivos de seguridad llevaron a la introducción de un estándar compatible y práctico para encriptar llaves privadas de manera que puedan ser comprendidas por muchas carteras y clientes de bitcoin diferentes, estandarizados por BIP-38 (ver <<appdxbitcoinimpproposals>>).
-
-BIP-38 propone un estándar común para el cifrado de llaves privadas con una frase de contraseña larga y codificado con Base58Check para que puedan almacenarse de forma segura mediante copias de seguridad, transportarse de manera segura entre carteras o guardarse en situaciones en las que la llave pudiera estar expuesta. El estándar para el cifrado utiliza el Advanced Encryption Standard (AES), un estándar establecido por el NIST y utilizado ampliamente en implementaciones de cifrado de datos para aplicaciones comerciales y militares.
-
-Un esquema de cifrado BIP-38 toma como entrada una llave privada de bitcoin, generalmente codificada en WIF, como una cadena Base58Check con el prefijo "5". Además, el esquema de cifrado BIP-38 toma una frase de contraseña, una contraseña larga, generalmente compuesta por varias palabras o una cadena compleja de caracteres alfanuméricos. El resultado del esquema de cifrado BIP-38 es una llave privada cifrada codificada en Base58Check que comienza con el prefijo +6P+. Si ves una llave que comienza con +6P+, está cifrada y requiere una frase de contraseña para convertirla (descifrarla) en una llave privada con formato WIF (prefijo +5+) que se puede usar en cualquier cartera. Muchas aplicaciones de cartera ya reconocen las llaves privadas encriptadas con BIP-38 y solicitarán al usuario una frase de contraseña para descifrar e importar la llave. Las aplicaciones de terceros, como el increíblemente útil http://bitaddress.org[Bit Address] orientado al navegador (pestaña Detalles de cartera), se pueden usar para descifrar las llaves BIP-38.
-
-El caso de uso más común para las llaves cifradas BIP-38 es para carteras de papel que se pueden utilizar como copia de seguridad de las llaves privadas en un trozo de papel. Siempre que el usuario seleccione una frase de contraseña segura, una cartera de papel con llaves privadas encriptadas con BIP-38 es increíblemente segura y una excelente manera de crear almacenamiento de bitcoin sin conexión (también conocido como "almacenamiento en frío") .
-
-Prueba las llaves cifradas en <<table_4-10>> usando bitaddress.org para ver cómo puedes obtener la llave descifrada ingresando la frase de contraseña.
-
-[[table_4-10]]
-.Ejemplo de llave privada cifrada BIP-38
-|=======
-| *Llave Privada (WIF)* | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
-| *Frase de contraseña* | MyTestPassphrase
-| *Llave Cifrada (BIP-38)* | 6PRTHL6mWa48xSopbU1cKrVjpKbBZxcLRRCdctLJ3z5yxE87MobKoXdTsJ
-|=======
-
 
 [[p2sh_addresses]]
 ==== Pagar-al-Hash-de-un-Script (P2SH) y Direcciones Multi-firma
@@ -784,7 +763,7 @@ En ambos casos, uno de los riesgos del uso de una dirección fija única (en lug
 | *Vanidad (coincidencia de 6 caracteres)* | 1J7mdg5WxGENmwyJP9xuGhG5KRzu99BBCX
 |=======
 
-So does a vanity address increase security? If Eugenia generates the vanity address +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, users are likely to look at the vanity pattern word _and a few characters beyond_, for example noticing the "1Kids33" part of the address. That would force an attacker to generate a vanity address matching at least six characters (two more), expending an effort that is 3,364 times (58 × 58) higher than the effort Eugenia expended for her 4-character vanity. Essentially, the effort Eugenia expends (or pays a vanity pool for) "pushes" the attacker into having to produce a longer pattern vanity. If Eugenia pays a pool to generate an 8-character vanity address, the attacker would be pushed into the realm of 10 characters, which is infeasible on a personal computer and expensive even with a custom vanity-mining rig or vanity pool. What is affordable for Eugenia becomes unaffordable for the attacker, especially if the potential reward of fraud is not high enough to cover the cost of the vanity address generation.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
+Entonces, ¿una dirección de vanidad aumenta la seguridad? Si Eugenia genera la dirección de vanidad +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, es probable que los usuarios vean la palabra del patrón de vanidad _y unos pocos caracteres más allá_, por ejemplo, notando la parte "1Kids33" de la dirección. Eso obligaría a un atacante a generar una dirección de vanidad que coincida con al menos seis caracteres (dos más), gastando un esfuerzo que es 3364 veces (58 × 58) más alto que el esfuerzo que Eugenia gastó por su vanidad de 4 caracteres. Esencialmente, el esfuerzo que Eugenia gastó (o pagó a un pool de vanidad) "empuja" al atacante a tener que producir un patrón de vanidad de mayor longitud. Si Eugenia paga a un pool para generar una dirección de vanidad de 8 caracteres, el atacante sería empujado a buscar una de 10 caracteres, que es inviable en una computadora personal y es costoso incluso con un equipo personalizado para minería de vanidad o con un pool de vanidad. Lo que es asequible para Eugenia se vuelve inasequible para el atacante, especialmente si la posible recompensa del fraude no es lo suficientemente alta como para cubrir el costo de la generación de direcciones de vanidad.
 
 [[paper_wallets]]
 ==== Carteras de Papel
@@ -819,7 +798,7 @@ image::images/mbc2_0409.png[]
 Aunque se puede depositar fondos en una cartera de papel varias veces, se debe retirar todos los fondos solo una vez, gastando todo. Esto se debe a que en el proceso de desbloqueo y gasto de fondos, algunas billeteras pueden generar una dirección de cambio si gasta menos del monto total. Si la computadora que se usa para firmar la transacción se ve comprometida, se corre el riesgo de exponer la llave privada, dando acceso a los fondos en la dirección de cambio. Al gastar el saldo completo de una cartera de papel de una vez, se reduce el riesgo del compromiso de la llave. Si solo necesita una pequeña cantidad, envíe los fondos restantes a una nueva cartera de papel en la misma transacción.
 ====
 
-Paper wallets come in many designs and sizes, with many different features. Some are intended to be given as gifts and have seasonal themes, such as Christmas and New Year's themes. Others are designed for storage in a bank vault or safe with the private key hidden in some way, either with opaque scratch-off stickers, or folded and sealed with tamper-proof adhesive foil. Figures <<paper_wallet_bpw>> through <<paper_wallet_spw>> show various examples of paper wallets with security and backup features.
+Las carteras de papel vienen en muchos diseños y tamaños, con muchas características diferentes. Algunas están destinadas a ser dadas como regalos y tienen temas estacionales, como la Navidad y temas de Año Nuevo. Otras están diseñadas para el almacenamiento en una bóveda bancaria o caja de seguridad con la llave privada oculta de alguna manera, ya sea con pegatinas-rasca opacas o plegados y sellados con una lámina adhesiva a prueba de manipulaciones. Las imágenes de <<paper_wallet_bpw>> a <<paper_wallet_spw>> muestran varios ejemplos de carteras de papel con características de seguridad y de copia de respaldo.
 
 [[paper_wallet_bpw]]
 .Un ejemplo de una cartera de papel de bitcoinpaperwallet.com con la llave privada en una solapa plegable

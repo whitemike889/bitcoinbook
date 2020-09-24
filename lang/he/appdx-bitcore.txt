@@ -18,14 +18,13 @@
 * סכמת עקומה אליפטית משולב הצפנה (bitcore-ecies)
 * שרות ארנק (bitcore-wallet-service)
 * ארנק לקוח (bitcore-קwallet-client)
-* מגרש משחקים (bitcore-playground)
 * שרותי אינטגרציה ישירות עם ליבת ביטקוין (bitcore-node)
 
 === דוגמאות ספרית ביטקור
 
 ==== דרישות מוקדמות
 
-* NodeJS >= 4.x או שימוש בשלנו https://bitcore.io/playground[hosted online playground]
+* NodeJS >= 4.x
 
 אם משתמשים ב NodeJS וב REPL:
 

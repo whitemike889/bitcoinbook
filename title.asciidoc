@@ -1,5 +1,6 @@
 ////
 Do not translate the :variable names:
+Translate the content following the variables 
 ////
 :author: Andreas M. Antonopoulos
 :book_title: Mastering Bitcoin Open Second Edition

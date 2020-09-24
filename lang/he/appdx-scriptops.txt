@@ -168,7 +168,7 @@ Tables and descriptions sourced from https://en.bitcoin.it/wiki/Script[].
 | OP_CODESEPARATOR | 0xab | סמן את ההתחלה של נתוןנים בדוקים בחתימה
 | OP_CHECKSIG | 0xac | קבל את המפתח הציבורי והחתימה ואמת את החתימה עבור ההאש של נתוני העסקה, החזר TRUE אם תואמים
 | OP_CHECKSIGVERIFY | 0xad | כמו CHECKSIG, ואז OP_VERIFY לעצור אם לא TRUE
-| OP_CHECKMULTISIG | 0xae | הרץ CHECKSIG לכל אחד מהחתימות והמפתחות הציבוריים שסופקו כולם חייבים להתאים. באג ביישום מקפיץ (POP) ערך מיותר, הקדם  OP_NOP כפתרון עוקף
+| OP_CHECKMULTISIG | 0xae | Run CHECKSIG for each pair of signature and public key provided. All must match. Bug in implementation pops an extra value, prefix with OP_0 as workaround
 | OP_CHECKMULTISIGVERIFY | 0xaf | כמו CHECKMULTISIG, ואז OP_VERIFY לעצור אם לא TRUE
 |=======
 

@@ -168,7 +168,7 @@ La fuente de las tablas y descripciones se encuentra en https://en.bitcoin.it/wi
 | OP_CODESEPARATOR | 0xab | Marca el comienzo de los datos a ser firmados
 | OP_CHECKSIG | 0xac | Extrae del tope de la pila una llave pública y una firma y verifica la firma con el hash de los datos de la transacción; devuelve VERDADERO si el resultado es congruente
 | OP_CHECKSIGVERIFY | 0xad | Hace lo mismo que CHECKSIG, pero después ejecuta OP_VERIFY para detener la ejecución si no se obtiene VERDADERO
-| OP_CHECKMULTISIG | 0xae | Ejecuta CHECKSIG para cada par de firma y llave pública proporcionados. Todos deben coincidir. Un error de código en la aplicación elimina de la pila un elemento extra, por lo que se hace necesario prefijar el operador con OP_NOP para solucionarlo.
+| OP_CHECKMULTISIG | 0xae | Ejecuta CHECKSIG por cada par de datos suministrados respectivamente como firma y llave pública. Todos los datos deben ser congruentes. Un error de código en la implementación de este comando  elimina un valor extra, lo que puede remediarse usando como prefijo un elemento OP_0
 | OP_CHECKMULTISIGVERIFY | 0xaf | Hace lo mismo que CHECKMULTISIG, pero después ejecuta OP_VERIFY para detener la ejecución si no se obtiene VERDADERO
 |=======
 

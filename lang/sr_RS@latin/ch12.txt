@@ -1,49 +1,49 @@
 [[ch12]]
 == Blokčejn aplikacije
 
-Da biste nadogradili znanje o bitkoinu posmatrajte ga kao _aplikacionu platformu_. U današnje vreme, mnogi ljudi koriste termin "blokčejn" kad govore o bilo kojoj aplikacionoj platformi koja deli principe dizajna bitkoina. Izraz se često pogrešno upotrebljava i primenjuje na mnoge stvari koje ne pružaju osnovne karakteristike koje pruža bitkoinov blokčejn.
+Da biste nadogradili znanje o bitkoinu posmatrajte ga kao _aplikacionu platformu_. U današnje vreme mnogi ljudi koriste termin "blokčejn" kada govore o bilo kojoj aplikacionoj platformi koja deli principe dizajna bitkoina. Izraz se često pogrešno upotrebljava i primenjuje na mnoge stvari koje ne pružaju osnovne karakteristike koje pruža bitkoin blokčejn.
 
-U ovom poglavlju ćemo predstaviti mogućnosti koje nudi bitkoin blokčejn kao aplikaciona platforma. Razmotrićemo _primitive_ koji stvaraju aplikaciju, i koji su gradivni blokovi bilo koje blokčejn aplikacije. Pozabavićemo se i sa nekoliko važnih aplikacija koje koriste ove primitive, kao što su kanali (stanje) za plaćanje i usmereni kanali za plaćanje (Lightning Network).
+U ovom poglavlju će biti predstavljene mogućnosti koje nudi bitkoin blokčejn kao aplikaciona platforma. Razmotrićemo _primitive_ koji stvaraju aplikaciju, i koji su gradivni blokovi bilo koje blokčejn aplikacije. Pozabavićemo se i sa nekoliko važnih aplikacija koje koriste ove primitive, kao što su kanali (stanje) za plaćanje i usmereni kanali za plaćanje (Lightning Network).
 
 === Uvod
 
-((("blockchain applications", "benefits of bitcoin system")))Bitkoin sistem je zamišljen kao decentralizovani sistem valute i plaćanja. Međutim, većina njegove funkcionalnosti izvedena je iz konstrukcija nižeg nivoa koje se mogu koristiti za mnogo šire primene. Bitkoin nije izgrađen sa komponentama kao što su računi, korisnici, balansi i plaćanja. Umesto toga, koristi transakcioni skripting jezik sa kriptografskim funkcijama niskog nivoa, kao što smo videli u <<transactions>>. Baš kao što koncepti računa, balansa i plaćanja na višem nivou mogu biti izvedeni iz ovih osnovnih primitiva, tako mogu i mnoge druge složene aplikacije. Dakle, bitkoinov blokčejn može da postane aplikaciona platforma koja aplikacijama nudi usluge poverenja, kao što su pametni (smart) ugovori, daleko nadmašujući prvobitnu svrhu digitalne valute i plaćanja.
+((("blockchain applications", "benefits of bitcoin system")))Bitkoin sistem je zamišljen kao decentralizovani sistem valute i plaćanja. Međutim, većina njegove funkcionalnosti izvedena je iz konstrukcija nižeg nivoa koje se mogu koristiti za mnogo šire primene. Bitkoin nije izgrađen sa komponentama kao što su računi, korisnici, balansi i plaćanja. Umesto toga, koristi transakcioni skripting jezik sa kriptografskim funkcijama niskog nivoa, kao što možete videti u <<transactions>>. Baš kao što koncepti računa, balansa i plaćanja na višem nivou mogu biti izvedeni iz ovih osnovnih primitiva, tako mogu i mnoge druge složene aplikacije. Dakle, bitkoin blokčejn može da postane aplikaciona platforma koja aplikacijama nudi usluge poverenja, kao što su pametni (smart) ugovori, daleko nadmašujući prvobitnu svrhu digitalne valute i plaćanja.
 
 === Građivni blokovi (primitivi)
 
-((("blockchain applications", "building blocks for (primitives)")))((("primitives")))Kada radi ispravno i duži period, bitkoin sistem nudi određene garancije, koje se mogu koristiti kao gradivni blokovi za kreiranje aplikacija. Oni uključuju:
+((("blockchain applications", "building blocks for (primitives)")))((("primitives")))Kada radi ispravno i duži period, bitkoin sistem nudi određene garancije, koje mogu da se koriste kao gradivni blokovi za kreiranje aplikacija. Oni uključuju:
 
 Bez dvostruke potrošnje:: Najosnovnija garancija decentralizovanog algoritma za konsenzus bitkoina osigurava da nijedan UTXO ne može biti potrošen dva puta.
 
-Nepromenljivost:: Jednom kada se transakcija zabeleži u blokčejnu i kada se doda dovoljno rada sa sledećim blokovima, podaci transakcije postaju nepromenljivi. Nepromenljivost se potpisuje strujom, pošto je za prepravljanje blokčejna potreban utrošak struje da bi se proizveo Proof-of-Work. Potrebna struja, a samim tim i stepen nepromenjivosti, povećavaju se sa količinom obavljenog posla na vrhu bloka koji sadrži transakciju.
+Nepromenljivost:: Jednom kada se transakcija zabeleži u blokčejnu i kada se doda dovoljno rada na sledećim blokovima, podaci transakcije postaju nepromenljivi. Nepromenljivost se potpisuje strujom, pošto je za prepravljanje blokčejna potreban utrošak struje da bi se proizveo Proof-of-Work. Potrebna struja, a samim tim i stepen nepromenjivosti, povećavaju se sa količinom obavljenog posla na vrhu bloka koji sadrži transakciju.
 
-Neutralnost:: Decentralizovana bitkoin mreža širi važeće transakcije bez obzira na poreklo ili sadržaj tih transakcija. To znači da svako može da napravi važeću transakciju sa dovoljno naknada i da bude uveren da će moći da prenese tu transakciju i uključi je u blokčejn u bilo kom trenutku.
+Neutralnost:: Decentralizovana bitkoin mreža širi važeće transakcije bez obzira na poreklo ili sadržaj tih transakcija. To znači da bilo ko može da napravi važeću transakciju sa dovoljno naknada i imati poverenja u to da će se ta transakciju i uključiti u blokčejn u bilo kom trenutku.
 
-Sigurni vremenski pečat:: Pravila konsenzusa odbijaju svaki blok čiji je vremenski pečat predaleko u budućnosti ili prošlosti. To osigurava da se vremenskim pečatima na blokovima može verovati. Vremenski pečat bloka daje garanciju da ulazi svih uključenih transakcija nisu već potrošeni.
+Sigurni vremenski pečat:: Pravila konsenzusa odbijaju svaki blok čiji je vremenski pečat predaleko u budućnosti ili prošlosti. To osigurava da se vremenskim pečatima na blokovima može verovati. Vremenski pečat bloka daje garanciju da ulazi svih uključenih transakcija nisu pre potrošeni.
 
-Autorizacija:: Digitalni potpisi, potvrđeni u decentralizovanoj mreži, nude garancije za autorizaciju. Skripte koje sadrže zahtev za digitalnim potpisom ne mogu se izvršiti bez odobrenja vlasnika privatnog ključa koji je naznačen u skripti.
+Autorizacija:: Digitalni potpisi potvrđeni u decentralizovanoj mreži nude garancije za autorizaciju. Skripte koje sadrže zahtev sa digitalnim potpisom se ne mogu izvršiti bez odobrenja vlasnika privatnog ključa koji je naznačen u skripti.
 
-Revizija:: Sve transakcije su javne i mogu se revidirati. Sve transakcije i blokovi mogu se povezati unazad u neprekinutom lancu sa geneznim blokom.
+Revizija:: Sve transakcije su javne i mogu da se revidiraju. Sve transakcije i blokovi mogu da se povežu unazad u neprekinutom lancu sa geneznim blokom.
 
-Računovodstvo:: U bilo kojoj transakciji (osim u transakcijama coinbase-a) vrednost ulaza jednaka je vrednosti izlaza plus naknade. Nije moguće stvoriti ili uništiti vrednost bitkoina u transakciji. Izlazi ne mogu biti veći od ulaza.
+Računovodstvo:: U bilo kojoj transakciji (osim u transakcijama coinbase-a) vrednost ulaza je jednaka vrednosti izlaza plus naknade. Nije moguće stvoriti ili uništiti vrednost bitkoina u transakciji. Izlazi ne mogu biti veći od ulaza.
 
-Ne-ekspiracija:: Važeća transakcija ne ističe. Ako važi danas, važiće u bliskoj budućnosti, sve dok ulazi ne budu potrošeni i dok se pravila konsenzusa ne promene.
+Ne-ekspiracija (ne isticanje):: Važeća transakcija ne ističe. Ako važi danas, važiće i u bliskoj budućnosti, sve dok ulazi ne budu potrošeni i dok se pravila konsenzusa ne promene.
 
-Integritet: Bitkoin transakcija potpisana sa +SIGHASH_ALL+ ili delovi transakcije potpisani od strane drugog +SIGHASH+ tipa ne mogu se izmeniti bez poništavanja potpisa, čime se poništava i sama transakcija.
+Integritet: Bitkoin transakcija potpisana sa +SIGHASH_ALL+ ili delovi transakcije potpisani od strane drugog +SIGHASH+ tipa se ne mogu izmeniti bez poništavanja potpisa, čime se poništava i sama transakcija.
 
-Nedeljivost transakcija:: Bitkoin transakcije su nedeljive. Ili su važeće i potvrđene (izrudarene) ili ne. Delimične transakcije se ne mogu rudariti i ne postoji privremeno stanje transakcija. U bilo kom trenutku transakcija je ili izrudarena, ili nije.
+Nedeljivost transakcija:: Bitkoin transakcije su nedeljive. Ili su važeće i potvrđene (izrudarene) ili ne. Delimične transakcije se ne mogu izrudariti i ne postoji privremeno stanje transakcija. U bilo kom trenutku transakcija je izrudarena ili nije.
 
 Diskretne (nedeljive) jedinice vrednosti:: Izlazi transakcije su diskretne i nedeljive jedinice vrednosti. Mogu se potrošiti ili ne potrošiti u potpunosti. Ne mogu se deliti ili delimično potrošiti.
 
 Kvorum kontrole :: Ograničenja multisig-a u skriptama nameću kvorum autorizacije, unapred definisan u šemi multisig-a. Uslov M-od-N sprovodi se po pravilima konsenzusa.
 
-Vremenska brava/starenje:: Svaka klauzula skripte koja sadrži relativnu ili apsolutnu vremensku bravu može se izvršiti tek nakon što njena starost pređe naznačeno vreme.
+Vremenska brava/starenje:: Svaka klauzula skripte koja sadrži relativnu ili apsolutnu vremensku bravu može da se izvrši tek nakon što njena starost pređe naznačeno vreme.
 
 Replikacija: Kada se transakcija izrudari, decentralizovano skladištenje blokčejna osigurava da se nakon dovoljno potvrda, ona kopira kroz mrežu i postane trajna i otporna na nestanak struje, gubitak podataka itd.
 
 Zaštita od falsifikovanja:: Transakcija može trošiti samo postojeće, potvrđene rezultate. Ne može se stvoriti ili falsifikovati vrednost.
 
-Konzistentnost: U nedostatku rudarskih particija, blokovi snimljeni u blokčejnu podležu reorganizaciji ili nesložnosti sa eksponencijalno opadajućom verovatnoćom, na osnovu dubine na kojoj su snimljeni. Jednom kada se duboko zabeleže, računanje i energija potrebna za promenu čine promene praktično neizvodljivim.
+Konzistentnost: U nedostatku rudarskih particija, blokovi snimljeni u blokčejnu podležu reorganizaciji ili nesložnosti sa eksponencijalno opadajućom verovatnoćom, na osnovu dubine na kojoj su snimljeni. Jednom kada se duboko zabeleže, računanje i energija potrebna za promenu, čine promene praktično neizvodljivim.
 
 Snimanje spoljnog stanja:: Transakcija može da izvrši vrednost podataka preko +OP_RETURN+ koda, što predstavlja prelaz stanja u spoljnoj mašini stanja.
 
@@ -53,17 +53,17 @@ Lista gradivnih blokova nije potpuna i još se dodaju sa svakom novom funkcijom 
 
 === Aplikacije iz gradivnih blokova
 
-((("blockchain applications", "examples of")))Gradivni blokovi koje nudi bitkoin su elementi platforme za poverenje koja može da se koristi za sastavljanje aplikacija. Evo nekoliko primera aplikacija koje postoje danas i gradivnih blokova koje koriste:
+((("blockchain applications", "examples of")))Gradivni blokovi koje nudi bitkoin su elementi platforme za poverenje koja može da se koristi za sastavljanje aplikacija. Evo nekoliko primera aplikacija koje postoje danas, kao i gradivnih blokova koje koriste:
 
-Dokaz o postojanju (Digitalni beležnik):: ((("digital notary services")))((("Proof of Existence")))Nepromenjivost + Vremenski pečat + Trajnost. Digitalni otisak prsta može se izvršiti transakcijom u blokčejn, što dokazuje da je dokument postojao (Vremenski pečat) u vreme kada je snimljen. Otisak prsta ne može se modifikovati retroaktivno (Nepromenljivost) i dokaz će se trajno čuvati (Trajnost).
+Dokaz o postojanju (Digitalni beležnik):: ((("digital notary services")))((("Proof of Existence")))Nepromenjivost + Vremenski pečat + Trajnost. Digitalni otisak prsta može se izvršiti transakcijom u blokčejn, što dokazuje da je dokument postojao (Vremenski pečat) u vreme kada je snimljen. Otisak prsta se ne može modifikovati retroaktivno (Nepromenljivost) i dokaz će se trajno čuvati (Trajnost).
 
-Kickstarter (Lighthouse):: Konzistentnost + Nedeljivost+ Integritet. Ako potpišete jedan ulaz i izlaz (Integritet) transakcije za prikupljanje sredstava, drugi mogu doprineti prikupljanju sredstava, ali ona se ne mogu potrošiti (Nedeljivost) dok se cilj (vrednost izlaza) ne finansira (Konzistentnost).
+Kickstarter (Lighthouse):: Konzistentnost + Nedeljivost+ Integritet. Ako potpišete jedan ulaz i izlaz (Integritet) transakcije za prikupljanje sredstava, drugi mogu doprineti prikupljanju sredstava, ali ona se ne mogu potrošiti (Nedeljivost) dok se cilj (vrednost izlaza) ne izfinansira (Konzistentnost).
 
 Kanali za plaćanje:: ((("payment (state) channels", "building blocks (primitives) used in")))Kvorum kontrole + Vremenska brava + Bez dvostruke potrošnje + Ne-ekspiracija + Otpornost na cenzuru + Autorizacija. Multisig 2-od-2 (Kvorum) sa vremenskom bravom (Vremenska brava) koja se koristi kao transakcija "namirenja" platnog kanala može biti zadržana (Ne-ekspiracija) i može bilo kad da je potroši (Otpornost na cenzuru) bilo koje od dva lica (Autorizacija). Zatim, ova dva lica mogu da stvore transakcije obavezivanja koje dvostruko troše (Bez dvostrukog trošenja) namirenje u kraćoj vremenskoj bravi (Vremenska brava).
 
 === Counterparty
 
-((("blockchain applications", "Counterparty")))((("Counterparty")))((("smart contracts")))((("Ethereum Virtual Machine (EVM)")))((("extrinsic asset management")))((("virtual asset management")))Counterparty je sloj protokola izgrađen na vrhu bitkoina. Counterparty protokol nudi mogućnost stvaranja i trgovine virtuelnim sredstvima i tokenima. Pored toga, Counterparty nudi decentralizovanu razmenu imovine. Counterparty takođe implementira pametne ugovore, zasnovane na Ethereum Virtual Machine (EVM).
+((("blockchain applications", "Counterparty")))((("Counterparty")))((("smart contracts")))((("Ethereum Virtual Machine (EVM)")))((("extrinsic asset management")))((("virtual asset management")))Counterparty je sloj protokola izgrađen na vrhu bitkoina. Counterparty protokol nudi mogućnost stvaranja i trgovine virtuelnim sredstvima i tokenima. Pored toga, Counterparty nudi decentralizovanu razmenu imovine. Counterparty takođe implementira pametne ugovore zasnovane na Ethereum Virtual Machine (EVM).
 
 Counterparty ugrađuje metapodatke u bitkoin transakcije, koristeći +OP_RETURN+ opcode ili 1-od-N multisignature adrese koje kodiraju metapodatke umesto javnih ključeva. Koristeći ove mehanizme, Counterparty implementira protokolni sloj kodiran u bitkoin transakcijama. Dodatni sloj protokola mogu da tumače aplikacije koje su svesne Counterparty-a, kao što su novčanici i blokčejn explorer-i, ili bilo koje aplikacije izgrađene korišćenjem biblioteke Counterparty-a.
 
@@ -74,25 +74,25 @@ Više detalja o Counterparty-u možete naći na https://counterparty.io. Projeka
 [[state_channels]]
 === Kanali plaćanja i kanali stanja
 
-_Kanali plaćanja_ ((("blockchain applications", "payment (state) channels", id="BCApayment12")))((("payment (state) channels", "defined"))) su mehanizmi bez poverenja za razmenu bitkoin transakcija između dva lica, van bitkoin blokčejna. Ove transakcije, koje bi bile validne da se izmiruju na bitkoin blokčejnu, umesto toga se drže van lanca, služeći kao _promesa_ za eventualno poravnanje serijske obrade izmirivanja. Pošto transakcije nisu izmirene, mogu se razmeniti bez uobičajene latencije izmirivanja, omogućavajući izuzetno visoku propusnost transakcija, nisku (submiliisekundnu) latenciju i finu granularnost (na nivou satošija).
+_Kanali plaćanja_ ((("blockchain applications", "payment (state) channels", id="BCApayment12")))((("payment (state) channels", "defined"))) su mehanizmi bez poverenja za razmenu bitkoin transakcija između dva lica van bitkoin blokčejna. Ove transakcije, koje bi bile validne da se izmiruju na bitkoin blokčejnu, umesto toga se drže van lanca, služeći kao _menica_ za eventualno poravnanje serijske obrade izmirivanja. Pošto transakcije nisu izmirene mogu da se razmene bez uobičajene latencije izmirivanja, omogućavajući izuzetno visoku propusnost transakcija, nisku (submiliisekundnu) latenciju i finu granularnost (na nivou satošija).
 
-Zapravo, termin _kanal (channel)_ je metafora. Statusni kanali su virtuelne konstrukti predstavljeni razmenom stanja između dva lica, van blokčejna. Ne postoje "kanali" sami po sebi i osnovni mehanizam prenosa podatka nije kanal. Koristimo termin kanal za predstavljanje odnosa i zajedničkog stanja između dva lica, van blokčejna.
+Zapravo, termin _kanal (channel)_ je metafora. Statusni kanali su virtuelni konstrukti predstavljeni razmenom stanja između dva lica, van blokčejna. Ne postoje "kanali" sami po sebi i osnovni mehanizam prenosa podatka nije kanal. Koristimo termin kanal za predstavljanje odnosa i zajedničkog stanja između dva lica van blokčejna.
 
-((("payment (state) channels", "concept of")))Da bismo pojasnili ovaj koncept, zamislite jedan TCP strim. Iz perspektive protokola višeg nivoa to je "utičnica" koji povezuje dve aplikacije preko interneta. Ali ako pogledate mrežni saobraćaj, TCP strim je samo virtuelni kanal preko IP paketa. Svaka krajnja tačka TCP-a strimuje sekvence i sastavlja IP pakete kako bi stvorio iluziju toka bajtova. Ispod su sve nepovezani paketi. Slično tome, kanal plaćanja je samo niz transakcija. Ako su pravilno poređani i povezani, oni stvaraju otkupne obaveze u koje možete imati poverenja iako ne verujete drugoj strani kanala.
+((("payment (state) channels", "concept of")))Da bismo pojasnili ovaj koncept, zamislite jedan TCP strim. Iz perspektive protokola višeg nivoa to je "utičnica" koja povezuje dve aplikacije preko interneta. Ali, ako pogledate mrežni saobraćaj, TCP strim je samo virtuelni kanal preko IP paketa. Svaka krajnja tačka TCP-a strimuje sekvence i sastavlja IP pakete kako bi stvorio iluziju toka bajtova. Ispod su sve nepovezani paketi. Slično tome, kanal plaćanja je samo niz transakcija. Ako su pravilno poređani i povezani, oni stvaraju otkupne obaveze u koje možete imati poverenja iako ne verujete drugoj strani kanala.
 
-U ovom odeljku videćete različite oblike kanala plaćanja. Prvo ćemo ispitati mehanizme koji se koriste za izgradnju jednosmernog (unidirectional) kanala plaćanja za odmerenu uslugu mikro-plaćanja, kao što je strimovanje videa. Zatim ćemo proširiti ovaj mehanizam i uvesti dvosmerne kanale plaćanja. Na kraju ćemo pogledati kako se dvosmerni kanali mogu povezati od kraja do kraja kako bismo formirali višestruke kanale u usmerenoj mreži, prvo predložene pod imenom _Lightning Network_.
+U ovom odeljku videćete različite oblike kanala plaćanja. Prvo ćemo ispitati mehanizme koji se koriste za izgradnju jednosmernog (unidirectional) kanala plaćanja za odmerenu uslugu mikro-plaćanja, kao što je strimovanje videa. Zatim ćemo proširiti ovaj mehanizam i uvesti dvosmerne kanale plaćanja. Na kraju ćemo videti kako se dvosmerni kanali mogu povezati od početka do kraja kako bi se formirali višestruki kanali u usmerenoj mreži, prvi predlog za to rešenje se zove _Lightning Network_.
 
 Kanali plaćanja su deo šireg koncepta _kanala stanja_, koji predstavlja promenu stanja van mreže, osiguranu eventualnim izmirivanjem u blokčejnu. Kanal plaćanja je kanal stanja, gde je stanje koje se menja balans virtuelne valute.
 
 ==== Kanali stanja—osnovni pojmovi i terminologija
 
-((("payment (state) channels", "terminology")))Kanal stanja se uspostavlja između dva lica, putem transakcije koja zaključava zajedničko stanje na blokčejnu. To se naziva _transakcija finansiranja (funding transaction)_ ili _anchor transaction (transakcija inicijalizacije)_. Ova pojedinačna transakcija mora biti poslata mreži i rudarena kako bi se uspostavio kanal. U primeru kanala plaćanja, zaključano stanje je početni balans (u valuti) kanala.
+((("payment (state) channels", "terminology")))Kanal stanja se uspostavlja između dva lica, putem transakcije koja zaključava zajedničko stanje na blokčejnu. To se naziva _transakcija finansiranja (funding transaction)_ ili _anchor transaction (transakcija inicijalizacije)_. Ova pojedinačna transakcija mora biti poslata mreži i izrudarena kako bi se uspostavio kanal. U primeru kanala plaćanja, zaključano stanje je početni balans (u valuti) kanala.
 
-Dva lica zatim razmenjuju potpisane transakcije, zvane _transakcije obavezivanja (commitment transaction)_, koje menjaju početno stanje. Ove transakcije su validne transakcije jer ih bilo koje lice može podneti za izmirivanje, ali umesto toga svako lice ih drži van lanca do zatvaranja kanala. Ažuriranja stanja mogu da se vrše onoliko brzo koliko svako lice može da napravi, potpiše i prenese transakciju drugom licu. U praksi to znači da se može razmeniti na hiljade transakcija po sekundi.
+Dva lica razmenjuju potpisane transakcije, zvane _transakcije obavezivanja (commitment transaction)_, koje menjaju početno stanje. Ove transakcije su validne transakcije jer ih bilo koje lice može podneti za izmirivanje, ali umesto toga svako lice ih drži van lanca do zatvaranja kanala. Ažuriranja stanja mogu da se vrše onoliko brzo koliko svako lice može da napravi, potpiše i prenese transakciju drugom licu. U praksi to znači da se može razmeniti na hiljade transakcija po sekundi.
 
-Tokom razmene transakcija obavezivanja, oba lica takođe poništavaju prethodna stanja, tako da je najnovija transakcija obvezivanja uvek jedina koja može da se otkupi. Ovo sprečava bilo koje lice da vara tako što jednostrano zatvori kanal sa isteklim, prethodnim stanjem, koje je povoljnije po njih od trenutnog stanja. U ostatku ovog poglavlja ćemo ispitati razne mehanizme koji se mogu koristiti za poništavanje prethodnog stanja.
+Tokom razmene transakcija obavezivanja oba lica poništavaju prethodna stanja, tako da je najnovija transakcija obvezivanja uvek jedina koja može da se otkupi. Ovo sprečava bilo koje lice da vara jednostranim zatvaranjem kanala sa isteklim, prethodnim stanjem, koje je povoljnije po njih od trenutnog stanja. U ostatku ovog poglavlja ispitaćemo razne mehanizme koji se mogu koristiti za poništavanje prethodnog stanja.
 
-Napokon, kanal može biti ili kooperativno zatvoren, podnošenjem konačne _transakcije izmirivanja_ u blokčejnu, ili jednostrano, tako što bilo koje lice preda poslednju transakciju obavezivanja blokčejnu. Mogućnost jednostranog zatvaranja je potrebna u slučaju da jedno od lica neočekivano prekine vezu. Transakcija izmirivanja predstavlja konačno stanje kanala i izmirena je na blokčejnu.
+Na kraju, kanal može biti kooperativno zatvoren, podnošenjem konačne _transakcije izmirivanja_ u blokčejnu, ili jednostrano, tako što bilo koje lice preda poslednju transakciju obavezivanja blokčejnu. Mogućnost jednostranog zatvaranja je potrebna u slučaju da jedno od lica neočekivano prekine vezu. Transakcija izmirivanja predstavlja konačno stanje kanala i izmirena je na blokčejnu.
 
 Tokom celog životnog veka kanala samo dve transakcije moraju biti podnete za rudarenje na blokčejnu: transakcije finansiranja i izmirivanja. Između ova dva stanja, oba lica mogu razmeniti bilo koji broj transakcija obavezivanja koje niko drugi ne vidi, niti su predate u blokčejn.
 
@@ -104,92 +104,92 @@ image::images/mbc2_1201.png["Kanal plaćanja između Boba i Alise, prikazuje tra
 
 ==== Primer jednostavnog kanala plaćanja
 
-((("payment (state) channels", "example of", id="PSCexample12")))Da bismo objasnili kanale stanja, počinjemo sa vrlo jednostavnim primerom. Pokazujemo jednosmerni kanal, što znači da vrednost teče samo u jednom pravcu. Počećemo i sa naivnom pretpostavkom da niko neče pokušati da vara, kako bi stvari ostale jednostavne. Kada se objasni osnovna ideja kanala, videćete šta je potrebno da on bude bez potrebe za poverenjem, tako da nijedno lice _ne može_ da vara, čak i ako to pokuša.
+((("payment (state) channels", "example of", id="PSCexample12")))Da bismo objasnili kanale stanja počinjemo sa vrlo jednostavnim primerom. Pokazaćemo jednosmerni kanal, što znači da vrednost teče samo u jednom pravcu. Počinjemo sa naivnom pretpostavkom da niko neče pokušati da vara, kako bi stvari ostale jednostavne. Kada se objasni osnovna ideja kanala, videćete šta je potrebno da on bude bez potrebe za poverenjem, tako da nijedno lice _ne može_ da vara, čak iako to pokuša.
 
-Za primer ćemo uzeti dva aktera: Emu i Fabiana. Fabian nudi uslugu strimovanja videa koju naplaćuje po sekundi koristeći kanal mikro-plaćanja (micropayment channel). Fabian naplaćuje 0,01 milibita (0,00001 BTC) po sekundi videa, što iznosi 36 milibita (0,036 BTC) po satu video zapisa. Ema je korisnik ove usluge strimovanja videa i kupuje je od Fabiana. <<emma_fabian_streaming_video>> pokazuje Emu koja kupuje uslugu za strimovanje video sadržaja od Fabiana pomoću kanala plaćanja.
+Za ovaj primer uzećemo dva aktera: Emu i Fabijana. Fabijan nudi uslugu strimovanja videa koju naplaćuje po sekundi koristeći kanal mikro-plaćanja (micropayment channel). Fabijan naplaćuje 0,01 milibita (0,00001 BTC) po sekundi videa, što iznosi 36 milibita (0,036 BTC) po satu video zapisa. Ema je korisnik ove usluge strimovanja videa i kupuje je od Fabijana. <<emma_fabian_streaming_video>> pokazuje Emu koja kupuje uslugu za strimovanje video sadržaja od Fabiana pomoću kanala plaćanja.
 
 [[emma_fabian_streaming_video]]
-.Ema kupuje strimovanje videa od Fabiana kanalom plaćanja, plaćajući za svaku sekundu video zapisa
-image::images/mbc2_1202.png["Ema kupuje strimovanje videa od Fabiana kanalom plaćanja, plaćajući za svaku sekundu video zapisa"]
+.Ema kupuje strimovanje videa od Fabijana kanalom plaćanja, plaćajući za svaku sekundu video zapisa
+image::images/mbc2_1202.png["Ema kupuje strimovanje videa od Fabijana kanalom plaćanja, plaćajući za svaku sekundu video zapisa"]
 
-U ovom primeru, Fabian i Ema koriste poseban softver koji upravlja i kanalom plaćanja i video strimovanjem. Ema pokreće softver u svom pretraživaču, Fabian ga pokreće na serveru. Softver uključuje osnovnu funkcionalnost bitkoin novčanika i može da kreira i potpisuje bitkoin transakcije. Koncept i pojam "kanal plaćanja" potpuno su skriveni od korisnika. Ono što vide je video koji se plaća po sekundi.
+U ovom primeru, Fabijan i Ema koriste poseban softver koji upravlja i kanalom plaćanja i video strimovanjem. Ema pokreće softver u svom pretraživaču, Fabijan ga pokreće na serveru. Softver uključuje osnovnu funkcionalnost bitkoin novčanika i može da kreira i potpisuje bitkoin transakcije. Koncept i pojam "kanal plaćanja" potpuno su skriveni od korisnika. Ono što vide je video koji se plaća po sekundi.
 
-Da bi postavili kanal plaćanja, Ema i Fabian uspostavili su multisignature adresu 2-od-2, a svako od njih ima jedan od ključeva. Iz Emine perspektive, softver u njenom pretraživaču predstavlja QR kod sa P2SH adresom (počinjući sa "3") i traži od nje da podnese "depozit" za do 1 sata gledanja video zapisa. Adresu zatim finansira Ema. Emina transakcija, plaćanje na multisignature adresu, predstavlja finansiranje ili anchor transakciju (transakciju inicijalizacije) za kanal plaćanja.
+Da bi postavili kanal plaćanja, Ema i Fabijan su uspostavili multisignature adresu 2-od-2, a svako od njih ima jedan od ključeva. Iz Emine perspektive softver u njenom pretraživaču predstavlja QR kod sa P2SH adresom (počinjući sa "3") i traži od nje da podnese "depozit" za do 1 sata gledanja video zapisa. Adresu zatim finansira Ema. Emina transakcija, plaćanje na multisignature adresu, predstavlja finansiranje ili anchor transakciju (transakciju inicijalizacije) za kanal plaćanja.
 
-Za ovaj primer, recimo da Ema finansira kanal sa 36 milibita (0,036 BTC). To će omogućiti Emi da troši _sve do_ jednog sata strimovanja videa. Transakcija finansiranja u ovom slučaju postavlja maksimalni iznos koji se može preneti na ovom kanalu, postavljajući _maksimalni kapacitet kanala_.
+Na primer, recimo da Ema finansira kanal sa 36 milibita (0,036 BTC). To će omogućiti Emi da troši _sve do_ 1 sata strimovanja videa. Transakcija finansiranja u ovom slučaju postavlja maksimalan iznos koji se može preneti na ovom kanalu postavljajući _maksimalan kapacitet kanala_.
 
-Transakcija finansiranja troši jedan ili više ulaza iz Eminog novčanika, prikupljajući sredstva. Stvara jedan izlaz u vrednosti od 36 milibita uplaćenih na multisig adresu 2-od-2, koju zajednički kontrolišu Ema i Fabian. Možda će imati dodatne izlaze za vraćanje u Emin novčanik.
+Transakcija finansiranja troši jedan ili više ulaza iz Eminog novčanika prikupljajući sredstva. Potom stvara jedan izlaz u vrednosti od 36 milibita uplaćenih na multisig adresu 2-od-2, koju zajednički kontrolišu Ema i Fabijan. Možda će imati dodatne izlaze za vraćanje u Emin novčanik.
 
-Jednom kada se transakcija finansiranja kanala potvrdi, Ema može započeti strimovanje videa. Emin softver kreira i potpisuje transakciju obavezivanja koja menja balans kanala na 0,01 milibata na Fabianovu adresu i vraća 35,99 milibita nazad Emi. Transakcija koju potpisuje Ema troši 36 milibita napravljeno od transakcije finansiranja i stvara dva izlaza: jedan za njen povraćaj novca, a drugi za Fabianovo plaćanje. Transakcija je samo delimično potpisana—zahteva dva potpisa (2 od 2), ali ima samo Emin potpis. Kada Fabianov server primi ovu transakciju, dodaje drugi potpis (za ulaz 2-od-2) i vraća ga Emi zajedno sa video kreditom vrednim 1 sekundu. Sada obe strane imaju potpuno potpisanu transakciju obavezivanja koju može neko od njih da iskoristi, predstavljajući tačan ažurirani balans kanala. Nijedna strana ne prenosi ovu transakciju na mrežu.
+Kada se transakcija finansiranja kanala potvrdi, Ema može započeti strimovanje videa. Emin softver kreira i potpisuje transakciju obavezivanja koja menja balans kanala na 0,01 milibata na Fabijanovu adresu i vraća 35,99 milibita nazad Emi. Transakcija koju potpisuje Ema troši 36 milibita napravljenih od transakcije finansiranja i stvara dva izlaza: jedan za njen povraćaj novca, a drugi za Fabijanovo plaćanje. Transakcija je samo delimično potpisana&#x2014; zahteva dva potpisa (2 od 2), ali ima samo Emin potpis. Kada Fabijanov server primi ovu transakciju, dodaje drugi potpis (za ulaz 2-od-2) i vraća ga Emi zajedno sa video kreditom vrednim 1 sekundu. Sada obe strane imaju potpuno potpisanu transakciju obavezivanja koju može neko od njih da iskoristi, predstavljajući tačan ažurirani balans kanala. Nijedna strana ne prenosi ovu transakciju na mrežu.
 
-U sledećem krugu Emin softver kreira i potpisuje još jednu transakciju obavezivanja (obaveza #2) koja troši _isti_ 2-od-2 izlaz iz transakcije finansiranja. Druga transakcija obavezivnja dodeljuje jedan izlaz od 0,02 milibita Fabianovoj adresi i jedan izlaz od 35,98 milibita nazad Eminoj adresi. Ova nova transakcija je plaćanje za dve kumulativne sekunde videa. Fabianov softver potpisuje i vraća drugu transakciju obavezivanja, zajedno sa još jednom sekundom videa. 
+U sledećem krugu Emin softver kreira i potpisuje još jednu transakciju obavezivanja (obaveza #2) koja troši _isti_ 2-od-2 izlaz iz transakcije finansiranja. Druga transakcija obavezivnja dodeljuje jedan izlaz od 0,02 milibita Fabijanovoj adresi i jedan izlaz od 35,98 milibita nazad Eminoj adresi. Ova nova transakcija je plaćanje za dve kumulativne sekunde videa. Fabijanov softver potpisuje i vraća drugu transakciju obavezivanja, zajedno sa još jednom sekundom videa. 
 
-Na taj način Emin softver i dalje šalje transakcije obavezivanja na Fabianov server u zamenu za strimovanje videa. Bilans kanala postepeno raste u korist Fabiana, jer Ema troši sve više sekundi videa. Recimo da Ema gleda 600 sekundi (10 minuta) videa, stvarajući i potpisujući 600 transakcija obavezivanja. Poslednja transakcija (#600) će imati dva izlaza, podelivši balans kanala, 6 milibita Fabianu i 30 milibita Emi.
+Na taj način Emin softver i dalje šalje transakcije obavezivanja na Fabijanov server u zamenu za strimovanje videa. Bilans kanala postepeno raste u korist Fabijana, jer Ema troši sve više sekundi videa. Recimo da Ema gleda 600 sekundi (10 minuta) videa, stvarajući i potpisujući 600 transakcija obavezivanja. Poslednja transakcija (#600) će imati dva izlaza, deleći balans kanala, 6 milibita Fabijanu i 30 milibita Emi.
 
-Na kraju, Ema klikne na "Stop" da bi zaustavila strimovanje videa. Fabian ili Ema mogu sada da pošalju konačnu transakciju stanja za izmirenje. Ova poslednja transakcija je _transakcija izmirivanja_ i plaća Fabianu za sve minute video strimovanja koje je Ema potrošila, vraćajući ostatak transakcije finansiranja Emi.
+Na kraju Ema klikne na "Stop" da bi zaustavila strimovanje videa. Fabijan ili Ema mogu sada da pošalju konačnu transakciju stanja za izmirenje. Ova poslednja transakcija je _transakcija izmirivanja_ i plaća Fabijanu za sve minute video strimovanja koje je Ema potrošila, vraćajući ostatak transakcije finansiranja Emi.
 
-<<video_payment_channel>> prikazuje kanal između Eme i Fabiana i transakcije obavezivanja koje ažuriraju balans kanala.
+<<video_payment_channel>> prikazuje kanal između Eme i Fabijana i transakcije obavezivanja koje ažuriraju balans kanala.
 
-Na kraju, samo se dve transakcije beleže na blokčejnu: transakcija finansiranja koja je uspostavila kanal i transakcija izmirivanja koja je konačno stanje pravilno dodelila između dva učesnika.((("", startref="PSCexample12")))
+Na kraju se samo dve transakcije beleže na blokčejnu: transakcija finansiranja koja je uspostavila kanal i transakcija izmirivanja koja je konačno stanje pravilno dodelila između dva učesnika.((("", startref="PSCexample12")))
 
 [[video_payment_channel]]
-.Emin kanal plaćanja sa Fabianom, prikazuje transakcije obavezivanja koje ažuriraju balans kanala
-image::images/mbc2_1203.png["Emin kanal plaćanja Fabianu, prikazuje transakcije obavezivanja koje ažuriraju balans kanala"]
+.Emin kanal plaćanja sa Fabijanom prikazuje transakcije obavezivanja koje ažuriraju balans kanala
+image::images/mbc2_1203.png["Emin kanal plaćanja Fabijanu prikazuje transakcije obavezivanja koje ažuriraju balans kanala"]
 
 ==== Pravljenje kanala bez potrebe za poverenjem
 
 ((("payment (state) channels", "making trustless channels", id="PSCtrust12")))Kanal koji smo upravo opisali radi, ali samo ako obe strane sarađuju, bez grešaka i pokušaja varanja. Pogledajmo neke od scenarija koji prekidaju ovaj kanal i pogledajmo šta je potrebno da se poprave:
 
-* Jednom kada se transakcija finansiranja dogodi, Emi je potreban Fabianov potpis da vrati novac. Ako Fabian nestane, Emina sredstva su zaključana u 2-od-2 i efektivno se gube. Ovaj kanal je tako konstruisan da dovede do gubitka sredstava ako jedno od lica prekine vezu pre nego što oba lica ne potpišu bar jednu transakciju obavezivanja.
+* Kada dođe do transakcije finansiranja, Emi je potreban Fabijanov potpis da vrati novac. Ako Fabijan nestane, Emina sredstva su zaključana u 2-od-2 i efektivno se gube. Ovaj kanal je tako konstruisan da dovede do gubitka sredstava ako jedno od lica prekine vezu pre nego što oba lica ne potpišu bar jednu transakciju obavezivanja.
 
-* Dok se kanal pokreće, Ema može preuzeti bilo koju od transakcija obavezivanja koju je Fabian potpisao i poslao u blokčejn. Zašto bi plaćala 600 sekundi videa, kad Ema može da prenese transakciju obavezivanja #1 i plati samo 1 sekundu videa? Kanal ne uspeva jer Ema može da vara emitovanjem prethodnog obavezivanja koje joj ide u prilog.
+* Dok se kanal pokreće Ema može da preuzeme bilo koju od transakcija obavezivanja koju je Fabijan potpisao i poslao u blokčejn. Zašto bi Ema plaćala 600 sekundi videa, kada može da prenese transakciju obavezivanja #1 i plati samo 1 sekundu videa? Kanal ne uspeva jer Ema može da vara emitovanjem prethodnog obavezivanja koje joj ide u prilog.
 
-Oba ova problema se mogu rešiti pomoću vremenskih brava (timelocks)—pogledajmo kako mogu da se koriste vremenske brave na nivou transakcije (+nLocktime+).
+Oba ova problema se mogu rešiti pomoću vremenskih brava (timelocks)&#x2014;pogledajte kako mogu da se koriste vremenske brave na nivou transakcije (+nLocktime+).
 
-Ema ne može da rizikuje da finansira 2-od-2 multisig adresu, osim ako nema zagarantovani povraćaj novca. Da bi rešila ovaj problem, Ema istovremeno konstruiše transakciju finansiranja i povraćaja novca. Ona potpisuje transakciju finansiranja, ali je nikome ne šalje. Ema šalje samo transakciju za povraćaj novca Fabianu i dobija njegov potpis.
+Ema ne može da rizikuje finansirajući 2-od-2 multisig transakcija, osim ako nema zagarantovan povraćaj novca. Da bi rešila ovaj problem, Ema istovremeno konstruiše transakciju finansiranja i povraćaja novca. Ona potpisuje transakciju finansiranja, ali je nikome ne šalje. Ema šalje samo transakciju za povraćaj novca Fabijanu i dobija njegov potpis.
 
-Transakcija za povraćaj novca deluje kao prva transakcija obavezivanja i njena vremenska brava utvrđuje gornju granicu života kanala. U tom slučaju, Ema bi mogla da postavi +nLocktime+ na 30 dana ili 4320 blokova u budućnost. Sve naredne transakcije obavezivanja moraju imati kraću vremensku bravu, da bi se mogle iskoristiti pre transakcije za povraćaj novca.
+Transakcija za povraćaj novca deluje kao prva transakcija obavezivanja i njena vremenska brava utvrđuje gornju granicu života kanala. U tom slučaju Ema bi mogla da postavi +nLocktime+ na 30 dana ili 4320 blokova u budućnost. Sve naredne transakcije obavezivanja moraju imati kraću vremensku bravu, da bi se mogle iskoristiti pre transakcije za povraćaj novca.
 
-Sada kada Ema ima potpuno potpisanu transakciju za povraćaj novca, ona može sa sigurnošću preneti potpisanu transakciju finansiranja znajući da može na kraju, nakon isteka vremenske brave, otkupiti transakciju za povraćaj novca čak i ako Fabian nestane.
+Sada kada Ema ima potpuno potpisanu transakciju za povraćaj novca, ona može sa sigurnošću preneti potpisanu transakciju finansiranja znajući da može na kraju, nakon isteka vremenske brave, otkupiti transakciju za povraćaj novca čak i ako Fabijan nestane.
 
-Svaka transakcija obavezivanja, koju lica razmenjuju dok je kanal aktivan, imaće vremensku bravu u budućnosti. Ali odlaganje će biti malo kraće za svako obavezivanje, tako da najnovije obavezivanje može da se otkupi pre nego što se njena obaveza ispuni. Zbog nLockTime-a, nijedno lice ne može uspešno emitovati bilo koju od transakcija obavezivanja sve dok njihova vremenska brava ne istekne. Ako sve ide kako treba, oni će sarađivati i zatvoriti kanal sa transakcijom izmirivanja, čineći nepotrebnim slanje posredničke transakcije obavezivanja. Ako ne, najnovija transakcija obavezivanja može da se širi kako bi se izmirio račun i poništile sve prethodne transakcije obavezivanja.
+Svaka transakcija obavezivanja koju lica razmenjuju dok je kanal aktivan, imaće vremensku bravu u budućnosti. Ali odlaganje će biti malo kraće za svako obavezivanje, tako da najnovije obavezivanje može da se otkupi pre nego što se njena obaveza ispuni. Zbog nLockTime-a, nijedno lice ne može uspešno emitovati bilo koju od transakcija obavezivanja sve dok njihova vremenska brava ne istekne. Ako sve ide kako treba, oni će sarađivati i zatvoriti kanal sa transakcijom izmirivanja, čineći nepotrebnim slanje posredničke transakcije obavezivanja. Ako ne, najnovija transakcija obavezivanja može da se širi kako bi se izmirio račun i poništile sve prethodne transakcije obavezivanja.
 
-Na primer, ako je transakcija obavezivanja #1 zaključana vremenskom bravom na 4.320 blokova, onda će transakcija obavezivanja #2 biti sa vremenskom bravom na 4.319 blokova u budućnosti. Transakcija obavezivanja #600 može se potrošiti 600 blokova pre nego što transakcija obavezivanja #1 postane validna.
+Na primer, ako je transakcija obavezivanja #1 zaključana vremenskom bravom na 4.320 blokova, onda će transakcija obavezivanja #2 biti sa vremenskom bravom na 4.319 blokova u budućnosti. Transakcija obavezivanja #600 može da se potroši 600 blokova pre nego što transakcija obavezivanja #1 postane validna.
 
 <<timelocked_commitments>> prikazuje svaku transakciju obavezanja kako postavlja kraću vremensku bravu, omogućavajući joj da se potroši pre nego što prethodna obavezivanja postanu validna.
 
 [[timelocked_commitments]]
-.Svako obavezivanje postavlja kraću vremensku bravu, omogućavajući mu da se potroši pre nego što prethodna obavezivanja postanu važeća
-image::images/mbc2_1204.png["Svako obavezivanje postavlja kraću vremensku bravu, omogućavajući mu da se potroši pre nego što prethodna obavezivanja postanu važeća"]
+.Svako obavezivanje postavlja kraću vremensku bravu, omogućavajući da se potroši pre nego što prethodna obavezivanja postanu važeća
+image::images/mbc2_1204.png["Svako obavezivanje postavlja kraću vremensku bravu, omogućavajući da se potroši pre nego što prethodna obavezivanja postanu važeća"]
 
 Svaka naredna transakcija mora imati kraću vremensku bravu kako bi se mogla emitovati pre svojih prethodnika i pre transakcije za povraćaj novca. Sposobnost da se obavezivanje emituje ranije osigurava da će moći da troši sredstva finansiranja i spreči bilo koju drugu transakciju obavezivanja da se otkupi potrošnjom izlaza. Garancije koje pruža bitoin blokčejn, sprečavajući dvostruko trošenje i nametanje vremenskih brava, efektivno omogućavaju svakoj transakciji obavezivanja da poništi svoje prethodnike.
 
-Kanali stanja koriste vremenske brave da izvrše pametne ugovore u vremenskoj dimenziji. U ovom primeru smo videli kako vremenska dimenzija garantuje da poslednja transakcija obavezivanja postaje validna pre bilo kakvih ranijih obavezivanja. Zato se može preneti najnovija transakcija obavezivanja, trošeći ulaze i poništavajući prethodne transakcije obavezivanja. Primena pametnih ugovora sa apsolutnim vremenskim bravama štiti od varanja sa jedne i druge strane. Ovoj implementaciji nije potrebno ništa više od apsolutnih vremenskih brava na nivou transakcije (+nLocktime+). Zatim ćemo videti kako vremenske brave na nivou skripti, +CHECKLOCKTIMEVERIFY+ i +CHECKSEQUENCEVERIFY+, mogu da se koriste za pravljenje fleksibilnijih, korisnijih i sofisticiranijih kanala stanja.
+Kanali stanja koriste vremenske brave da izvrše pametne ugovore u vremenskoj dimenziji. U ovom primeru smo videli kako vremenska dimenzija garantuje da poslednja transakcija obavezivanja postaje validna pre bilo kakvih ranijih obavezivanja. Zato se može preneti najnovija transakcija obavezivanja, trošeći ulaze i poništavajući prethodne transakcije obavezivanja. Primena pametnih ugovora sa apsolutnim vremenskim bravama štiti od varanja sa jedne i druge strane. Ovoj implementaciji nije potrebno ništa više od apsolutnih vremenskih brava na nivou transakcije (+nLocktime+). Kao sledeće videćemo kako vremenske brave, +CHECKLOCKTIMEVERIFY+ i +CHECKSEQUENCEVERIFY+, na nivou skripti mogu da se koriste za pravljenje fleksibilnijih, korisnijih i sofisticiranijih kanala stanja.
 
-Argentinski tim programera demonstrirao je prvi oblik jednosmernog platnog kanala kao prototip aplikacije za strimovanje videa 2015. godine. I dalje ga možete videti na pass:[<a href="https://streamium.io/" class="orm:hideurl"><em>streamium.io</em></a>].
+Prva vrsta jednosmernih kanala plaćanja predstavljena je kao prototip aplikacije za strimovanje videa 2015. godine od strane argentinskog tima programera.
 
-Vremenske brave nisu jedini način za poništavanje prethodnih transakcija obavezivanja. U sledećim odeljcima videćete kako se ključ za opozivanje transakcije može koristiti za postizanje istog rezultata. Vremenske brave su efikasne, ali imaju dva vidna nedostatka. Uspostavljanjem maksimalne vremenske brave prilikom prvog otvaranja kanala, oni ograničavaju vek kanala. Što je još gore, oni prisiljavaju implementacije kanala da uspostave ravnotežu između omogućavanja dugotrajnih kanala i prisiljavanja jednog od učesnika da dugo čeka na povraćaj novca u slučaju prevremenog zatvaranja. Na primer, ako dozvolite da kanal ostane otvoren 30 dana, postavljanjem vremenske brave za povraćaj novca na 30 dana, ako jedna od strana odmah nestane, druga strana mora da čeka 30 dana za povraćaj novca. Što je krajnja tačka udaljenija, to će povraćaj biti udaljeniji.
+Vremenske brave nisu jedini način za poništavanje prethodnih transakcija obavezivanja. U sledećim odeljcima videćete kako se ključ za opozivanje transakcije može koristiti za postizanje istog rezultata. Vremenske brave su efikasne, ali imaju dva vidna nedostatka. Uspostavljanjem maksimalne vremenske brave prilikom prvog otvaranja kanala, oni ograničavaju vek kanala. Što je još gore, oni prisiljavaju implementacije kanala da uspostave ravnotežu između omogućavanja dugotrajnih kanala i prisiljavanja jednog od učesnika da dugo čeka na povraćaj novca u slučaju prevremenog zatvaranja. Na primer, ako dozvolite da kanal ostane otvoren 30 dana, postavljanjem vremenske brave za povraćaj novca na 30 dana, ako jedna od strana odmah nestane druga strana mora da čeka 30 dana za povraćaj novca. Što je krajnja tačka udaljenija, to će povraćaj biti udaljeniji.
 
-Drugi problem je da, pošto svaka naredna transakcija obavezivanja mora smanjiti vremensku bravu, postoji izričito ograničenje broja transakcija obavezivanja koje se mogu razmeniti između lica. Na primer, 30-dnevni kanal koji postavlja vremensku bravu od 4.320 blokova u budućnost, može da primi samo 4.320 prelaznih transakcija pre nego što ih zatvori. Postoji opasnost u podešavanju intervala vremenske brave transakcije obavezivanja na 1 blok. Postavljanjem intervala vremenske brave između transakcija obavezivanja na 1 blok, programer stvara veoma veliko opterećenje za učesnike kanala koji moraju biti budni, ostati na mreži i gledati, i biti spremni u svakom trenutku da prenesu pravu transakciju obavezivanja.
+Drugi problem je taj što svaka naredna transakcija obavezivanja mora da smanji vremensku bravu, postoji izričito ograničenje broja transakcija obavezivanja koje se mogu razmeniti između lica. Na primer, 30-dnevni kanal koji postavlja vremensku bravu od 4.320 blokova u budućnost može da primi samo 4.320 prelaznih transakcija pre nego što ih zatvori. Postoji opasnost u podešavanju intervala vremenske brave transakcije obavezivanja na 1 blok. Postavljanjem intervala vremenske brave između transakcija obavezivanja na 1 blok, programer stvara veliko opterećenje za učesnike kanala koji moraju da budu budni, da ostanu na mreži i gledaju, i da u svakom trenutku budu spremni da prenesu pravu transakciju obavezivanja.
 
-Sada kada znamo kako se vremenske brave mogu koristiti za poništavanje prethodnih obavezivanja, vidimo razliku između zajedničkog zatvaranja kanala i jednostranog zatvaranja emitovanjem transakcije za obavezivanje. Sve transakcije su sa vremenskim bravama, pa će emitovanje transakcije obavezivanja uključivati čekanje dok vremenska brava ne istekne. Ali ako se dva lica dogovore o tome koji je konačni balans i znaju da oba imaju transakcije obavezivanja koje će na kraju taj balans pretvoriti u realnost, mogu da konstruišu transakciju izmirivanja bez vremenske brave koja predstavlja taj isti balans. U bliskoj saradnji, bilo koje lice preuzima najnoviju transakciju obavezivanja i gradi transakciju izmirivanja koja je u svakom pogledu identična, osim što izostavlja vremensku bravu. Oba lica mogu potpisati ovu transakciju izmirivanja znajući da nema načina da varaju i postignu povoljniji balans. Zajedničkim potpisivanjem i prenosom transakcije obavezivanja oni mogu zatvoriti kanal i odmah otkupiti svoj balans. Najgore što jedno od lica može da uradi je da bude nekooperativno, da odbije saradnju i primora drugo lice da učini jednostrano zatvaranje sa poslednjom transakcijom obavezivanja. Ali ako to uradi, moraće i ono da čeka na svoja sredstva. ((("", startref="PSCtrust12")))
+Sada kada znate kako se vremenske brave mogu koristiti za poništavanje prethodnih obavezivanja, možete da uočite razliku između zajedničkog zatvaranja kanala i jednostranog zatvaranja emitovanjem transakcije za obavezivanje. Sve transakcije su sa vremenskim bravama, pa će emitovanje transakcije obavezivanja obuhvatiti čekanje dok vremenska brava ne istekne. Ali ako se dva lica dogovore o tome koji je konačni balans i znaju da oba imaju transakcije obavezivanja koje će na kraju taj balans pretvoriti u realnost, mogu da konstruišu transakciju izmirivanja bez vremenske brave koja predstavlja taj isti balans. U bliskoj saradnji, bilo koje lice preuzima najnoviju transakciju obavezivanja i gradi transakciju izmirivanja koja je u svakom pogledu identična, osim što izostavlja vremensku bravu. Oba lica mogu da potpišu ovu transakciju izmirivanja znajući da nema načina da varaju i postignu povoljniji balans. Zajedničkim potpisivanjem i prenosom transakcije obavezivanja oni mogu da zatvore kanal i odmah otkupe svoj balans. Najgori slučaj je da jedno od lica bude nekooperativno, da odbije saradnju i primora drugo lice da učini jednostrano zatvaranje sa poslednjom transakcijom obavezivanja. Ali ako to uradi, moraće i ono da čeka na svoja sredstva. ((("", startref="PSCtrust12")))
 
-==== Obavezivanja koja se mogu asimetrično opozvati
+==== Obavezivanja koja mogu da se asimetrično opozovu
 
-((("payment (state) channels", "asymmetric revocable commitments", id="PSCaymetric12")))Bolji način za postupanje sa prethodnim stanjima obavezivanja je da se izričito opozovu. Međutim, to nije lako postići. Ključna karakteristika bitkoina je da jednom kada je transakcija validna, ona ostaje validna i ne ističe. Jedini način da se opozove transakcija je dvostruko trošenje njenih ulaza drugom transakcijom pre nego što je rudarena. Zato smo koristili vremenske brave u gornjem primeru jednostavnog kanala plaćanja kako bismo osigurali da se novija obavezivanja mogu potrošiti pre nego što starija obavezivanja postanu validna. Međutim, redosled obavezivanja u vremenu stvara niz ograničenja koja otežavaju upotrebu kanala plaćanja.
+((("payment (state) channels", "asymmetric revocable commitments", id="PSCaymetric12")))Bolji način za postupanje sa prethodnim stanjima obavezivanja je da se izričito opozovu. Međutim, to nije lako postići. Ključna karakteristika bitkoina je da jednom kada transakcija postane validna, ona ostaje validna i ne ističe. Jedini način da se transakcija opozove je dvostruko trošenje njenih ulaza drugom transakcijom pre nego što se izrudari. Zato smo koristili vremenske brave u gornjem primeru jednostavnog kanala plaćanja kako bismo osigurali da se novija obavezivanja mogu potrošiti pre nego što starija obavezivanja postanu validna. Međutim, redosled obavezivanja u vremenu stvara niz ograničenja koja otežavaju upotrebu kanala plaćanja.
 
-Iako se transakcija ne može otkazati, može da se napravi na takav način da bude nepoželjna za upotrebu. To se radi tako što se svakoj strani da  _ključ za opozivanje_ koji se može koristiti da bi se kaznila druga strane ako pokuša da vara. Ovaj mehanizam za opozivanje prethodnih obavezivanja je prvi put predložen kao deo Lightning (munja) mreže (Lightning Network).
+Iako se transakcija ne može otkazati, može da se napravi na takav način da bude nepoželjna za upotrebu. To se radi tako što se svakoj strani da  _ključ za opozivanje_ koji može da se upotrebi da bi se druga strana kaznila ako pokuša da vara. Ovaj mehanizam za opozivanje prethodnih obavezivanja je prvi put predložen kao deo Lightning (munja) mreže (Lightning Network).
 
-Da bismo objasnili ključeve za opozivanje, napravićemo složeniji kanal plaćanja između dve berze koje vode Hiteš i Irin. Hiteš i Irin vode berze bitkoina u Indiji i u SAD, obostrano. Kupci Hitešove indijske berze često šalju pare Irininoj berzi u SAD i obrnuto. Trenutno se ove transakcije događaju na bitkoin blokčejnu, ali to znači da plaćaju naknade i čekaju nekoliko blokova za potvrdu. Postavljanje kanala plaćanja između berzi značajno će smanjiti troškove i ubrzati protok transakcija.
+Da bismo objasnili ključeve za opozivanje, napravićemo složeniji kanal plaćanja između dve berze koje vode Hiteš i Irin. Hiteš i Irin vode berze bitkoina u Indiji i u SAD. Kupci Hitešove indijske berze često šalju pare Irininoj berzi u SAD i obrnuto. Trenutno se ove transakcije događaju na bitkoin blokčejnu, a to znači da plaćaju naknade i čekaju nekoliko blokova za potvrdu. Postavljanje kanala plaćanja između berzi značajno će smanjiti troškove i ubrzati protok transakcija.
 
-Hiteš i Irin pokreću kanal praveći transakciju finansiranja sarađujući i oboje finansiraju kanal sa po 5 bitkoina.
+Hiteš i Irin zajedno pokreću kanal praveći transakciju finansiranja, pri čemu oboje finansiraju kanal sa po 5 bitkoina.
 Početni balans je 5 bitkoina za Hiteša i 5 bitkoina za Irin. Transakcija finansiranja zaključava stanje kanala sa 2-od-2 multisig-om, baš kao u primeru jednostavnog kanala.
 
-Transakcija finansiranja može imati jedan ili više ulaza od Hiteša (u zbiru 5 bitkoina ili više) i jedan ili više ulaza od Irine (u zbiru 5 bitkoina ili više). Ulazi bi trebalo neznatno da nadmaše kapacitet kanala da bi se pokrile transakcijske naknade. Transakcija ima jedan izlaz koji zaključava ukupno 10 bitkoina na 2-od-2 multisig adresi koju kontrolišu i Hiteš i Irina. Transakcija finansiranja takođe može imati jedan ili više izlaza koji vraćaju kusur Hitešu i Irini ako njihovi ulozi nadmaše predviđeni doprinos za kanal. Ovo je jedna transakcija sa ulazima koje nude i potpisuju dve strane. Mora biti sastavljena u saradnji i obe strane je moraju potpisati pre nego što se pošalje.
+Transakcija finansiranja može imati jedan ili više ulaza od Hiteša (u zbiru 5 bitkoina ili više) i jedan ili više ulaza od Irin (u zbiru 5 bitkoina ili više). Ulazi bi trebali neznatno da nadmaše kapacitet kanala da bi se pokrile transakcijske naknade. Transakcija ima jedan izlaz koji zaključava ukupno 10 bitkoina na 2-od-2 multisig adresi koju kontrolišu i Hiteš i Irin. Transakcija finansiranja takođe može imati jedan ili više izlaza koji vraćaju kusur Hitešu i Irin ako njihovi ulozi nadmaše predviđeni doprinos na kanalu. Ovo je jedna transakcija sa ulazima koje nude i potpisuju dve strane. Ona mora da bude sastavljena u saradnji, i obe strane moraju da je potpišu pre nego što se pošalje.
 
 Sada, umesto da naprave jednu transakciju obavezivanja koju obe strane potpisuju, Hiteš i Irin kreiraju dve različite transakcije obavezivanja koje su _asimetrične_.
 
-Hiteš ima transakciju obavezivanja sa dva izlaza. Prvi izlaz _odmah_ plaća Irini 5 bitkoina koje joj Hiteš duguje . Drugim izlazom se Hitešu plaća 5 bitkoina koji mu sleduju, ali tek nakon vremenske brave od 1.000 blokova. Izlazi transakcije izgledaju ovako:
+Hiteš ima transakciju obavezivanja sa dva izlaza. Prvi izlaz _odmah_ plaća Irin 5 bitkoina koje joj Hiteš duguje . Drugim izlazom se Hitešu plaća 5 bitkoina koji mu sleduju, ali tek nakon vremenske brave od 1.000 blokova. Izlazi transakcije izgledaju ovako:
 
 ----
 Ulaz: 2-od-2 izlaz finansiranja, koju je potpisala Irin
@@ -204,7 +204,7 @@ Izlaz 1:
 <Hitešov javni ključ> CHECKSIG
 ----
 
-Irin ima drugačiju transakciju obavezivanja sa dva izlaza. Prvi izlaz odmah plaća Hitešu pet bitkoina koje mu Irin duguje. Drugim izlazom se Irini plaća 5 bitkoina koji joj sleduju, ali tek nakon vremenske brave od 1.000 blokova. Transakcija obavezivanja koju Irina drži (koju potpisuje Hiteš) izgleda ovako:
+Irin ima drugačiju transakciju obavezivanja sa dva izlaza. Prvim izlazom se odmah plaća Hitešu 5 bitkoina koje mu Irin duguje. Drugim izlazom se Irin plaća 5 bitkoina koji joj sleduju, ali tek nakon vremenske brave od 1.000 blokova. Transakcija obavezivanja koju Irin drži (koju potpisuje Hiteš) izgleda ovako:
 
 ----
 Ulaz: 2-od-2 finansiranja izlaza, koji je potpisao Hiteš
@@ -219,7 +219,7 @@ Izlaz 1:
 <Irinin javni ključ> CHECKSIG
 ----
 
-Na ovaj način, svaka strana ima transakciju obavezivanja, trošeći sredstva od 2-od-2. Ovaj ulaz potpisuje _drugo_ lice. Takođe, lice koje drži transakciju može u bilo kom trenutku da je potpiše (dovršavajući 2-od-2) i da je pošalje na bitkoin mrežu. Međutim, ako pošalje transakciju obavezivanja, ona odmah plaća drugoj strani, dok ona mora da čeka da istekne vremenska brava. Nametanjem kašnjenja za otkup jednog od ulaza, stavljamo svaku stranu u malu neugodnost kada odluči da jednostrano emituje transakciju obavezivanja. Ali samo odlaganje vremena nije dovoljno za podsticanje poštenog ponašanja.
+Na ovaj način svaka strana ima transakciju obavezivanja, trošeći sredstva od 2-od-2. Ovaj ulaz potpisuje _drugo_ lice. Takođe, lice koje drži transakciju može u bilo kom trenutku da je potpiše (dovršavajući 2-od-2) i da je pošalje na bitkoin mrežu. Međutim, ako pošalje transakciju obavezivanja, ona odmah plaća drugoj strani, dok ona mora da čeka da istekne vremenska brava. Nametanjem kašnjenja za otkup jednog od ulaza, svaka strana dolazi u neprijatnu situaciju kada odluči da jednostrano emituje transakciju obavezivanja. Ali samo odlaganje vremena nije dovoljno za podsticanje poštenog ponašanja.
 
 <<asymmetric_commitments>> prikazuje dve asimetrične transakcije obavezivanja, gde je izlaz koji plaća nosiocu obavezivanja odložen.
 
@@ -231,11 +231,11 @@ Sada predstavljamo završni element ove šeme: ključ za opozivanje koji spreča
 
 Ključ za opozivanje sastoji se od dve tajne, od kojih svaku polovinu nezavisno stvara svaki učesnik kanala. Sličan je 2-od-2 multisig-u, ali izgrađen je koristeći aritmetiku eliptičke krive, tako da oba lica znaju javni ključ za opozivanje, ali svako lice zna samo polovinu tajnog ključa za opozivanje.
 
-U svakom krugu oba lica otkrivaju svoju polovinu tajne opozivanja drugom licu i na taj način daju drugom licu (koje sada ima obe polovine) način da zatraži izlaz za kazneno plaćanje ukoliko se ta povučena transakcija ikada emituje.
+U svakom krugu oba lica otkrivaju svoju polovinu tajne opozivanja onom drugom, dajući drugom licu (koje sada ima obe polovine) mogućnost da zatraži izlaz za kazneno plaćanje ukoliko se ta povučena transakcija ikada emituje.
 
 Svaka transakcija obavezivanja ima "odložen" izlaz. Skripta za otkupljivanje za taj izlaz omogućava jednom licu da je otkupi nakon 1.000 blokova, _ili_ drugom licu da je otkupi ako ima ključ za opozivanje, kažnjavajući prenos opozvanog obavezivanja.
 
-Dakle, kada Hiteš pravi transakciju obavezivanja Irini da je potpiše, drugi izlaz čini takvim da može biti isplaćen njemu, nakon 1.000 blokova, ili javnom ključu za opozivanje (od koga zna samo pola tajne). Hiteš pravi ovu transakciju. Svoju polovinu tajne za opozivajne otkriće Irini tek kada bude spreman da pređe na novo stanje kanala i kad bude želeo da opozove ovo obavezivanje.
+Dakle, kada Hiteš prosledi Irini transakciju obavezivanja na potpis, drugi izlaz plaća sebi nakon 1.000 blokova, ili javnom ključu za opozivanje (od koga zna samo pola tajne). Hiteš pravi ovu transakciju. Svoju polovinu tajne za opozivajne otkriće Irini tek kada bude spreman da pređe na novo stanje kanala i kada bude želeo da opozove ovo obavezivanje.
 
 Skripta drugog izlaza izgleda ovako:
 
@@ -256,35 +256,35 @@ ENDIF
 CHECKSIG
 ----
 
-Irina može sa poverenjem da potpiše ovu transakciju, jer ako joj je poslata, odmah će joj se platiti dug. Hiteš drži transakciju, ali zna da će, ako je pošalje u jednostranom zatvaranju kanala, morati da sačeka 1.000 blokova da bi bio plaćen.
+Irin može sa poverenjem da potpiše ovu transakciju, jer čim je prosledi odmah će joj biti plaćeno ono što joj se duguje. Hiteš drži transakciju, ali zna da će ako je prosledi u jednostranom zatvaranju kanala morati da sačeka 1.000 blokova da bi bio plaćen.
 
-Kada kanal pređe na sledeće stanje, Hiteš mora da _opozove_ ovu transakciju pre nego što Irin pristane da potpiše sledeću transakciju obavezivanja. Da bi to učinio, sve što treba da uradi je da pošalje Irin svoju polovinu _ključa za opozivanje_. Jednom kada Irin ima obe polovine tajnog ključa za opozivanje za ovo obavezivanje, ona može sa poverenjem da potpiše sledeće obavezivanje. Ona zna da ako Hiteš pokuša da vara objavljujući prethodno obavezivanje, ona može da upotrebi ključ za opozivanje kako bi unovčila Hitešov odloženi izlaz. _Ako Hiteš vara, Irin dobija OBA izlaza_. U međuvremenu, Hiteš ima samo polovinu tajne opozivanja za taj javni ključ za opozivanje i ne može da otkupi izlaz sve do 1.000 blokova. Iren će moći da otkupi izlaz i kazni Hiteša pre nego što prođe 1.000 blokova.
+Kada kanal pređe na sledeće stanje, Hiteš mora da _opozove_ ovu transakciju pre nego što Irin pristane da potpiše sledeću transakciju obavezivanja. Da bi to učinio mora Irin da pošalje svoju polovinu _ključa za opozivanje_. Kada Irin dođe u posed obe polovine tajnog ključa za opozivanje ovog obavezivanja, ona slobodno može da potpiše sledeće obavezivanje. Ona zna da ako Hiteš pokuša da vara objavljujući prethodno obavezivanje, ona može da upotrebi ključ za opozivanje da bi unovčila Hitešov odloženi izlaz. _Ako Hiteš vara, Irin dobija OBA izlaza_. U međuvremenu, Hiteš ima samo polovinu tajne opozivanja javnog ključa za opozivanje i ne može da otkupi izlaz sve do 1.000 blokova. Irin će moći da otkupi izlaz i kazni Hiteša pre nego što prođe 1.000 blokova.
 
-Protokol opozivanja je bilateralni, što znači da u svakom krugu, kako stanje kanala napreduje, oba lica razmenjuju nova obavezivanja, razmenjuju tajne opozivanja za prethodna obavezivanja i međusobno potpisuju nove transakcije obavezivanja. Kada prihvate novo stanje, oni onemogućavaju upotrebu prethodnog stanja, dajući jedni drugima potrebne tajne za opozivanje kako bi kaznili svako varanje.
+Protokol opozivanja je bilateralni, što znači da u svakom krugu, kako stanje kanala napreduje, oba lica razmenjuju nova obavezivanja, razmenjuju tajne opozivanja za prethodna obavezivanja i međusobno potpisuju nove transakcije obavezivanja. Kada prihvate novo stanje, oni onemogućavaju upotrebu prethodnog stanja, dajući jedno drugom potrebne tajne za opozivanje kako bi kaznili bilo kakvo varanje.
 
-Pogledajmo primer kako to radi. Jedan od Irininih kupaca želi da pošalje 2 bitkoina nekom od Hitešovih kupaca. Da bi preneli 2 bitkoina preko kanala, Hiteš i Irin moraju unaprediti stanje kanala da bi napravili novi balans. Oni će se obavezati na novo stanje (stanje broj 2) gde će 10 bitkoina kanala biti podeljeno, 7 bitkoina Hitešu i 3 bitkoina Irin. Da bi pomakli unapred stanje kanala, oboje će kreirati nove transakcije obavezivanja, koje odražavaju novi balans na kanalu.
+Pogledajte u primeru kako to izgleda. Jedan od Irininih kupaca želi da pošalje 2 bitkoina nekom od Hitešovih kupaca. Da bi preneli 2 bitkoina preko kanala, Hiteš i Irin moraju unaprediti stanje kanala da bi napravili novi balans. Oni će se obavezati na novo stanje (stanje broj 2) gde će 10 bitkoina kanala biti podeljeno, 7 bitkoina Hitešu i 3 bitkoina Irin. Da bi pomakli unapred stanje kanala, oboje će kreirati nove transakcije obavezivanja, koje odražavaju novi balans na kanalu.
 
-Kao i do sada, ove transakcije obavezivanja su asimetrične, tako da transakcija obavezivanja koju svako lice drži, prisiljava ih na čekanje ako je otkupe. Najbitnije je da pre potpisivanja novih transakcija obavezivanja, oni moraju prvo da razmene ključeve za opozivanje kako bi poništili prethodno obavezivanje. U ovom konkretnom slučaju, Hitešovi interesi su usklađeni sa stvarnim stanjem kanala i zato on nema razloga da emituje prethodno stanje. Međutim, za Irin, stanje broj 1 je ostavlja sa većim balansom od stanja 2. Kad Irin da Hitešu ključ za opozivanje njene prethodne transakcije obavezivanja (stanje broj 1), ona efektivno opoziva svoju sposobnost da profitira od vraćanja kanala na prethodno stanje, pošto Hiteš može bez odlaganja da otkupi oba ulaza prethodne transakcije obavezivanja sa ključem za opozivanje. Znači ako Irin emituje prethodno stanje, Hiteš može da iskoristi svoje pravo na preuzimanje svih izlaza.
+Kao i do sada, ove transakcije obavezivanja su asimetrične, tako da transakcija obavezivanja koju drži svako lice, prisiljava ih na čekanje ako žele da je otkupe. Najbitnije je da pre potpisivanja novih transakcija obavezivanja, oni moraju prvo da razmene ključeve za opozivanje kako bi poništili prethodno obavezivanje. U ovom konkretnom slučaju, Hitešovi interesi su usklađeni sa stvarnim stanjem kanala i zato on nema razloga da emituje prethodno stanje. Međutim, za Irin stanje broj 1 je ostavlja sa većim balansom od stanja 2. Kada Irin da Hitešu ključ za opozivanje njene prethodne transakcije obavezivanja (stanje broj 1), ona efektivno opoziva svoju sposobnost da profitira od vraćanja kanala na prethodno stanje, pošto Hiteš može bez odlaganja da otkupi oba ulaza prethodne transakcije obavezivanja sa ključem za opozivanje. Znači ako Irin emituje prethodno stanje, Hiteš može da iskoristi svoje pravo na preuzimanje svih izlaza.
 
 Važno je da se opozivanje ne događa automatski. Iako Hiteš ima moć da kazni Irin zbog varanja, on mora pažljivo da prati blokčejn u potrazi za znacima varanja. Ako vidi da se emituje prethodna transakcija obavezivanja, ima 1.000 blokova da reaguje i iskoristi ključ za opozivanje kako bi sprečio Irin u varanju i kako bi je kaznio uzimajući celokupni balans, svih 10 bitkoina.
 
-Asimetrične obaveze koje se mogu opozvati sa relativnim vremenskim bravama (+CSV+) su mnogo bolji način za implementaciju kanala plaćanja i vrlo značajna inovacija u ovoj tehnologiji. Pomoću ovog konstrukta, kanal može ostati beskonačno otvoren i može imati milijarde posredničkih transakcija. U implementacijama prototipa Lightning mreže, stanje obavezivanja identifikovano je 48-bitnim indeksom, omogućavajući više od 281 biliona (2.8 x 10^14^) prelaza stanja u bilo kojem kanalu!((("", startref="PSCaymetric12")))
+Asimetrične obaveze koje se mogu opozvati sa relativnim vremenskim bravama (+CSV+) su mnogo bolji način za implementaciju kanala plaćanja i vrlo značajna inovacija u ovoj tehnologiji. Pomoću ove konstrukcije, kanal može da ostane beskonačno otvoren i može da ima milijarde posredničkih transakcija. U implementacijama prototipa Lightning mreže, stanje obavezivanja identifikovano je 48-bitnim indeksom, omogućavajući više od 281 biliona (2.8 x 10^14^) prelaza stanja u bilo kojem kanalu!((("", startref="PSCaymetric12")))
 
 ==== Ugovori hešovani sa vremenskom bravom (Hash Time Lock Contracts - HTLC)
 
-((("Hash Time Lock Contracts (HTLC)")))((("payment (state) channels", "Hash Time Lock Contracts (HTLC)")))Kanali plaćanja mogu se dalje produžiti posebnom vrstom pametnog ugovora koji omogućava učesnicima da obavežu sredstva za otkupljivu tajnu, sa vremenskom bravom. Ova se funkcija naziva _Hash Time Lock Contract_ ili _HTLC_ i koristi se i u dvosmernim i u usmerenim kanalima plaćanja.
+((("Hash Time Lock Contracts (HTLC)")))((("payment (state) channels", "Hash Time Lock Contracts (HTLC)")))Kanali plaćanja mogu da se produže posebnom vrstom pametnog ugovora koji učesnicima omogućava da obavežu sredstva za otkup tajne sa rokom isteka. Ova se funkcija naziva _Hash Time Lock Contract_ ili _HTLC_ i koristi se i u dvosmernim i u usmerenim kanalima plaćanja.
 
-Objasnimo najpre "heš" deo HTLC-a. Da bi kreirao HTLC, planirani primalac plaćanja prvo će stvoriti tajnu +R+. On potom izračunava heš ove tajne +H+:
+Objasnićemo najpre "heš" deo HTLC-a. Da bi kreirao HTLC, planirani primalac plaćanja će prvo stvoriti tajnu +R+. Potom će izračunati heš ove tajne +H+:
 
 ----
 H = Hash(R)
 ----
 
-Ovo stvara heš +H+ koji se može uključiti u skriptu za zaključavanje izlaza. Ko poznaje tajnu, može je iskoristiti da bi otkupio izlaz. Tajna +R+ se takođe naziva _preimage_ funkcije heša. Preimage su samo podaci koji se koriste kao ulaz u funkciju heša.
+To stvara heš +H+ koji se može uključiti u skriptu za zaključavanje izlaza. Ko zna tajnu može da je iskoristi za otkup izlaza. Tajna +R+ se takođe naziva _preimage_ funkcije heša. Preimage su samo podaci koji se koriste kao ulaz u funkciju heša.
 
 Drugi deo HTLC-a je komponenta "vremenske brave". Ako tajna nije otkrivena, onaj ko plati HTLC može nakon nekog vremena dobiti "povraćaj novca". Ovo se postiže apsolutnom vremenskom bravom koja koristi +CHECKLOCKTIMEVERIFY+.
 
-Skripta koja implementira HTLC može izgledati ovako:
+Skripta koja implementira HTLC može ovako da izgleda:
 
 ----
 IF
@@ -306,7 +306,7 @@ Ovo je osnovna implementacija HTLC-a. Ovu vrstu HTLC-a može otkupiti _svako_ ko
 [[lightning_network]]
 === Kanali rutiranja za plaćanje (Lightning Network)
 
-((("blockchain applications", "routed payment channels", seealso="Lightning Network", id="BCAlightning12")))((("routed payment channels", see="Lightning Network")))((("Lightning Network", "defined")))Lightning Network (mreža munje) je predložena mreža rutiranja dvosmernih kanala plaćanja povezanih od kraja do kraja. Takva mreža može omogućiti bilo kom učesniku da rutira plaćanje od kanala do kanala, a da ne veruje nijednom posredniku. Lightning mrežu je https://lightning.network/lightning-network-paper.pdf[prvi put su opisali Džozef Pun (Joseph Poon) i Tadeus Draj (Thadeus Dryja) u februaru 2015.], nadogradnjom na koncept kanala plaćanja koji su predložili i razradili mnogi drugi.
+((("blockchain applications", "routed payment channels", seealso="Lightning Network", id="BCAlightning12")))((("routed payment channels", see="Lightning Network")))((("Lightning Network", "defined")))Lightning Network (mreža munje) je predložena mreža rutiranja dvosmernih kanala plaćanja povezanih od kraja do kraja. Takva mreža može omogućiti bilo kom učesniku da rutira plaćanje od kanala do kanala, bez poverenja u bilo kog posrednika. Lightning mrežu je https://lightning.network/lightning-network-paper.pdf[prvi put su opisali Džozef Pun (Joseph Poon) i Tadeus Draj (Thadeus Dryja) u februaru 2015.], nadogradnjom na koncept kanala plaćanja koji su predložili i razradili mnogi drugi.
 
 „Lightning mreža“ se odnosi na specifičan dizajn za rutiranu mrežu kanala plaćanja koji je sada implementiralo najmanje pet različitih timova otvorenog koda. ((("Basics of Lightning Technology (BOLT)")))Nezavisne implementacije koordinišu se nizom standarda interoperabilnosti opisanih u ovom radu: https://bit.ly/2rBHeoL[_Osnove Lightning tehnologije (BOLT)_].
 
@@ -316,9 +316,9 @@ Lightning Network je jedan od mogućih načina implementacije rutiranog kanala p
 
 ==== Osnovni primer Lightning mreže
 
-((("Lightning Network", "basic example")))Pogledajmo kako ovo funkcioniše.
+((("Lightning Network", "basic example")))Pogledajte kako to funkcioniše.
 
-U ovom primeru imamo pet učesnika: Alisu, Boba, Carol footnote:[prim. prev. Ime Carol u daljem tekstu u originalnoj formi, kako bi se očuvao redosled engleskog alfabeta imena iz izvornog teksta] (Karol), Dijanu i Erika. Ovih pet učesnika su međusobno otvorili kanale plaćanja u parovima. Alisa ima kanal plaćanja sa Bobom. Bob je povezan sa Carolom, Carol s Dijanom, a Dijana s Erikom. Radi jednostavnosti, pretpostavimo da je svaki kanal finansiran sa 2 bitkoina od strane svakog učesnika, ukupnog kapaciteta 4 bitkoina na svakom kanalu.
+U ovom primeru imamo pet učesnika: Alisu, Boba, Carol footnote:[prim. prev. Ime Carol u daljem tekstu u originalnoj formi, kako bi se očuvao redosled engleskog alfabeta imena iz izvornog teksta] (Karol), Dijanu i Erika. Ovih pet učesnika su međusobno otvorili kanale plaćanja u parovima. Alisa ima kanal plaćanja sa Bobom. Bob je povezan sa Carol, a Carol sa Dijanom i Dijana sa Erikom. Radi jednostavnosti, pretpostavimo da je svaki kanal finansiran sa 2 bitkoina od strane svakog učesnika, ukupnog kapaciteta od 4 bitkoina na svakom kanalu.
 
 <<lightning_network_fig>> prikazuje pet učesnika u Lightning mreži, povezanih dvosmernim kanalima plaćanja koji se mogu povezati da bi izvršili plaćanje od Alise do Erika (<<lightning_network>>).
 
@@ -326,31 +326,31 @@ U ovom primeru imamo pet učesnika: Alisu, Boba, Carol footnote:[prim. prev. Ime
 .Serija dvosmernih kanala plaćanja povezanih za formiranje Lightning mreže koja može usmeravati uplatu od Alise do Erika 
 image::images/mbc2_1206.png["Serija dvosmernih kanala plaćanja povezanih da formiraju Lightning mrežu"]
 
-Alisa želi Eriku da plati 1 bitkoin. Međutim, Alisa nije povezana kanalom plaćanja sa Erikom. Stvaranje kanala plaćanja zahteva transakciju finansiranja, koja se mora izvršiti u bitkoin blokčejnu. Alisa ne želi da otvori novi kanal plaćanja i da obavezuje više svojih sredstva. Postoji li način da Eriku plati posredno?
+Alisa želi Eriku da plati 1 bitkoin. Međutim, Alisa nije povezana kanalom plaćanja sa Erikom. Stvaranje kanala plaćanja zahteva transakciju finansiranja, koja se mora izvršiti u bitkoin blokčejnu. Alisa ne želi da otvori novi kanal plaćanja i da obaveže još svojih sredstava. Da li postoji način da Eriku plati posredno?
 
 <<ln_payment_process>> prikazuje korak po korak usmeravanje plaćanja od Alise do Erika, kroz niz HTLC obavezivanja na kanalima plaćanja koji povezuju učesnike.
 
 [[ln_payment_process]]
-. Korak po korak usmeravanja uplata kroz Lightning mrežu
+. Korak po korak usmeravanja plaćanja kroz Lightning mrežu
 image::images/mbc2_1207.png["Korak po korak usmeravanje plaćanja kroz Lightning mrežu"]
 
 Alisa pokreće Lightning Network (LN) čvor koji prati njen kanal plaćanja Bobu i ima mogućnost otkrivanja ruta (putanja) između kanala plaćanja. Alisin LN čvor takođe ima mogućnost povezivanja preko interneta na Erikov LN čvor. Erikov LN čvor stvara tajnu +R+ koristeći generator nasumičnih brojeva. Erikov čvor ne otkriva nikome ovu tajnu. Umesto toga, Erikov čvor izračunava heš +H+ tajne +R+ i prenosi ovaj heš na Alisin čvor (vidi <<ln_payment_process>> korak 1).
 
 Sada Alisin LN čvor gradi rutu između Alisinog LN čvora i Erikovog LN čvora. Algoritam rutiranja ćemo detaljnije ispitati kasnije, ali za sada pretpostavimo da Alisin čvor može pronaći efikasnu rutu.
 
-Alisin čvor zatim konstruiše HTLC za plaćanje na heš +H+, sa vremenski ograničenim povraćajem novca od 10 blokova (trenutni blok +10), za iznos od 1,003 bitkoina (videti <<ln_payment_process>> korak 2). Dodatnih 0,003 koristiće se za kompenzaciju posrednih čvorova za njihovo učešće u ovoj ruti plaćanja. Alisa nudi ovaj HTLC Bobu, oduzimajući 1.003 bitkoina iz njegovog status kanala sa Bobom i predajući ga HTLC-u. HTLC ima sledeće značenje: _"Alisa obavezuje 1,003 svog kanala da se plati Bobu ako Bob zna tajnu, ili da joj se vrati nazad ako prođe 10 blokova."_ Balans kanala između Alise i Boba je sada izražen transakcijama obavezivanja sa tri izlaza: 2 bitkoin balansa Bobu, 0,997 bitkoin balansa Alisi, 1,003 bitkoin obavezanih Alisinoj HTLC-u. Alisin balans je umanjen za iznos namenjen HTLC-u.
+Alisin čvor zatim konstruiše HTLC za plaćanje na heš +H+, sa vremenski ograničenim povraćajem novca od 10 blokova (trenutni blok +10), za iznos od 1,003 bitkoina (pogledajte <<ln_payment_process>> korak 2). Dodatnih 0,003 koristiće se za kompenzaciju posrednih čvorova za njihovo učešće u ovoj ruti plaćanja. Alisa nudi ovaj HTLC Bobu, oduzimajući 1.003 bitkoina iz njegovog status kanala sa Bobom i predajući ga HTLC-u. HTLC ima sledeće značenje: _"Alisa obavezuje 1,003 svog kanala da plati Bobu ako Bob zna tajnu, ili da joj se vrati nazad ako prođe 10 blokova."_ Balans kanala između Alise i Boba je sada izražen transakcijama obavezivanja sa tri izlaza: 2 bitkoin balansa Bobu, 0,997 bitkoin balansa Alisi, 1,003 bitkoin obavezanih Alisinoj HTLC-u. Alisin balans je umanjen za iznos namenjen HTLC-u.
 
-Bob se sada obavezao da, ako uspe da dobije tajnu +R+ u narednih 10 blokova, može da zatraži 1,003 koje je zaključala Alisa. S ovim obavezivanjem u ruci, Bobov čvor konstruiše HTLC na svom kanalu plaćanja Carol-i. Bobov HTLC obavezuje 1,002 bitkoina za heš +H+ za 9 blokova koje Carol može da otkupi ako ima tajnu +R+ (vidi <<ln_payment_process>> korak 3). Bob zna da ako Carol može zatražiti svoj HTLC, ona mora da proizvede +R+. Ako Bob ima +R+ u devet blokova, on će moći da ga upotrebi za traženje Alisinog HTLC-a. Takođe zarađuje 0,001 bitkoin za izvršenje svog stanja kanala u devet blokova. Ako Carol nije u mogućnosti da zatraži svoj HTLC i on nije u mogućnosti da zatraži Alisin HTLC, sve se vraća na prethodno stanje kanala i niko nije u gubitku. Balans kanala između Boba i Carol-e je sada: 2 Carol-i, 0,998 Bobu, 1,002 obavezane od Boba prema HTLC-u.
+Bob sada ima obavezu ako dobije tajnu +R+ u narednih 10 blokova, da traži 1,003 koje je zaključala Alisa. Sa ovim obavezivanjem u ruci, Bobov čvor konstruiše HTLC na svom kanalu plaćanja Caroli. Bobov HTLC obavezuje 1,002 bitkoina za heš +H+ za 9 blokova koje Carol može da otkupi ako ima tajnu +R+ (vidi <<ln_payment_process>> korak 3). Bob zna da ako Carol zatraži njegov HTLC, ona mora da proizvede +R+. Ako Bob ima +R+ u devet blokova, on će moći da ga upotrebi za traženje Alisinog HTLC-a. On takođe zarađuje 0,001 bitkoin za izvršenje svog stanja kanala u devet blokova. Ako Carol nije u mogućnosti da zatraži svoj HTLC i on nije u mogućnosti da zatraži Alisin HTLC, sve se vraća na prethodno stanje kanala i niko nije u gubitku. Balans kanala između Boba i Carole je sada: 2 Caroli, 0,998 Bobu, 1,002 obavezane od Boba prema HTLC-u.
 
-Carol se sada obavezala da ako dobije +R+ u narednih devet blokova, može zatražiti 1,002 bitkoina koje je Bob zaključao. Sada sa Dijanom može da napravi HTLC obavezivanje njenom kanalu. Ona obavezuje HTLC od 1,001 bitkoina sa hešom +H+, za osam blokova, koje Dijana može otkupiti ako ima tajnu +R+ (vidi <<ln_payment_process>> korak 4). Iz Caroline perspektive, ako ovo uspe, dobija 0,001 bitkoina, a ako to ne učini, ništa ne gubi. Njen HTLC prema Dijani je održiv samo ako se otkrije +R+, u kom trenutku ona može zatražiti HTLC od Boba. Balans kanala između Carol-e i Dijane je sada: 2 za Dijanu, 0,999 za Carol i 1,001 koje je Carol obavezala HTLC-u.
+Carol se sada obavezuje da ako dobije +R+ u narednih devet blokova, može tražiti 1,002 bitkoina koje je Bob zaključao. Sada sa Dijanom može da napravi HTLC obavezivanja na njenom kanalu. Ona obavezuje HTLC od 1,001 bitkoina sa hešom +H+, za osam blokova, koje Dijana može da otkupi ako ima tajnu +R+ (vidi <<ln_payment_process>> korak 4). Iz Caroline perspektive, ako ovo uspe ona dobija 0,001 bitkoina, a ako ne, opet ništa ne gubi. Njen HTLC prema Dijani je održiv samo ako se otkrije +R+, u tom trenutku ona može tražiti HTLC od Boba. Balans kanala između Carole i Dijane je sada: 2 za Dijanu, 0,999 za Carol i 1,001 koje je Carol obavezala HTLC-u.
 
-Konačno, Dijana može da ponudi Eriku HTLC, obavezjući 1 bitkoin za sedam blokova za heš +H+ (vidi <<ln_payment_process>> korak 5). Balans na kanalu između Dijane i Erika je sada: 2 za Erika, 1 za Dijanu, 1 koje je Dijana obavezala HTLC-u.
+Konačno, Dijana može da ponudi Eriku HTLC, obavezjući 1 bitkoin za sedam blokova za heš +H+ (pogledajte <<ln_payment_process>> korak 5). Balans na kanalu između Dijane i Erika je sada: 2 za Erika, 1 za Dijanu, 1 koje je Dijana obavezala HTLC-u.
 
-Međutim, pri ovom skoku na ruti, Erik _ima_ tajnu +R+. Zato može tražiti HTLC koji nudi Dijana. Šalje +R+ Dijani i traži 1 bitkoin, dodajući ga na svoj kanal (vidi <<ln_payment_process>> korak 6). Balans kanala je sada: 1 Dijani, 3 Eriku.
+Međutim, pri ovom skoku na ruti, Erik _ima_ tajnu +R+. Zato može da traži HTLC koji nudi Dijana. Šalje +R+ Dijani i traži 1 bitkoin, dodajući ga na svoj kanal (pogledajte <<ln_payment_process>> korak 6). Balans kanala je sada: 1 za Dijanu, 3 za Erika.
 
-Dijana ima tajnu +R+. Zbog toga ona sada može tražiti HTLC od Carol. Dijana prenosi +R+ Caroli i dodaje 1,001 bitkoin na svoj kanal (vidi <<ln_payment_process>> korak 7). Sada je balans kanala između Carole i Dijane: 0,999 Carol-i, 3,001 Dijani. Dijana je "zaradila" 0,001 za učešće u ovoj ruti plaćanja.
+Dijana ima tajnu +R+. Zbog toga ona sada može tražiti HTLC od Carol. Dijana prenosi +R+ Caroli i dodaje 1,001 bitkoin na svoj kanal (pogledajte <<ln_payment_process>> korak 7). Sada je balans kanala između Carole i Dijane: 0,999 Caroli, 3,001 Dijani. Dijana je "zaradila" 0,001 za učešće u ovoj ruti plaćanja.
 
-Prolazeći kroz rutu, tajna +R+ omogućava svakom učesniku da zatraži izvanredne HTLC-e. Carol zahteva 1,002 od Boba, stavljajući balans na svom kanalu na: 0,998 za Boba, 3,002 za Carol-u (vidi <<ln_payment_process>> korak 8). Konačno, Bob zahteva HTLC od Alise (vidi <<ln_payment_process>>  korak 9). Njihov balans na kanalima je ažuriran kao: 0,997 za Alisu, 3,003 za Boba.
+Prolazeći kroz rutu, tajna +R+ omogućava svakom učesniku da zatraži izvanredne HTLC-e. Carol zahteva 1,002 od Boba, stavljajući balans na svom kanalu na: 0,998 za Boba, 3,002 za Carolu (pogledajte <<ln_payment_process>> korak 8). Konačno, Bob zahteva HTLC od Alise (pogledajte <<ln_payment_process>>  korak 9). Njihov balans na kanalima je ažuriran kao: 0,997 za Alisu, 3,003 za Boba.
 
 Alisa je Eriku platila 1 bitkoin bez otvaranja kanala Eriku. Nijedna od posredničkih strana na ruti plaćanja nije morala da veruje drugoj. Za kratkoročno obavezivanje svojih sredstva na kanalu mogu zaraditi malu naknadu, jedini rizik je malo kašnjenje u povraćaju novca ako je kanal zatvoren ili rutiranje plaćanja ne uspe.
 
@@ -362,15 +362,15 @@ Kad god čvor želi da pošalje bitkoin na drugi čvor, prvo mora izgraditi _put
 
 U našem prethodnom primeru, Alisin čvor koristi jedan od ovih mehanizma otkrivanja rute da pronađe jednu ili više putanja koje povezuju njen čvor sa Erikovim čvorom. Jednom kada Alisin čvor izgradi putanju, ona će inicijalizirati tu putanju kroz mrežu, širiti niz šifrovanih i ugnezdenih uputstava za povezivanje svakog od susednih kanala plaćanja.
 
-Važno je da je ova putanja poznata samo Alisinom čvoru. Svi ostali učesnici u ruti plaćanja vide samo susedne čvorove. Iz Caroline perspektive, ovo izgleda kao Bobovo plaćanje Dijani. Carol ne zna da Bob ustvari vraća uplatu od Alise. Takođe ne zna da će Dijana predati uplatu Eriku.
+Važno je da je ova putanja poznata samo Alisinom čvoru. Svi ostali učesnici u ruti plaćanja vide samo susedne čvorove. Iz Caroline perspektive, to izgleda kao Bobovo plaćanje Dijani. Carol ne zna da Bob ustvari vraća uplatu od Alise. Ona takođe ne zna da će Dijana predati uplatu Eriku.
 
-Ovo je ključna karakteristika Lightning mreže jer obezbeđuje privatnost plaćanja i otežava primenu nadzora, cenzure ili crnih lista. Ali kako Alisa uspostavlja tu putanju plaćanja, a da ništa ne otkrije posredničkim čvorovima?
+Ovo je ključna karakteristika Lightning mreže jer obezbeđuje privatnost plaćanja i otežava primenu nadzora, cenzure ili crnih lista. Kako Alisa uspostavlja tu putanju plaćanja, a da ništa ne otkrije posredničkim čvorovima?
 
-Lightning mreža implementira protokol onion (luk na engleskom) rutiranja na osnovu šeme koja se zove https://bit.ly/2q6ZDrP[Sphinx]. Ovaj protokol rutiranja osigurava da pošiljalac plaćanja može konstruisati i saopšti putanju kroz Lightning mrežu tako da:
+Lightning mreža implementira protokol onion (engl. luk) rutiranja na osnovu šeme koja se zove https://bit.ly/2q6ZDrP[Sphinx]. Ovaj protokol rutiranja osigurava da pošiljalac plaćanja može da konstruiše i saopšti putanju kroz Lightning mrežu tako da:
 
 * Prelazni čvorovi mogu da provere i dešifruju svoj deo informacija o ruti i pronađu sledeći skok.
 
-* Osim prethodnog i sledećeg skoka, oni ne mogu saznati za bilo koje druge čvorove koji su deo putanje.
+* Osim prethodnog i sledećeg skoka, oni ne mogu da saznaju za druge čvorove koji su deo putanje.
 
 * Ne mogu da identifikuju dužinu putanje plaćanja ili sopstvenu poziciju na toj putanji.
 
@@ -380,29 +380,29 @@ Lightning mreža implementira protokol onion (luk na engleskom) rutiranja na osn
 
 Koristeći ovaj protokol onion-rutiranja, Alisa omotava svaki element putanje u sloj šifrovanja, počevši od kraja i radeći unazad. Ona šifruje poruku Eriku sa Erikovim javnim ključem. Ova poruka je umotana u poruku šifrovanu Dijani, identifikujući Erika kao sledećeg primaoca. Poruka Dijani je umotana u poruku šifrovanu za Carolin javni ključ i identifikuje Dijanu kao sledećeg primaoca. Poruka za Carolu je šifrovana na Bobovom ključu. Tako je Alisa konstruisala ovaj šifrovani višeslojni "luk" (onion) poruka. Ona ovo šalje Bobu, koji može samo da dešifruje i odmota spoljni sloj. Unutra Bob pronalazi poruku upućenu Caroli koju može da joj prosledi, ali on sam ne može da je dešifruje. Sledeći putanju, poruke se prosleđuju, dešifruju, prosleđuju itd., sve do Erika. Svaki učesnik zna samo prethodni i sledeći čvor u svakom skoku.((("", startref="alicetwelve")))
 
-Svaki element putanje sadrži podatke o HTLC-u koji se moraju proširiti na sledeći skok, iznos koji se šalje, naknadu koja uključuje i CLTV vreme zaključavanja (u blokovima) isteka HTLC-a. Kako se informacije o ruti šire, čvorovi izvršavaju HTLC obaveze na sledećem skoku.
+Svaki element putanje sadrži podatke o HTLC-u koji se moraju proširiti na sledeći skok, iznos koji se šalje, naknadu koja uključuje i CLTV vreme zaključavanja (u blokovima) isteka HTLC-a. Kako se informacije o ruti šire, tako čvorovi izvršavaju HTLC obaveze na sledećem skoku.
 
 U ovom trenutku se možda pitate kako je moguće da čvorovi ne znaju dužinu putanje i njihov položaj na toj putanji. Naposletku, oni primaju poruku i prosleđuju je sledećem skoku. Zar se ne skraćuje, omogućavajući im da izvedu zaključak o veličini putanje i njihovom položaju? Da bi se to sprečilo, putanja je uvek fiksirana na 20 skokova i dopunjena nasumičnim podacima. Svaki čvor vidi sledeći skok i šifrovanu poruku fiksne dužine koju treba proslediti. Samo krajnji primalac vidi da nema sledećeg skoka. Drugima uvek izgleda kao da je preostalo još 20 skokova.
 
 ==== Prednosti Lightning mreže
 
-((("Lightning Network", "benefits of")))Lightning mreža je tehnologija za rutiranje drugog sloja. Može se primeniti na bilo koji blokčejn koji podržava neke osnovne mogućnosti, kao multisignature transakcije, vremenske brave i osnovne pametne ugovore.
+((("Lightning Network", "benefits of")))Lightning mreža je tehnologija za rutiranje drugog sloja. Može se primeniti na bilo koji blokčejn koji podržava neke osnovne mogućnosti, kao multisignature transakcije, vremenske brave i osnovni pametni ugovori.
 
 Ako je Lightning mreža sloj na vrhu bitkoin mreže, bitkoin mreža može steći značajno povećanje kapaciteta, privatnosti, preciznosti i brzine, a da ne žrtvuje principe pouzdanog rada bez posrednika:
 
-Privatnost:: Plaćanja putem Lightning mreže mnogo su privatnija od plaćanja na bitkoin blokčejnu, jer nisu javna. Dok učesnici na ruti mogu videti plaćanja distribuirana preko svojih kanala, oni ne znaju pošiljaoca ili primaoca.
+Privatnost:: Plaćanja putem Lightning mreže su mnogo privatnija od plaćanja na bitkoin blokčejnu, jer nisu javna. Dok učesnici na ruti mogu videti plaćanja distribuirana preko svojih kanala, oni ne znaju pošiljaoca ili primaoca.
 
 Sposobnost zamene (Fungibility):: Lightning mreža znatno otežava primenu nadzora i crnih lista na bitkoinu, povećavajući fleksibilnost valute.
 
-Brzina: Bitkoin transakcije pomoću Lightning mreže izmiruju se u milisekundama, a ne u minutima, jer se HTLC-i kliringuju (izmiruju) bez izvršavanja transakcija u jednom bloku.
+Brzina: Bitkoin transakcije pomoću Lightning mreže se izmiruju u milisekundama, a ne u minutima, jer se HTLC-i kliringuju (izmiruju) bez izvršavanja transakcija u jednom bloku.
 
-Granularnost:: Lightning mreža može omogućiti plaćanja bar onoliko mala kolika je granica bitkoinove "prašine",  a možda i manja. Neki predlozi omogućavaju inkremente na nivou manjim od satošija.
+Granularnost:: Lightning mreža može da omogući plaćanja bar onoliko mala kolika je granica bitkoinove "prašine",  a možda i manja. Neki predlozi dozvoljavaju jedinice i manje od satošija (subsatoshi).
 
-Kapacitet:: Lightning mreža povećava kapacitet bitkoin sistema za nekoliko redova veličina. Praktično ne postoji gornja granica broja plaćanja u sekundi koja se može usmeriti putem Lightning mreže, jer to zavisi samo od kapaciteta i brzine svakog čvora.
+Kapacitet:: Lightning mreža povećava kapacitet bitkoin sistema za nekoliko redova veličina. Praktično ne postoji gornja granica broja plaćanja u sekundi koja se može preusmeriti putem Lightning mreže, jer to zavisi samo od kapaciteta i brzine svakog čvora.
 
-Operacija bez potrebe poverenja:: Lightning mreža koristi bitkoin transakcije između čvorova koji deluju kao vršnjaci, a ne veruju jedni drugima. Na taj način, Lightning mreža čuva principe bitkoin sistema, znatno proširujući svoje radne parametre.
+Operacija bez potrebe poverenja:: Lightning mreža koristi bitkoin transakcije između čvorova koji deluju kao vršnjaci, a ne veruju jedni drugima. Na taj način, Lightning mreža čuva principe bitkoin sistema, znatno proširujući svoje operativne parametre.
 
-Naravno, kao što je ranije spomenuto, protokol Lightning mreže nije jedini način za implementaciju rutiranih kanala plaćanja. Ostali predloženi sistemi uključuju Tumblebit i Teechan. Međutim, u ovom trenutku Lightning mreža je već postavljena na testnetu. Nekoliko različitih timova razvilo je konkurentske implementacije LN-a i rade na zajedničkom standardu interoperabilnosti (zvanom BOLT). Verovatno je da će Lightning mreža biti prva rutirana mreža kanala za plaćanje koja će biti pokrenuta u proizvodnji.((("", startref="BCAlightning12")))
+Kao što je ranije spomenuto, protokol Lightning mreže nije jedini način za implementaciju rutiranih kanala plaćanja. Ostali predloženi sistemi uključuju Tumblebit i Teechan. Međutim, u ovom trenutku Lightning mreža je već postavljena na testnetu. Nekoliko različitih timova razvilo je konkurentske implementacije LN-a i rade na zajedničkom standardu interoperabilnosti (zvanom BOLT). Verovatno je da će Lightning mreža biti prva rutirana mreža kanala za plaćanje koja će biti pokrenuta u proizvodnji.((("", startref="BCAlightning12")))
 
 === Zaključak
 

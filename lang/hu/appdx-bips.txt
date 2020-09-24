@@ -43,7 +43,6 @@ _Folyamatot leíró_ BIP:: Egy bitcoin folyamatot ír le, vagy valamilyen válto
 |[[bip-35]]https://github.com/bitcoin/bips/blob/master/bip-0035.mediawiki[BIP-35] |mempool üzenet |Jeff Garzik |Szabvány |Végleges
 |[[bip-36]]https://github.com/bitcoin/bips/blob/master/bip-0036.mediawiki[BIP-36] |Egyedi szolgáltatások |Stefan Thomas |Szabvány |Tervezet
 |[[bip-37]]https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki[BIP-37] Bloom szűrők |Mike Hearn, Matt Corallo |Szabvány |Végleges
-|[[bip-38]]https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki[BIP-38] |Jelmondattal védett titkos kulcs |Mike Caldwell,  Aaron Voisine |Szabvány |Tervezet
 |[[bip-39]]https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki[BIP-39] |Mnemonikok a determinisztikus kulcsok előállításához |Marek Palatinus, Pavol Rusnak, Aaron Voisine, Sean Bowe |Szabvány |Javaslat
 |[[bip-40]]https://github.com/bitcoin/bips/blob/master/bip-0040.mediawiki[BIP-40] |Stratum wire protocol |Marek Palatinus |Standard |BIP number allocated
 |[[bip-41]]https://github.com/bitcoin/bips/blob/master/bip-0041.mediawiki[BIP-41] |Stratum bányászprotokoll |Marek Palatinus |Szabvány |BIP szám hozzárendelve

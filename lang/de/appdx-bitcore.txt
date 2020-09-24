@@ -18,14 +18,13 @@ Anhang
 * Elliptische Kurve Integriertes Verschlüsselungsschema (bitcore-ecies)
 * Wallet Service (bitcore-wallet-service)
 * Wallet Client (bitcore-wallet-client)
-* Playground (bitcore-playground)
 * Direkte Integration von Diensten mit Bitcoin Core (bitcore-node)
 
 === Bitcore Library Beispiele
 
 ==== Voraussetzungen
 
-* NodeJS >= 4.x oder nutzen Sie unser https://bitcore.io/playground[hosted online playground]
+* NodeJS >= 4.x
 
 Bei Verwendung von NodeJS und dem Knoten REPL:
 

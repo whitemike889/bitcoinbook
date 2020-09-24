@@ -490,7 +490,7 @@ A két script együttesen a következő egyesített ellenőrző scriptet alkotja
 
 A végrehajtás során az egyesített script akkor és csak akkor lesz IGAZ, ha a zárolást feloldó script megfelel a zároló script által felállított feltételeknek. Más szóval, az eredmény akkor lesz IGAZ, ha a zárolást feloldó scriptben van egy érvényes aláírás a kávéház titkos kulcsával, ami megfelel az akadályként állított nyilvános kulcs hashnek.
 
-Figures <<P2PubKHash1>> and <<P2PubKHash2>> show (in two parts) a step-by-step execution of the combined script, which will prove this is a valid transaction.((("", startref="Tsript06")))((("", startref="Stransact06")))
+A pass:[<a data-type="xref" href="#P2PubKHash1" data-xrefstyle="select: labelnumber">#P2PubKHash1</a>] és pass:[<a data-type="xref" href="#P2PubKHash2" data-xrefstyle="select: labelnumber">#P2PubKHash2</a>] ábrák (két részben) az egyesített tranzakció lépésről lépésre történő végrehajtását mutatják, amely bizonyítja, hogy érvényes tranzakcióról van szó.((("", startref="Tsript06")))((("", startref="Stransact06")))
 
 [[P2PubKHash1]]
 .Egy P2PKH tranzakció scriptének kiértékelése (1. rész)
@@ -735,6 +735,6 @@ Annak érdekében, hogy elkészítse ezt az egy képet, e két "egyenleggel", a 
 
 Összegezve: a felhasználóknak a pénztárca alkalmazások, a blokklánc felfedezők és más bitcoin felhasználói felületek révén bemutatott információk gyakran magasabb szintű absztrakciókból állnak, amelyeket sok különböző tranzakció megkeresése, azok tartalmának vizsgálata és az azokban található adatok manipulálása útján nyernek. A bitcoin tranzakciók ezen egyszerűsített, egy küldőtől egy címzetthez tartozó bankcsekkre hasonlító nézetének bemutatásával, ezeknek az alkalmazásoknak sok részletet el kell rejteniük. Leginkább a tranzakciók általános típusaira koncentrálnak: P2PKH SIGHASH_ALL aláírással minden bemeneten. Így, bár a bitcoin alkalmazások az összes tranzakció több mint 80%-át könnyen olvasható módon tudják megmutatni, a normától eltérő tranzakciókon gyakran elhasalnak. A bonyolultabb zároló szkripteket vagy különféle SIGHASH jelzőket, vagy sok bemenetet és kimenetet tartalmazó tranzakciók mutatják ezen absztrakciók egyszerűségét és gyengeségét.
 
-Minden nap P2PKH kimeneteket nem tartalmazó tranzakciók százai nyernek megerősítést a blokkláncon. A blokklánc felfedezők ezeket gyakran piros figyelmeztető üzenetekkel mutatják, jelezvén, hogy nem tudják dekódolni valamelyik címet. A következő link a legutóbbi "furcsa tranzakciókat" tartalmazza, amelyek nem lettek teljesen dekódolva: https://blockchain.info/strange-transactions[].
+Minden nap P2PKH kimeneteket nem tartalmazó tranzakciók százai nyernek megerősítést a blokkláncon. A blokklánc felfedezők ezeket gyakran piros figyelmeztető üzenetekkel mutatják, jelezvén, hogy nem tudják dekódolni valamelyik címet.
 
 Amint azt a következő fejezetben látni fogjuk, ezek nem feltétlenül furcsa tranzakciók, hanem olyan tranzakciók, amelyek összetettebb zárolási szkripteket tartalmaznak, mint a gyakori P2PKH. Megtanuljuk, hogyan kell dekódolni és megérteni a bonyolultabb szkripteket és az általuk támogatott alkalmazásokat.((("", startref="Thigher06")))((("", startref="alicesixtwo")))

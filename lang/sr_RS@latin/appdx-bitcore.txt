@@ -1,31 +1,30 @@
 [[appdx_bitcore]]
-[dodatak]
+[appendix]
 
 == Bitcore
 
 
-((("Bitcore", id="bitcore16")))Bitcore je skup alata koji nudi BitPay. Njegov cilj je da obezbedi bitkoin programerima alate za razvoj koji se lako koriste. Skoro ceo Bitcore kod napisan je u JavaScript-u. Postoje neki moduli napisani posebno za NodeJS. Konačno, modul "čvora" (node) u Bitcore-u uključuje C++ kod Bitcoin Core-a. Pogledajte molim vas https://bitcore.io za više informacije.
+((("Bitcore", id="bitcore16")))Bitcore je skup alata koji nudi BitPay. Njegov cilj je da obezbedi bitkoin programerima alate za razvoj koji se lako koriste. Skoro ceo Bitcore kod napisan je u JavaScript-u. Postoje neki moduli napisani posebno za NodeJS. Konačno, modul "čvora" (node) u Bitcore-u uključuje C++ kod Bitcoin Core-a. Za više informacija pogledajte https://bitcore.io.
 
 === Lista Bitcore karakteristika
 
 * Pun čvor bitkoina (bitcore-node)
 * Blok explorer (insight)
 * Uslužni programi za blokove, transakcije i novčanike (bitcore-lib)
-* Komunicira direktno sa Bitkoinovom P2P mrežom (bitcore-p2p)
+* Komunicira direktno sa bitkoin P2P mrežom (bitcore-p2p)
 * Generisanje mnemonika semenom entropije (bitcore-mnemonic)
 * Protokol plaćanja (bitcore-payment-protocol)
 * Potvrđivanje poruke i potpisivanje (bitcore-message)
 * Integrisana šema šifrovanja sa eliptičkom krivom (bitcore-ecies)
 * Usluga novčanika (bitcore-wallet-service)
 * Klijent novčanika (bitcore-wallet-client)
-* Igralište za isprobavanje (bitcore-playground)
 * Integrisanje usluga direktno sa Bitcoin Core-om (bitcore-node)
 
 === Primeri biblioteke bitcore
 
 ==== Preduslovi
 
-* NodeJS >= 4.x ili koristite naše https://bitcore.io/playground[online igralište]
+* NodeJS >= 4.x
 
 Ako koristite NodeJS i čvor REPL:
 
@@ -89,7 +88,7 @@ Emitovanje transakcije na bitkoin mreži
 
 1. Kopirajte donji kod u fajl koji se zove _broadcast.js_.
 2. Varijable +tx+ i +rbfTx+ su izlaz od +tx.serialize()+ i +rbfTx.serialize()+.
-3. Da bi zamenio naknadu, peer mora podržati bitcoind opciju +mempoolreplace+ i staviti je na +1+.
+3. Da bi zamenio naknadu peer mora da podrži bitcoind opciju +mempoolreplace+ i stavi je na +1+.
 4. Pokrenite čvor fajla _broadcast.js_((("", startref="bitcore16"))):
 
 ----

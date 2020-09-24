@@ -1,5 +1,5 @@
 ////
-Do not translate the :variable names:
+Ne fordítsd le a :változó neveket:
 ////
 :author: Andreas M. Antonopoulos
 :book_title: Mastering Bitcoin Open Second Edition

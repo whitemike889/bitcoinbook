@@ -18,14 +18,13 @@
 * Elliptikus görbe integrált titkosítási rendszer (bitcore-ecies)
 * Pénztárca szolgáltatás (bitcore-wallet-service)
 * Pénztárca kliens (bitcore-wallet-client)
-* Homokozó (bitcore-playground)
 * A szolgáltatások integrálása közvetlenül a Bitcoin Core-ral (bitcore-node)
 
 === Bitcore könyvtár példák
 
 ==== Előfeltételek
 
-* NodeJS >= 4.x, vagy használja a https://bitcore.io/playground[hosztolt online homokozónkat]
+* NodeJS >= 4.x
 
 NodeJS és a REPL csomópont használata esetén:
 

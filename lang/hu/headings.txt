@@ -1,6 +1,6 @@
 ////
-Do not translate the :variable names:
+Ne fordítsd le a :változó neveket:
 ////
-:index_heading: Index
-:toc-title: Table of Contents
-:table-caption: Table
+:index_heading: Tárgymutató
+:toc-title: Tartalomjegyzék
+:table-caption: Táblázat

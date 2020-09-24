@@ -1,5 +1,5 @@
 ////
-Do not translate the :variable names:
+Ne prevodite :imena promenljivih:
 ////
 :index_heading: Index
 :toc-title: Table of Contents

@@ -18,14 +18,13 @@
 * Skema Elliptic curve Integrated Encryption (bitcore-ecies)
 * Layanan wallet (bitcore-wallet-service)
 * Klien wallet (bitcore-wallet-client)
-* Playground (bitcore-playground)
 * Layanan integerasi langsung dengan Bitcoin Core (bitcore-node)
 
 === Contoh Library Bitcore
 
 ==== Prasyarat
 
-* NodeJS >= 4.x atau gunakan https://bitcore.io/playground[hosted online playground] kami
+* NodeJS >= 4.x
 
 Jika menggunakan NodeJS dan node REPL:
 

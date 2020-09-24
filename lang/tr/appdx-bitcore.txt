@@ -18,14 +18,13 @@
 * Eliptik eğri Entegre Şifreleme Şeması (bitcore-ecies)
 * Cüzdan hizmeti (bitcore-wallet-service)
 * Cüzdan istemcisi (bitcore-wallet-client)
-* Playground (bitcore-playground)
 * Hizmetleri doğrudan Bitcoin Core (bitcore-node) ile entegre etme
 
 === Bitcore Kitaplığı Örnekleri
 
 ==== Önkoşullar
 
-* NodeJS >= 4.x or use our https://bitcore.io/playground[hosted online playground]
+* NodeJS >= 4.x
 
 NodeJS ve REPL düğümü kullanılıyorsa:
 

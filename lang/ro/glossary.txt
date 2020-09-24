@@ -183,7 +183,7 @@ Dovadă-de-Lucru (Proof-of-Work)::
     Un fragment de date care necesită calcul semnificativ pentru a fi găsi. În bitcoin, minerii trebuie să găsească o soluție numerică la algoritmul SHA256 care îndeplinește o țintă la nivelul întregii rețele, ținta de dificultate.
 
 recompensă (reward)::
-    Suma inclusă în fiecare nou bloc ca recompensă de către rețea pentru minerul care a găsit soluția Dovadă-de-Lucru. În prezent este 12,5 BTC pe bloc.
+    Suma inclusă în fiecare nou bloc ca recompensă de către rețea pentru minerul care a găsit soluția Dovadă-de-Lucru. În prezent este 6,25 BTC pe bloc.
 
 RIPEMD-160::
     RIPEMD-160 este o funcție de rezumare criptografică pe 160 de biți. RIPEMD-160 este o versiune consolidată a RIPEMD cu un rezumat pe 160 de biți și este de așteptat să fie sigură pentru următorii zece ani sau mai mult.

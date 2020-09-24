@@ -23,7 +23,7 @@ A nyilvános kulcsú titkosítás felfedezése óta számos, e célra alkalmas m
 
 A bitcoinnál nyilvános kulcsú titkosítást használunk egy olyan kulcspár létrehozására, amely a bitcoinhoz történő hozzáférést szabályozza. A kulcspár egy titkos kulcsból és a belőle származó egyedi nyilvános kulcsból áll. A nyilvános kulcs szolgál pénz fogadására, a titkos kulcs szolgál a tranzakciók aláírására és a pénz elköltésére.
 
-A nyilvános és titkos kulcs között van egy matematikai összefüggés, ami lehetővé teszi, hogy a titkos kulcsokkal üzenetek aláírását állítsuk elő. Ez az aláírás a nyilvános kulccsal úgy ellenőrizhető, hogy közben nincs szükség a titkos kulcs felfedésére.
+There is a mathematical relationship between the public and the private key that allows the private key to be used to generate signatures on messages. These signatures can be validated against the public key without revealing the private key.
 
 Ha egy bitcoin tulajdonos el akarja költeni a bitcoinját, akkor egy tranzakcióban bemutatja a nyilvános kulcsát és egy aláírást (ami minden egyes alkalommal különböző, de ugyanabból a titkos kulcsból áll elő). A nyilvános kulcs és az aláírás révén a bitcoin hálózat bármelyik tagja ellenőrizni tudja a tranzakciót, meg tudja állapítani, hogy érvényes-e, és meg tud bizonyosodni arról, hogy a bitcoint küldő személy valóban birtokolta-e őket a küldés idején.
 
@@ -186,7 +186,7 @@ Van néhány különleges eset, amely megvilágítja, miért van szükség a "v�
 
 Ha a P~1~ és a P~2~ pont megegyezik, akkor a P~1~ és P~2~ "közötti" egyenes a görbe P~1~ pontbeli érintője lesz. Az érintő pontosan egy pontban fogja metszeni a görbét. A differenciálszámítás segítségével meghatározható az érintő meredeksége. Ezek a módszerek érdekes módon még akkor is működnek, ha csak azok a görbén lévő pontok érdekelnek minket, melyeknek mindkét koordinátája egész szám!
 
-Bizonyos esetekben (pl. ha a P~1~ és a P~2~ x koordinátája azonos, de az y koordinátája különböző), akkor az érintő függőleges lesz, és ebben az esetben a P~3~ = "a végtelenben lévő pont".
+In some cases (i.e., if P~1~ and P~2~ have the same x values but different y values), the tangent line will be exactly vertical, in which case P~3~ = "point at infinity."
 
 Ha P~1~ a "végtelenben lévő pont", akkor P~1~ + P~2~ = P~2~. Hasonlóképpen, ha a P~2~ a végtelenben lévő pont, akkor P~1~ + P~2~ = P~1~. Ez mutatja, hogy a végtelenben lévő pont a nulla szerepét játssza.
 
@@ -437,7 +437,7 @@ Ugyanez a nyilvános kulcs egy 520-bites számként (130 hexa számjegyként), a
 
 ++++
 <pre data-type="programlisting">
-K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A↵
+K = 04F028892BAD7ED57D2FB57BF33081D5CFCF6F9ED3D3D7F159C2E2FFF579DC341A&#x21b5;
 07CF33DA18BD734C600B96A72BBC4749D5141C90EC8AC328AE52DDFE2E505BDB
 </pre>
 ++++
@@ -568,7 +568,7 @@ Public Key (x,y) coordinates is:
  (41637322786646325214887832269588396900663353932545912953362782457239403430124L,
  16388935128781238405526710466724741593761085120864331449066658622400339362166L)
 Public Key (hex) is:
- 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec↵
+ 045c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec&#x21b5;
 243bcefdd4347074d44bd7356d6a53c495737dd96295e2a9374bf5f02ebfc176
 Compressed Public Key (hex) is:
  025c0de3b9c8ab18dd04e3511243ec2952002dbfadc864b9628910169d9b9b00ec
@@ -618,27 +618,6 @@ BTC public key: 029ade3effb0a67d5c8609850d797366af428f4a0d5194cb221d807770a15228
 === Kódolt titkos kulcsok (BIP0038)
 
 ((("kulcsok és címek", "egyéb fajták", id="KAadvanced04")))A következő részben kulcsok és címek egyéb fajtáira fogunk példákat látni, pl. a kódolt (titkosított) titkos kulcsokra, script és multisig címekre, kérkedő címekre, valamint papír pénztárcákra.
-
-==== Titkosított (kódolt) titkos kulcsok (BIP-38)
-
-((("bitcoin továbbfejlesztési javaslatok", "titkosított titkos kulcsok (BIP-38)")))((("kulcsok és címek", "egyéb fajták", "titkosított titkos kulcsok")))((("nyilvános és titkos kulcsok", "titkosított titkos kulcsok")))((("jelszavak", "titkosított titkos kulcsok")))((("biztonság", "jelszavak")))A titkos kulcsoknak titokban kell maradniuk. A titkos kulcsok _bizalmas_ volta olyan evidencia, amelyet a gyakorlatban eléggé nehéz megvalósítani, mivel ütközik egy ugyanilyen fontos biztonsági céllal, a _rendelkezésre állással_. A titkos kulcsok titokban tartása sokkal nehezebb, ha a titkos kulcsokról biztonsági másolatokat kell tárolni, nehogy elveszítsük őket. A pénztárcákban lévő, jelszóval védett titkos kulcsok biztonságban vannak, de a pénztárcáról biztonsági másolatot kell készíteni. Néha a felhasználók az egyik pénztárcából a másikba mozgatják át kulcsokat – például a pénztárca program újabb változatának telepítésekor vagy egy másik programra való lecserélésekor. A titkos kulcsokról készített biztonsági mentések papíron (lásd a <<paper_wallets>> részt) vagy külső tároló eszközön, pl. USB kulcson is tárolhatók. De mi történik, ha a másolatot ellopják vagy elveszítjük? Ezek az egymásnak ellentmondó biztonsági követelmények vezettek egy hordozható és kényelmes szabvány, a BIP-38 létrejöttéhez (lásd <<appdxbitcoinimpproposals>>), mellyel a titkos kulcsok úgy titkosíthatók, hogy sok különféle pénztárca és bitcoin kliens megértse őket.
-
-A BIP-38 szabvány a titkos kulcsok jelmondattal történő titkosításáról, és Base58Check kódolásáról szól. Célja az, hogy a titkos kulcsok biztonságosan tárolhatók legyenek a mentő eszközön, és átvihetők legyenek a pénztárcák között, vagy olyan körülmények között is kezelhetők legyenek, ahol a kulcs nyilvánosságra kerülhet. A BIP-38 titkosítási szabvány az AES-t (Advanced Encryption Standard) használja, melyet az Amerikai Szabványügyi Hivatal (NIST, National Institute of Standards and Technology) fogadott el, és széles körben használják kereskedelmi és katonai alkalmazásokban.
-
-A BIP-38 titkosítás esetén a titkos kulcsból indulunk ki, amely általában Base58Check string formájában, „5” előtaggal, WIF formátumban (Wallet Import Format, pénztárca import formátum) van kódolva. Ezen kívül a BIP-38 titkosításnak egy jelmondatra – egy hosszú jelszóra – van szüksége, amely általában számos szóból vagy egy bonyolult alfanumerikus karakterláncból áll. A BIP-38 titkosítás eredménye egy olyan Bas58Check kódolású titkos kulcs, amely a +6P+ előtaggal kezdődik. Ha egy olyan kulccsal találkoznak, amely +6P+-vel kezdődik, akkor a kulcs kódolt, és egy jelmondatra van szükség ahhoz, hogy WIF-formátumú titkos kulccsá tudjuk visszaalakítani (visszakódolni), amely +5+-tel kezdődik, és bármelyik pénztárcában használható. Sok pénztárca alkalmazás felismeri a BIP-38 kódolású titkos kulcsokat. Ezek a kulcs dekódolása és importálása céljából megkérdezik a felhasználótól, hogy mi a jelmondat. Vannak egyéb alkalmazások, pl. a hihetetlenül hasznos webböngésző alapú http://bitaddress.org[Bit Address], amellyel (a „pénztárca részletei” fülön) szintén elvégezhető a BIP-38 kulcsok dekódolása.
-
-A BIP-38 titkosított kulcsokat leggyakrabban a papír pénztárcák esetén alkalmazzák. A papír pénztárcákkal a titkos kulcsok egy papírlapon tárolhatók. Ha a felhasználó egy erős jelmondatot választ, a BIP-38 kódolt papír pénztárcák nagyon biztonságosak, és kiválóan alkalmasan arra, hogy egy offline bitcoin tárolót hozzunk létre (ezeket „hideg tárolónak” (cold storage) is hívják).
-
-A <<table_4-10>> táblázatban látható kódolt kulcsok a bitaddress.org-gal lettek előállítva, és azt szemléltetik, hogyan lehet a kulcsot a jelmondat beadásával dekódolni:
-
-[[table_4-10]]
-.Példa egy BIP-38 kódolt titkos kulcsra 
-|=======
-| *Titkos kulcs (WIF)* | 5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn
-| *Jelmondat* | MyTestPassphrase
-| *A titkosított kulcs (BIP-38)* | 6PRTHL6mWa48xSopbU1cKrVjpKbBZxcLRRCdctLJ3z5yxE87MobKoXdTsJ
-|=======
-
 
 [[p2sh_addresses]]
 ==== Fizetés script hashnek (P2SH, pay to script hash) címek és több aláírást megkövetelő (multisig) címek
@@ -784,7 +763,7 @@ Mindkét esetben az egyetlen fix cím használatának (az egyes adományozóknak
 | *Kérkedő cím (6 kar. egyezés)* | 1J7mdg5WxGENmwyJP9xuGhG5KRzu99BBCX
 |=======
 
-So does a vanity address increase security? If Eugenia generates the vanity address +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, users are likely to look at the vanity pattern word _and a few characters beyond_, for example noticing the "1Kids33" part of the address. That would force an attacker to generate a vanity address matching at least six characters (two more), expending an effort that is 3,364 times (58 × 58) higher than the effort Eugenia expended for her 4-character vanity. Essentially, the effort Eugenia expends (or pays a vanity pool for) "pushes" the attacker into having to produce a longer pattern vanity. If Eugenia pays a pool to generate an 8-character vanity address, the attacker would be pushed into the realm of 10 characters, which is infeasible on a personal computer and expensive even with a custom vanity-mining rig or vanity pool. What is affordable for Eugenia becomes unaffordable for the attacker, especially if the potential reward of fraud is not high enough to cover the cost of the vanity address generation.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
+Növeli-e egy kérkedő cím a biztonságot? Ha Eugénia azt a kérkedő címet állítja elő, hogy +1Kids33q44erFfpeXrmDSz7zEqG2FesZEN+, a felhasználók a kérkedő karaktereket, valamint _az ezek mögött álló néhány karaktert_ fogják megvizsgálni, pl. a cím "1Kids33" részét. Ez arra kényszeríti a támadót, hogy egy olyan kérkedő címet állítson elő, amely legalább 6 karakter hosszú, de ehhez 3364-szer (58 * 58) több munkára van szükség, mint Eugéniának a 4 karakteres kérkedő címéhez. Lényegében az Eugénia (vagy az általa megfizetett bányászközösség) által elvégzett munka arra „kényszeríti” a támadót, hogy hosszabb kérkedő címet állítson elő. Ha Eugénia egy bányászközösséget fogad föl egy 8 karakter hosszú kérkedő cím előállítására, akkor ezáltal a támadó a 10 karakteres tartományba kényszerül, amelynek személyi számítógépen lehetetlen az előállítása, de még egy célhardverrel vagy bányászközösséggel is nagyon költséges. Ami Eugéniának még megfizethető, a támadónak megfizethetetlen, különösen akkor, ha a csalás által szerezhető pénz arra sem elég, hogy fedezze a kérkedő cím előállításának a költségét.((("", startref="Avanity04")))((("", startref="vanity04")))((("", startref="eugeniafour")))
 
 [[paper_wallets]]
 ==== Papír pénztárcák
@@ -819,7 +798,7 @@ image::images/mbc2_0409.png[]
 Egy papírtárcába akár többször is lehet pénzt küldeni, de a pénzt csak egyszer célszerű belőle felvenni. Ekkor a benne lévő összes pénzt el kell költeni. Ez azért van így, mert némelyik pénztárca a pénz feloldása és elköltése során a visszajáró pénznek egy további, újabb címet állíthat elő, ha nem az egész összeget költjük el. Ha a tranzakció aláírásához használt számítógép kompromittálódik, megnő a titkos kulcs felfedésének veszélye, ami hozzáférést ad a visszajáró címen lévő pénzhez. Ha a papírtárca teljes összegét csak egyszer költjük el, csökkentjük a kulcslopás kockázatát. Ha csak kis összegre van szükségünk, küldjük a maradék pénzt egy új papírtárcába a tranzakcióban.
 ====
 
-Paper wallets come in many designs and sizes, with many different features. Some are intended to be given as gifts and have seasonal themes, such as Christmas and New Year's themes. Others are designed for storage in a bank vault or safe with the private key hidden in some way, either with opaque scratch-off stickers, or folded and sealed with tamper-proof adhesive foil. Figures <<paper_wallet_bpw>> through <<paper_wallet_spw>> show various examples of paper wallets with security and backup features.
+Sokféle méretű és kivitelű papírtárca van, melyeknek különféle tulajdonságaik vannak. Némelyik ajándékul szolgál, és az alkalomhoz illő témáik vannak, pl. karácsonyi vagy újévi jelenetek. Mások arra a célra szolgálnak, hogy egy banki páncélteremben vagy széfben őrizzük őket. Ezeknél a privát kulcs valamilyen módszerrel el van takarva, pl. nem átlátszó, lekaparható matricával, vagy össze van hajtogatva és egy biztonságos öntapadó fóliával van leragasztva. Az alábbi pass:[<a data-type="xref" href="#paper_wallet_bpw" data-xrefstyle="select: labelnumber">#paper_wallet_bpw</a>] és pass:[<a data-type="xref" href="#paper_wallet_spw" data-xrefstyle="select: labelnumber">#paper_wallet_spw</a>] közötti ábrákon különféle papírtárcák láthatók.
 
 [[paper_wallet_bpw]]
 .Példa egy papírtárcára a bitcoinpaperwallet.com-ról, ahol a titkos kulcs egy összehajtható fülön van.

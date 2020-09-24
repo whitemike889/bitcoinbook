@@ -1,5 +1,5 @@
 ////
-Do not translate the :variable names:
+אין לתרגם את שמות המשתנים:
 ////
 :index_heading: Index
 :toc-title: Table of Contents

@@ -126,7 +126,7 @@ Zapisujući ovu mnemoniku, Gabrijel je stvorio sigurnosnu kopiju (vidi <<mnemoni
 
 [[mnemonic_paper_backup]]
 .Gabrijelove mnemonik sigurnosne papirne kopije
-[cols="<,^,<,^", width="80%"]
+[cols="<1,^5,<1,^5", width="80%"]
 |===
 |*1.*| _army_ |*7.*| _garbage_
 |*2.*| _van_ |*8.*| _claim_
@@ -199,7 +199,7 @@ image::images/mbc2_0506.png["Generisanje entropije i kodiranja kao mnemoničke r
 
 ((("key-stretching function")))((("PBKDF2 function")))Mnemoničke reči predstavljaju entropiju dužine od 128 do 256 bita. Entropija se zatim koristi za dobijanje dužeg (512-bitnog) semena korišćenjem funkcije PBKDF2 za istezanje ključa. Proizvedeno seme se zatim koristi za izradu determinističkog novčanika i njegovih ključeva.
 
-((("salts")))((("passphrases")))Funkcija istezanja ključeva ima dva parametra: mnemoniku i _salt (bukvalno so)_. Svrha soli u funkciji istezanja ključa je da oteža izgradnju tabele za pretraživanje koja omogućava napad grubom silom. U standardu BIP-39, so ima drugu svrhu &#x2014; omogućava unošenje lozinke koja služi kao dodatni faktor sigurnosti koji štiti seme, kao što je detaljnije opisano u <<mnemonic_passphrase>>.
+((("salts")))((("passphrases")))Funkcija istezanja ključeva ima dva parametra: mnemoniku i _salt (bukvalno so)_. Svrha soli u funkciji istezanja ključa je da oteža izgradnju tabele za pretraživanje koja omogućava napad grubom silom. U standardu BIP-39, so ima drugu svrhu — omogućava unošenje lozinke koja služi kao dodatni faktor sigurnosti koji štiti seme, kao što je detaljnije opisano u <<mnemonic_passphrase>>.
 
 Proces opisan u koracima 7 do 9 nastavlja se sa postupkom opisanim ranije u <<generating_mnemonic_words>>
 
@@ -222,7 +222,7 @@ image::images/mbc2_0507.png["From mnemonic to seed"]
 Funkcija istezanja ključeva, sa 2048 krugova hešovanja, veoma je efikasna zaštita od napada grubom silom na mnemoniku ili lozinke. Izuzetno je skupo (u proračunu) isprobati više od nekoliko hiljada kombinacija lozinki i mnemonike, dok je broj mogućih izvedenih semena ogroman (2 ^512^).
 ====
 
-Tables <<mnemonic_128_no_pass>>, and <<mnemonic_256_no_pass>> show some examples of mnemonic codes and the seeds they produce (either with or without a passphrase).
+Tablice <<mnemonic_128_no_pass>>, <<mnemonic_128_w_pass>>, i <<mnemonic_256_no_pass>> prikazuju neke primere mnemoničkih kodova i semena koje proizvode (sa ili bez lozinke).
 
 [[mnemonic_128_no_pass]]
 .128-bitna entropija mnemoničkog koda, bez lozinke i rezultirajuće seme
@@ -345,7 +345,7 @@ Ponavljajući postupak na jednom nivou niz stablo, svako dete zauzvrat može pos
 
 ===== Korišćenje izvedenih dečijih ključeva
 
-Dečiji privatni ključevi ne razlikuju se od nedeterminičkih (nasumičnih) ključeva. Pošto je funkcija derivacije jednosmerna funkcija, dečiji ključ se ne može koristiti za pronalazak roditeljskog ključa. Dečiji ključ se takođe ne može koristiti za pronalaženje braće i sestara. Ako imate n-to dete, ne možete da pronađete njegove braću i sestre, kao što su n&#x2013;1 dete ili n+1 dete, ili bilo koju drugu decu koja su deo sekvence. Samo roditeljski ključ i kod lanca mogu izvući svu decu. Bez šifre dečijeg lanca, dečiji ključ se ne može koristiti ni za dobijanje unuka. Da biste pokrenuli novu granu i stekli unuke, potrebni su vam i dečiji privatni ključ i kod dečijeg lanca.
+Dečiji privatni ključevi ne razlikuju se od nedeterminičkih (nasumičnih) ključeva. Pošto je funkcija derivacije jednosmerna funkcija, dečiji ključ se ne može koristiti za pronalazak roditeljskog ključa. Dečiji ključ se takođe ne može koristiti za pronalaženje braće i sestara. Ako imate n-to dete, ne možete da pronađete njegove braću i sestre, kao što su n-1 dete ili n+1 dete, ili bilo koju drugu decu koja su deo sekvence. Samo roditeljski ključ i kod lanca mogu izvući svu decu. Bez šifre dečijeg lanca, dečiji ključ se ne može koristiti ni za dobijanje unuka. Da biste pokrenuli novu granu i stekli unuke, potrebni su vam i dečiji privatni ključ i kod dečijeg lanca.
 
 Za šta se može koristiti dečiji privatni ključ? Može se koristiti za pravljenje javnog ključa i bitkoin adrese. Zatim se može koristiti za potpisivanje transakcija da biste trošili bilo šta uplaćeno na tu adresu.
 
@@ -367,7 +367,7 @@ Zamislite produženi ključ kao koren jedne grane u strukturi stabla HD novčani
 Prošireni ključ sastoji se od privatnog ili javnog ključa i šifre lanca. Prošireni ključ može da stvori decu, generišući sopstvenu granu u strukturi stabla. Deljenje proširenog ključa omogućava pristup celoj grani.
 ====
 
-Prošireni ključevi se kodiraju pomoću Base58Check-a radi lakšeg eksporta i importa između različitih novčanika kompatibilnih sa BIP-32&#x2013;kompatilnim novčanicima. Base58Check kodiranje za proširene ključeve koristi poseban broj verzije koji rezultira prefiksima "xprv" i "xpub" kada su kodirani u Base58 znakovima kako bi ih lakše prepoznali. Pošto je prošireni ključ od 512 ili 513 bita, takođe je i mnogo duži od ostalih Base58Check kodiranih stringova koje smo ranije videli.
+Prošireni ključevi se kodiraju pomoću Base58Check-a radi lakšeg eksporta i importa između različitih novčanika kompatibilnih sa BIP-32 -  kompatilnim novčanicima. Base58Check kodiranje za proširene ključeve koristi poseban broj verzije koji rezultira prefiksima "xprv" i "xpub" kada su kodirani u Base58 znakovima kako bi ih lakše prepoznali. Pošto je prošireni ključ od 512 ili 513 bita, takođe je i mnogo duži od ostalih Base58Check kodiranih stringova koje smo ranije videli.
 
 Evo primera proširenog _privatnog_ ključa, kodiranog u Base58Check-u:
 
@@ -412,7 +412,7 @@ Međutim, mala web prodavnica postala je prilično uspešna i privukla je brojne
 
 Gabrijelov HD novčanik nudi mnogo bolje rešenje zahvaljujući mogućnosti izvođenja javnih dečijih ključeva bez poznavanja privatnih ključeva. Gabrijel može da učita prošireni javni ključ (xpub) na svoju web aplikaciju koji se može koristiti za dobijanje jedinstvene adrese za svaku porudžbinu kupca. Gabrijel može da troši sredstva sa svog Trezora, ali xpub učitan na web aplikaciji može samo da generiše adrese i prima sredstva. Ova karakteristika HD novčanika je odlična sigurnosna funkcija. Gabrijelova web aplikacija ne sadrži privatne ključeve pa joj stoga nije potreban visok nivo sigurnosti.
 
-Za eksport xpub, Gabrijel koristi web-bazirani softver u kombinaciji sa Trezorovim novčanikom. Za eksport ključeva mora da se priključi Trezor uređaj. Imajte na umu da hardverski novčanici nikada neće eksportirati privatne ključeve &#x2014; oni uvek ostaju na uređaju. <<export_xpub>> prikazuje web interfejs koji Gabrijel koristi za izvoz xpub-a.
+Za eksport xpub, Gabrijel koristi web-bazirani softver u kombinaciji sa Trezorovim novčanikom. Za eksport ključeva mora da se priključi Trezor uređaj. Imajte na umu da hardverski novčanici nikada neće eksportirati privatne ključeve — oni uvek ostaju na uređaju. <<export_xpub>> prikazuje web interfejs koji Gabrijel koristi za izvoz xpub-a.
 
 [[export_xpub]]
 . Izvoz xpub-a iz Trezor hardverskog novčanika
@@ -437,7 +437,7 @@ Jednostavno rečeno, ako želite da iskoristite pogodnost xpub-a za dobijanje gr
 
 ===== Indeksni brojevi za normalnu i očvršćenu derivaciju
 
-Indeksni broj koji se koristi u funkciji derivacije je 32-bitni celi broj. Da biste lako razlikovali ključeve izvedene normalnom funkcijom derivacije od ključeva izvedenih očvršćenom derivacijom, indeksni broj je podeljen u dva raspona. Indeksni brojevi između 0 i 2^31^&#x2013;1 (0x0 do 0x7FFFFFFF) koriste se _samo_ za normalnu derivaciju. Indeksni brojevi između 2^32^&#x2013;1 (0x80000000 to 0xFFFFFFFF) koriste se _samo_ za očvršćenu derivaciju. Dakle, ako je broj indeksa manji od  2^31^, dete je normalno, ali ako je indeksni broj jednak ili veći od 2^31^, dete je očvršćeno  (&#128578).
+Indeksni broj koji se koristi u funkciji derivacije je 32-bitni celi broj. Da biste lako razlikovali ključeve izvedene normalnom funkcijom derivacije od ključeva izvedenih očvršćenom derivacijom, indeksni broj je podeljen u dva raspona. Indeksni brojevi između 0 i 2^31^-1 (0x0 do 0x7FFFFFFF) koriste se _samo_ za normalnu derivaciju. Indeksni brojevi između 2^32^-1 (0x80000000 to 0xFFFFFFFF) koriste se _samo_ za očvršćenu derivaciju. Dakle, ako je broj indeksa manji od  2^31^, dete je normalno, ali ako je indeksni broj jednak ili veći od 2^31^, dete je očvršćeno.
 
 Da bi se indeksni broj olakšao za čitanje i prikazivanje, broj indeksa za očvšćenu decu se prikazuje počevši od nule, ali sa simbolom "'". Prvi normalni dečiji ključ je prikazan kao 0, dok je prvo očvršćeno dete (indeks 0x80000000) prikazano kao 0++&#x27;++. Zatim bi drugi očvršćeni ključ imao indeks 0x80000001 i bio bi prikazan kao 1++&#x27;++, i tako dalje. Kada vidite indeks HD novčanika i++&#x27;++, to znači 2^31^+i.
 
@@ -473,18 +473,18 @@ BIP-44 određuje strukturu koja se sastoji od pet unapred definisanih nivoa stab
 m / purpose' / coin_type' / account' / change / address_index
 -----
 
-The first-level "purpose" is always set to +44'+. The second-level "coin_type" specifies the type of cryptocurrency coin, allowing for multicurrency HD wallets where each currency has its own subtree under the second level. There are three currencies defined for now: Bitcoin is m/44'/0', Bitcoin Testnet is m/44'/1', and Litecoin is m/44'/2'.
+Na prvom nivou je "svrha" uvek postavljena na +44'+. Drugi nivo "coin_type" određuje vrstu kriptovalute kovanica, omogućavajući multi-valutne HD novčanike u kojima svaka valuta ima svoje podstablo ispod drugog nivoa. Za sada su definisane tri valute: Bitkoin je m/44'/0', Bitcoin Testnet je m/44++&#x27;++/1++&#x27;++, a Litecoin je m/44++&#x27;++/2++&#x27;++.
 
-The third level of the tree is "account," which allows users to subdivide their wallets into separate logical subaccounts, for accounting or organizational purposes. For example, an HD wallet might contain two bitcoin "accounts": m/44'/0'/0' and m/44'/0'/1'. Each account is the root of its own subtree.
+Treći nivo stabla je "račun", koji omogućava korisnicima da podele svoje novčanike na odvojene logične podračune, u računovodstvene ili organizacione svrhe. Na primer, HD novčanik može da sadrži dva bitkoin "računa": m/44++&#x27;++/0++&#x27;++/0++&#x27;++ i m/44++&#x27;++/0++&#x27;++/1++&#x27;++. Svaki nalog je koren sopstvene podgrane.
 
-((("keys and addresses", see="also public and private keys")))On the fourth level, "change," an HD wallet has two subtrees, one for creating receiving addresses and one for creating change addresses. Note that whereas the previous levels used hardened derivation, this level uses normal derivation. This is to allow this level of the tree to export extended public keys for use in a nonsecured environment. Usable addresses are derived by the HD wallet as children of the fourth level, making the fifth level of the tree the "address_index." For example, the third receiving address for bitcoin payments in the primary account would be M/44'/0'/0'/0/2. <<table_4-9>> shows a few more examples.
+((("keys and addresses", see="also public and private keys")))Na četvrtom nivou, "kusur", HD novčanik ima dve podgrane, jednu za kreiranje adresa prijema i jednu za kreiranje adresa za kusur. Imajte na umu da iako su u prethodnim nivoima korišćeni očvršćeni derivati, ovaj nivo koristi normalnu derivaciju. Ovo će omogućiti ovom nivou stabla da eksportuje proširene javne ključeve za upotrebu u nebezbednom okruženju. Adrese za uportrebu HD novčanika su deca četvrtog nivoa, čineći peti nivo stabla "address_index". Na primer, treća adresa za primanje bitkoina za plaćanja na primarnom računu bila bi M/44++&#x27;++/0++&#x27;++/0++&#x27;++/0/2. <<table_4-9>> pokazuje još nekoliko primera.
 
 [[table_4-9]]
 .BIP-44 primeri strukture novčanika
 [options="header"]
 |=======
 |HD path | opisani ključ
-| M/44'/0'/0'/0/2 | The third receiving public key for the primary bitcoin account
-| M/44'/0'/3'/1/14 | The fifteenth change-address public key for the fourth bitcoin account
-| m/44'/2'/0'/0/1 | The second private key in the Litecoin main account, for signing transactions
+| M/44++&#x27;++/0++&#x27;++/0++&#x27;++/0/2 | Treći javni ključ koji prima za primarni bitkoin račun 
+| M/44++&#x27;++/0++&#x27;++/3++&#x27;++/1/14 | Petnaesta promena adrese javnog ključa za četvrti bitkoin račun
+| m/44++&#x27;++/2++&#x27;++/0++&#x27;++/0/1 | Drugi privatni ključ u glavnom Litecoin računu, za potpisivanje transakcija
 |=======

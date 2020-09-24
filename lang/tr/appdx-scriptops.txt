@@ -168,7 +168,7 @@ Kriptografi ve karma işlemleri
 | OP_CODESEPARATOR | 0xab | İmzası kontrol edilmiş verinin başını işaretle
 | OP_CHECKSIG | 0xac | Yığından açık anahtar ve imza çekbu işlemin özet verisinin imzasını doğrula, eğer eşleşiyorsa TRUE döndür
 | OP_CHECKSIGVERIFY | 0xad | CHECKSIG ile aynı, TRUE değilse durdurmak için OP_VERIFY çalıştır
-| OP_CHECKMULTISIG | 0xae | Verilen her bir imza ve açık anahtar çifti için CHECKSIG'i çalıştır. Tamamı eşleşmeli. İmplementasyonundaki hata fazladan değer çıkartabilir, OP_NOP ön eki ile geçici çözüm üretilebilir
+| OP_CHECKMULTISIG | 0xae | Run CHECKSIG for each pair of signature and public key provided. All must match. Bug in implementation pops an extra value, prefix with OP_0 as workaround
 | OP_CHECKMULTISIGVERIFY | 0xaf | CHECKMULTISIG ile aynı, eğer TRUE değilse OP_VERIFY çalıştır
 | =======
 

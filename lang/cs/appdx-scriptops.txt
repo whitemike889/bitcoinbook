@@ -168,7 +168,7 @@ OP_LESSTHAN | 0x9f | Vrací TRUE pokud druhá položka z vrcholu zásobníku je 
 | OP_CODESEPARATOR | 0xab | Označí začátek dat, která budou kontrolována na jejich podepsanost
 | OP_CHECKSIG | 0xac | Z vrcholu zásobníku odebere veřejný klíč a podpis a ověří, zda podpis odpovídá hašovaným datům transakce, vrací TRUE pokud se shodují
 | OP_CHECKSIGVERIFY | 0xad | Stejné jako CHECKSIG, ale následně zavolá OP_VERIFY 
-| OP_CHECKMULTISIG | 0xae | Zavolá CHECKSIG pro každý poskytnutý pár podpisu a veřejného klíče. Všechny musí souhlasit. Kvůli chybě v implementaci je vrácena přebytečná hodnota označená prefixem ON_NOP.
+| OP_CHECKMULTISIG | 0xae | Run CHECKSIG for each pair of signature and public key provided. All must match. Bug in implementation pops an extra value, prefix with OP_0 as workaround
 | OP_CHECKMULTISIGVERIFY | 0xaf | stejné jako CHECKMULTISIG, ale následně zavolá OP_VERIFY
 |=======
 

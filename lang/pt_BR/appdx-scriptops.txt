@@ -168,7 +168,7 @@ Tabelas e descrições provenientes de https://en.bitcoin.it/wiki/Script [].
 | OP_CODESEPARATOR | 0xab | Marca o início dos dados verificados pela assinatura
 | OP_CHECKSIG | 0xac | Exibe uma chave pública e assinatura e valida a assinatura para os dados hashados da transação, retorna TRUE se corresponde
 | OP_CHECKSIGVERIFY | 0xad | O mesmo que o CHECKSIG, então OP_VERIFY para suspender se não for TRUE
-| OP_CHECKMULTISIG | 0xae | Executa o CHECKSIG para cada par de assinatura e chave pública fornecido. Todos devem corresponder. Um bug na implementação exibe um valor extra, use o prefixo OP_NOP como uma solução temporária
+| OP_CHECKMULTISIG | 0xae | Run CHECKSIG for each pair of signature and public key provided. All must match. Bug in implementation pops an extra value, prefix with OP_0 as workaround
 | OP_CHECKMULTISIGVERIFY | 0xaf | O mesmo que o CHECKMULTISIG, então OP_VERIFY para suspender se não for TRUE
 |=======
 

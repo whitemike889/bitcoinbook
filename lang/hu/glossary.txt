@@ -183,7 +183,7 @@ munkabizonyíték (Proof-of-Work)::
     Egy olyan számérték, melynek előállítása jelentős számítási kapacitást igényel. A bitcoin esetében a bányászok az SHA256 algoritmust használják arra, hogy egy olyan hasht találjanak, amely megfelel a hálózat egészében fennálló cél nehézségi szintnek.
 
 jutalom::
-    Az új blokkokban szereplő pénzösszeg, melyet a hálózat annak a bányásznak ad, aki megtalálta a blokkhoz a munkabizonyítékot. A jutalom jelenleg 12,5 BTC/blokk.
+    An amount included in each new block as a reward by the network to the miner who found the Proof-of-Work solution. It is currently 6.25 BTC per block.
 
 RIPEMD-160::
     A RIPEMD-160 egy 160 bites kriptográfiai hash függvény. A RIPEMD-160 a RIPEMD továbbfejlesztett változata, amely 160 bites hasht produkál, és várhatóan biztonságos lesz még a következő tíz évben.

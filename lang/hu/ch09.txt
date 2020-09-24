@@ -270,7 +270,7 @@ Vegyünk például egy SPV csomópontot, amely a bejövő fizetéseknél egy ado
 
 ==== Testnet – a bitcoin tesztelési homokozója
 
-A tesztelési célokra használt blokklánc, hálózat és pénz neve testnet. A testnet egy teljes értékű éles P2P hálózat pénztárcákkal, teszt bitcionokkal (testnet coinokkal), bányászattal, és a mainnet összes egyéb funkciójával. Valójában két dologban különböznek egymástól: a testnet coinok szándékosan értéktelenek, és a bányászat nehézségi szintje eléggé alacsony ahhoz, hogy bárki viszonylag könnyen tudjon test coinokat bányászni (így biztosítva értéktelenségüket).
+A tesztelési célokra használt blokklánc, hálózat és pénz neve testnet. A testnet egy teljes értékű éles P2P hálózat pénztárcákkal, teszt bitcoinnal (testnet coinokkal), bányászattal, és a mainnet összes egyéb funkciójával. Valójában két dologban különböznek egymástól: a testnet coinok szándékosan értéktelenek, és a bányászat nehézségi szintje eléggé alacsony ahhoz, hogy bárki viszonylag könnyen tudjon test coinokat bányászni (így biztosítva értéktelenségüket).
 
 Bármely bitcoin mainneten futó, éles felhasználásra szánt szoftvert először a testneten, teszt érmékkel célszerű tesztelni. Ez megvédi mind a fejlesztőt a hibákból adódó pénzügyi veszteségektől, mind a hálózatot a hibákból adódó, nem várt működéstől.
 

@@ -72,15 +72,15 @@ Este trabajo está sujeto a la licencia internacional de "Creative Commons Attri
 
 http://creativecommons.org/licenses/by-sa/4.0/.
 
-Para proporcionar atribución, enlace al repositorio del libro:
+Para declarar alguna atribución de autor, por favor consúltese el siguiente enlace al repositorio del libro:
 
 https://github.com/bitcoinbook/bitcoinbook
 
-and include this license or an equivalent open license, to satisfy the ShareAlike requirements.
+e incluya esta misma licencia (creative commons) o una licencia abierta equivalente, para satisfacer los requisitos de ShareAlike.
 
-This "Free Culture" compliant license was approved by my publisher O'Reilly Media (http://oreilly.com), who understand the value of open source. O'Reilly Media is not just the world's best publisher of technical books but also a strong supporter of an open culture and the sharing of knowledge.
+Esta licencia compatible con la "Cultura Libre" fue aprobada por mi editor O'Reilly Media (http://oreilly.com), quien comprende el valor del código abierto. O'Reilly Media no es solo la mejor editorial del mundo de libros técnicos, sino también un firme defensor de una cultura abierta y del intercambio de conocimientos.
 
-Thank you O'Reilly!
+¡Gracias O'Reilly!
 
 [role="pagebreak-before"]
 === Contactando al Autor
@@ -94,7 +94,7 @@ enlace:$$https://bitcoinbook.info/$$[]
 Sígame en Twitter:
 enlace:$$https://twitter.com/aantonop$$[]
 
-Find more than 500 education videos on my YouTube channel:
+Encuentre más de 500 vídeos educativos en mi canal de YouTube:
 link:$$https://youtube.com/aantonop$$[]
 
 Muchas gracias a todos mis “patreons” que apoyan mi trabajo a través de donaciones mensuales. Puede seguir mi página de Patreon por aquí:

@@ -18,14 +18,13 @@
 * Schemă de Criptare Integrată pentru Curba Eliptică (bitcore-ecies)
 * Serviciu portofel (bitcoin-wallet-service)
 * Client portofel (bitcore-wallet-client)
-* Playground (bitcore-playground)
 * Integrarea serviciilor direct cu Bitcoin Core (bitcore-node)
 
 === Exemple din Biblioteca Bitcore
 
 ==== Cerințe Preliminare
 
-* NodeJS&gt; = 4.x sau folosiți site-ul https://bitcore.io/playground[de experimenare online]
+* NodeJS >= 4.x
 
 Dacă utilizați NodeJS și nodul REPL:
 

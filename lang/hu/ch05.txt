@@ -126,7 +126,7 @@ A mnemonik leírásával Gábriel biztonsági másolatot készített (lásd <<mn
 
 [[mnemonic_paper_backup]]
 .Gabriel papírmásolata a mnemonikról
-[cols="<,^,<,^", width="80%"]
+[cols="<1,^50,<1,^50", width="80%"]
 |===
 |*1.*| _army_ |*7.*| _garbage_
 |*2.*| _van_ |*8.*| _claim_
@@ -222,7 +222,7 @@ image::images/mbc2_0507.png["Mnemonikból mag létrehozása"]
 A 2048-szoros hashelést használó kulcs-kiszélesítő függvény nagyon hatásos védelmet nyújt a mnemonik vagy a jelmondat brute force-támadása ellen. Rendkívül költségessé teszi (számítási szempontból) néhány ezernél több jelmondat és mnemonik kombinációjának kipróbálását, miközben a lehetséges magok száma hatalmas (2^512^).
 ====
 
-Tables <<mnemonic_128_no_pass>>, and <<mnemonic_256_no_pass>> show some examples of mnemonic codes and the seeds they produce (either with or without a passphrase).
+A pass:[<a data-type="xref" href="#mnemonic_128_no_pass" data-xrefstyle="select: labelnumber">#mnemonic_128_no_pass</a>], pass:[<a data-type="xref" href="#mnemonic_128_w_pass" data-xrefstyle="select: labelnumber">#mnemonic_128_w_pass</a>] és pass:[<a data-type="xref" href="#mnemonic_256_no_pass" data-xrefstyle="select: labelnumber">#mnemonic_256_no_pass</a>] táblázatok néhány példát mutatnak mnemonikok, és a belőlük létrehozott magokra (jelmondattal vagy anélkül).
 
 [[mnemonic_128_no_pass]]
 .128 bites entrópiájú jelmondat nélküli mnemonik és a belőle kapott mag 
@@ -473,18 +473,18 @@ A BIP-44 definíciója szerint a fa szerkezet öt, előre definiált szintből �
 m / cél' / érme_típus' / számla' / visszajáró / cím_index
 -----
 
-The first-level "purpose" is always set to +44'+. The second-level "coin_type" specifies the type of cryptocurrency coin, allowing for multicurrency HD wallets where each currency has its own subtree under the second level. There are three currencies defined for now: Bitcoin is m/44'/0', Bitcoin Testnet is m/44'/1', and Litecoin is m/44'/2'.
+Az első szinten lévő "cél" értéke mindig +44'+. A második szinten lévő "érme típus" a digitális pénzt fajtáját határozza meg, és ily módon több pénznem kezelését is lehetővé teszi egy HD pénztárcában: minden pénznemnek saját al-fája van a második szinten. Jelenleg három pénznem van definiálva: a Bitcoin az m/44'/0', Bitcoin Testnet az m/44++&#x27;++/1++&#x27;++; a Litecoin pedig az m/44++&#x27;++/2++&#x27;++.
 
-The third level of the tree is "account," which allows users to subdivide their wallets into separate logical subaccounts, for accounting or organizational purposes. For example, an HD wallet might contain two bitcoin "accounts": m/44'/0'/0' and m/44'/0'/1'. Each account is the root of its own subtree.
+A fa harmadik szintjét a "számla" alkotja, amely lehetővé teszi, hogy a felhasználók a pénztárcáikat logikailag különálló al-számlákra osszák, pl. könyvelési vagy szervezeti szempontok alapján. Például egy HD pénztárca az alábbi két "számlát" tartalmazhatja: m/44++&#x27;++/0++&#x27;++/0++&#x27;++ és m/44++&#x27;++/0++&#x27;++/1++&#x27;++. Mindegyik számla a saját rész-fájának a gyökerét alkotja.
 
-((("keys and addresses", see="also public and private keys")))On the fourth level, "change," an HD wallet has two subtrees, one for creating receiving addresses and one for creating change addresses. Note that whereas the previous levels used hardened derivation, this level uses normal derivation. This is to allow this level of the tree to export extended public keys for use in a nonsecured environment. Usable addresses are derived by the HD wallet as children of the fourth level, making the fifth level of the tree the "address_index." For example, the third receiving address for bitcoin payments in the primary account would be M/44'/0'/0'/0/2. <<table_4-9>> shows a few more examples.
+((("kulcsok és címek", see="also nyilvános és titkos kulcsok")))A negyedik szinten, a "visszajáró" pénz szintjén a HD pénztárcáknak két al-fája van: az egyik a fogadó címek, a másik a visszajáró pénz számára. Figyeljék meg, hogy míg az előző szintek megerősített kulcs származtatást használtak, ez a szint normál származtatást használ. Ez lehetővé teszi az ezen a szinten lévő kiterjesztett nyilvános kulcsok exportját, és nem fokozott biztonságú környezetben történő használatát. A HD pénztárca a használható címeket a negyedik szint gyermekeiként definiálja, vagyis a fa ötödik szintjéből lesz a "cím index". Például a fő számla harmadik fogadó címe az lesz, hogy M/44++&#x27;++/0++&#x27;++/0++&#x27;++/0/2. A <<table_4-9>> néhány további példát mutat.
 
 [[table_4-9]]
 .Példák a BIP-44 HD pénztárca szerkezetre
 [options="header"]
 |=======
 |HD útvonal | Kulcs leírása
-| M/44'/0'/0'/0/2 | A fő bitcoin számla harmadik nyilvános fogadó kulcsa
-| M/44'/0'/3'/1/14 | A negyedik bitcoin számla visszajáró pénz kezelésre szolgáló 15-ik nyilvános kulcsa
-| m/44'/2'/0'/0/1 | Egy Litecoin főszámla tranzakciók aláírására szolgáló második titkos kulcsa
+| M/44++&#x27;++/0++&#x27;++/0++&#x27;++/0/2 | A fő bitcoin számla harmadik nyilvános fogadó kulcsa
+| M/44++&#x27;++/0++&#x27;++/3++&#x27;++/1/14 | A negyedik bitcoin számla visszajáró pénz kezelésre szolgáló 15-ik nyilvános kulcsa
+| m/44++&#x27;++/2++&#x27;++/0++&#x27;++/0/1 | Egy Litecoin főszámla tranzakciók aláírására szolgáló második titkos kulcsa
 |=======

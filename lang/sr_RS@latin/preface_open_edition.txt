@@ -3,7 +3,7 @@
 
 === Pisanje bitkoin knjige
 
-((("bitcoin", "benefits of", id="BCbasicbenefits0")))((("decentralized systems", "bitcoin as")))Prvi put sam naleteo na bitkoin sredinom 2011. Moja neposredna reakcija bila je manje-više "Pfft! Novac za gikove! (Nerd money!)" i ignorisao sam ga još šest meseci, ne uspevajući da shvatim njegovu važnost. Ovo je bila reakcija koju sam video više puta kod mnogo pametnih ljudi koje poznajem, što mi daje utehu. Drugi put kada sam naišao na bitkoin, u diskusiji na jednoj mejl listi. Tu sam odlučio da pročitam članak koji je napisao Satoši Nakamoto, da proučim taj autoritativni izvor i da vidim o čemu se tu radi. ((("digital currencies", "bitcoin vs. others"))) Još se sećam trenutka kada sam završio čitanje tih devet stranica, tada sam shvatio da bitkoin nije samo digitalna valuta, već mreža poverenja koja bi takođe mogla da pruži osnovu za mnogo više od valuta. Kada sam shvatio da "ovo nije novac, to je decentralizovana mreža poverenja", krenuo sam na četveromesečno putovanje na kojem sam gutao gomile informacija o bitkoinu na koje sam naišao. Postao sam opsednut i očaran, provodeći 12 i više sati svakog dana zalepljen za ekran, čitajući, pišući, programirajući i učeći koliko sam mogao. Iz ove zone sumraka izašao sam lakši za više od 20 kilograma zbog nedostatka redovnih obroka, ali odlučan da se posvetim radu na bitkoinu.
+((("bitcoin", "benefits of", id="BCbasicbenefits0")))((("decentralized systems", "bitcoin as")))Prvi put sam naleteo na bitkoin sredinom -2011. Moja neposredna reakcija bila je manje-više "Pfft! Novac za gikove! (Nerd money!)" i ignorisao sam ga još šest meseci, ne uspevajući da shvatim njegovu važnost. Ovo je bila reakcija koju sam video više puta kod mnogo pametnih ljudi koje poznajem, što mi daje utehu. Drugi put kada sam naišao na bitkoin, u diskusiji na jednoj mejl listi. Tu sam odlučio da pročitam članak koji je napisao Satoši Nakamoto, da proučim taj autoritativni izvor i da vidim o čemu se tu radi. ((("digital currencies", "bitcoin vs. others"))) Još se sećam trenutka kada sam završio čitanje tih devet stranica, tada sam shvatio da bitkoin nije samo digitalna valuta, već mreža poverenja koja bi takođe mogla da pruži osnovu za mnogo više od valuta. Kada sam shvatio da "ovo nije novac, to je decentralizovana mreža poverenja", krenuo sam na četveromesečno putovanje na kojem sam gutao gomile informacija o bitkoinu na koje sam naišao. Postao sam opsednut i očaran, provodeći 12 i više sati svakog dana zalepljen za ekran, čitajući, pišući, programirajući i učeći koliko sam mogao. Iz ove zone sumraka izašao sam lakši za više od 20 kilograma zbog nedostatka redovnih obroka, ali odlučan da se posvetim radu na bitkoinu.
 
 Dve godine kasnije, nakon što sam stvorio brojne male startape da bih istražio razne usluge i proizvode koji se odnose na bitkoin, shvatio sam da je bilo vreme da napišem svoju prvu knjigu. Bitkoin je bila tema koja me dovela u besomučnost kreativnosti i okupirala moje misli; to je bila najuzbudljivija tehnologija sa kojom sam se susreo od interneta. Bilo je vreme da podelim svoju strast vezanu za ovu neverovatnu tehnologiju sa širom publikom.
 
@@ -60,27 +60,27 @@ Međutim, imajte na umu da su privatni ključevi koji se koriste za pravljenje a
 NE ŠALJITE NOVAC BILO KOJOJ ADRESI U OVOJ KNjIZI. Vaš novac će uzeti drugi čitalac ili ćete ga izgubiti zauvek.((("", startref="codeuse00")))
 ====
 
-=== Publication by O'Reilly Media
+=== Publikacija O'Reilly Media
 
-This book is derived under license from the book "Mastering Bitcoin 2nd Edition", by O'Reilly Media.
+Ova knjiga je izvedena pod licencom knjige "Mastering Bitcoin 2nd Edition", u izdanju O'Reilly Media.
 
-=== Copyright and Book License
+=== Autorska prava i Licenca knjige
 
 Copyright (c) 2014 Andreas M. Antonopoulos LLC
 
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit
+Ovo delo je licencirano pod Creative Commons Attribution-ShareAlike 4.0 međunarodnom licencom. Da biste videli kopiju te licence posetite
 
 http://creativecommons.org/licenses/by-sa/4.0/.
 
-To provide attribution please link to the book's repository:
+Svoja zapažanja i zaključke možete da prosledite skladištu knjige:
 
 https://github.com/bitcoinbook/bitcoinbook
 
-and include this license or an equivalent open license, to satisfy the ShareAlike requirements.
+i uključite ovu licencu ili ekvivalentnu otvorenu licencu da biste zadovoljili zahteve ShareAlike.
 
-This "Free Culture" compliant license was approved by my publisher O'Reilly Media (http://oreilly.com), who understand the value of open source. O'Reilly Media is not just the world's best publisher of technical books but also a strong supporter of an open culture and the sharing of knowledge.
+Ovu licencu koja se slaže sa "Free Culture" (Slobodnom Kulturom) odobrio je moj izdavač O'Reilly Media (http://oreilly.com), koji razume vrednost otvorenog koda.  O'Reilly Media nije samo najbolji svetski izdavač tehničkih knjiga, nego je i veliki pobornik otvorene kulture i razmene znanja. 
 
-Thank you O'Reilly!
+Hvala O'Reilly!
 
 [role="pagebreak-before"]
 === Kontaktiranje autora
@@ -94,7 +94,7 @@ link:$$https://bitcoinbook.info/$$[]
 Pratite me na Twitter-u:
 link:$$https://twitter.com/aantonop$$[]
 
-Find more than 500 education videos on my YouTube channel:
+Na mom you tube kanalu možete naći preko 500 edukativnih videa:
 link:$$https://youtube.com/aantonop$$[]
 
 Mnogo se zahvaljujem svim pokroviteljima koji su podržali moj rad sa mesečnim donacijama. Ovde možete pratiti moju Patreon stranu:

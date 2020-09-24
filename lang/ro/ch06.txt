@@ -490,7 +490,7 @@ Cele două scripturi împreună vor forma următorul script de validare combinat
 
 Când este executat, acest script combinat va fi evaluat la TRUE dacă și numai dacă, scriptul de deblocare se potrivește cu condițiile stabilite de scriptul de blocare. Cu alte cuvinte, rezultatul va fi TRUE dacă scriptul de deblocare are o semnătură validă din cheia privată a cafenelei, care corespunde cu rezumatul (hash-ul) cheii publice setat ca sarcină.
 
-Figures <<P2PubKHash1>> and <<P2PubKHash2>> show (in two parts) a step-by-step execution of the combined script, which will prove this is a valid transaction.((("", startref="Tsript06")))((("", startref="Stransact06")))
+Imaginile următoare arată (în două părți) o execuție pas cu pas a scriptului combinat, care va demonstra că este o tranzacție validă.((("", startref="Tsript06")))((("", startref="Stransact06")))
 
 [[P2PubKHash1]]
 .Evaluarea unui script pentru o tranzacție P2PKH (partea 1 din 2)
@@ -735,6 +735,6 @@ Pentru a produce această imagine, cu aceste două ”balanțe”, exploratorul 
 
 În concluzie, informațiile prezentate utilizatorilor prin intermediul aplicațiilor portofel, exploratorilor lanțului-de-blocuri și alte interfețe cu utilizatorul sunt adesea compuse din abstractizări de nivel înalt care sunt obținute prin căutarea multor tranzacții diferite, inspecția conținutului lor și manipularea datelor acestora. Prin prezentarea acestei concepții simpliste asupra tranzacțiilor bitcoin care seamănă cu cecuri bancare de la un expeditor la un destinatar, aceste aplicații trebuie să rezume o mulțime de detalii adiacente. Ele se concentrează mai ales pe tipurile comune de tranzacții: P2PKH cu semnături SIGHASH_ALL pe fiecare intrare. Astfel, în timp ce aplicațiile bitcoin pot prezenta mai mult de 80% din toate tranzacțiile într-o manieră ușor de citit, ele se împiedică uneori de tranzacții care se abat de la normă. Tranzacțiile care conțin scripturi de blocare mai complexe sau diferite indicatoare SIGHASH, sau multe intrări și ieșiri, demonstrează simplitatea și slăbiciunea acestor abstractizări.
 
-În fiecare zi, sute de tranzacții care nu conțin ieșiri P2PKH sunt confirmate pe lanțul-de-blocuri. Exploratorii lantului-de-blocuri le prezintă adesea cu mesaje de avertizare roșie spunând că nu pot decoda o adresă. Următorul link conține cele mai recente ”tranzacții ciudate” care nu au fost complet decodate: https://blockchain.info/strange-transactions [].
+În fiecare zi, sute de tranzacții care nu conțin ieșiri P2PKH sunt confirmate pe lanțul-de-blocuri. Exploratorii lanțului-de-blocuri le prezintă adesea cu mesaje de avertizare spunând că nu pot decoda o adresă.
 
 După cum vom vedea în capitolul următor, acestea nu sunt neapărat tranzacții ciudate. Sunt tranzacții care conțin scripturi de blocare mai complexe decât P2PKH-ul obișnuit. Vom învăța cum să decodăm și să înțelegem scripturi mai complexe și aplicațiile pe care le susțin.((("", startref="Thigher06")))((("", startref="alicesixtwo")))

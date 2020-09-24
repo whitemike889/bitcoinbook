@@ -183,7 +183,7 @@ P2WSH::
     פיסת מידע הדורשת עבודת חישוב משמעותית כדי למצאה. כורים חייבים למצוא פתרון מספרי באלגוריתם SHA256 אשר עונה על יעד כלל רשתי, יעד דרגת הקושי.
 
 תמורה reward::
-    הסכום שכלולל בכל בלוק חדש כתמורה של הרשת לכורה אשר מצא את פתרון הוכחת העבודה. כרגע הסכום הנו 12.5 BTC לבלוק.
+    An amount included in each new block as a reward by the network to the miner who found the Proof-of-Work solution. It is currently 6.25 BTC per block.
 
 RIPEMD-160::
     RIPEMD-160 הנה פונקצית האש קריפטוגרפית. זוהי גירסה מתוגברת של RIPEMD עם תואה של האש 160 ביטים, ואשר צפויה להיות בטוחה בעשר השנים הבאות או יותר.

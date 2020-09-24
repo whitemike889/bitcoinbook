@@ -43,7 +43,6 @@ Leyenda: | BIP # | Título de la Propuesta | Proponente | Tipo de Propuesta | Es
 |[[bip-35]]https://github.com/bitcoin/bips/blob/master/bip-0035.mediawiki[BIP-35] | mensaje de mempool | Jeff Garzik | Estándar | Final
 |[[bip-36]]https://github.com/bitcoin/bips/blob/master/bip-0036.mediawiki[BIP-36] | Servicios a la Medida del Cliente | Stefan Thomas | Estándar | Borrador
 |[[bip-37]]https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki[BIP-37] | Filtrado de Conexiones Bloom | Mike Hearn, Matt Corallo | Estándar | Final
-|[[bip-38]]https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki[BIP-38] | Llave privada protegida por frase de contraseña | Mike Caldwell, Aaron Voisine | Estándar | Borrador
 |[[bip-39]]https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki[BIP-39]  | Código mnemónico para generar llaves deterministas | Marek Palatinus, Pavol Rusnak, Aaron Voisine , Sean Bowe | Estándar | Propuesto
 |[[bip-40]]https://github.com/bitcoin/bips/blob/master/bip-0040.mediawiki[BIP-40] | Protocolo de conectividad de Stratum | Marek Palatinus | Estándar | Número de BIP asignado
 |[[bip-41]]https://github.com/bitcoin/bips/blob/master/bip-0041.mediawiki[BIP-41] | Protocolo de minería de Stratum | Marek Palatinus | Estándar | Número de BIP asignado

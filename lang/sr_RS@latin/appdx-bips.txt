@@ -1,5 +1,5 @@
 [[appdxbitcoinimpproposals]]
-[dodatak]
+[appendix]
 == Predlozi za poboljšanje bitkoina
 
 ((("bitcoin improvement proposals", "types of")))Predlozi za poboljšanje bitkoina (Bitkoin Improvement Proposals) su dizajnerski dokumenti koji pružaju informacije bitkoin zajednici, ili za opis nove funkcije za bitkoin, ili za opis njegovih procesa ili okruženja.
@@ -8,7 +8,7 @@ Prema BIP-01 _Svrha i smernice BIP-a (BIP Purpose and Guidelines)_, postoje tri 
 
 _Standard_ BIP:: Opisuje svaku promenu koja utiče na većinu ili sve implementacije bitkoina, kao što je promena mrežnog protokola, promena pravila validnosti bloka ili transakcije, ili bilo kakva promena ili dodatak koji utiče na interoperabilnost aplikacija koje koriste bitkoin.
 _Informational_ BIP:: Opisuje problem dizajna bitkoina ili pruža opšte smernice ili informacije bitkoin zajednici, ali ne predlaže novu funkciju. Informativni BIP-ovi ne predstavljaju nužno konsenzus ili preporuku bitkoin zajednice, tako da korisnici i programeri mogu ignorisati informativne BIP-ove ili slediti njihove savete.
-_Process_ BIP:: Opisuje bitkoin proces ili predlaže promenu (ili događaj u) procesu. Procesni BIP-ovi su kao standardni BIP-ovi, ali se odnose na područja koja su van bitkoin protokola. Oni mogu da predlože implementaciju, ali ne i za bitkoinovu bazu koda; često im je potreban konsenzus zajednice; a za razliku od informativnih BIP-ova, oni su više od preporuka, a korisnici obično ne mogu da ih ignorišu. Primeri uključuju procedure, smernice, promene u procesu donošenja odluka i promene alata ili okruženja koje se koriste u razvoju bitkoina. Bilo koji meta-BIP takođe se smatra procesnim BIP-om.
+_Process_ BIP:: Opisuje bitkoin proces ili predlaže promenu (ili događaj u) procesu. Procesni BIP-ovi su kao standardni BIP-ovi, ali se odnose na područja koja su van bitkoin protokola. Oni mogu da predlože implementaciju, ali ne i za bitkoin bazu koda; često im je potreban konsenzus zajednice; a za razliku od informativnih BIP-ova, oni su više od preporuka, a korisnici obično ne mogu da ih ignorišu. Primeri uključuju procedure, smernice, promene u procesu donošenja odluka i promene alata ili okruženja koje se koriste u razvoju bitkoina. Bilo koji meta-BIP takođe se smatra procesnim BIP-om.
 
 ((("bitcoin improvement proposals", "repository of")))BIP-ovi se beleže u verzioniranom skladištu na GitHub-u: https://github.com/bitcoin/bips[https://github.com/bitcoin/bips]. <<table_d-1>> prikazuje stanje BIP-ova u aprilu 2017. Potražite autoritativno skladište za najnovije informacije o postojećim BIP-ovima i njihovom sadržaju.((("bitcoin improvement proposals", "snapshot of", id="BIPsnap15")))
 
@@ -43,7 +43,6 @@ _Process_ BIP:: Opisuje bitkoin proces ili predlaže promenu (ili događaj u) pr
 |[[bip-35]]https://github.com/bitcoin/bips/blob/master/bip-0035.mediawiki[BIP-35] |mempool poruke |Jeff Garzik |Standard |Finalan
 |[[bip-36]]https://github.com/bitcoin/bips/blob/master/bip-0036.mediawiki[BIP-36] |Prilagođene usluge |Stefan Thomas |Standard |Prva verzija
 |[[bip-37]]https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki[BIP-37] |Veza Blumovo filtriranje |Mike Hearn, Matt Corallo |Standard |Finalan
-|[[bip-38]]https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki[BIP-38] |Privatni ključ zaštićen lozinkom |Mike Caldwell, Aaron Voisine |Standard |Prva verzija
 |[[bip-39]]https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki[BIP-39] |Mnemonički kod za generisanje determinističkih ključeva |Marek Palatinus, Pavol Rusnak, Aaron Voisine, Sean Bowe |Standard |Predlog
 |[[bip-40]]https://github.com/bitcoin/bips/blob/master/bip-0040.mediawiki[BIP-40] |Stratum mrežni protokol |Marek Palatinus |Standard |BIP broj dodeljen
 |[[bip-41]]https://github.com/bitcoin/bips/blob/master/bip-0041.mediawiki[BIP-41] |Stratum protokol rudarenja |Marek Palatinus |Standard |BIP broj dodeljen
