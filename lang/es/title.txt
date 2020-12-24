@@ -1,5 +1,6 @@
 ////
 No traduzca los :nombres de variables:
+Translate the content following the variables 
 ////
 :author: Andreas M. Antonopoulos
 :book_title: Dominando el Bitcoin Abierta Segunda Edición 

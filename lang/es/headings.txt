@@ -1,5 +1,6 @@
 ////
 No traduzca los :nombres de variables:
+Translate the content following the variables 
 ////
 :index_heading: Índice
 :toc-title: Tabla de contenido

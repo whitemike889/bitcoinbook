@@ -28,6 +28,7 @@ La siguiente es una lista de colaboradores notables en GitHub:
 * Craig Dodd (cdodd)
 * dallyshalla
 * Dan Nolan (Dan-Nolan)
+* Dan Raviv (danra)
 * Darius Kramer (dkrmr)
 * Darko Janković (trulex)
 * David Huie (DavidHuie)
@@ -50,8 +51,10 @@ La siguiente es una lista de colaboradores notables en GitHub:
 * Evlix
 * fabienhinault
 * Fan (whiteath)
+* Francis Ballares (fballares)
 * François Wirion (wirion)
 * Frank Höger (francyi)
+* Gabriel Montes (gabmontes)
 * Gaurav Rana (bitcoinsSG)
 * genjix
 * Geremia
@@ -73,6 +76,7 @@ La siguiente es una lista de colaboradores notables en GitHub:
 * Jordan Baczuk (JBaczuk)
 * Jeremy Bokobza (bokobza)
 * JerJohn15
+* Jimmy DeSilva (jimmydesilva)
 * Jo Wo (jowo-io)
 * Joe Bauers (joebauers)
 * joflynn
@@ -91,12 +95,14 @@ La siguiente es una lista de colaboradores notables en GitHub:
 * Marco Falke (MarcoFalke)
 * María Martín (mmartinbar)
 * Mark Pors (pors)
+* Martin Harrigan (harrigan)
 * Martin Vseticka (MartyIX)
 * Marzig (marzig76)
 * Matt McGivney (mattmcgiv)
 * Maximilian Reichel (phramz)
 * Michalis Kargakis (kargakis)
 * Michael C. Ippolito (michaelcippolito)
+* Michael Galero (mikong)
 * Michael Newman (michaelbnewman)
 * Mihail Russu (MihailRussu)
 * Minh T. Nguyen (enderminh)
@@ -110,6 +116,7 @@ La siguiente es una lista de colaboradores notables en GitHub:
 * Omar Boukli-Hacene (oboukli)
 * Parzival (Parz-val)
 * Philipp Gille (philippgille)
+* ratijas
 * Reproducibility Matters (TheCharlatan)
 * Reuben Thomas (rrthomas)
 * Robert Furse (Rfurse)
@@ -130,8 +137,11 @@ La siguiente es una lista de colaboradores notables en GitHub:
 * takaya-imai
 * Thiago Arrais (thiagoarrais)
 * Thomas Kerin (afk11)
+* Tochi Obudulu (tochicool)
 * venzen
+* Vlad Stan (motorina0)
 * Vijay Chavda (VijayChavda)
+* Vincent Déniel (vincentdnl)
 * weinim
 * wenzhenxiang
 * Will Binns (wbnns)
@@ -143,4 +153,4 @@ La siguiente es una lista de colaboradores notables en GitHub:
 * Yoshimasa Tanabe (emag)
 * yuntai
 * yurigeorgiev4
-* Zheng Jia (zhengjia)((("", startref="acknowledge0")))
+* Zheng Jia (zhengjia)

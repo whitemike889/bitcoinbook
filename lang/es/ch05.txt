@@ -9,7 +9,7 @@ Más estrictamente, desde la perspectiva de un programador, la palabra "cartera"
 
 En este capítulo veremos el segundo significado, donde las carteras son contenedores para llaves privadas, generalmente implementadas como archivos estructurados o bases de datos simples.
 
-=== Resumen de la Tecnología de Carteras 
+=== Resumen de la Tecnología de Carteras
 
 En esta sección resumimos las diversas tecnologías utilizadas para construir carteras bitcoin fáciles de usar, seguras y flexibles.
 
@@ -37,7 +37,7 @@ Las siguientes secciones introducen cada una de estas tecnologías a nivel gener
 
 [TIP]
 ====
-Se desaconseja el uso de carteras no deterministas para cualquier otra cosa que no sean simples pruebas. Son simplemente demasiado engorrosas para hacer copias de seguridad y para usarlas. En su lugar, úsese una _cartera HD_ basada en el estándar de la industria&#x2013;con una semilla _mnemónica_ como copia de seguridad. 
+Se desaconseja el uso de carteras no deterministas para cualquier otra cosa que no sean simples pruebas. Son simplemente demasiado engorrosas para hacer copias de seguridad y para usarlas. En su lugar, úsese una _cartera HD_ basada en el estándar de la industria&#x2013;con una semilla _mnemónica_ como copia de seguridad.
 ====
 
 [[Type0_wallet]]
@@ -99,7 +99,7 @@ Los estándares han sido adoptados por una amplia gama de carteras bitcoin de so
 
 ((("carteras hardware")))((("carteras hardware", see="también carteras")))Algunos ejemplos de carteras software que admiten estos estándares son (enumerados alfabéticamente) Breadwallet, Copay, Multibit HD y Mycelium. Los ejemplos de carteras hardware que admiten estos estándares son (enumerados alfabéticamente) Keepkey, Ledger y Trezor.
 
-Las siguientes secciones examinan en detalle algunas de estas tecnologías. 
+Las siguientes secciones examinan en detalle algunas de estas tecnologías.
 
 [TIP]
 ====
@@ -126,7 +126,6 @@ Al escribir este mnemónico, Gabriel creó una copia de seguridad (ver <<mnemoni
 
 [[mnemonic_paper_backup]]
 .Copia de seguridad en papel del mnemónico de Gabriel
-[cols="<1,^50,<1,^50", width="80%"]
 |===
 |*1.*| _army_ |*7.*| _garbage_
 |*2.*| _van_ |*8.*| _claim_
@@ -184,15 +183,15 @@ image::images/mbc2_0506.png["Generating entropy and encoding as mnemonic words"]
 
 [[table_4-5]]
 .Códigos mnemónicos: entropía y longitud de palabra
-[opciones="título"]
-|=======
+[options="heading"]
+|===
 |Entropía (bits) | Checksum (bits) | Entropía *+* checksum (bits) | Longitud de mnemónico (palabras)
 | 128 | 4 | 132 | 12
 | 160 | 5 | 165 | 15
 | 192 | 6 | 198 | 18
 | 224 | 7 | 231 | 21
 | 256 | 8 | 264 | 24
-|=======
+|===
 
 [[mnemonic_to_seed]]
 ===== De mnemónico a semilla
@@ -222,42 +221,42 @@ image::images/mbc2_0507.png["From mnemonic to seed"]
 La función de estiramiento de llaves, con sus 2048 rondas de hash, es una protección muy efectiva contra los ataques de fuerza bruta contra el mnemónico o la frase de contraseña. Es extremadamente costoso (en computación) probar más de unos pocos miles de combinaciones de frases de contraseña y de mnemónicos, mientras que el número de posibles semillas que se pueden derivar es enorme (2^512^).
 ====
 
-Las tablas pass:[<a data-type="xref" href="#mnemonic_128_no_pass" data-xrefstyle="select: labelnumber">#mnemonic_128_no_pass</a>], pass:[<a data-type="xref" href="#mnemonic_128_w_pass" data-xrefstyle="select: labelnumber">#mnemonic_128_w_pass</a>], y pass:[<a data-type="xref" href="#mnemonic_256_no_pass" data-xrefstyle="select: labelnumber">#mnemonic_256_no_pass</a>] muestran algunos ejemplos de códigos mnemónicos y las semillas que éstos producen (con o sin frase de contraseña).
+Las tablas <<mnemonic_128_no_pass>>, <<mnemonic_128_w_pass>>, y <<mnemonic_256_no_pass>> muestran algunos ejemplos de códigos mnemónicos y las semillas que éstos producen (con o sin frase de contraseña).
 
 [[mnemonic_128_no_pass]]
 .Código mnemónico con 128 bits de entropía, sin frase de contraseña, semilla resultante
 [cols="h,"]
-|=======
+|===
 | *Entrada de entropía (128 bits)*| +0c1e24e5917779d297e14d45f14e1a1a+
 | *Mnemónico (12 palabras)* | +army van defense carry jealous true garbage claim echo media make crunch+
 | *Frase de contraseña*| (ninguna)
 | *Semilla  (512 bits)* | +5b56c417303faa3fcba7e57400e120a0ca83ec5a4fc9ffba757fbe63fbd77a89a1a3be4c67196f57c39+
 +a88b76373733891bfaba16ed27a813ceed498804c0570+
-|=======
+|===
 
 [[mnemonic_128_w_pass]]
 .Código mnemónico con 128 bits de entropía, con frase de contraseña, semilla resultante
 [cols="h,"]
-|=======
+|===
 | *Entrada de entropía (128 bits)*| +0c1e24e5917779d297e14d45f14e1a1a+
 | *Mnemónico (12 palabras)* | +army van defense carry jealous true garbage claim echo media make crunch+
 | *Frase de contraseña*| SuperDuperSecret
 | *Semilla  (512 bits)* | +3b5df16df2157104cfdd22830162a5e170c0161653e3afe6c88defeefb0818c793dbb28ab3ab091897d0+
 +715861dc8a18358f80b79d49acf64142ae57037d1d54+
-|=======
+|===
 
 
 [[mnemonic_256_no_pass]]
 .Código mnemónico con 256 bits de entropía, sin frase de contraseña, semilla resultante
 [cols="h,"]
-|=======
+|===
 | *Entrada de entropía (256 bits)* | +2041546864449caff939d32d574753fe684d3c947c3346713dd8423e74abcf8c+
 | *Mnemónico (24 palabras)* | +cake apple borrow silk endorse fitness top denial coil riot stay wolf
 luggage oxygen faint major edit measure invite love trap field dilemma oblige+
 | *Frase de contraseña*| (ninguna)
 | *Semilla (512 bits)* | +3269bce2674acbd188d4f120072b13b088a0ecf87c6e4cae41657a0bb78f5315b33b3a04356e53d062e5+
 +5f1e0deaa082df8d487381379df848a6ad7e98798404+
-|=======
+|===
 
 [[mnemonic_passphrase]]
 ===== Frase de contraseña opcional en BIP-39
@@ -449,15 +448,15 @@ Los "antepasados" de una llave se leen de derecha a izquierda, hasta llegar a la
 
 [[table_4-8]]
 .Ejemplos de rutas de cartera HD
-[opciones="título"]
-|=======
+[options="heading"]
+|===
 |Ruta HD | Llave descrita
 | m/0 | La primera (0) llave privada hija de la llave privada maestra (m)
 | m/0/0 | La primera (0) llave privada derivada de la primera derivación (m/0)
 | m/0'/0 | El primer (0) derivado normal del primer derivado _fortalecido_  (m/0')
 | m/1/0 | La primera (0) llave privada derivada de la segunda derivación (m/1)
 | M/23/17/0/0 | La primera (0) llave pública derivada de la primera derivación (M/23/17/0) de la 18va derivación (M/23/17) de la 24va derivación (M/23)
-|=======
+|===
 
 ===== Navegando por la estructura de árbol de la cartera HD
 
@@ -481,10 +480,10 @@ El tercer nivel del árbol es "cuenta", que permite a los usuarios que subdivida
 
 [[table_4-9]]
 .Ejemplos de estructuras de carteras HD BIP-44
-[opciones="título"]
-|=======
+[options="heading"]
+|===
 |Ruta HD | Llave descrita
 | M/44++&#x27;++/0++&#x27;++/0++&#x27;++/0/2 | La tercera llave pública receptora para la cuenta bitcoin primaria
 | M/44++&#x27;++/0++&#x27;++/3++&#x27;++/1/14 | La decimoquinta llave pública de la dirección de cambio para la cuarta cuenta bitcoin
 | m/44++&#x27;++/2++&#x27;++/0++&#x27;++/0/1 | La segunda llave privada en la cuenta principal Litecoin, para las transacciones de firma
-|=======
+|===

@@ -835,13 +835,13 @@ El intervalo entre bloques de 10 minutos de bitcoin es un compromiso de diseño 
 La siguiente lista muestra la potencia de hash total de la red Bitcoin, durante los primeros ocho años de operación:
 
 2009 :: 0.5 MH / seg-8 MH / seg (16#x00D7; crecimiento)
-2010 :: 8 MH / seg-116 GH / s (14500&#x00D7; crecimiento)
-2011:: 116 GH/seg–9 TH/seg (78&#x00D7; crecimiento)
+2010 :: 8 MH / seg-116 GH / s (14500× crecimiento)
+2011:: 116 GH/seg–9 TH/seg (78× crecimiento)
 2012:: 9 TH/sec–23 TH/sec (2.56#x00D7; growth)
-2013:: 23 TH/seg–10 PH/seg (450&#x00D7; crecimiento)
-2014:: 10 PH/seg–300 PH/seg (30&#x00D7; crecimiento)
-2015:: 300 PH/seg-800 PH/seg (2.66&#x00D7; crecimiento)
-2016:: 800 PH/seg-2.5 EH/seg (3.12&#x00D7; crecimiento)
+2013:: 23 TH/seg–10 PH/seg (450× crecimiento)
+2014:: 10 PH/seg–300 PH/seg (30× crecimiento)
+2015:: 300 PH/seg-800 PH/seg (2.66× crecimiento)
+2016:: 800 PH/seg-2.5 EH/seg (3.12× crecimiento)
 
 En el gráfico que se muestra en <<network_hashing_power>>, podemos ver que la potencia de hash de la red bitcoin aumentó en los últimos dos años. Como puede verse, la competencia entre los mineros y el crecimiento de bitcoin ha resultado en un aumento exponencial en la potencia de hash (hashes totales por segundo en toda la red).
 

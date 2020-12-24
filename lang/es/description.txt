@@ -10,3 +10,11 @@ Esta segunda edición incluye:
 * Nuevos desarrollos como el del Testigo Segregado, los Canales de Pago y la plataforma Lightning Network.
 * Una inmersión profunda en las aplicaciones de la cadena de bloques, incluyendo cómo combinar los componentes básicos que ofrece esta plataforma en aplicaciones de nivel superior.
 * Historias de usuarios, analogías, ejemplos y fragmentos de código que ilustran conceptos técnicos fundamentales.
+
+====
+The best-selling, highest rated and most cited book about how Bitcoin works. Used to teach about Bitcoin and Blockchains at top universities, Bitcoin startups, and inside terrified financial institutions.
+
+"By far the best technical introduction to Bitcoin and cryptocurrencies"
+====
+
+This ebook is sold and delivered in three ebook formats: PDF, EPUB and MOBI/Kindle, without DRM restrictions, under a CC-BY-SA open license.
